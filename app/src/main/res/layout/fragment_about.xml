@@ -1,0 +1,583 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_height="0dp"
+        android:layout_weight="10"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        style="@style/style_medium_font"
+        android:text="@string/company_title" />
+
+    <include layout="@layout/title_divider" />
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="left|center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/app_version_title" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/appVersion"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="left|center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/lib_version_title" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/libVersion"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="left|center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/app_timeStamp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/timeStamp"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="left|center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/app_GeoLocation" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/GeoLocation"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="left|center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/app_Ecompasss" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/eCompass"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <include layout="@layout/title_divider" />
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Bluetooth firmware version" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/bluetooth_version"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/bluetooth_address" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/bluetooth_address"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/bluetooth_rssi" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/bluetooth_rssi"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <include layout="@layout/title_divider" />
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Reader serial number" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/module_productserialnumber"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Main board version" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/module_boardversion"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Controller firmware version" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/module_versoin"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Battery level" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/module_battery"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <include layout="@layout/title_divider" />
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Radio serial number" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/radio_serialnumber"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Radio board version" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/radio_boardVersion"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Radio firmware version" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/radioVersion"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Model version" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/modelVersion"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/moduleRfid_onStatus" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/moduleRfid_onStatus"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <include layout="@layout/title_divider" />
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Barcode serial number" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/moduleBar_serialNumber"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/moduleBar_onStatus" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/moduleBar_onStatus"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Trigger status" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/trigger_onStatus"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+</LinearLayout>

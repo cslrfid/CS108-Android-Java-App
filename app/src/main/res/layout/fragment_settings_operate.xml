@@ -1,0 +1,290 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Regulatory region" />
+
+            <Spinner
+                android:id="@+id/settingOperateRegulatoryRegion"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:visibility="visible"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Frequency order" />
+
+            <Spinner
+                android:id="@+id/settingOperateFrequencyOrder"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:visibility="visible"/>
+
+        <TableRow
+            android:id="@+id/settingOperateChannelRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Fixed channel" />
+
+            <EditText
+                android:id="@+id/settingOperateChannel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:visibility="visible"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/settingOperatePowerLabel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Power" />
+
+            <EditText
+                android:id="@+id/settingOperatePower"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/settingOperatePopulationLabel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Tag population" />
+
+            <EditText
+                android:id="@+id/settingOperatePopulation"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Q(0-15)" />
+
+            <EditText
+                android:id="@+id/settingOperateQValue"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+
+            <Button
+                android:id="@+id/settingOperateOverrideButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Override" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Session" />
+
+            <Spinner
+                android:id="@+id/settingOperateSession"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:visibility="visible"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Target" />
+
+            <Spinner
+                android:id="@+id/settingOperateTarget"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="@string/settingInvAlgo_titile" />
+
+            <Spinner
+                android:id="@+id/settingOperateAlgorithmToUse"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Reader mode /\nLink profile" />
+
+            <Spinner
+                android:id="@+id/settingOperateProfile"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/settingSaveButtonOperate"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            style="@style/style_button_font"
+            android:text="@string/save_title" />
+    </LinearLayout>
+</LinearLayout>

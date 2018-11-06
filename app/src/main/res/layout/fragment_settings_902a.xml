@@ -1,0 +1,105 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="@string/settingQValue_title" />
+
+            <EditText
+                android:id="@+id/settingQValue"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="@string/settingRetry_title" />
+
+            <EditText
+                android:id="@+id/settingRetryA"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                style="@style/style_normal_font"
+                android:text="@string/settingRunTilZero_title" />
+
+            <CheckBox
+                android:id="@+id/settingRunTilZero"
+                android:layout_width="0dp"
+                android:layout_weight="1" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/settingSaveButton2A"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            style="@style/style_button_font"
+            android:text="@string/save_title" />
+    </LinearLayout>
+</LinearLayout>

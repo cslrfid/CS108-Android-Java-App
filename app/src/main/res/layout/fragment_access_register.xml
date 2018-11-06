@@ -1,0 +1,340 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:orientation="vertical" >
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:textSize="20sp"
+                    android:text="Step 1: Read Barcode" />
+
+                <CheckBox
+                    android:id="@+id/registerNewValue"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Old value" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <Button
+                    android:id="@+id/registerReadBarButton"
+                    android:layout_width="wrap_content"
+                    android:text="Read Barcode" />
+
+                <include
+                    android:id="@+id/registerBarValue"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:textSize="20sp"
+                    android:text="Step 2: Select RFID tag:" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <Spinner
+                    android:id="@+id/registerSelectBank"
+                    android:layout_width="wrap_content"
+                    style="@style/style_default_spinner" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:gravity="right"
+                    style="@style/style_normal_font"
+                    android:text="Offset (bit)" />
+
+                <EditText
+                    android:id="@+id/registerSelectOffset"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font"
+                    android:text="0" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:gravity="right"
+                    style="@style/style_normal_font"
+                    android:text="Tag Number" />
+
+                <EditText
+                    android:id="@+id/registerSelectPopulation"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font"
+                    android:text="16" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Select Mask " />
+
+                <include
+                    android:id="@+id/registerSelectMask"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/regtagConfirm2Button"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Step 2 Confirm Select Mask" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:textSize="20sp"
+                    android:text="Step 3: Write RFID Tag Configuration:" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/password_title" />
+
+                <include
+                    android:id="@+id/registerPassword"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext_password" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Offset (word)" />
+
+                <EditText
+                    android:id="@+id/registerWriteOffset"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font"
+                    android:text="0" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Size (word)" />
+
+                <EditText
+                    android:id="@+id/registerWriteLength"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font"
+                    android:text="0" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/settingAntennaPower_title" />
+
+                <EditText
+                    android:id="@+id/registerAntennaPower"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font"
+                    android:inputType="numberDecimal" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingLeft="@dimen/default_left_padding"
+                android:visibility="gone">
+
+                <CheckBox
+                    android:id="@+id/registerAutoRun"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Repeat" />
+
+                <CheckBox
+                    android:id="@+id/registerNewBarcode"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="with new barcode" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/regtagWrite3Button"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Step 3 Write Tag" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/regtagAuto123Button"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Automatic cycle 1, 2, 3 with step 2 fixed" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/regtagAuto23Button"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Automatic cycle 2, 3 using same UPC from step 1" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/registerRunTime"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font" />
+
+                <TextView
+                    android:id="@+id/registetTagGotView"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    style="@style/style_normal_font" />
+
+                <TextView
+                    android:id="@+id/registerVoltageLevel"
+                    android:layout_width="wrap_content"
+                    android:textAlignment="viewEnd"/>
+            </TableRow>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/registerYieldView"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                style="@style/style_button_font" />
+
+            <Button
+                android:id="@+id/regtagWriteButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font" />
+
+            <TextView
+                android:id="@+id/registerTotalView"
+                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                style="@style/style_button_font" />
+        </TableRow>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,146 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
+        <item name="android:actionBarTabTextStyle">@style/ActionTabTextStyle</item>
+    </style>
+
+    <!-- action bar icon style -->
+    <style name="ActionButtonStyle">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">5dp</item>
+    </style>
+
+    <style name="ActionTabTextStyle">
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <!--Style for all the screens. Contains default margins -->
+    <style name="base_layout_style">
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+    </style>
+
+    <!--Style for all the screens. Contains default margins -->
+
+    <!--Style for the title icon & text in all the screens -->
+
+    <!--Style for the font to indicate success(green font) -->
+    <style name="style_green_font">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+        <item name="android:textColor">@android:color/holo_green_dark</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!--Style for the font to indicate success(green font) -->
+    <style name="style_dark_green_font">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@android:color/holo_green_dark</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!--Style for the font to indicate No active connection(grey font) -->
+    <style name="style_grey_font">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+        <item name="android:textColor">@android:color/darker_gray</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!--Style for the font to indicate warning(red font) -->
+    <style name="style_red_font">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+        <item name="android:textColor">@android:color/holo_red_dark</item>
+    </style>
+
+    <!--Style for the normal font to be used across the application -->
+    <style name="style_normal_font">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+    </style>
+
+    <style name="style_small_font">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
+
+    <style name="style_very_small_font">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!--Style for the normal font to be used across the application -->
+    <style name="style_medium_font">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <!--Style for the font to be used in buttons -->
+    <style name="style_button_font">
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textColor">@android:color/primary_text_dark</item>
+        <item name="android:background">#CC000000</item>
+    </style>
+
+    <style name="style_pwd_dialog_button_font" parent="style_button_font">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <!--Style for the large font to be used in titles -->
+    <style name="style_large_font">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+    </style>
+
+    <!--Default style for the spinner -->
+    <style name="style_default_spinner" parent="Base.Widget.AppCompat.Spinner.Underlined">
+        <item name="android:textSize">@dimen/custom_spinner_font</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!-- Font for the inventory list -->
+    <style name="style_inventory_list_font">
+        <item name="android:textSize">@dimen/inventory_list_font_size</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <!-- Button for Home Screen -->
+    <style name="DashboardButton">
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:drawablePadding">2dp</item>
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/dashboard_textSize</item>
+        <item name="android:textColor">#222222</item>
+    </style>
+
+    <!--Background for save config-->
+
+    <!-- CustomNotificationBar title text -->
+
+    <!-- table row layout for spinners -->
+</resources>

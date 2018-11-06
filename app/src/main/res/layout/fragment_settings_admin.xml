@@ -1,0 +1,431 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Reader model" />
+
+            <TextView
+                android:id="@+id/settingAdminReaderModel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Reader model" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Reader name" />
+
+            <EditText
+                android:id="@+id/settingAdminDeviceName"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_normal_font"
+                android:inputType="textNoSuggestions|textVisiblePassword"
+                android:maxLength="20" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Battery level format" />
+
+            <Spinner
+                android:id="@+id/settingAdminBattery"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Inventory: Rssi unit" />
+
+            <Spinner
+                android:id="@+id/settingAdminRssi"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/settingAdminTagDelayLabel"
+                android:layout_width="0dp"
+                android:layout_weight="4"
+                style="@style/style_normal_font"
+                android:text="'Compact' Inventory delay time" />
+
+            <EditText
+                android:id="@+id/settingAdminTagDelay"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/settingAdminCycleDelayLabel"
+                android:layout_width="0dp"
+                android:layout_weight="4"
+                style="@style/style_normal_font"
+                android:text="Cycle delay" />
+
+            <EditText
+                android:id="@+id/settingAdminCycleDelay"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/settingAdminInventoryBeep"
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Enable beeping: " />
+
+            <TextView
+                android:id="@+id/settingAdminBeepCountLabel"
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Beep trigger count" />
+
+            <EditText
+                android:id="@+id/settingAdminBeepCount"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/settingAdminInventoryVibrate"
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Enable vibration: " />
+
+            <TextView
+                android:id="@+id/settingAdminVibrateTimeLabel"
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Vibration Time" />
+
+            <EditText
+                android:id="@+id/settingAdminVibrateTime"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Vibrate for " />
+
+            <Spinner
+                android:id="@+id/settingAdminVibrateMode"
+                android:layout_width="wrap_content"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+
+            <TextView
+                android:id="@+id/settingAdminVibrateWindowLabel"
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Tags, Window" />
+
+            <EditText
+                android:id="@+id/settingAdminVibrateWindow"
+                android:layout_width="wrap_content"
+                android:background="@drawable/my_edittext_background"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/settingAdminToCloudEnable"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Enable cloud saving" />
+
+            <CheckBox
+                android:id="@+id/settingAdminToFileEnable"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Enable file saving" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Cloud address" />
+
+            <EditText
+                android:id="@+id/settingAdminServer"
+                style="@style/style_normal_font"
+                android:inputType="textNoSuggestions|textVisiblePassword|textMultiLine"
+                android:gravity="center" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/settingAdminServerConnectTimeoutLabel"
+                android:layout_width="0dp"
+                android:layout_weight="8"
+                style="@style/style_normal_font"
+                android:text="Cloud connect timeout" />
+
+            <EditText
+                android:id="@+id/settingAdminServerConnectTimeout"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:gravity="center"
+                style="@style/style_normal_font" />
+
+            <Button
+                android:id="@+id/settingAdminCSLServer"
+                android:layout_width="wrap_content"
+                android:text="Set CSL cloud"
+                android:gravity="center"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Enable real time cloud saving for" />
+
+            <CheckBox
+                android:id="@+id/settingAdminNewToCloudEnable"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="New" />
+
+            <CheckBox
+                android:id="@+id/settingAdminAllToCloudEnable"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="All" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:visibility="visible">
+
+            <TextView
+                style="@style/style_normal_font"
+                android:text="Barcode:" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/settingAdminBarcodeResetButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="Reset to Continuous Mode" />
+
+            <Button
+                android:id="@+id/settingAdminBarcodeResetButtonR"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="Reset Barcode format" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <Button
+                android:id="@+id/settingAdminBarcodeResetButtonT"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="Reset to Trigger Mode" />
+
+            <Button
+                android:id="@+id/settingAdminBarcodeResetButtonF"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:layout_height="wrap_content"
+                android:text="Set New Barcode Format 2.0" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:visibility="visible"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                style="@style/style_normal_font"
+                android:text="Software and Reader" />
+
+            <Button
+                android:id="@+id/settingAdminReaderResetButton"
+                android:layout_width="0dp"
+                android:layout_weight="3"
+                android:layout_height="wrap_content"
+                android:text="Reset to Default Setting" />
+        </TableRow>
+    </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dip"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/settingSaveButtonAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            style="@style/style_button_font"
+            android:text="@string/save_title" />
+    </LinearLayout>
+</LinearLayout>

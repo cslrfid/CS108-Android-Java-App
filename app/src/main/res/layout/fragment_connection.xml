@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:layout_marginTop="@dimen/default_top_margin"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="left"
+        style="@style/style_normal_font"
+        android:text="@string/available_readers_title" />
+
+    <include layout="@layout/title_divider" />
+
+    <ListView
+        android:id="@+id/readersList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="95"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="0.25dp" />
+
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="95"
+        android:padding="@dimen/default_padding"
+        style="@style/style_medium_font"
+        android:text="@string/nodevice_found"
+        android:visibility="gone" />
+
+</LinearLayout>

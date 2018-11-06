@@ -1,0 +1,69 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <include
+            android:id="@+id/accessKillTagID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            style="@style/style_normal_font"
+            android:text="@string/password_title" />
+
+        <include
+            android:id="@+id/accessKillPasswordValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            layout="@layout/custom_edittext_password" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            style="@style/style_normal_font"
+            android:text="@string/settingAntennaPower_title" />
+
+        <EditText
+            android:id="@+id/accessKillAntennaPower"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:inputType="numberDecimal" />
+    </TableRow>
+
+    <Button
+        android:id="@+id/accessKillButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        style="@style/style_button_font"
+        android:text="@string/kill_title" />
+</LinearLayout>

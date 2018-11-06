@@ -1,0 +1,174 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="95"
+        android:layout_marginTop="@dimen/default_top_margin"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:orientation="vertical">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/geigerProgressLabelMin"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:gravity="left"
+                android:text="20" />
+
+            <TextView
+                android:id="@+id/geigerProgressLabelMid"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="50" />
+
+            <TextView
+                android:id="@+id/geigerProgressLabelMax"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:gravity="right"
+                android:text="100" />
+        </TableRow>
+
+        <ProgressBar
+            android:id="@+id/geigerProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.ProgressBar.Horizontal" />
+
+        <TextView
+            android:id="@+id/geigerTagRssi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="@dimen/dashboard_textSize"/>
+
+        <include
+            android:id="@+id/geigerTagID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/geigerToneCheck"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:checked="true"
+                android:text="@string/geigerTone_title" />
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="right"
+                android:text="@string/geigerThreshold_title" />
+
+            <TextView
+                android:id="@+id/geigerThreshold"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="left" />
+        </TableRow>
+
+        <SeekBar
+            android:id="@+id/geigerSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                style="@style/style_normal_font"
+                android:text="@string/settingAntennaPower_title" />
+
+            <EditText
+                android:id="@+id/geigerAntennaPower"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                style="@style/style_normal_font"
+                android:inputType="numberDecimal" />
+        </TableRow>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/geigerRunTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textStart" />
+
+        <TextView
+            android:id="@+id/geigerTagGot"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/geigerVoltageLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="13"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/geigerYield"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            style="@style/style_button_font" />
+
+        <Button
+            android:id="@+id/geigerStart"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            style="@style/style_button_font"
+            android:text="@string/start_title" />
+
+        <TextView
+            android:id="@+id/geigerRate"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            style="@style/style_button_font" />
+        </LinearLayout>
+</LinearLayout>

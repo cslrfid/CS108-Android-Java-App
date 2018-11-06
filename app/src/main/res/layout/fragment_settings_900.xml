@@ -1,0 +1,175 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="@string/settingQueryTarget_title" />
+
+            <Spinner
+                android:id="@+id/settingQueryTarget"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Query session" />
+
+            <Spinner
+                android:id="@+id/settingQuerySession"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Query select" />
+
+            <Spinner
+                android:id="@+id/settingQuerySelect"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                style="@style/style_normal_font"
+                android:text="@string/settingInvAlgo_titile" />
+
+            <Spinner
+                android:id="@+id/settingInventoryAlgorithmToUse"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+<!--        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="@string/settingConnectionHSpeed_title" />
+
+            <CheckBox
+                android:id="@+id/settingConnectionHSpeed"
+                android:layout_width="0dp"
+                android:layout_weight="1" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="@string/settingTagDelay_title" />
+
+            <EditText
+                android:id="@+id/settingTagDelay"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>-->
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/settingSaveButton0"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            style="@style/style_button_font"
+            android:text="@string/save_title" />
+    </LinearLayout>
+</LinearLayout>

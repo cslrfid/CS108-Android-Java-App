@@ -1,0 +1,193 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <include
+            android:id="@+id/accessMNTagID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="@string/password_title" />
+
+        <include
+            android:id="@+id/accessMNAccPasswordValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext_password" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="@string/settingAntennaPower_title" />
+
+        <EditText
+            android:id="@+id/accessMNAntennaPower"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:inputType="numberDecimal" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessMNModelCodeOK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accesMNModelCodeTitle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            style="@style/style_normal_font"
+            android:text="Model code:" />
+
+        <TextView
+            android:id="@+id/accessMNModelCode"
+            android:layout_width="0dp"
+            android:layout_weight="1" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessMNCalibrationOK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accesMNCalibrationTitle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            style="@style/style_normal_font"
+            android:text="Calibration version: " />
+
+        <TextView
+            android:id="@+id/accessMNCalibrationVersion"
+            android:layout_width="0dp"
+            android:layout_weight="1" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessMNSensorCodeOK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accesMNSensorCodeTitle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Sensor code:" />
+
+        <TextView
+            android:id="@+id/accessMNSensorCode"
+            android:layout_width="0dp"
+            android:layout_weight="1" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessMNRssiCodeOK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accesMNRssiCodeTitle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Rssi code:" />
+
+        <TextView
+            android:id="@+id/accessMNRssiCode"
+            android:layout_width="0dp"
+            android:layout_weight="1" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessMNTemperatureCodeOK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accesMNTemperatureCodeTitle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Temperature code:" />
+
+        <TextView
+            android:id="@+id/accessMNTemperatureCode"
+            android:layout_width="0dp"
+            android:layout_weight="1" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/accessMNReadButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="@string/read_title" />
+        </TableRow>
+    </LinearLayout>
+</LinearLayout>

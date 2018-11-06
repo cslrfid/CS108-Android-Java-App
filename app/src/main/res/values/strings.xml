@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">CS108 Java Demo</string>
+    <string name="app_ime">CS108 Java Wedge</string>
+    <string name="subtype_en_US">English (US)</string>
+
+    <!-- Strings for Fragment actionBar title -->
+    <string name="title_activity_home">Convergence Systems</string>
+    <string name="title_activity_connection">Connect</string>
+    <string name="title_activity_filters">Filters</string>
+    <string name="title_activity_about">About</string>
+    <string name="title_activity_readwrite">Read / Write</string>
+    <string name="title_activity_registertag">Register tag</string>
+    <string name="title_activity_special">Special Functions</string>
+    <string name="title_activity_geiger">Geiger search</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_security">Security</string>
+
+    <!-- Items for lock privilege state -->
+    <string-array name="access_lock_privilege_array">
+        <item>Unchanged</item>
+        <item>Unlock</item>
+        <item>Permanent Unlock</item>
+        <item>Lock</item>
+        <item>Permanent Lock</item>
+    </string-array>
+
+    <!-- Strings for Access Operations Kill Fragment -->
+
+    <!-- Strings for Access Operations Kill Fragment -->
+    <!-- Items selectMaskagID -->
+    <string-array name="memoryBank_options">
+        <item>Reser</item>
+        <item>EPC</item>
+        <item>TID</item>
+        <item>User</item>
+    </string-array>
+
+    <string-array name="read_memoryBank_options">
+        <item>EPC</item>
+        <item>TID</item>
+        <item>User</item>
+    </string-array>
+
+    <string-array name="write_memoryBank_options">
+        <item>EPC</item>
+        <item>User</item>
+    </string-array>
+
+    <string-array name="filterPre_SLaction_options">
+        <item>Match(assert SL), else(deassert SL)</item>
+        <item>Match(assert SL), else(do nothing)</item>
+        <item>Match(do nothing), else(deassert SL)</item>
+        <item>Match(invert SL), else(do nothing)</item>
+        <item>Match(deassert SL), else(assert SL)</item>
+        <item>Match(deassert SL), else(do nothing)</item>
+        <item>Match(do nothing), else(assert SL)</item>
+        <item>Match(do nothing), else(invert SL)</item>
+    </string-array>
+
+    <string-array name="filterPre_SessionAction_options">
+        <item>Match(inventory A), else(set inventory B)</item>
+        <item>Match(inventory A), else(do nothing)</item>
+        <item>Match(do nothing), else(inventory B)</item>
+        <item>Match(toggle AB), else(do nothing)</item>
+        <item>Match(inventory B), else(inventory A)</item>
+        <item>Match(inventory B), else(do nothing)</item>
+        <item>Match(do nothing), else(inventory A)</item>
+        <item>Match(do nothing), else(toggle AB)</item>
+    </string-array>
+
+    <string-array name="filterPre_target_options">
+        <item>Inventoried S0</item>
+        <item>Inventoried S1</item>
+        <item>Inventoried S2</item>
+        <item>Inventoried S3</item>
+        <item>SL</item>
+    </string-array>
+
+    <string-array name="admin_battery_options">
+        <item>Voltage</item>
+        <item>Percentage</item>
+    </string-array>
+
+    <string-array name="admin_rssi_options">
+        <item>dBuV</item>
+        <item>dBm</item>
+    </string-array>
+
+    <string-array name="admin_vibratemode_options">
+        <item>New</item>
+        <item>All</item>
+    </string-array>
+
+    <string-array name="frequencyOrder_options">
+        <item>Frequency hopping</item>
+        <item>Fixed channel</item>
+    </string-array>
+
+    <string-array name="query_target_options">
+        <item>A</item>
+        <item>B</item>
+        <item>Toggle A/B</item>
+    </string-array>
+
+    <string-array name="query_session_options">
+        <item>S0</item>
+        <item>S1</item>
+        <item>S2</item>
+        <item>S3</item>
+    </string-array>
+
+    <string-array name="inventory_algorithm_options">
+        <item>Dynamic</item>
+        <item>Fixed</item>
+    </string-array>
+
+    <string-array name="profile_options">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="profile1_options">
+        <item>0: Multipath Interference Resistance</item>
+        <item>1: Range/Dense reader</item>
+        <item>2: Range/Throughput/Dense reader</item>
+        <item>3: Maximum throughput</item>
+    </string-array>
+
+    <string-array name="query_select_options">
+        <item>All</item>
+        <item>All</item>
+        <item>~SL</item>
+        <item>SL</item>
+    </string-array>
+
+    <string-array name="coldChain_unit_options">
+        <item></item>
+        <item>second</item>
+        <item>minute</item>
+        <item>hour</item>
+        <item>sample interval</item>
+    </string-array>
+
+    <string-array name="coldChain_IntervalUnit_options">
+        <item></item>
+        <item>second</item>
+        <item>minute</item>
+        <item>hour</item>
+        <item>5 minutes</item>
+    </string-array>
+
+    <string-array name="coldChain_enable_options">
+        <item></item>
+        <item>disable</item>
+        <item>enable</item>
+    </string-array>
+
+    <!-- Strings for StartStopTrigger Fragment -->
+    <!-- Strings for start trigger Selection -->
+    <!-- Strings for stop trigger Selection -->
+
+    <!-- beeper volume -->
+
+    <!-- Error Indicators -->
+    <string name="nodevice_found">No Device Found</string>
+    <string name="notag_found">No Tag Found</string>
+    <string name="nobarcode_found">No BarCode Found</string>
+
+    <!-- Titles in ReadersList -->
+    <string name="available_readers_title">Available Readers</string>
+
+    <!-- Titles in regulatory settings -->
+
+    <!-- toast -->
+    <string name="toast_ble_not_connected">Bluetooth is Not Connected, Please Connect</string>
+    <string name="toast_not_ready">Updating data. Please wait.</string>
+    <string name="toast_finishing_tag_data_upload">Finishing tag data upload</string>
+    <string name="toast_abort_by_STOP">Finish as STOP is pressed</string>
+    <string name="toast_abort_by_BUTTON">Finish as BUTTON is released</string>
+    <string name="toast_abort_by_TIMEOUT">Finish as TIMEOUT</string>
+    <string name="toast_abort_by_RFIDRESET">Finish as RFID RESET</string>
+    <string name="toast_abort_by_END">Finish as COMMAND END is received</string>
+    <string name="toast_abort_by_SUCCESS">SUCCESS</string>
+    <string name="toast_abort_by_FAILURE">FAILURE</string>
+    <string name="toast_ble_connected">BLE is connected</string>
+    <string name="toast_ble_setup_problem">Setup problem after connection. Disconnect</string>
+    <string name="toast_invalid_range">Invalid Range. Operation is cancelled.</string>
+    <string name="toast_invalid_sendHostRequest">Invalid sendHostRequest. Operation is cancelled.</string>
+    <string name="toast_same_setting">Same setting. Need no update. Operation is cancelled.</string>
+    <string name="toast_saved">Saved new setting.</string>
+
+    <!-- Titles in connection settings -->
+    <string name="start_title">START</string>
+    <string name="tag_pattern_title">Tag Pattern</string>
+    <string name="password_pattern_title">Password</string>
+    <string name="password_title">Password</string>
+    <string name="memory_bank_title">Memory Bank</string>
+    <string name="read_title">READ</string>
+    <string name="write_title">WRITE</string>
+    <string name="reserve_title">Reserved Memory</string>
+    <string name="readWriteOffset_title">Offset</string>
+    <string name="readWriteSize_title">Size</string>
+    <string name="kill_pwd_title">Kill PW</string>
+    <string name="access_pwd_title">Access PW </string>
+    <string name="epc_memory_title">EPC</string>
+    <string name="pc_title">PC</string>
+    <string name="epc_title">EPC</string>
+    <string name="xpc_title">XPC</string>
+    <string name="epc1_memory_title">EPC Memory</string>
+    <string name="tid_memory_title">TID Memory</string>
+    <string name="user_mmeory_title">User Memory</string>
+    <string name="geigerTone_title">Tone</string>
+    <string name="geigerThreshold_title">Threshold = </string>
+    <string name="settingProfile_title">Profile(0-3)</string>
+    <string name="settingAntennaCycle_title">Antenna cycle(0-65535)</string>
+    <string name="settingAntennaDwell_title">Antenna dwell(0-65535ms)</string>
+    <string name="settingAntennaPower_title">Antenna power(0-300)</string>
+    <string name="settingAntennaBattery_title">Battery Display</string>
+    <string name="settingQueryTarget_title">Query target</string>
+    <string name="settingInvAlgo_titile">Query algorithm</string>
+    <string name="settingStartQ_title">Start Q(0-15)</string>
+    <string name="settingQValue_title">Q Value(0-15)</string>
+    <string name="settingMaxQ_title">Maximum Q(0-15)</string>
+    <string name="settingMinQ_title">Minimum Q(0-15)</string>
+    <string name="settingRetry_title">Retry(0-255)</string>
+    <string name="settingRunTilZero_title">Run til zero</string>
+    <string name="settingInvSelectMaskData_title">Mask data</string>
+    <string name="kill_title">KILL</string>
+    <string name="save_title">SAVE</string>
+    <string name="offset_bits_title">Offset (bits)</string>
+    <string name="index_title">Index</string>
+    <string name="target_title">Target</string>
+    <string name="action_title">Action</string>
+    <string name="enable_filter">Enable Filter</string>
+    <string name="type_filter">match on ~EPC (not EPC)</string>
+    <string name="company_title">Convergence Systems Limited</string>
+    <string name="app_version_title">Application Version</string>
+    <string name="lib_version_title">Library Version</string>
+    <string name="app_timeStamp">Time stamp</string>
+    <string name="app_GeoLocation">GPS location</string>
+    <string name="app_Ecompasss">E-Compass</string>
+    <string name="bluetooth_address">Bluetooth device address</string>
+    <string name="bluetooth_rssi">Bluetooth Rssi level</string>
+    <string name="moduleRfid_onStatus">Rfid module status</string>
+    <string name="moduleBar_onStatus">Barcode module status</string>
+    <string name="drawer_item_text">Drawer Item</string>
+    <string name="home_read_write">Read/Write</string>
+    <string name="home_inventory">Inventory</string>
+    <string name="home_regTag">Register Tag</string>
+    <string name="home_settings">Settings</string>
+    <string name="home_locate">Geiger Search</string>
+    <string name="home_filter">Filters</string>
+    <string name="home_connect">Connect</string>
+    <string name="home_access">Security</string>
+    <string name="error_bluetooth_connection_failed">Unable to connect device</string>
+    <string name="colon">:</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+</resources>

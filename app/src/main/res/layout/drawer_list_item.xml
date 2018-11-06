@@ -1,0 +1,19 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="45dp"
+    android:paddingLeft="10dp">
+
+    <TextView
+        android:id="@+id/drawerItemName"
+        android:layout_width="0dp"
+        android:layout_weight="85"
+        android:layout_marginLeft="@dimen/list_horizontal_margin"
+        android:layout_height="match_parent"
+        android:ellipsize="marquee"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:textColor="#fff"
+        style="@style/style_normal_font"
+        android:text="@string/drawer_item_text" />
+
+</LinearLayout>

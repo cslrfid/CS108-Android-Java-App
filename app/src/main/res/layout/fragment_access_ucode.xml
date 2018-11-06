@@ -1,0 +1,201 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <include
+            android:id="@+id/accessUCTagID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="@string/password_title" />
+
+        <include
+            android:id="@+id/accessUCAccPasswordValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext_password" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="@string/settingAntennaPower_title" />
+
+        <EditText
+            android:id="@+id/accessUCAntennaPower"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:inputType="numberDecimal" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/accessUCReadBufferButton"
+            style="@style/style_normal_font"
+            android:text="Buffer Read" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/accessUCTam1AuthButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="TAM1 Authenticate" />
+
+        <Button
+            android:id="@+id/accessUCTam2AuthButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="TAM2 Authenticate" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/accessUCHideEpcButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Hide" />
+
+        <Button
+            android:id="@+id/accessUCUnHideEpcButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="UnHide" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <CheckBox
+            android:id="@+id/accessUCKey0Activate"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Activate Key0" />
+
+        <CheckBox
+            android:id="@+id/accessUCKey1Activate"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Activate Key0" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessUCAesKey0OK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accessUCAesKey0Title"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font"
+            android:text="Key0: " />
+
+        <EditText
+            android:id="@+id/accessUCAesKey0"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessUCAesKey1OK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accessUCAesKey1Title"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font"
+            android:text="Key1: " />
+
+        <EditText
+            android:id="@+id/accessUCAesKey1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/accessUCReadButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="@string/read_title" />
+
+            <Button
+                android:id="@+id/accessUCWriteButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="@string/write_title" />
+        </TableRow>
+    </LinearLayout>
+</LinearLayout>

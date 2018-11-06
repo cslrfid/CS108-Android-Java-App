@@ -1,0 +1,31 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+
+    <!--List item margin values -->
+    <dimen name="list_horizontal_margin">8dp</dimen>
+
+    <!--Font Sizes for RapidRead Fragment -->
+
+    <!--Font Sizes for Inventory Fragment -->
+
+    <!--Font sizes for Readers List Fragment -->
+
+    <!--Font sizes for Singulation Control Fragment -->
+
+    <!-- Font size for inventory list font -->
+    <dimen name="inventory_list_font_size">18sp</dimen>
+
+    <!-- Font size for locationing font -->
+
+    <!--Dimensions used throughout the app -->
+    <dimen name="dashboard_textSize">32sp</dimen>
+    <dimen name="custom_spinner_font">15sp</dimen>
+    <dimen name="default_top_margin">10dp</dimen>
+    <dimen name="default_left_padding">10dp</dimen>
+    <dimen name="default_padding">10dp</dimen>
+    <dimen name="default_top_padding">10dp</dimen>
+    <dimen name="reader_list_item_padding">5dp</dimen>
+    <dimen name="home_icon_margin_1">2dp</dimen>
+    <dimen name="home_icon_margin_2">4dp</dimen>
+
+</resources>

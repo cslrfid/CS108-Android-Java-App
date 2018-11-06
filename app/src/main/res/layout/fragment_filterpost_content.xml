@@ -1,0 +1,106 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_top_margin"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/settingInvSelectMaskData_title" />
+
+        <include
+            android:id="@+id/filterPostMaskData"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_top_margin"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/offset_bits_title" />
+
+        <EditText
+            android:id="@+id/filterPostOffset"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:inputType="numberDecimal"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_top_margin"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/type_filter" />
+
+        <CheckBox
+            android:id="@+id/filterPostCheckType"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="top"
+        android:layout_marginTop="@dimen/default_top_margin"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="@string/enable_filter" />
+
+        <CheckBox
+            android:id="@+id/filterPostCheckEnable"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="" />
+    </TableRow>
+
+    <Button
+        android:id="@+id/filterPostSaveButton"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom"
+        android:gravity="center"
+        style="@style/style_button_font"
+        android:text="@string/save_title" />
+
+</LinearLayout>

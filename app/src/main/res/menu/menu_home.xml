@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/menuAction_4"
+        android:title=""
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menuAction_3"
+        android:title=""
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menuAction_2"
+        android:title=""
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menuAction_1"
+        android:title=""
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/home_voltage"
+        android:title=""
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/home_menu"
+        android:icon="@drawable/ic_drawer"
+        android:title="Menu"
+        app:showAsAction="always" />
+</menu>
