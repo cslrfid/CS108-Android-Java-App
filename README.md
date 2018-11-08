@@ -26,3 +26,14 @@ After running the Android Studio installer, you can open the CS108 Android Java 
 
 
 With the existing demo code, it is required have Android SDK platform 25 installed.  You can achieve this by going to Tools->SDK Manager and select the Android 7.1.1 (Nougat) 25 from the this.  This will bring up the downloaded for getting the necessary platform SDK required.
+
+<img src="app_img/CS108-AndroidSDK.png" width="600"/>
+<br>
+You can go to Build->Make Project to rebuild the application.
+
+After this, go to the menu bar and click on “Sync Project with Gradle Files” for enabling the building of the module.  Then, you can go to Run->Debug “app” to start debugging.
+
+<img src="app_img/CS108-syncCradleFile.png" width="600"/><br>
+For debugging, you can select emulator for UI level debugging or select actual device for physical debugging on different features on the demo app. <br>
+<img src="app_img/CS108-selectAndroidDevice.png" width="600"/><br>
+<img src="app_img/CS108-AndroidStudio.png" width="600"/>
