@@ -23,20 +23,23 @@ import com.csl.cs108library4a.ReaderDevice;
 public class AccessUcodeFragment extends CommonFragment {
     final boolean DEBUG = true;
 	EditText editTextRWTagID, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
-    TextView textViewAesKey0Ok, textViewAesKey1Ok;
-    CheckBox checkBoxAesKey0, checkBoxAesKey1;
+    TextView textViewAesKey0ActivateOk, textViewAesKey1ActivateOk, textViewAesKey0Ok, textViewAesKey1Ok;
+    Spinner spinnerHideTid;
+    CheckBox checkBoxHideEpc, checkBoxHideTid, checkBoxHideUser, checkBoxHideRange;
+    CheckBox checkBoxAesKey0Activate, checkBoxAesKey1Activate, checkBoxAesKey0, checkBoxAesKey1;
 
-    EditText editTextAesKey0, editTextAesKey1;
+    EditText editTextAuthMsg, editTextAuthResponse, editTextEpcSize, editTextAesKey0, editTextAesKey1;
 	private Button buttonRead, buttonWrite;
-    private Button buttonReadBuffer, buttonTam1, buttonTam2, buttonUntrace, buttonTrace;
+    private Button buttonReadBuffer, buttonTam1, buttonTam2, buttonUntrace, buttonShowEpc; String strShowEpcButtonBackup;
 
     enum ReadWriteTypes {
-        NULL, TEMPERATURE, AESKEY0, AESKEY1, ENABLE
+        NULL, TEMPERATURE, AESKEY0, AESKEY1, AESKEY0ACTIVATE, AESKEY1ACTIVATE, ENABLE
     }
     boolean operationRead = false;
     boolean readBufferChecked = false;
     boolean authenChecked = false; boolean authenTam1;
-    boolean untraceChecked = false; boolean untraceHide;
+    boolean untraceChecked = false;
+    boolean showEpcChecked = false;
     ReadWriteTypes readWriteTypes;
 
     private AccessTask accessTask;
@@ -56,11 +59,29 @@ public class AccessUcodeFragment extends CommonFragment {
         editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
         editTextAccessRWAccPassword.setText("00000000");
 
+        spinnerHideTid = (Spinner) getActivity().findViewById(R.id.accessUCHideTid);
+        ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.hideTid_options, R.layout.custom_spinner_layout);
+        targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerHideTid.setAdapter(targetAdapter);
+
+        checkBoxHideEpc = (CheckBox) getActivity().findViewById(R.id.accessUCHideEpc);
+        checkBoxHideTid = (CheckBox) getActivity().findViewById(R.id.accessUCHideTid1);
+        checkBoxHideUser = (CheckBox) getActivity().findViewById(R.id.accessUCHideUser);
+        checkBoxHideRange = (CheckBox) getActivity().findViewById(R.id.accessUCHideRange);
+        textViewAesKey0ActivateOk = (TextView) getActivity().findViewById(R.id.accessUCAesKey0ActivateOK);
+        textViewAesKey1ActivateOk = (TextView) getActivity().findViewById(R.id.accessUCAesKey1ActivateOK);
+        checkBoxAesKey0Activate = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey0Activate);
+        checkBoxAesKey1Activate = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey1Activate);
+
         textViewAesKey0Ok = (TextView) getActivity().findViewById(R.id.accessUCAesKey0OK);
         textViewAesKey1Ok = (TextView) getActivity().findViewById(R.id.accessUCAesKey1OK);
         checkBoxAesKey0 = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey0Title);
         checkBoxAesKey1 = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey1Title);
 
+        editTextAuthMsg = (EditText) getActivity().findViewById(R.id.accessUCAuthMsg);
+        editTextAuthMsg.addTextChangedListener(new GenericTextWatcher(editTextAuthMsg, 20));
+        editTextAuthResponse = (EditText) getActivity().findViewById(R.id.accessUCAuthResponse);
+        editTextEpcSize = (EditText) getActivity().findViewById(R.id.accessUCEpcSize);
         editTextAesKey0 = (EditText) getActivity().findViewById(R.id.accessUCAesKey0);
         editTextAesKey0.addTextChangedListener(new GenericTextWatcher(editTextAesKey0, 32));
         editTextAesKey1 = (EditText) getActivity().findViewById(R.id.accessUCAesKey1);
@@ -144,7 +165,7 @@ public class AccessUcodeFragment extends CommonFragment {
             }
         });
 
-        buttonUntrace = (Button) getActivity().findViewById(R.id.accessUCHideEpcButton);
+        buttonUntrace = (Button) getActivity().findViewById(R.id.accessUCUntraceButton);
         buttonUntrace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -155,12 +176,12 @@ public class AccessUcodeFragment extends CommonFragment {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                untraceHide = true; untraceChecked = true; startAccessTask();
+                untraceChecked = true; startAccessTask();
             }
         });
 
-        buttonTrace = (Button) getActivity().findViewById(R.id.accessUCUnHideEpcButton);
-        buttonTrace.setOnClickListener(new View.OnClickListener() {
+        buttonShowEpc = (Button) getActivity().findViewById(R.id.accessUCShowEpcButton);
+        buttonShowEpc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.mCs108Library4a.isBleConnected() == false) {
@@ -170,7 +191,7 @@ public class AccessUcodeFragment extends CommonFragment {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                untraceHide = false; untraceChecked = true; startAccessTask();
+                showEpcChecked = true; startAccessTask();
             }
         });
 
@@ -265,22 +286,22 @@ public class AccessUcodeFragment extends CommonFragment {
                     if (readBufferChecked) button = buttonReadBuffer;
                     else if (authenChecked && authenTam1) button = buttonTam1;
                     else if (authenChecked) button = buttonTam2;
-                    else if (untraceChecked && untraceHide) button = buttonUntrace;
-                    else if (untraceChecked) button = button = buttonTrace;
+                    else if (untraceChecked) button = buttonUntrace;
+                    else if (showEpcChecked) { if (strShowEpcButtonBackup == null) strShowEpcButtonBackup = buttonShowEpc.getText().toString(); buttonShowEpc.setText("Show"); button = buttonShowEpc; }
                     else if (operationRead) button = buttonRead;
                     else button = buttonWrite;
 
                     Cs108Connector.HostCommands hostCommand;
                     if (readBufferChecked) hostCommand = Cs108Connector.HostCommands.CMD_READBUFFER;
                     else if (authenChecked) hostCommand = Cs108Connector.HostCommands.CMD_AUTHENTICATE;
-                    else if (untraceChecked) hostCommand = Cs108Connector.HostCommands.CMD_UNTRACEABLE;
+                    else if (untraceChecked || showEpcChecked) hostCommand = Cs108Connector.HostCommands.CMD_UNTRACEABLE;
                     else if (operationRead) hostCommand = Cs108Connector.HostCommands.CMD_18K6CREAD;
                     else hostCommand = Cs108Connector.HostCommands.CMD_18K6CWRITE;
 
                     accessTask = new AccessTask(
                             button, null,
                             invalid,
-                            null, editTextRWTagID.getText().toString(), 1, 32,
+                            editTextRWTagID.getText().toString(), 1, 32,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             hostCommand,
@@ -338,28 +359,31 @@ public class AccessUcodeFragment extends CommonFragment {
         else {
             accessResult = accessTask.accessResult;
             if (readBufferChecked) readBufferChecked = false;
-            else if (authenChecked) authenChecked = false;
+            else if (authenChecked) { authenChecked = false; if (accessResult != null) editTextAuthResponse.setText(accessResult); }
             else if (untraceChecked) untraceChecked = false;
+            else if (showEpcChecked) { showEpcChecked = false; if (strShowEpcButtonBackup != null) buttonShowEpc.setText(strShowEpcButtonBackup); strShowEpcButtonBackup = null; }
             else if (accessResult == null) {
-                if (readWriteTypes == ReadWriteTypes.AESKEY0) {
+                if (readWriteTypes == ReadWriteTypes.AESKEY0ACTIVATE) {
+                    textViewAesKey0ActivateOk.setText("E"); checkBoxAesKey0Activate.setChecked(false);
+                } else if (readWriteTypes == ReadWriteTypes.AESKEY1ACTIVATE) {
+                    textViewAesKey1ActivateOk.setText("E"); checkBoxAesKey1Activate.setChecked(false);
+                } else if (readWriteTypes == ReadWriteTypes.AESKEY0) {
                     textViewAesKey0Ok.setText("E"); checkBoxAesKey0.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.AESKEY1) {
                     textViewAesKey1Ok.setText("E"); checkBoxAesKey1.setChecked(false);
                 }
             } else {
                 if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
-                if (readWriteTypes == ReadWriteTypes.AESKEY0) {
+                if (readWriteTypes == ReadWriteTypes.AESKEY0ACTIVATE) {
+                    textViewAesKey0ActivateOk.setText("O"); checkBoxAesKey0Activate.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
+                } else if (readWriteTypes == ReadWriteTypes.AESKEY1ACTIVATE) {
+                    textViewAesKey1ActivateOk.setText("O"); checkBoxAesKey1Activate.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
+                } else if (readWriteTypes == ReadWriteTypes.AESKEY0) {
                     textViewAesKey0Ok.setText("O"); checkBoxAesKey0.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
-                    if (operationRead) {
-                        editTextAesKey0.setText(accessResult);
-                        byte bValue = Byte.parseByte(accessResult.substring(0, 1), 16);
-                    }
+                    if (operationRead) editTextAesKey0.setText(accessResult);
                 } else if (readWriteTypes == ReadWriteTypes.AESKEY1) {
                     textViewAesKey1Ok.setText("O"); checkBoxAesKey1.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
-                    if (operationRead) {
-                        editTextAesKey1.setText(accessResult);
-                        byte bValue = Byte.parseByte(accessResult.substring(0, 1), 16);
-                    }
+                    if (operationRead) editTextAesKey1.setText(accessResult);
                 }
             }
             accessTask = null;
@@ -374,11 +398,29 @@ public class AccessUcodeFragment extends CommonFragment {
         if (readBufferChecked) {
             accOffset = 0; accSize = 1;
         } else if (authenChecked) {
-            MainActivity.mCs108Library4a.setAuthenticateSendReplay();
+            if (authenTam1) {
+                if (MainActivity.mCs108Library4a.setTam1Configuration(editTextAuthMsg.getText().toString()) == false)
+                    invalidRequest1 = true;
+            } else if (MainActivity.mCs108Library4a.setTam2Configuration(editTextAuthMsg.getText().toString()) == false)
+                invalidRequest1 = true;
+            if (invalidRequest1 == false) editTextAuthResponse.setText("");
             return invalidRequest1;
         } else if (untraceChecked) {
-            if (MainActivity.mCs108Library4a.setUntraceableEpc(untraceHide) == false) invalidRequest1 = true;
+            if (MainActivity.mCs108Library4a.setUntraceableEpc(checkBoxHideEpc.isChecked(), checkBoxHideEpc.isChecked() ? 2 : 6, checkBoxHideTid.isChecked() ? 1: 0, checkBoxHideUser.isChecked(), checkBoxHideRange.isChecked()) == false) invalidRequest1 = true;
             return invalidRequest1;
+        } else if (showEpcChecked) {
+            try {
+                if (MainActivity.mCs108Library4a.setUntraceableEpc(false, Integer.parseInt(editTextEpcSize.getText().toString()), 0, false, false) == false) invalidRequest1 = true;
+            } catch (Exception ex) {
+                invalidRequest1 = true;
+            }
+            return invalidRequest1;
+        } else if (checkBoxAesKey0Activate.isChecked() == true) {
+            accOffset = 0xC8; accSize = 1; readWriteTypes = ReadWriteTypes.AESKEY0ACTIVATE; textViewAesKey0ActivateOk.setText("");
+            if (operationRead == false) writeData = "E200";
+        } else if (checkBoxAesKey1Activate.isChecked() == true) {
+            accOffset = 0xD8; accSize = 1; readWriteTypes = ReadWriteTypes.AESKEY1ACTIVATE; textViewAesKey0ActivateOk.setText("");
+            if (operationRead == false) writeData = "E200";
         } else if (checkBoxAesKey0.isChecked() == true) {
             accOffset = 0xC0; accSize = 8; readWriteTypes = ReadWriteTypes.AESKEY0; textViewAesKey0Ok.setText("");
             if (operationRead) editTextAesKey0.setText("");

@@ -211,14 +211,10 @@ public class AccessColdChainFragment extends CommonFragment {
                 MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
                 if (bankProcessing++ != 0 && invalid == true)   rerunRequest = false;
                 else {
-/*                    if (restartAccessBank != accessBank) {
-                        restartAccessBank = accessBank;
-                        restartCounter = 3;
-                    }*/
                     accessTask = new AccessTask(
                             (operationRead ? buttonRead : buttonWrite), null,
                             invalid,
-                            null, editTextRWTagID.getText().toString(), 1, 32,
+                            editTextRWTagID.getText().toString(), 1, 32,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE),
