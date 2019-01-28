@@ -380,7 +380,7 @@ public class AccessRegisterFragment extends CommonFragment {
         MainActivity.mCs108Library4a.appendToLog("selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", selectOffset1= " + selectOffset1 + ", invalidRequest1 = " + invalidRequest1);
 
         accessTask = new AccessTask(buttonWrite, textViewWriteCount, invalidRequest1,
-                "", selectMask, selectBank + 1, (selectBank == 0 ? selectOffset + 32 : selectOffset),
+                selectMask, selectBank + 1, (selectBank == 0 ? selectOffset + 32 : selectOffset),
                 password, antennaPower, Cs108Connector.HostCommands.CMD_18K6CWRITE, selectQValue, checkBoxAutoRun.isChecked(), checkBoxNewBarcode.isChecked(), resetCount,
                 textViewRunTime, textViewTagGot, textViewVoltageLevel,
                 textViewYield, textViewTotal);

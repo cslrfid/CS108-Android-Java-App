@@ -7,9 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,14 +23,15 @@ import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class AccessReadWriteFragment extends CommonFragment {
-    EditText editTextRWTagID, editTextAccessRWAccPassword, editTextAccessRWKillPwd, editTextAccessRWAccPwd, editTextAccPc, editTextAccessRWEpc, editTExtAccessRWXpc;
+    Spinner spinnerSelectBank;
+    EditText editTextRWSelectOffset, editTextRWTagID, editTextAccessRWAccPassword, editTextAccessRWKillPwd, editTextAccessRWAccPwd, editTextAccPc, editTextAccessRWEpc, editTExtAccessRWXpc;
     EditText editTextTidValue, editTextUserValue, editTextEpcValue, editTextaccessRWAntennaPower;
     TextView textViewEpcLength;
     private Button buttonRead;
     private Button buttonWrite;
     Handler mHandler = new Handler();
 
-    String tagPcValue = ""; String accPcValue = ""; String accEpcValue = ""; String accXpcValue = ""; String accTidValue = ""; String accUserValue = "";
+    String accPcValue = ""; String accEpcValue = ""; String accXpcValue = ""; String accTidValue = ""; String accUserValue = "";
     enum ReadWriteTypes {
         NULL, RESERVE, EPC, XPC, TID, USER, EPC1
     }
@@ -51,6 +54,12 @@ public class AccessReadWriteFragment extends CommonFragment {
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_access);
         actionBar.setTitle(R.string.title_activity_readwrite);
+
+        spinnerSelectBank = (Spinner) getActivity().findViewById(R.id.accessRWSelectBank);
+        ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
+        targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSelectBank.setAdapter(targetAdapter);
+        editTextRWSelectOffset = (EditText) getActivity().findViewById(R.id.accessRWSelectOffset);
 
         editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessRWTagID);
         editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessRWAccPasswordValue);
@@ -115,7 +124,6 @@ public class AccessReadWriteFragment extends CommonFragment {
                 String header = "PC=";
                 int index = detail.indexOf(header) + header.length();
                 String strPCValue = detail.substring(index, index + 4);
-                tagPcValue = strPCValue;
                 if (true) {
                     updatePCEpc(strPCValue, strEpcValue);
                 } else {
@@ -172,18 +180,22 @@ public class AccessReadWriteFragment extends CommonFragment {
             }
             if (processResult()) { rerunRequest = true; }
             else if (taskRequest) {
+                bcheckBoxAll = false;
                 boolean invalid = processTickItems();
-                if (bankProcessing++ != 0 && invalid == true)   rerunRequest = false;
+                if (bankProcessing == 0 && bcheckBoxAll) rerunRequest = false;
+                else if (bankProcessing++ != 0 && invalid == true)   rerunRequest = false;
                 else {
                     if (restartAccessBank != accessBank) {
                         restartAccessBank = accessBank;
                         restartCounter = 3;
                     }
                     if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteFragment().InventoryRfidTask(): tagID=" + editTextRWTagID.getText() + ", operationrRead=" + operationRead + ", accessBank=" + accessBank + ", accOffset=" + accOffset + ", accSize=" + accSize);
+                    int selectOffset = 0;
+                    selectOffset = Integer.parseInt(editTextRWSelectOffset.getText().toString());
                     accessTask = new AccessTask(
                             (operationRead ? buttonRead : buttonWrite), null,
                             invalid,
-                            tagPcValue, editTextRWTagID.getText().toString(), 1, 32,
+                            editTextRWTagID.getText().toString(), spinnerSelectBank.getSelectedItemPosition() + 1, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE),
@@ -197,7 +209,12 @@ public class AccessReadWriteFragment extends CommonFragment {
                 mHandler.postDelayed(updateRunnable, 500);
                 if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteFragment().updateRunnable(): Restart");
             }
-            else    updating = false;
+            else {
+                if (bankProcessing == 0 && bcheckBoxAll) {
+                    Toast.makeText(MainActivity.mContext, "no choice selected yet", Toast.LENGTH_SHORT).show();
+                }
+                updating = false;
+            }
         }
     };
 
@@ -312,6 +329,7 @@ public class AccessReadWriteFragment extends CommonFragment {
             return true;
         }
     }
+    boolean bcheckBoxAll = false;
     boolean processTickItems() {
         String writeData = "";
         boolean invalidRequest1 = false;
@@ -349,10 +367,8 @@ public class AccessReadWriteFragment extends CommonFragment {
             if (DEBUG) MainActivity.mCs108Library4a.appendToLog("processTickItems(): start EPC operation");
             if (operationRead) {
                 String detail = editTextAccPc.getText().toString();
-                if (detail.length() != 4) {
-                    accOffset = 1;
-                    accSize = 1;
-                } else {
+                if (detail.length() != 4) accSize = 1;
+                else {
                     String detail2 = detail.substring(0, 1);
                     int number2 = Integer.valueOf(detail2, 16) * 2;
                     String detail3 = detail.substring(1, 2);
@@ -364,21 +380,24 @@ public class AccessReadWriteFragment extends CommonFragment {
                 }
             } else {
                 String strValue = editTextAccPc.getText().toString();
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("processTickItems(): strValue =  " + strValue + ", accPcValue = " + accPcValue);
-                if (strValue.length() == 4 && strValue.matches(accPcValue) == false) {
-//                        accOffset = 1;
-                    accSize = 1;
-                    writeData = strValue;
-                    editTextAccessRWEpc.setText("");
-                } else  strValue = "";
                 String strValue1 = editTextAccessRWEpc.getText().toString();
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("processTickItems(): strValue1 =  " + strValue1 + ", accEpcValue = " + accEpcValue);
-                if (strValue1.length() >= 4 && strValue1.matches(accEpcValue) == false) {
-                    if (strValue.length() == 0) accOffset = 2;
+                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("TestDebug111(): strValue =  " + strValue + ", accPcValue = " + accPcValue);
+                if (strValue1.length() == 0) {
+                    if (strValue.length() != 4) invalidRequest1 = true;
+                    else {
+                        accSize = 1;
+                        writeData = strValue;
+                    }
+                } else {
                     accSize += strValue1.length() / 4;
                     if (strValue1.length() % 4 != 0) accSize++;
-                    writeData = strValue + strValue1;
-                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("processTickItems(): accOffset =  " + accOffset + ", accSize = " + accSize);
+                    if (strValue.length() == 4) {
+                        accSize++;
+                        writeData = strValue + strValue1;
+                    } else {
+                        accOffset = 2;
+                        writeData = strValue1;
+                    }
                 }
             }
         } else if (checkBoxTid.isChecked() == true) {
@@ -464,6 +483,7 @@ public class AccessReadWriteFragment extends CommonFragment {
             }
         } else {
             invalidRequest1 = true;
+            bcheckBoxAll = true;
         }
 
         if (restartAccessBank == accessBank) {

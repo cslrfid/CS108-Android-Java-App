@@ -158,6 +158,7 @@ public class ConnectionFragment extends CommonFragment {
                 return true;
 
             case R.id.action_2:
+                for (int i = 0; i < 300; i++) MainActivity.mCs108Library4a.setPowerLevel(i);
 //                MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelConfig(false);
 //                MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelSelect(3);
 //                MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelConfig(true);

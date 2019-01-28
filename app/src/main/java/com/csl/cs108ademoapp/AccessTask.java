@@ -21,7 +21,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     TextView registerRunTime, registerTagGot, registerVoltageLevel;
     TextView registerYield, registerTotal;
     boolean invalidRequest;
-    String tagPcValue; String selectMask; int selectBank, selectOffset;
+    String selectMask; int selectBank, selectOffset;
     String strPassword; int powerLevel;
     Cs108Connector.HostCommands hostCommand;
 
@@ -40,7 +40,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     int batteryCountInventory_old;
 
     public AccessTask(Button button, TextView textViewWriteCount, boolean invalidRequest,
-                      String tagPcValue, String selectMask, int selectBank, int selectOffset,
+                      String selectMask, int selectBank, int selectOffset,
                       String strPassword, int powerLevel, Cs108Connector.HostCommands hostCommand,
                       int qValue, boolean repeat, boolean nextNew, boolean resetCount,
                       TextView registerRunTime, TextView registerTagGot, TextView registerVoltageLevel,
@@ -54,7 +54,6 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         this.registerTotal = registerTotalView;
 
         this.invalidRequest = invalidRequest;
-        this.tagPcValue = tagPcValue;
         this.selectMask = selectMask;
         this.selectBank = selectBank;
         this.selectOffset = selectOffset;
@@ -78,11 +77,16 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     @Override
     protected void onPreExecute() {
         buttonText = button.getText().toString().trim();
-        String buttonText1 = null;
-        if (buttonText.substring(buttonText.length()-1).toUpperCase().matches("E")) buttonText1 = buttonText.substring(0, buttonText.length()-1);
+        String buttonText1 = null; String strLastChar = buttonText.substring(buttonText.length()-1);
+        if (strLastChar.toUpperCase().matches("E")) {
+            buttonText1 = buttonText.substring(0, buttonText.length()-1);
+            if (strLastChar.matches("E")) buttonText1 += "ING";
+            else buttonText1 += "ing";
+        }
         if (repeat || buttonText.length() == 0) button.setText("Stop");
-        else if (buttonText1 != null) button.setText(buttonText1 + "ING");
-        else button.setText(buttonText + "ING");
+        else if (buttonText1 != null) button.setText(buttonText1);
+        else if (Character.isUpperCase(strLastChar.charAt(0))) button.setText(buttonText + "ING");
+        else button.setText(buttonText + "ing");
         if (registerYield != null && tagList.size()==0) registerYield.setText("");
         if (registerTotal != null && total == 0) registerTotal.setText("");
 
@@ -111,8 +115,8 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             int matchRep = 0;
             if (repeat == false || nextNew) matchRep = 1;
             if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
-            else if (MainActivity.mCs108Library4a.setSelectedTag(tagPcValue, selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
-                invalidRequest = true; MainActivity.mCs108Library4a.appendToLog("setSelectedTag is failed with tagPcValue = " + tagPcValue + ", selectMask = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", powerLevel = " + powerLevel);
+            else if (MainActivity.mCs108Library4a.setSelectedTag(null, selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
+                invalidRequest = true; MainActivity.mCs108Library4a.appendToLog("setSelectedTag is failed with selectMask = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", powerLevel = " + powerLevel);
             }
         }
         taskCancelReason = TaskCancelRReason.NULL;
@@ -241,7 +245,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
 
     void DeviceConnectTask4RegisterEnding() {
         String strErrorMessage = "";
-        if (true) {
+        if (false) {
             boolean success = false;
             MainActivity.mCs108Library4a.appendToLog("repeat = " + repeat + ", taskCancelReason = " + taskCancelReason.toString()
                     + ", backscatterError = " + backscatterError + ", accessError =" + accessError + ", accessResult = " + accessResult + ", resultError = " + resultError);
@@ -253,27 +257,27 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 playerN.start();
             }
         } else {
-            MainActivity.mCs108Library4a.appendToLog("AAA");
             strErrorMessage = "";
             switch (taskCancelReason) {
                 case NULL:
-                    strErrorMessage += "Finish as COMMAND END is received";
+                    if (accessResult == null || (resultError != null && resultError.length() != 0) || (endingMessaage != null && endingMessaage.length() != 0)) strErrorMessage += "Finish as COMMAND END is received";
+                    else Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
                     break;
                 case STOP:
-                    strErrorMessage += "Finish as STOP is pressed";
+                    strErrorMessage += "Finish as STOP is pressed. ";
                     break;
                 case BUTTON_RELEASE:
-                    strErrorMessage += "Finish as BUTTON is released";
+                    strErrorMessage += "Finish as BUTTON is released. ";
                     break;
                 case TIMEOUT:
-                    strErrorMessage += "Finish as TIMEOUT";
+                    strErrorMessage += "TIMEOUT without COMMAND_END. ";
                     break;
                 case INVALD_REQUEST:
-                    strErrorMessage += "Invalid sendHostRequest. Operation is cancelled.";
+                    strErrorMessage += "Invalid request. Operation is cancelled. ";
                     break;
             }
-            MainActivity.mCs108Library4a.appendToLog("resultError = " + resultError + ", taskCancelReason = " + taskCancelReason.toString() + ", strErrorMessage = " + strErrorMessage + ", endingMessaage = " + endingMessaage);
-            if (resultError.length() != 0) strErrorMessage += " with Error " + resultError;
+            MainActivity.mCs108Library4a.appendToLog("taskCancelReason = " + taskCancelReason.toString() + ", accessResult = " + (accessResult == null ? "NULL": accessResult) + ", endingMessaage = " + (endingMessaage == null ? "NULL" : endingMessaage) + ", resultError = " + (resultError == null ? "NULL" : resultError));
+            if (resultError.length() != 0) strErrorMessage += resultError;
             if (strErrorMessage.length() != 0) strErrorMessage += ". ";
         }
         if (endingMessaage != null) if (endingMessaage.length() != 0) strErrorMessage += "Received CommandEND Error = " + endingMessaage;

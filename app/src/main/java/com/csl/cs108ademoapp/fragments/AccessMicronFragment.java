@@ -197,7 +197,7 @@ public class AccessMicronFragment extends CommonFragment {
                     accessTask = new AccessTask(
                             buttonRead, null,
                             invalid,
-                            null, selectMask, selectBank, selectOffset,
+                            selectMask, selectBank, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             Cs108Connector.HostCommands.CMD_18K6CREAD,

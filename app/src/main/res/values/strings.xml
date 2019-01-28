@@ -98,6 +98,12 @@
         <item>Fixed channel</item>
     </string-array>
 
+    <string-array name="hideTid_options">
+        <item>hide none</item>
+        <item>hide some</item>
+        <item>hide all</item>
+    </string-array>
+
     <string-array name="query_target_options">
         <item>A</item>
         <item>B</item>
