@@ -156,22 +156,11 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/accessRWEpcOK"
+            android:id="@+id/accessRWPcOK"
             android:layout_width="wrap_content" />
 
         <CheckBox
-            android:id="@+id/accessRWEpcTitle"
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="@string/epc_memory_title" />
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="15dp">
-
-        <TextView
+            android:id="@+id/accessRWPcTitle"
             android:layout_width="0dp"
             android:layout_weight="1"
             style="@style/style_normal_font"
@@ -180,7 +169,7 @@
         <include
             android:id="@+id/accessRWAccPcValue"
             android:layout_width="0dp"
-            android:layout_weight="3"
+            android:layout_weight="2"
             android:layout_height="wrap_content"
             layout="@layout/custom_edittext" />
 
@@ -190,6 +179,28 @@
             android:layout_weight="3"
             style="@style/style_normal_font"
             android:text="EPC has   bits" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/accessRWEpcOK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accessRWEpcTitle"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font"
+            android:text="@string/epc_memory_title" />
+
+        <include
+            android:id="@+id/accessRWAccEpcValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
     </TableRow>
 
     <TableRow
@@ -206,25 +217,6 @@
 
         <include
             android:id="@+id/accessRWAccXpcValue"
-            android:layout_width="0dp"
-            android:layout_weight="10"
-            android:layout_height="wrap_content"
-            layout="@layout/custom_edittext" />
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="15dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="@string/epc_title" />
-
-        <include
-            android:id="@+id/accessRWAccEpcValue"
             android:layout_width="0dp"
             android:layout_weight="10"
             android:layout_height="wrap_content"

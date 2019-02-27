@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.adapters.MicronAdapter;
 
@@ -18,7 +19,7 @@ public class MicronFragment extends CommonFragment {
     private ViewPager viewPager;
     MicronAdapter mAdapter;
 
-    private String[] tabs = {"Configuration", "Scan"};
+    private String[] tabs = {"Select Tag", "Read Temp."};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -102,6 +103,9 @@ public class MicronFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
+        MainActivity.mCs108Library4a.setInvSelectIndex(1);
+        MainActivity.mCs108Library4a.setSelectCriteria(false, 0, 0, 0, 0, ""); MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 1 = FALSE");
+        MainActivity.mCs108Library4a.setInvSelectIndex(0);
         mAdapter.fragment0.onDestroy();
         mAdapter.fragment1.onDestroy();
         super.onDestroy();

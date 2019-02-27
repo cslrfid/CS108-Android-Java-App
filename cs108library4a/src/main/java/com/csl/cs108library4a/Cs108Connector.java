@@ -3341,7 +3341,7 @@ public class Cs108Connector extends BleConnector {
 //                        }
                     }
                     appendToLog("complete 4 bytes: " + byteArrayToString(msgBuffer));
-                    msgBuffer[2] = (byte) ((msgBuffer[2] & 0xFF) + i);
+                    msgBuffer[2] = (byte) ((msgBuffer[2] & 0xFF) + (i % 16));
                     if (wrieByteSize == 4) {
                         msgBuffer[6] = (byte)(i);
                     }
@@ -3390,6 +3390,7 @@ public class Cs108Connector extends BleConnector {
         }
         boolean setFreqChannelSelect(int freqChannelSelect) {
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 1, 0x0C, 0, 0, 0, 0};
+            appendToLog("FrequencyA: freqChannelSelect = " + freqChannelSelect);
             if (freqChannelSelect < FREQCHANSEL_MIN || freqChannelSelect > FREQCHANSEL_MAX)   freqChannelSelect = mDefault.freqChannelSelect;
             if (this.freqChannelSelect == freqChannelSelect && sameCheck)  return true;
             msgBuffer[4] = (byte) (freqChannelSelect);
@@ -3890,10 +3891,11 @@ public class Cs108Connector extends BleConnector {
         }
         boolean setSelectMaskLength(int selectMaskLength) {
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 4, 8, 0, 0, 0, 0};
-            if (selectMaskLength < INVSELMLENGTH_MIN || selectMaskLength > INVSELMLENGTH_MAX)
-                selectMaskLength = mDefault.selectMaskLength;
+            if (selectMaskLength < INVSELMLENGTH_MIN) selectMaskLength = INVSELMLENGTH_MIN;
+            else if (selectMaskLength > INVSELMLENGTH_MAX) selectMaskLength = INVSELMLENGTH_MAX;
             if (this.selectMaskLength == selectMaskLength && sameCheck) return true;
             msgBuffer[4] |= (byte) (selectMaskLength & 0xFF);
+            if (selectMaskLength == INVSELMLENGTH_MAX) msgBuffer[5] = 1;
             this.selectMaskLength = selectMaskLength;
             return mRfidDevice.mRx000Device.sendHostRegRequest(HostRegRequests.HST_TAGMSK_PTR, true, msgBuffer);
         }
@@ -4260,8 +4262,9 @@ public class Cs108Connector extends BleConnector {
         }
     }
 
+    final int RFID_READING_BUFFERSIZE = 150;
     public class Rx000Device {
-        byte[] mRfidToReading = new byte[100];
+        byte[] mRfidToReading = new byte[RFID_READING_BUFFERSIZE];
         int mRfidToReadingOffset = 0;
         boolean mRfidReadingReset = false;
         ArrayList<Cs108RfidData> mRx000ToWrite = new ArrayList<>();
@@ -4286,7 +4289,7 @@ public class Cs108Connector extends BleConnector {
             cs108DataLeft = new byte[CS108DATALEFT_SIZE];
             cs108DataLeftOffset = 0;
             mCs108DataRead.clear();
-            mRfidToReading = new byte[100];
+            mRfidToReading = new byte[RFID_READING_BUFFERSIZE];
             mRfidToReadingOffset = 0;
             mRx000ToRead.clear();
             mRfidDevice.mRfidToRead.clear();
@@ -4321,7 +4324,7 @@ public class Cs108Connector extends BleConnector {
                         byte[] unhandledBytes = new byte[mRfidToReadingOffset];
                         System.arraycopy(mRfidToReading, 0, unhandledBytes, 0, unhandledBytes.length);
                         if (DEBUG) appendToLog("ERROR insufficient buffer, mRfidToReadingOffset=" + mRfidToReadingOffset + ", dataIn.length=" + dataIn.length + ", clear mRfidToReading: " + byteArrayToString(unhandledBytes));
-                        byte[] mRfidToReadingNew = new byte[100];
+                        byte[] mRfidToReadingNew = new byte[RFID_READING_BUFFERSIZE];
                         mRfidToReading = mRfidToReadingNew;
                         mRfidToReadingOffset = 0;
                         invalidUpdata++;
@@ -4927,7 +4930,7 @@ public class Cs108Connector extends BleConnector {
                                                                     System.arraycopy(dataValuesFull, index, dataA.decodedPc, 0, dataA.decodedPc.length);
                                                                     index += 2;
                                                                 }
-                                                                int epcLength = (dataA.decodedPc[0] >> 3) * 2;
+                                                                int epcLength = ((dataA.decodedPc[0] & 0xFF) >> 3) * 2;
                                                                 if (dataValuesFull.length >= index + epcLength) {
                                                                     dataA.decodedEpc = new byte[epcLength];
                                                                     System.arraycopy(dataValuesFull, index, dataA.decodedEpc, 0, epcLength);
@@ -5156,7 +5159,7 @@ public class Cs108Connector extends BleConnector {
                             startIndex = startIndexNew;
                             startIndexOld = startIndexNew;
                             //if (startIndexNew != mRfidToReadingOffset) {
-                            byte[] mRfidToReadingNew = new byte[100];
+                            byte[] mRfidToReadingNew = new byte[RFID_READING_BUFFERSIZE];
                             System.arraycopy(mRfidToReading, startIndexNew, mRfidToReadingNew, 0, mRfidToReadingOffset - startIndexNew);
                             mRfidToReading = mRfidToReadingNew;
                             mRfidToReadingOffset -= startIndexNew;
@@ -5176,7 +5179,7 @@ public class Cs108Connector extends BleConnector {
                 }
             }
             if (mRfidToReadingOffset == startIndexNew) {
-                mRfidToReading = new byte[100];
+                mRfidToReading = new byte[RFID_READING_BUFFERSIZE];
                 mRfidToReadingOffset = 0;
             }
             if (false && bdebugging) appendToLog("mRx000UplinkHandler(): END");

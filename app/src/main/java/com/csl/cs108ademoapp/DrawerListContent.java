@@ -57,7 +57,7 @@ public class DrawerListContent {
         addItem(new DrawerItem("8", "Security", R.drawable.dl_access));
         addItem(new DrawerItem("9", "Register Tag", R.drawable.dl_rr));
         addItem(new DrawerItem("10", "Cold Chain CS8300", R.drawable.dl_loc));
-        addItem(new DrawerItem("11", "RFMicron Temperature", R.drawable.dl_loc));
+        addItem(new DrawerItem("11", "RFMicron", R.drawable.dl_loc));
         addItem(new DrawerItem("12", "UCODE DNA", R.drawable.dl_loc));
         addItem(new DrawerItem("13", "Wedge", R.drawable.dl_rr));
     }

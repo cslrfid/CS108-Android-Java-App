@@ -98,6 +98,11 @@
         <item>Fixed channel</item>
     </string-array>
 
+    <string-array name="frequencyAgile_options">
+        <item>Frequency agile</item>
+        <item>Fixed channel</item>
+    </string-array>
+
     <string-array name="hideTid_options">
         <item>hide none</item>
         <item>hide some</item>

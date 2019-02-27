@@ -16,12 +16,13 @@ public class MicronAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int index) {
         Fragment fragment = null;
         switch (index) {
-            case 0:
+            case 1:
                 fragment = new AccessMicronFragment();
                 fragment0 = fragment;
                 break;
-            case 1:
-                fragment = InventoryRfidiMultiFragment.newInstance(true,"E28240", false);
+            case 0:
+                String mDid = "E282403"; //"E28240", "E282403"
+                fragment = InventoryRfidiMultiFragment.newInstance(true, mDid, false);
                 fragment1 = fragment;
                 break;
             default:

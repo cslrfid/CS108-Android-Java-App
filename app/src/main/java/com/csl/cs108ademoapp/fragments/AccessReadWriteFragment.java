@@ -16,11 +16,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.ReaderDevice;
+
+import static com.csl.cs108ademoapp.MainActivity.mContext;
 
 public class AccessReadWriteFragment extends CommonFragment {
     Spinner spinnerSelectBank;
@@ -30,10 +33,11 @@ public class AccessReadWriteFragment extends CommonFragment {
     private Button buttonRead;
     private Button buttonWrite;
     Handler mHandler = new Handler();
+    String strPCValueRef;
 
-    String accPcValue = ""; String accEpcValue = ""; String accXpcValue = ""; String accTidValue = ""; String accUserValue = "";
+    String accEpcValue = ""; String accXpcValue = ""; String accTidValue = ""; String accUserValue = "";
     enum ReadWriteTypes {
-        NULL, RESERVE, EPC, XPC, TID, USER, EPC1
+        NULL, RESERVE, PC, EPC, XPC, TID, USER, EPC1
     }
     boolean operationRead = false;
     ReadWriteTypes readWriteTypes;
@@ -119,19 +123,12 @@ public class AccessReadWriteFragment extends CommonFragment {
         ReaderDevice tagSelected = MainActivity.tagSelected;
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
-                String strEpcValue = tagSelected.getAddress(); editTextRWTagID.setText(strEpcValue);
+                String strEpcValue = tagSelected.getAddress();
                 String detail = tagSelected.getDetails();
                 String header = "PC=";
                 int index = detail.indexOf(header) + header.length();
-                String strPCValue = detail.substring(index, index + 4);
-                if (true) {
-                    updatePCEpc(strPCValue, strEpcValue);
-                } else {
-                    editTextAccPc.setText(strPCValue);
-                    textViewEpcLength.setText("EPC has " + 4 * strEpcValue.length() + " bits");
-                    editTextAccessRWEpc.setText(strEpcValue);
-                    editTextAccessRWEpc.addTextChangedListener(new GenericTextWatcher(editTextAccessRWEpc, strEpcValue.length()));
-                }
+                strPCValueRef = detail.substring(index, index + 4);
+                updatePCEpc(strPCValueRef, strEpcValue);
             }
         }
         MainActivity.mCs108Library4a.setSameCheck(false);
@@ -149,11 +146,77 @@ public class AccessReadWriteFragment extends CommonFragment {
         super("AccessReadWriteFragment");
     }
 
+    int getPC2EpcWordCount(String detail) {
+        String detail2 = detail.substring(0, 1);
+        int number2 = Integer.valueOf(detail2, 16) * 2;
+        String detail3 = detail.substring(1, 2);
+        int number3 = Integer.valueOf(detail3, 16);
+        if ((number3 / 8) != 0) number2 += 1;
+        return number2;
+    }
     void updatePCEpc(String strPCValue, String strEpcValue) {
-        editTextAccPc.setText(strPCValue);
-        textViewEpcLength.setText("EPC has " + 4 * strEpcValue.length() + " bits");
-        editTextAccessRWEpc.setText(strEpcValue);
-        editTextAccessRWEpc.addTextChangedListener(new GenericTextWatcher(editTextAccessRWEpc, strEpcValue.length()));
+        if (false) {
+            int iWordCount = 0;
+            if (strPCValue != null) {
+                if (strPCValue.length() != 0) editTextAccPc.setText(strPCValue);
+                iWordCount = getPC2EpcWordCount(strPCValue);
+                textViewEpcLength.setText("EPC has " + (iWordCount * 16) + " bits");
+            }
+            if (strEpcValue != null) {
+                if (strEpcValue.length() != 0) {
+                    editTextRWTagID.setText(strEpcValue); editTextAccessRWEpc.setText(strEpcValue);
+                    editTextAccessRWEpc.addTextChangedListener(new GenericTextWatcher(editTextAccessRWEpc, iWordCount * 4));
+                }
+            }
+        } else {
+            boolean needPopup = false;
+            boolean needMaskUpdate = false;
+            if (spinnerSelectBank.getSelectedItemPosition() == 0) needMaskUpdate = true;
+            if (DEBUG)
+                MainActivity.mCs108Library4a.appendToLog("strPCValueRef strPCValue = " + strPCValue + "strPCValueRef A = " + strPCValueRef + ", strEpcValue = " + strEpcValue);
+            if (strPCValue == null) strPCValue = "";
+            if (strPCValue.length() != 0) editTextAccPc.setText(strPCValue);
+            else strPCValue = strPCValueRef;
+            if (strPCValueRef != null && strPCValue != null) {
+                if (strPCValue.matches(strPCValueRef) == false && strPCValue.length() == 4) {
+                    needPopup = true;
+                    strPCValueRef = strPCValue;
+                }
+            }
+
+            int iWordCount = getPC2EpcWordCount(strPCValue);
+            textViewEpcLength.setText("EPC has " + (iWordCount * 16) + " bits");
+            if (strEpcValue != null) {
+                if (needMaskUpdate) editTextRWTagID.setText(strEpcValue);
+                editTextAccessRWEpc.setText(strEpcValue);
+            } else {
+                if (iWordCount * 4 < editTextRWTagID.getText().toString().length()) {
+                    // needPopup = true;
+                    String strTemp = editTextRWTagID.getText().toString().substring(0, iWordCount * 4);
+                    if (needMaskUpdate) editTextRWTagID.setText(strTemp);
+                }
+                if (iWordCount * 4 < editTextAccessRWEpc.getText().toString().length()) {
+                    // needPopup = true;
+                    String strTemp = editTextAccessRWEpc.getText().toString().substring(0, iWordCount * 4);
+                    editTextAccessRWEpc.setText(strTemp);
+                }
+                if (editTextAccessRWEpc.getText().toString().length() != 0) {
+                    String strTemp = editTextAccessRWEpc.getText().toString();
+                    if (editTextRWTagID.getText().toString().matches(strTemp) == false) {
+                        // needPopup = true;
+                        if (needMaskUpdate) editTextRWTagID.setText(strTemp);
+                    }
+                }
+            }
+            editTextAccessRWEpc.addTextChangedListener(new GenericTextWatcher(editTextAccessRWEpc, iWordCount * 4));
+            String strTemp = editTextAccessRWEpc.getText().toString();
+            editTextAccessRWEpc.setText(strTemp);
+
+            if (needPopup) {
+                CustomPopupWindow customPopupWindow = new CustomPopupWindow(mContext);
+                customPopupWindow.popupStart("Changing EPC Length will automatically modify to " + (iWordCount * 16) + " bits.", false);
+            }
+        }
     }
 
     void startAccessTask() {
@@ -218,8 +281,8 @@ public class AccessReadWriteFragment extends CommonFragment {
         }
     };
 
-    TextView textViewReserveOk, textViewEpcOk, textViewTidOk, textViewUserOk, textViewEpc1Ok;
-    CheckBox checkBoxReserve, checkBoxEpc, checkBoxTid, checkBoxUser, checkBoxEpc1;
+    TextView textViewReserveOk, textViewPcOk, textViewEpcOk, textViewTidOk, textViewUserOk, textViewEpc1Ok;
+    CheckBox checkBoxReserve, checkBoxPc, checkBoxEpc, checkBoxTid, checkBoxUser, checkBoxEpc1;
     int accessBank, accSize, accOffset;
     int restartCounter = 0; int restartAccessBank = -1;
     boolean processResult() {
@@ -232,6 +295,9 @@ public class AccessReadWriteFragment extends CommonFragment {
             if (accessResult == null) {
                 if (readWriteTypes == ReadWriteTypes.RESERVE) {
                     textViewReserveOk.setText("E"); checkBoxReserve.setChecked(false);
+                }
+                if (readWriteTypes == ReadWriteTypes.PC) {
+                    textViewPcOk.setText("E"); checkBoxPc.setChecked(false);
                 }
                 if (readWriteTypes == ReadWriteTypes.EPC) {
                     textViewEpcOk.setText("E"); checkBoxEpc.setChecked(false);
@@ -263,34 +329,40 @@ public class AccessReadWriteFragment extends CommonFragment {
                     } else {
                         editTextAccessRWAccPwd.setText(accessResult.subSequence(8, 16));
                     }
+                } else if (readWriteTypes == ReadWriteTypes.PC) {
+                    textViewPcOk.setText("O"); checkBoxPc.setChecked(false);
+                    readWriteTypes = ReadWriteTypes.NULL;
+                    if (operationRead) {
+                        String newValue = "";
+                        if (accessResult.length() <= 4) {
+                            newValue = accessResult.subSequence(0, accessResult.length()).toString();
+                        } else {
+                            newValue = accessResult.subSequence(0, 4).toString();
+                        }
+                        editTextAccPc.setText(newValue);
+                    }
+                    updatePCEpc(editTextAccPc.getText().toString(), null);
                 } else if (readWriteTypes == ReadWriteTypes.EPC) {
                     if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWrite(). EPC DATA with accessBank = " + accessBank + ", with accessResult.length = " + accessResult.length());
                     textViewEpcOk.setText("O"); checkBoxEpc.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (operationRead) {
                         String newValue = "";
-                        if (accessResult.length() < 4) {
-                            newValue = accessResult.subSequence(4, accessResult.length()).toString();
+                        if (accessResult.length() <= 4) {
+                            newValue = accessResult.subSequence(0, accessResult.length()).toString();
                         } else {
                             newValue = accessResult.subSequence(0, 4).toString();
                         }
                         editTextAccPc.setText(newValue);
-                        accPcValue = newValue;
-                    } else {
-                        accPcValue = editTextAccPc.getText().toString();
                     }
+                    updatePCEpc(editTextAccPc.getText().toString(), null);
 
                     if (operationRead) {
-                        int epclength = accSize - 2;
                         String newValue = "";
-                        if (accessResult.length() <= 4) {
-                        } else {
+                        if (accessResult.length() > 4) {
                             newValue = accessResult.subSequence(4, accessResult.length()).toString();
                         }
                         editTextAccessRWEpc.setText(newValue);
-                        accEpcValue = newValue;
-                    } else {
-                        accEpcValue = editTextAccessRWEpc.getText().toString();
                     }
                 } else if (readWriteTypes == ReadWriteTypes.XPC) {
                     if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWrite(). XPC DATA with accessBank = " + accessBank + ", with accessResult.length = " + accessResult.length() + ", with accessResult=" + accessResult);
@@ -321,7 +393,11 @@ public class AccessReadWriteFragment extends CommonFragment {
                     textViewEpc1Ok.setText("O"); checkBoxEpc1.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (accessResult.length() == 0 || operationRead == false) {
-                    } else editTextEpcValue.setText(accessResult);
+                    } else {
+                        editTextEpcValue.setText(accessResult);
+                        accEpcValue = accessResult;
+                    }
+                    if (operationRead == false) accEpcValue = editTextEpcValue.getText().toString();
                 }
                 accessResult = null;
             }
@@ -335,12 +411,14 @@ public class AccessReadWriteFragment extends CommonFragment {
         boolean invalidRequest1 = false;
 
         textViewReserveOk = (TextView) getActivity().findViewById(R.id.accessRWReserveOK);
+        textViewPcOk = (TextView) getActivity().findViewById(R.id.accessRWPcOK);
         textViewEpcOk = (TextView) getActivity().findViewById(R.id.accessRWEpcOK);
         textViewTidOk = (TextView) getActivity().findViewById(R.id.accessRWTidOK);
         textViewUserOk = (TextView) getActivity().findViewById(R.id.accessRWUserOK);
         textViewEpc1Ok = (TextView) getActivity().findViewById(R.id.accessRWEpc1OK);
 
         checkBoxReserve = (CheckBox) getActivity().findViewById(R.id.accessRWReserveTitle);
+        checkBoxPc = (CheckBox) getActivity().findViewById(R.id.accessRWPcTitle);
         checkBoxEpc = (CheckBox) getActivity().findViewById(R.id.accessRWEpcTitle);
         checkBoxTid = (CheckBox) getActivity().findViewById(R.id.accessRWTidTitle);
         checkBoxUser = (CheckBox) getActivity().findViewById(R.id.accessRWUserTitle);
@@ -361,27 +439,29 @@ public class AccessReadWriteFragment extends CommonFragment {
                     writeData = strValue + strValue1;
                 }
             }
+        } else if (checkBoxPc.isChecked() == true) {
+            textViewPcOk.setText("");
+            accessBank = 1; accOffset = 1; accSize = 1; readWriteTypes = ReadWriteTypes.PC;
+            if (operationRead) {
+                editTextAccPc.setText("");
+            } else {
+                String strValue = editTextAccPc.getText().toString();
+                if (strValue.length() != 4) invalidRequest1 = true;
+                else writeData = strValue;
+            }
         } else if (checkBoxEpc.isChecked() == true) {
             textViewEpcOk.setText("");
             accessBank = 1; accOffset = 1; accSize = 0; readWriteTypes = ReadWriteTypes.EPC;
             if (DEBUG) MainActivity.mCs108Library4a.appendToLog("processTickItems(): start EPC operation");
             if (operationRead) {
-                String detail = editTextAccPc.getText().toString();
-                if (detail.length() != 4) accSize = 1;
+                if (strPCValueRef.length() != 4) accSize = 1;
                 else {
-                    String detail2 = detail.substring(0, 1);
-                    int number2 = Integer.valueOf(detail2, 16) * 2;
-                    String detail3 = detail.substring(1, 2);
-                    int number3 = Integer.valueOf(detail3, 16);
-                    if ((number3 % 2) == 1) number2 += 1;
-                    accSize = number2 + 1;
-                    MainActivity.mCs108Library4a.appendToLog("number3 = " + number3 + ", accSize = " + accSize);
+                    accSize = getPC2EpcWordCount(strPCValueRef) + 1;
                     editTextAccessRWEpc.setText("");
                 }
             } else {
                 String strValue = editTextAccPc.getText().toString();
                 String strValue1 = editTextAccessRWEpc.getText().toString();
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("TestDebug111(): strValue =  " + strValue + ", accPcValue = " + accPcValue);
                 if (strValue1.length() == 0) {
                     if (strValue.length() != 4) invalidRequest1 = true;
                     else {
@@ -392,6 +472,8 @@ public class AccessReadWriteFragment extends CommonFragment {
                     accSize += strValue1.length() / 4;
                     if (strValue1.length() % 4 != 0) accSize++;
                     if (strValue.length() == 4) {
+                        int iPCWordCount = getPC2EpcWordCount(strValue);
+                        if (iPCWordCount < accSize) accSize = iPCWordCount;
                         accSize++;
                         writeData = strValue + strValue1;
                     } else {

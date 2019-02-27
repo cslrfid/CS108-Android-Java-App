@@ -1,5 +1,6 @@
 package com.csl.cs108ademoapp.fragments;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -105,11 +106,6 @@ public class AccessMicronFragment extends CommonFragment {
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
         MainActivity.mCs108Library4a.setSameCheck(true);
-        if (changedSelectIndex) {
-            MainActivity.mCs108Library4a.setInvSelectIndex(1);
-            MainActivity.mCs108Library4a.setSelectCriteria(false, 0, 0, 0, 0, "");
-            MainActivity.mCs108Library4a.setInvSelectIndex(0);
-        }
         MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }
@@ -147,6 +143,27 @@ public class AccessMicronFragment extends CommonFragment {
                 bSelected = true;
                 if (editTextRWTagID != null) editTextRWTagID.setText(tagSelected.getAddress());
 
+                if (setModelCode(tagSelected.getTid())) textViewModelCode.setText(tagSelected.getTid().substring(4));
+                else if (tagSelected.getRes() != null && tagSelected.getUser() != null) { modelCode = 3; textViewModelCode.setText("403"); }
+                else {
+                    CheckBox checkBoxModelCode = (CheckBox)  getActivity().findViewById(R.id.accesMNModelCodeTitle);
+                    checkBoxModelCode.setVisibility(View.VISIBLE);
+                    TextView textViewModelCode = (TextView)  getActivity().findViewById(R.id.accesMNModelCodeTitle1);
+                    textViewModelCode.setVisibility(View.GONE);
+                }
+                if (setCalibrationVersion(tagSelected.getUser()) == false) {
+                    CheckBox checkBoxCalibrationData = (CheckBox)  getActivity().findViewById(R.id.accesMNCalibrationTitle);
+                    checkBoxCalibrationData.setVisibility(View.VISIBLE);
+                    TextView textViewCalibrationData = (TextView)  getActivity().findViewById(R.id.accesMNCalibrationTitle1);
+                    textViewCalibrationData.setVisibility(View.GONE);
+                }
+                if (tagSelected.getRes() == null) {
+                    CheckBox checkBoxRssiCode = (CheckBox)  getActivity().findViewById(R.id.accesMNRssiCodeTitle);
+                    checkBoxRssiCode.setVisibility(View.VISIBLE);
+                    TextView textViewRssiCodeTitle = (TextView) getActivity().findViewById(R.id.accesMNRssiCodeTitle1);
+                    textViewRssiCodeTitle.setVisibility(View.GONE);
+                } else setRssiCode(tagSelected.getRes());
+
                 stringDetail = tagSelected.getDetails();
                 indexUser = stringDetail.indexOf("USER=");
                 if (indexUser != -1) {
@@ -165,12 +182,13 @@ public class AccessMicronFragment extends CommonFragment {
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
         if (updating == false) {
             updating = true; bankProcessing = 0;
-            checkBoxConfig.setChecked(true); MainActivity.mCs108Library4a.setInvSelectIndex(0);
+            checkProcessing = 0;
             mHandler.removeCallbacks(updateRunnable);
             mHandler.post(updateRunnable);
         }
     }
     boolean updating = false; int bankProcessing = 0;
+    int checkProcessing = 0;
     private final Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {
@@ -238,6 +256,44 @@ public class AccessMicronFragment extends CommonFragment {
         return  stringValue;
     }
 
+    boolean setModelCode(String strTid) {
+        if (strTid == null) return false;
+        if (strTid.length() <= 7) return false;
+        if (strTid.substring(0, 7).matches("E282401")) {
+            modelCode = 1; return true;
+        } else if (strTid.substring(0, 7).matches("E282402")) {
+            modelCode = 2; return true;
+        } else if (strTid.substring(0, 7).matches("E282403")) {
+            modelCode = 3; return true;
+        }
+        return false;
+    }
+    boolean setCalibrationVersion(String strUser) {
+        if (strUser == null) return false;
+        if (strUser.length() < 16) return false;
+        int crc = Integer.parseInt(strUser.substring(0, 4), 16);
+        calCode1 = Integer.parseInt(strUser.substring(4, 7), 16);
+        calTemp1 = Integer.parseInt(strUser.substring(7, 10), 16); calTemp1 >>= 1;
+        calCode2 = Integer.parseInt(strUser.substring(9, 13), 16); calCode2 >>= 1; calCode2 &= 0xFFF;
+        calTemp2 = Integer.parseInt(strUser.substring(12, 16), 16); calTemp2 >>= 2; calTemp2 &= 0x7FF;
+        calVer = Integer.parseInt(strUser.substring(15, 16),16); calVer &= 0x3;
+        MainActivity.mCs108Library4a.appendToLog("crc = " + crc + ", code1 = " + calCode1 + ", temp1 = " + calTemp1 + ", code2 = " + calCode2 + ", temp2 = " + calTemp2 + ", ver = " + calVer);
+        textViewCalibrationVersion.setText(strUser); //String.valueOf(calVer)
+        return true;
+    }
+    boolean setRssiCode(String strData) {
+        if (strData == null) return false;
+        if (strData.length() < 4) return false;
+        int iTemp = Integer.parseInt(strData.substring(2,4), 16); iTemp &= 0x1F;
+        textViewRssiCode.setText(String.format("%d", iTemp));   //"%02X"
+        EditText editText = (EditText) getActivity().findViewById(R.id.accessMNRssiLowerLimit);
+        int iTempLower = Integer.parseInt(editText.getText().toString());
+        editText = (EditText) getActivity().findViewById(R.id.accessMNRssiUpperLimit);
+        int iTempUpper = Integer.parseInt(editText.getText().toString());
+        if (iTemp >= iTempLower && iTemp <= iTempUpper) textViewRssiCode.setTextColor(Color.BLACK);
+        else textViewRssiCode.setTextColor(Color.RED);
+        return true;
+    }
     //    int accessBank, accSize, accOffset;
 //    int restartCounter = 0; int restartAccessBank = -1;
     boolean processResult() {
@@ -245,50 +301,46 @@ public class AccessMicronFragment extends CommonFragment {
         if (accessTask == null) return false;
         else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
         else {
+            MainActivity.mCs108Library4a.setInvSelectIndex(1);
+            MainActivity.mCs108Library4a.setSelectCriteria(false, 0, 0, 0, 0, ""); MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 1 = FALSE");
+            MainActivity.mCs108Library4a.setInvSelectIndex(0);
             if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessTask FINISHED");
             accessResult = accessTask.accessResult;
             if (accessResult == null) {
                 if (readWriteTypes == ReadWriteTypes.MODELCODE) {
                     textViewConfigOk.setText("E");
-                    checkBoxConfig.setChecked(false);
+                    // checkBoxConfig.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.CALIBRATION) {
                     textViewCalibrationOk.setText("E");
-                    checkBoxCalibration.setChecked(false);
+                    // checkBoxCalibration.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.SENSORCODE) {
-                    textViewSensorCodeOk.setText("E"); checkBoxSensorCode.setChecked(false);
+                    textViewSensorCodeOk.setText("E");
+                    //checkBoxSensorCode.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.RSSICODE) {
-                    textViewRssiCodeOk.setText("E"); checkBoxRssiCode.setChecked(false);
+                    textViewRssiCodeOk.setText("E");
+                    // checkBoxRssiCode.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.TEMPERATURECODE) {
-                    textViewTemperatureCodeOk.setText("E"); checkBoxTemperatureCode.setChecked(false);
+                    textViewTemperatureCodeOk.setText("E");
+                    // checkBoxTemperatureCode.setChecked(false);
                 }
             } else {
                 if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.MODELCODE) {
                     textViewConfigOk.setText("O");
-                    checkBoxConfig.setChecked(false);
+                    // checkBoxConfig.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
-                    boolean valid = false;
-                    if (accessResult.length() > 7) {
-                        if (accessResult.substring(0, 7).matches("E282401")) { modelCode = 1; valid = true; }
-                        else if (accessResult.substring(0, 7).matches("E282402")) { modelCode = 2; valid = true; }
-                        else if (accessResult.substring(0, 7).matches("E282403")) { modelCode = 3; valid = true; }
-                    }
-                    if (valid) { textViewModelCode.setText(accessResult.substring(4)); checkBoxCalibration.setChecked(true); }
+                    boolean valid = setModelCode(accessResult);
+                    if (valid) textViewModelCode.setText(accessResult.substring(4));
                     else Toast.makeText(MainActivity.mContext, "This is not Micron 40X tag !!!", Toast.LENGTH_SHORT).show();
                 } else if (readWriteTypes == ReadWriteTypes.CALIBRATION) {
-                    textViewCalibrationOk.setText("O"); checkBoxCalibration.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
-                    if (accessResult.length() >= 16) {
-                        int crc = Integer.parseInt(accessResult.substring(0, 4), 16);
-                        calCode1 = Integer.parseInt(accessResult.substring(4, 7), 16);
-                        calTemp1 = Integer.parseInt(accessResult.substring(7, 10), 16); calTemp1 >>= 1;
-                        calCode2 = Integer.parseInt(accessResult.substring(9, 13), 16); calCode2 >>= 1; calCode2 &= 0xFFF;
-                        calTemp2 = Integer.parseInt(accessResult.substring(12, 16), 16); calTemp2 >>= 2; calTemp2 &= 0x7FF;
-                        calVer = Integer.parseInt(accessResult.substring(15, 16),16); calVer &= 0x3;
-                        MainActivity.mCs108Library4a.appendToLog("crc = " + crc + ", code1 = " + calCode1 + ", temp1 = " + calTemp1 + ", code2 = " + calCode2 + ", temp2 = " + calTemp2 + ", ver = " + calVer);
-                        textViewCalibrationVersion.setText(String.valueOf(calVer));
-                    }
+                    textViewCalibrationOk.setText("O");
+                    // checkBoxCalibration.setChecked(false);
+                    readWriteTypes = ReadWriteTypes.NULL;
+                    setCalibrationVersion(accessResult);
                 } else if (readWriteTypes == ReadWriteTypes.SENSORCODE) {
-                    textViewSensorCodeOk.setText("O"); checkBoxSensorCode.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
+                    textViewSensorCodeOk.setText("O");
+                    // checkBoxSensorCode.setChecked(false);
+                    readWriteTypes = ReadWriteTypes.NULL;
                     int iTemp = 0;
                     if (accessResult.length() >= 4) {
                         if (modelCode == 3) {
@@ -300,13 +352,14 @@ public class AccessMicronFragment extends CommonFragment {
                         }
                     }
                 } else if (readWriteTypes == ReadWriteTypes.RSSICODE) {
-                    textViewRssiCodeOk.setText("O"); checkBoxRssiCode.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
-                    if (accessResult.length() >= 4) {
-                        int iTemp = Integer.parseInt(accessResult.substring(2,4), 16); iTemp &= 0x1F;
-                        textViewRssiCode.setText(String.format("%02X", iTemp));
-                    }
+                    textViewRssiCodeOk.setText("O");
+                    // checkBoxRssiCode.setChecked(false);
+                    readWriteTypes = ReadWriteTypes.NULL;
+                    setRssiCode(accessResult);
                 } else if (readWriteTypes == ReadWriteTypes.TEMPERATURECODE) {
-                    textViewTemperatureCodeOk.setText("O"); checkBoxTemperatureCode.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
+                    textViewTemperatureCodeOk.setText("O");
+                    // checkBoxTemperatureCode.setChecked(false);
+                    readWriteTypes = ReadWriteTypes.NULL;
                     if (accessResult.length() >= 4) {
                         float fTemperature = Integer.parseInt(accessResult.substring(0,4), 16);
                         fTemperature = ((float)calTemp2 - (float)calTemp1) * (fTemperature - (float) calCode1);
@@ -322,35 +375,36 @@ public class AccessMicronFragment extends CommonFragment {
             return true;
         }
     }
+    int processedTick = 0;
     boolean processTickItems() {
         boolean invalidRequest1 = false;
         int accBank = 0, accSize = 0, accOffset = 0;
         String writeData = "";
 
         if (editTextRWTagID.getText().toString().length() == 0) invalidRequest1 = true;
-        else if (checkBoxConfig.isChecked() == true) {
-            accBank = 2; accOffset = 0; accSize = 2; readWriteTypes = ReadWriteTypes.MODELCODE;
+        else if (checkBoxConfig.isChecked() == true && checkProcessing < 1) {
+            accBank = 2; accOffset = 0; accSize = 2; readWriteTypes = ReadWriteTypes.MODELCODE; checkProcessing = 1;
             textViewConfigOk.setText(""); textViewModelCode.setText(""); modelCode = -1;
-        } else if (checkBoxCalibration.isChecked() == true) {
-            accBank = 3; accOffset = 8; accSize = 4; readWriteTypes = ReadWriteTypes.CALIBRATION;
+        } else if (checkBoxCalibration.isChecked() == true && checkProcessing < 2) {
+            accBank = 3; accOffset = 8; accSize = 4; readWriteTypes = ReadWriteTypes.CALIBRATION; checkProcessing = 2;
             textViewCalibrationOk.setText(""); textViewCalibrationVersion.setText(""); calVer = -1;
-        } else if (checkBoxSensorCode.isChecked() == true && modelCode != -1) {
+        } else if (checkBoxSensorCode.isChecked() == true && modelCode != -1 && checkProcessing < 3) {
             accBank = 0; if (modelCode == 1) accBank = 3;
             accOffset = 11; if (modelCode == 3) accOffset = 12;
-            accSize = 1; readWriteTypes = ReadWriteTypes.SENSORCODE;
+            accSize = 1; readWriteTypes = ReadWriteTypes.SENSORCODE; checkProcessing = 3;
             textViewSensorCodeOk.setText(""); textViewSensorCode.setText("");
-        } else if (checkBoxRssiCode.isChecked() == true && modelCode != -1) {
+        } else if (checkBoxRssiCode.isChecked() == true && modelCode != -1 && checkProcessing < 4) {
             MainActivity.mCs108Library4a.setInvSelectIndex(0);
-            MainActivity.mCs108Library4a.setSelectCriteria(true, 4, 0, 3, (modelCode == 3 ? 0xD0 : 0xA0), "1F");
+            MainActivity.mCs108Library4a.setSelectCriteria(true, 4, 0, 3, (modelCode == 3 ? 0xD0 : 0xA0), "1F"); MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 0 = TRUE");
             MainActivity.mCs108Library4a.setInvSelectIndex(1); changedSelectIndex = true;
             accBank = 0; accOffset = 13; if (modelCode == 1) { accBank = 3; accOffset = 9; }
-            accSize = 1; readWriteTypes = ReadWriteTypes.RSSICODE;
+            accSize = 1; readWriteTypes = ReadWriteTypes.RSSICODE; checkProcessing = 4;
             textViewRssiCodeOk.setText(""); textViewRssiCode.setText("");
-        } else if (checkBoxTemperatureCode.isChecked() == true && modelCode == 3 && calVer != -1) {
+        } else if (checkBoxTemperatureCode.isChecked() == true && modelCode == 3 && calVer != -1 && checkProcessing < 5) {
             MainActivity.mCs108Library4a.setInvSelectIndex(0);
-            MainActivity.mCs108Library4a.setSelectCriteria(true, 4, 0, 3, 0xE0, "");
+            MainActivity.mCs108Library4a.setSelectCriteria(true, 4, 0, 3, 0xE0, ""); MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 0 = TRUE");
             MainActivity.mCs108Library4a.setInvSelectIndex(1); changedSelectIndex = true;
-            accBank = 0; accOffset = 14; accSize = 1; readWriteTypes = ReadWriteTypes.TEMPERATURECODE;
+            accBank = 0; accOffset = 14; accSize = 1; readWriteTypes = ReadWriteTypes.TEMPERATURECODE; checkProcessing = 5;
             textViewTemperatureCodeOk.setText(""); textViewTemperatureCode.setText("");
         } else {
             invalidRequest1 = true;
