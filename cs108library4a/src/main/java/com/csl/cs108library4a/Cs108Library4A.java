@@ -10,9 +10,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
-import android.provider.ContactsContract;
 import android.support.annotation.Keep;
-import android.support.annotation.MainThread;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -28,7 +26,7 @@ import java.util.List;
 import static java.lang.Math.log10;
 
 public class Cs108Library4A extends Cs108Connector {
-    final boolean DEBUG = true;
+    final boolean DEBUG = false;
     Context context;
     private Handler mHandler = new Handler();
     BluetoothAdapter.LeScanCallback mLeScanCallback = null;
@@ -387,6 +385,7 @@ public class Cs108Library4A extends Cs108Connector {
                                 }
                                 int countryInListNew = Integer.valueOf(dataArray[1]);
                                 if (countryInList != countryInListNew) setCountryInList(countryInListNew);
+                                channelOrderType = -1;
 
                             } else if (dataArray[0].matches("antennaPower")) {
                                 setPowerLevel(Long.valueOf(dataArray[1]));
@@ -2013,6 +2012,7 @@ public class Cs108Library4A extends Cs108Connector {
     PreMatchData preMatchData;
     public boolean setSelectCriteria(boolean enable, int target, int action, int bank, int offset, String mask) {
         appendToLog("target = " + target);
+        if (mask.length() > 64) mask = mask.substring(0, 64);
         preMatchData = new PreMatchData(enable, target, action, bank, offset, mask, mRfidDevice.mRx000Device.mRx000Setting.getQuerySelect(), getAntennaCycle(), getPwrlevel(), getInvAlgo(), getQValue());
         boolean result = mRfidDevice.mRx000Device.mRx000Setting.setInvSelectIndex(mRfidDevice.mRx000Device.mRx000Setting.invSelectIndex);
         if (result) result = mRfidDevice.mRx000Device.mRx000Setting.setSelectEnable(enable ? 1 : 0, target, action);
@@ -2419,6 +2419,7 @@ public class Cs108Library4A extends Cs108Connector {
         this.countryInList = countryInList;
         regionCode = regionCodeNew;
         if (DEBUG) appendToLog("getChannel =" + getChannel() + ", FreqChnCnt = " + FreqChnCnt());
+        appendToLog("X channel = ");
         if (getChannel() >= FreqChnCnt())   setChannel(0);
         switch (getCountryCode()) {
             case 1:
@@ -2463,20 +2464,52 @@ public class Cs108Library4A extends Cs108Connector {
         if (DEBUG) appendToLog("New regionCode = " + regionCode.toString() + ", channel = " + getChannel() + ", FreqChnCnt = " + FreqChnCnt());
         return true;
     }
-    public boolean getChannelHopping() {
+    public boolean getChannelHoppingDefault() {
         int countryCode = getCountryCode();
         if (countryCode == 1 || countryCode == 8 || countryCode == 9)   return false;
         return true;
     }
+
+    int channelOrderType; // 0 for frequency hopping / agile, 1 for fixed frequencey
+    public boolean getChannelHoppingStatus() {
+        if (channelOrderType < 0) {
+            if (getChannelHoppingDefault()) channelOrderType = 0;
+            else channelOrderType = 1;
+        }
+        return (channelOrderType == 0 ? true : false);
+    }
+    public boolean setChannelHoppingStatus(boolean channelOrderHopping) {
+        if (this.channelOrderType != (channelOrderHopping ? 0 : 1)) {
+            boolean result = true;
+            if (getChannelHoppingDefault() == false) {
+                result = mRfidDevice.mRx000Device.mRx000Setting.setAntennaFreqAgile(channelOrderHopping ? 1 : 0);
+            }
+            int freqcnt = FreqChnCnt(); appendToLog("FrequencyA Count = " + freqcnt);
+            int channel = getChannel(); appendToLog(" FrequencyA Channel = " + channel);
+            for (int i = 0; i < freqcnt; i++) {
+                if (result == true) mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelSelect(i);
+                if (result == true) mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelConfig(channelOrderHopping);
+            }
+            if (result == true) mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelSelect(channel);
+            if (result == true) mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelConfig(true);
+            appendToLog(" FrequencyA: end of setting");
+
+            this.channelOrderType = (channelOrderHopping ? 0 : 1);
+        }
+        return true;
+    }
+
     public int getChannel() {
         int channel = -1;
-        int countryCode = getCountryCode();
-        if (countryCode == 1 || countryCode == 8 || countryCode == 9) {
-            if (mRfidDevice.mRx000Device.mRx000Setting.getFreqChannelConfig() != 0) {
-                channel = mRfidDevice.mRx000Device.mRx000Setting.getFreqChannelSelect();
-            }
-        } else
+        if (mRfidDevice.mRx000Device.mRx000Setting.getFreqChannelConfig() != 0) {
+            channel = mRfidDevice.mRx000Device.mRx000Setting.getFreqChannelSelect();
+            appendToLog("A channel = " + channel);
+        }
+        if (getChannelHoppingStatus()) {
             channel = 0;
+            appendToLog("B channel = " + channel);
+        }
+        appendToLog("C channel = " + channel);
         return channel;
     }
     public boolean setChannel(int channelSelect) {

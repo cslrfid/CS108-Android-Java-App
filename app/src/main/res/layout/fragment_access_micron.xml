@@ -60,6 +60,45 @@
         android:paddingLeft="@dimen/default_left_padding">
 
         <TextView
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Upper Limit of On Chip RSSI" />
+
+        <EditText
+            android:id="@+id/accessMNRssiUpperLimit"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:inputType="numberDecimal"
+            android:text="21" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Lower Limit On Chip RSSI" />
+
+        <EditText
+            android:id="@+id/accessMNRssiLowerLimit"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:inputType="numberDecimal"
+            android:text="13" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessMNModelCodeRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
             android:id="@+id/accessMNModelCodeOK"
             android:layout_width="wrap_content" />
 
@@ -67,9 +106,17 @@
             android:id="@+id/accesMNModelCodeTitle"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:enabled="false"
+            android:visibility="gone"
             style="@style/style_normal_font"
             android:text="Model code:" />
+
+        <TextView
+            android:id="@+id/accesMNModelCodeTitle1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:visibility="visible"
+            style="@style/style_normal_font"
+            android:text="Model code =" />
 
         <TextView
             android:id="@+id/accessMNModelCode"
@@ -90,9 +137,17 @@
             android:id="@+id/accesMNCalibrationTitle"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:enabled="false"
+            android:visibility="gone"
             style="@style/style_normal_font"
-            android:text="Calibration version: " />
+            android:text="Calibration version:" />
+
+        <TextView
+            android:id="@+id/accesMNCalibrationTitle1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:visibility="visible"
+            style="@style/style_normal_font"
+            android:text="Calibration data =" />
 
         <TextView
             android:id="@+id/accessMNCalibrationVersion"
@@ -135,8 +190,16 @@
             android:id="@+id/accesMNRssiCodeTitle"
             android:layout_width="0dp"
             android:layout_weight="1"
+            android:visibility="gone"
             style="@style/style_normal_font"
-            android:text="Rssi code:" />
+            android:text="On chip RSSI code:" />
+
+        <TextView
+            android:id="@+id/accesMNRssiCodeTitle1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="On chip RSSI code = " />
 
         <TextView
             android:id="@+id/accessMNRssiCode"
@@ -157,6 +220,7 @@
             android:id="@+id/accesMNTemperatureCodeTitle"
             android:layout_width="0dp"
             android:layout_weight="1"
+            android:checked="true"
             style="@style/style_normal_font"
             android:text="Temperature code:" />
 

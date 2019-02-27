@@ -10,7 +10,8 @@ import com.csl.cs108library4a.Cs108Connector;
 import java.util.ArrayList;
 
 public class AccessTask extends AsyncTask<Void, String, String> {
-    final boolean DEBUG = false;
+    final boolean DEBUG = true;
+    final boolean skipSelect = false;
     public enum TaskCancelRReason {
         NULL, INVALD_REQUEST, DESTORY, STOP, BUTTON_RELEASE, TIMEOUT
     }
@@ -37,6 +38,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     private String endingMessaage;
     int qValue;
     boolean repeat, nextNew;
+    boolean gotInventory;
     int batteryCountInventory_old;
 
     public AccessTask(Button button, TextView textViewWriteCount, boolean invalidRequest,
@@ -53,7 +55,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         this.registerYield = registerYieldView;
         this.registerTotal = registerTotalView;
 
-        this.invalidRequest = invalidRequest;
+        this.invalidRequest = invalidRequest; MainActivity.mCs108Library4a.appendToLog("invalidRequest = " + invalidRequest);
         this.selectMask = selectMask;
         this.selectBank = selectBank;
         this.selectOffset = selectOffset;
@@ -115,14 +117,17 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             int matchRep = 0;
             if (repeat == false || nextNew) matchRep = 1;
             if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
+            else if (skipSelect) { }
             else if (MainActivity.mCs108Library4a.setSelectedTag(null, selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
                 invalidRequest = true; MainActivity.mCs108Library4a.appendToLog("setSelectedTag is failed with selectMask = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", powerLevel = " + powerLevel);
             }
         }
+        gotInventory = false;
         taskCancelReason = TaskCancelRReason.NULL;
         if (invalidRequest) {
             cancel(true);
             taskCancelReason = TaskCancelRReason.INVALD_REQUEST;
+            MainActivity.mCs108Library4a.appendToLog("invalidRequest A= " + invalidRequest);
         } else {
             if (MainActivity.mCs108Library4a.checkHostProcessorVersion(MainActivity.mCs108Library4a.getMacVer(), 2, 6, 8)) {
                 MainActivity.mCs108Library4a.setInvModeCompact(false);
@@ -192,6 +197,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         if (output[0] != null) {
             if (output[0].length() == 2) {
                 if (output[0].contains("TT")) {
+                    gotInventory = true;
                   if (registerTagGot != null) registerTagGot.setText(output[1]);
                     boolean matched = false;
                     for (int i = 0; i < tagList.size(); i++) {
@@ -260,7 +266,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             strErrorMessage = "";
             switch (taskCancelReason) {
                 case NULL:
-                    if (accessResult == null || (resultError != null && resultError.length() != 0) || (endingMessaage != null && endingMessaage.length() != 0)) strErrorMessage += "Finish as COMMAND END is received";
+                    if (accessResult == null || (resultError != null && resultError.length() != 0) || (endingMessaage != null && endingMessaage.length() != 0)) strErrorMessage += ("Finish as COMMAND END is received " + (gotInventory ? "WITH" : "WITHOUT") + " tag response");
                     else Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
                     break;
                 case STOP:

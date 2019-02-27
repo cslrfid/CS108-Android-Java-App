@@ -151,7 +151,12 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         rfidListView = (ListView) getActivity().findViewById(R.id.inventoryRfidList1);
         rfidEmptyView = (TextView) getActivity().findViewById(R.id.inventoryRfidEmpty1);
         rfidListView.setEmptyView(rfidEmptyView);
-        readerListAdapter = new ReaderListAdapter(getActivity(), R.layout.readers_list_item, MainActivity.sharedObjects.tagsList, ((bMultiBank && mDid == null) ? false : true));
+        boolean bSelect4detail = false;
+        if (bMultiBank == false) bSelect4detail = true;
+        else if (mDid != null) {
+            if (mDid.matches("E282403") == false) bSelect4detail = true;
+        }
+        readerListAdapter = new ReaderListAdapter(getActivity(), R.layout.readers_list_item, MainActivity.sharedObjects.tagsList, bSelect4detail);
         rfidListView.setAdapter(readerListAdapter);
         rfidListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         rfidListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -253,6 +258,9 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             userVisibleHint = false;
             MainActivity.mCs108Library4a.appendToLog("InventoryRfidiMultiFragment is now INVISIBLE");
             MainActivity.mCs108Library4a.setNotificationListener(null);
+            if (inventoryRfidTask != null) {
+                inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.STOP;
+            }
         }
     }
 
@@ -346,11 +354,30 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 extra2Bank = 3;
                 extra2Offset = 8;
                 extra2Count = 4;
+            } else if (mDid.matches("E282403")) {
+                if (true) {
+                    extra1Bank = 0;
+                    extra1Offset = 13;
+                    extra1Count = 2;
+                    extra2Bank = 3;
+                    extra2Offset = 8;
+                    extra2Count = 4;
+                } else {
+                    extra2Bank = 0;
+                    extra2Offset = 13;
+                    extra2Count = 2;
+                }
             } else {
                 extra1Count = (mDid.length() * 4) / 16;
                 if (extra1Count * 16 != mDid.length() * 4) extra1Count++;
             }
             MainActivity.mCs108Library4a.setSelectedTagByTID(mDid, 300);
+            if (mDid.matches("E282403")) {
+                MainActivity.mCs108Library4a.setInvSelectIndex(1);
+                MainActivity.mCs108Library4a.setSelectCriteria(true, 4, 2, 3, 0xD0, "20");
+                MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 1 = TRUE");
+                MainActivity.mCs108Library4a.setInvSelectIndex(0);
+            }
 //        extra2Offset = 0x10d; extra2Count = 1; //0 - 0x60: Ok, 70-B0, EC-F0: long, , C0-D0 no response for 30 seconds
         } else if (bMultiBank) {
             CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessInventoryBankTitle1);

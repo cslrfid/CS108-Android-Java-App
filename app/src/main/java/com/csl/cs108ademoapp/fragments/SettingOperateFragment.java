@@ -27,7 +27,7 @@ public class SettingOperateFragment extends CommonFragment {
 
     boolean overriding = false;
     int countrySelect = -1;
-    int channelSelect = -1;
+    int channelOrder = -1; int channelSelect = -1;
     long powerLevel = -1; final long powerLevelMin = 0; final long powerLevelMax = 300;
     int iPopulation = -1; int iPopulationMin = 1; int iPopulationMax = 9999;
     byte byteFixedQValue = -1; byte byteFixedQValueMin = 0; byte byteFixedQValueMax = 15;
@@ -49,11 +49,7 @@ public class SettingOperateFragment extends CommonFragment {
         super.onActivityCreated(savedInstanceState);
 
         spinnerRegulatoryRegion = (Spinner) getActivity().findViewById(R.id.settingOperateRegulatoryRegion);
-        spinnerFrequencyOrder = (Spinner) getActivity().findViewById(R.id.settingOperateFrequencyOrder);
-        ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.frequencyOrder_options, R.layout.custom_spinner_layout);
-        targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerFrequencyOrder.setAdapter(targetAdapter);
-
+        spinnerFrequencyOrder = (Spinner) getActivity().findViewById(R.id.settingOperateFrequencyOrder); spinnerFrequencyOrder.setEnabled(false);
         editTextChannel = (EditText) getActivity().findViewById(R.id.settingOperateChannel);
 
         TextView textViewOperatePowerLabel = (TextView) getActivity().findViewById(R.id.settingOperatePowerLabel);
@@ -71,7 +67,7 @@ public class SettingOperateFragment extends CommonFragment {
         editTextStartQValue = (EditText) getActivity().findViewById(R.id.settingOperateQValue);
 
         spinnerQueryTarget = (Spinner) getActivity().findViewById(R.id.settingOperateTarget);
-        targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.query_target_options, R.layout.custom_spinner_layout);
+        ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.query_target_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerQueryTarget.setAdapter(targetAdapter);
 
@@ -135,6 +131,7 @@ public class SettingOperateFragment extends CommonFragment {
                 } else {
                     try {
                         countrySelect = spinnerRegulatoryRegion.getSelectedItemPosition();
+                        channelOrder = spinnerFrequencyOrder.getSelectedItemPosition();
                         channelSelect = Integer.parseInt(editTextChannel.getText().toString());
                         powerLevel = Long.parseLong(editTextOperatePower.getText().toString());
                         iPopulation = Integer.parseInt(editTextPopulation.getText().toString());
@@ -193,9 +190,10 @@ public class SettingOperateFragment extends CommonFragment {
                     }
                 }
                 if (updating == false) {
+                    MainActivity.mCs108Library4a.appendToLog("2A channel = ");
                     int channel = MainActivity.mCs108Library4a.getChannel();
                     if (channel < 0) updating = true;
-                    else editTextChannel.setText(String.valueOf(channel));
+                    else { editTextChannel.setText(String.valueOf(channel)); MainActivity.mCs108Library4a.appendToLog("2 channel = "); }
                 }
                 if (updating == false) {
                     lValue = MainActivity.mCs108Library4a.getPwrlevel();
@@ -231,14 +229,16 @@ public class SettingOperateFragment extends CommonFragment {
                         else spinnerRegulatoryRegion.setSelection(countryNumber);
                         if (strCountryList.length == 1) spinnerRegulatoryRegion.setEnabled(false);
                         else spinnerRegulatoryRegion.setEnabled(true);
-                        spinnerFrequencyOrder.setEnabled(false);
-                        if (MainActivity.mCs108Library4a.getChannelHopping()) {
-                            spinnerFrequencyOrder.setSelection(0);
-                            editTextChannel.setEnabled(false);
-                        } else {
-                            spinnerFrequencyOrder.setSelection(1);
-                            editTextChannel.setEnabled(true);
-                        }
+
+                        ArrayAdapter<CharSequence> targetAdapter;
+                        if (MainActivity.mCs108Library4a.getChannelHoppingDefault())
+                            targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.frequencyOrder_options, R.layout.custom_spinner_layout);
+                        else targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.frequencyAgile_options, R.layout.custom_spinner_layout);
+                        targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinnerFrequencyOrder.setAdapter(targetAdapter);
+                        spinnerFrequencyOrder.setSelection(MainActivity.mCs108Library4a.getChannelHoppingStatus() ? 0 : 1);
+                        if (MainActivity.mCs108Library4a.getChannelHoppingStatus()) editTextChannel.setEnabled(false);
+                        else editTextChannel.setEnabled(true);
                     }
                 }
             }
@@ -263,6 +263,13 @@ public class SettingOperateFragment extends CommonFragment {
         if (invalidRequest == false && (MainActivity.mCs108Library4a.getCountryNumberInList() != countrySelect || sameCheck == false)) {
             sameSetting = false;
             if (MainActivity.mCs108Library4a.setCountryInList(countrySelect) == false)    invalidRequest = true;
+        }
+        if (invalidRequest == false && (MainActivity.mCs108Library4a.getChannelHoppingStatus() != (channelOrder == 0 ? true : false) || sameCheck == false)) {
+            sameSetting = false;
+            if (MainActivity.mCs108Library4a.setChannelHoppingStatus(channelOrder == 0 ? true : false) == false)    invalidRequest = true;
+            else if (channelOrder > 0) editTextChannel.setEnabled(true);
+            else editTextChannel.setEnabled(false);
+            editTextChannel.setText(String.valueOf(MainActivity.mCs108Library4a.getChannel())); MainActivity.mCs108Library4a.appendToLog("1 channel = ");
         }
         if (invalidRequest == false && (MainActivity.mCs108Library4a.getChannel() != channelSelect || sameCheck == false)) {
             sameSetting = false;

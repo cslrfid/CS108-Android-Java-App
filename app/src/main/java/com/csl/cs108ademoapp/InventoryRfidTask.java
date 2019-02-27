@@ -257,6 +257,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     String strEpc = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedEpc);
                     String strExtra2 = null; if (rx000pkgData.decodedData2 != null) strExtra2 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedData2);
                     String strExtra1 = null; if (rx000pkgData.decodedData1 != null) strExtra1 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedData1);
+                    String strAddresss = strEpc; // strEpc, strEpc + strExtra1 + strExtra2
                     String strCrc16 = null; if (rx000pkgData.decodedCrc != null) strCrc16 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedCrc);
                     if (strExtra1 != null && strExtra1Filter != null) {
                         MainActivity.mCs108Library4a.appendToLog("strEpc = " + strEpc + ", strExtra1 = " + strExtra1 + ", strExtra1Filter = " + strExtra1Filter + ", strExtra2 = " + strExtra2 );
@@ -300,7 +301,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
 //                        MainActivity.mCs108Library4a.appendToLog("Matching Epc = " + strEpc);
                         iMatchItem = -1;
                         if (true) {
-                            int index = Collections.binarySearch(MainActivity.sharedObjects.tagsIndexList, new SharedObjects.TagsIndex(strEpc+strExtra1+strExtra2, 0));
+                            int index = Collections.binarySearch(MainActivity.sharedObjects.tagsIndexList, new SharedObjects.TagsIndex(strAddresss, 0));
                             if (index >= 0) {
                                 iMatchItem = MainActivity.sharedObjects.tagsIndexList.size() - 1 - MainActivity.sharedObjects.tagsIndexList.get(index).getPosition();
 //                                MainActivity.mCs108Library4a.appendToLog("Binary matched index = " + index + ", iMatchItem = " + iMatchItem + ", Epc = " + tagsList.get(iMatchItem).getAddress());
@@ -322,6 +323,8 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             readerDevice.setRssi(rssi);
                             readerDevice.setPhase(phase);
                             readerDevice.setChannel(chidx);
+                            readerDevice.setExtra1(strExtra1, extra1Bank, data1_offset);
+                            MainActivity.mCs108Library4a.appendToLog("setExtra1 with strExtra1 = " + strExtra1);
                             tagsList.set(iMatchItem, readerDevice);
                             match = true;
                             updated = true;
@@ -342,7 +345,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                                     1, rssi, phase, chidx);
                             if (bAdd2End) tagsList.add(readerDevice);
                             else tagsList.add(0, readerDevice);
-                            SharedObjects.TagsIndex tagsIndex = new SharedObjects.TagsIndex(strEpc+strExtra1+strExtra2, tagsList.size()-1); MainActivity.sharedObjects.tagsIndexList.add(tagsIndex); Collections.sort(MainActivity.sharedObjects.tagsIndexList);
+                            SharedObjects.TagsIndex tagsIndex = new SharedObjects.TagsIndex(strAddresss, tagsList.size()-1); MainActivity.sharedObjects.tagsIndexList.add(tagsIndex); Collections.sort(MainActivity.sharedObjects.tagsIndexList);
                             if (serverConnectValid && ALLOW_RTSAVE && true) {
                                 try {
 //                                    saveExternalTask = new SaveList2ExternalTask();
