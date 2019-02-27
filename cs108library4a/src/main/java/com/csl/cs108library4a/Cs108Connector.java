@@ -4339,7 +4339,7 @@ public class Cs108Connector extends BleConnector {
                     while (mRfidToReadingOffset > startIndex) {
                         int packageLengthRead = 0;
                         if (mRfidToReadingOffset - startIndex >= 8) {
-                            packageLengthRead = mRfidToReading[startIndex + 5] * 256 + mRfidToReading[startIndex + 4];
+                            packageLengthRead = (mRfidToReading[startIndex + 5] & 0xFF) * 256 + (mRfidToReading[startIndex + 4] & 0xFF);
                         }
                         int expectedLength = 8 + packageLengthRead * 4;
                         if (mRfidToReading[startIndex + 0] == 0x04) expectedLength = 8 + packageLengthRead;
