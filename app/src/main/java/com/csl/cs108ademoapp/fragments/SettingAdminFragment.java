@@ -131,7 +131,8 @@ public class SettingAdminFragment extends CommonFragment {
         buttonCSLServer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String serverLocation = "https://" + "www.convergence.com.hk:" + "29090/WebServiceRESTs/1.0/req/" + "create-update-delete/update-entity/" + "tagdata";
+                String serverLocation = "https://" + "democloud.convergence.com.hk:" + "29090/WebServiceRESTs/1.0/req/" + "create-update-delete/update-entity/" + "tagdata";
+                //String serverLocation = "https://" + "www.convergence.com.hk:" + "29090/WebServiceRESTs/1.0/req/" + "create-update-delete/update-entity/" + "tagdata";
                 //String serverLocation = "http://ptsv2.com/t/10i1t-1519143332/post";
                 editTextServer.setText(serverLocation);
             }
