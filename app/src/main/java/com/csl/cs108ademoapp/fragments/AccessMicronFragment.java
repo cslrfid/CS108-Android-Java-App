@@ -301,6 +301,8 @@ public class AccessMicronFragment extends CommonFragment {
         if (accessTask == null) return false;
         else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
         else {
+            MainActivity.mCs108Library4a.setInvSelectIndex(2);
+            MainActivity.mCs108Library4a.setSelectCriteria(false, 0, 0, 0, 0, ""); MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 2 = FALSE");
             MainActivity.mCs108Library4a.setInvSelectIndex(1);
             MainActivity.mCs108Library4a.setSelectCriteria(false, 0, 0, 0, 0, ""); MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 1 = FALSE");
             MainActivity.mCs108Library4a.setInvSelectIndex(0);

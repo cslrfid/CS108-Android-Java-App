@@ -225,6 +225,7 @@ public class ConnectionFragment extends CommonFragment {
             while (mScanResultList.size() != 0) {
                 Cs108Connector.Cs108ScanData scanResultA = mScanResultList.get(0);
                 mScanResultList.remove(0);
+                if (false) mCs108Library4a.appendToLog("scanResultA.device.getType() = " + scanResultA.device.getType() + ". scanResultA.rssi = " + scanResultA.rssi);
                 if (scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE && scanResultA.rssi < 0) {
                     boolean match = false;
                     for (int i = 0; i < readersList.size(); i++) {
@@ -280,6 +281,7 @@ public class ConnectionFragment extends CommonFragment {
             }
             if (listUpdated) readerListAdapter.notifyDataSetChanged();
             wait4process = false;
+            if (false) mCs108Library4a.appendToLog("Exit....");
         }
 
         @Override

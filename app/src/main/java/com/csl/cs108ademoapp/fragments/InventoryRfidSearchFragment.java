@@ -256,7 +256,7 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             MainActivity.mCs108Library4a.startOperation(Cs108Library4A.OperationTypes.TAG_SEARCHING);
         }
         geigerSearchTask = new InventoryRfidTask(getContext(), -1,-1, 0, 0, 0, 0, invalidRequest, true,
-                null, null, geigerTagRssiView, null,
+                null, null, geigerTagRssiView, null, null,
                 geigerRunTime, geigerTagGotView, geigerVoltageLevelView, null, button, rfidRateView);
         geigerSearchTask.execute();
     }
