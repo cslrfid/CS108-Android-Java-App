@@ -150,6 +150,7 @@ class BleConnector extends BluetoothGattCallback {
                     if (disconnectRunning) break;
                     mStreamWriteCount = mStreamWriteCountOld = 0;
                     _readCharacteristic_in_progress = _writeCharacteristic_in_progress = false;
+                    appendToLog("Start discoverServices");
                     if (mBluetoothGatt.discoverServices()) {
                         if (DEBUG) appendToLog("state=Connected. discoverServices starts");
                     } else {
@@ -173,9 +174,13 @@ class BleConnector extends BluetoothGattCallback {
             if (DEBUG) appendToLog("INVALID mBluetoothGatt");
         } else if (status != BluetoothGatt.GATT_SUCCESS) {
             if (DEBUG) appendToLog("status=" + status);
+            appendToLog("restart discoverServices"); mBluetoothGatt.discoverServices();
         } else {
             mReaderStreamOutCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_OUT_CHARACTERISTIC);
             mReaderStreamInCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_IN_CHARACTERISTIC);
+            if (mReaderStreamInCharacteristic == null || mReaderStreamOutCharacteristic == null) {
+                appendToLog("restart discoverServices");mBluetoothGatt.discoverServices(); return;
+            }
             BluetoothGattDescriptor mReaderStreamInDescriptor = mReaderStreamInCharacteristic.getDescriptor(UUID_GATT_DESCRIPTOR_CLIENT_CHARACTERISTIC_CONFIG); //MUST BE AFTER getCharacteristic()
 
             if (!mBluetoothGatt.setCharacteristicNotification(mReaderStreamInCharacteristic, true)) {

@@ -115,7 +115,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             bMultiBank = getArguments().getBoolean("bMultiBank");
             mDid = getArguments().getString("mDid");
             bExtraFilter = getArguments().getBoolean("bExtraFilter");
-            MainActivity.mCs108Library4a.appendToLog("mDid = " + mDid);
+            MainActivity.mCs108Library4a.appendToLog("bExtraFilter" + bExtraFilter + ", mDid = " + mDid);
         }
     }
 
@@ -374,6 +374,8 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             MainActivity.mCs108Library4a.setSelectedTagByTID(mDid, 300);
             if (mDid.matches("E282403")) {
                 MainActivity.mCs108Library4a.setInvSelectIndex(1);
+                MainActivity.mCs108Library4a.setSelectCriteria(true, 4, 2, 3, 0xe0, "");
+                MainActivity.mCs108Library4a.setInvSelectIndex(2);
                 MainActivity.mCs108Library4a.setSelectCriteria(true, 4, 2, 3, 0xD0, "20");
                 MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 1 = TRUE");
                 MainActivity.mCs108Library4a.setInvSelectIndex(0);
@@ -403,7 +405,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             MainActivity.mCs108Library4a.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY_COMPACT);
             inventoryRfidTask = new InventoryRfidTask(getContext(), -1, -1, 0, 0, 0, 0,
                     false, MainActivity.mCs108Library4a.getInventoryBeep(),
-                    MainActivity.sharedObjects.tagsList, readerListAdapter, null, null,
+                    MainActivity.sharedObjects.tagsList, readerListAdapter, null, null, null,
                     rfidRunTime, null, rfidVoltageLevel, rfidYieldView, button, rfidRateView);
         } else {
             if ((extra1Bank != -1 && extra1Count != 0) || (extra2Bank != -1 && extra2Count != 0)) {
@@ -426,7 +428,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             MainActivity.mCs108Library4a.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY);
             inventoryRfidTask = new InventoryRfidTask(getContext(), extra1Bank, extra2Bank, extra1Count, extra2Count, extra1Offset, extra2Offset,
                     false, MainActivity.mCs108Library4a.getInventoryBeep(),
-                    MainActivity.sharedObjects.tagsList, readerListAdapter, null, (bExtraFilter ? mDid: null),
+                    MainActivity.sharedObjects.tagsList, readerListAdapter, null, (bExtraFilter ? mDid: null), mDid,
                     rfidRunTime, null, rfidVoltageLevel, rfidYieldView, button, rfidRateView);
         }
         inventoryRfidTask.execute();
