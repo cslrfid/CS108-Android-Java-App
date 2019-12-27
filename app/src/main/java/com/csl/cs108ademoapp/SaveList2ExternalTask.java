@@ -155,6 +155,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
 
                     String accessPassword = null, killPassword = null, pcData = null, epcData = null, resBankData = null, epcBankData = null, tidBankData = null, userBankData = null;
                     String timeOfRead = null, timeZone = null, location = null, compass = null;
+                    int phase = -1, channel = -1;
                     if (tagDevice != null) {
                         pcData = tagDevice.getPc();
                         epcData = tagDevice.getAddress();
@@ -166,6 +167,8 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
                         timeZone = tagDevice.getTimeZone();
                         location = tagDevice.getLocation();
                         compass = tagDevice.getCompass();
+                        phase = tagDevice.getPhase();
+                        channel = tagDevice.getChannel();
                     }
 
                     JSONObject objectTag = new JSONObject();
@@ -180,6 +183,8 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
                     objectTag.put("epcBank", epcBankData);
                     objectTag.put("tidBank", tidBankData);
                     objectTag.put("userBank", userBankData);
+                    if (phase != -1) objectTag.put("phase", phase);
+                    if (channel != -1) objectTag.put("channel", channel);
 
                     objectTag.put("timeOfRead", timeOfRead);
                     objectTag.put("timeZone", timeZone);

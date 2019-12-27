@@ -15,22 +15,39 @@ import com.csl.cs108library4a.ReaderDevice;
 import java.util.ArrayList;
 
 public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
+    final boolean DEBUG = false;
     private final Context context;
     private final int resourceId;
     private final ArrayList<ReaderDevice> readersList;
-    private final boolean select4detail;
+    private boolean select4detail, select4Rssi, selectDupElim, select4Extra1, select4Extra2;
 
-    public ReaderListAdapter(Context context, int resourceId, ArrayList<ReaderDevice> readersList, boolean select4detail) {
+    public ReaderListAdapter(Context context, int resourceId, ArrayList<ReaderDevice> readersList, boolean select4detail, boolean select4Rssi) {
         super(context, resourceId, readersList);
         this.context = context;
         this.resourceId = resourceId;
         this.readersList = readersList;
         this.select4detail = select4detail;
+        this.select4Rssi = select4Rssi;
+        select4Extra1 = false;
+        select4Extra2 = false;
+    }
+
+    public ReaderListAdapter(Context context, int resourceId, ArrayList<ReaderDevice> readersList, boolean select4detail, boolean select4Rssi, boolean selectDupElim, boolean select4Extra1, boolean select4Extra2) {
+        super(context, resourceId, readersList);
+        this.context = context;
+        this.resourceId = resourceId;
+        this.readersList = readersList;
+        this.select4detail = select4detail;
+        this.select4Rssi = select4Rssi;
+        this.selectDupElim = selectDupElim;
+        this.select4Extra1 = select4Extra1;
+        this.select4Extra2 = select4Extra2;
+        MainActivity.mCs108Library4a.appendToLog("select4Extra1 = " + select4Extra1 + ", select4Extra2 = " + select4Extra2);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (false) MainActivity.mCs108Library4a.appendToLog("position = " + position);
+        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("position = " + position);
         ReaderDevice reader = readersList.get(position);
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -63,26 +80,69 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
             countTextView.setVisibility(View.GONE);
         }
 
-        double rssiValue = reader.getRssi();
-        TextView rssiTextView = (TextView) convertView.findViewById(R.id.reader_rssi);
-        rssiTextView.setVisibility(View.VISIBLE);
-        if (MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0 && rssiValue > 0) rssiValue -= 106.98;
-        rssiTextView.setText(String.format("%.1f", rssiValue));
+        if (select4Rssi) {
+            TextView rssiTextView = (TextView) convertView.findViewById(R.id.reader_rssi);
+            rssiTextView.setVisibility(View.VISIBLE);
+            double rssiValue = reader.getRssi();
+            if (MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0 && rssiValue > 0)
+                rssiValue -= 106.98;
+            rssiTextView.setText(String.format("%.1f", rssiValue));
+        }
+
+        if (select4Extra1) {
+            TextView portTextView = (TextView) convertView.findViewById(R.id.reader_extra1);
+            portTextView.setVisibility(View.VISIBLE);
+            int portValue = reader.getPort() + 1;
+            portTextView.setText(String.valueOf(portValue));
+        }
+
+        if (select4Extra2) {
+            TextView portTextView = (TextView) convertView.findViewById(R.id.reader_extra2);
+            portTextView.setVisibility(View.VISIBLE);
+            int codeStatus = reader.getStatus();
+            int codeSensor = reader.getCodeSensor(); int codeRssi = reader.getCodeRssi(); float codeTempC = reader.getCodeTempC();
+            if (codeStatus > reader.INVALID_STATUS) {
+                String strExtra = "";
+                int portstatus = reader.getStatus(); if (portstatus > reader.INVALID_STATUS) {
+                    if ((portstatus & 2) == 0) strExtra += "Bat OK";
+                    else strExtra += "Bat NG";
+                    if ((portstatus & 4) != 0) strExtra += "\nTemper NG";
+                    portTextView.setText(strExtra);
+                }
+            } else if (codeSensor > reader.INVALID_CODESENSOR && codeRssi > reader.INVALID_CODERSSI) {
+                String strExtra = "";
+                int backport = reader.getBackport1(); if (backport > reader.INVALID_BACKPORT) strExtra += String.format("BP1=%d", backport);
+                backport = reader.getBackport2(); if (backport > reader.INVALID_BACKPORT) { if (strExtra.length() != 0) strExtra += "\n"; strExtra += String.format("BP2=%d", backport); }
+                if (strExtra.length() != 0) strExtra += "\n"; strExtra += "SC=" + String.format("%d", codeSensor);
+                strExtra += ("\nOCRSSI=" + String.format("%d", codeRssi));
+                if (codeTempC > reader.INVALID_CODETEMPC) strExtra += ("\nT=" + String.format("%.1f", codeTempC) + (char) 0x00B0 + "C");
+                portTextView.setText(strExtra);
+            }
+        }
 
         TextView readerDetailA = (TextView) convertView.findViewById(R.id.reader_detailA);
         TextView readerDetailB = (TextView) convertView.findViewById(R.id.reader_detailB);
-        if (checkedTextView.isChecked() || select4detail == false) {
-            readerDetailA.setVisibility(View.VISIBLE);
-            readerDetailB.setVisibility(View.VISIBLE);
+        if (reader.isConnected() || checkedTextView.isChecked() || select4detail == false) {
             if (reader.getDetails().length() != 0) {
                 readerDetailA.setText(reader.getDetails());
             }
             readerDetailB.setText("");
             if (reader.isConnected()) {
                 readerDetailB.setText("Connected");
-            } else if (select4detail == false) {
-                double dChannel = MainActivity.mCs108Library4a.getLogicalChannel2PhysicalFreq(reader.getChannel());
-                readerDetailB.setText("Phase=" + reader.getPhase() + "\n" + dChannel + "MHz");  //"\nChannel=" + reader.getChannel());
+            } else {
+                int channel = reader.getChannel();
+                int phase = reader.getPhase();
+                if (channel != 0 || phase != 0) {
+                    double dChannel = MainActivity.mCs108Library4a.getLogicalChannel2PhysicalFreq(reader.getChannel());
+                    readerDetailB.setText("Phase=" + reader.getPhase() + "\n" + dChannel + "MHz");
+                }
+            }
+            if (readerDetailA.getText().toString().length() != 0 || readerDetailB.getText().toString().length() != 0) {
+                readerDetailA.setVisibility(View.VISIBLE);
+                readerDetailB.setVisibility(View.VISIBLE);
+            } else {
+                readerDetailA.setVisibility(View.GONE);
+                readerDetailB.setVisibility(View.GONE);
             }
         } else {
             readerDetailA.setVisibility(View.GONE);
@@ -90,4 +150,7 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
         }
         return convertView;
     }
+
+    public boolean getSelectDupElim() { return selectDupElim; }
+    public void setSelectDupElim(boolean selectDupElim) { this.selectDupElim = selectDupElim; }
 }

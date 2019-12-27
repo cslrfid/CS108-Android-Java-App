@@ -83,8 +83,6 @@ public class AccessSecurityKillFragment extends CommonFragment {
     public void onDestroy() {
         MainActivity.mCs108Library4a.setNotificationListener(null);
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }
 

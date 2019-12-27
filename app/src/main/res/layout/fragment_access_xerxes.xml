@@ -1,0 +1,234 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <include
+            android:id="@+id/accessXXTagID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="@string/password_title" />
+
+        <include
+            android:id="@+id/accessXXAccPasswordValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext_password" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="@string/settingAntennaPower_title" />
+
+        <EditText
+            android:id="@+id/accessXXAntennaPower"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:inputType="numberDecimal" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessXXXerxes1Row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessXXXerxes1OK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accessXXXerxees1Title"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            style="@style/style_normal_font" />
+
+        <EditText
+            android:id="@+id/accessXXXerxes1Code"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessXXXerxes2Row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessXXXerxes2OK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accessXXXerxees2Title"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            style="@style/style_normal_font" />
+
+        <EditText
+            android:id="@+id/accessXXXerxes2Code"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+
+        <Spinner
+            android:id="@+id/accessXXXerxes2Unit"
+            android:layout_width="wrap_content"
+            android:background="@drawable/my_edittext_background"
+            android:gravity="center"
+            style="@style/style_default_spinner" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessXXXerxes3Row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessXXXerxes3OK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accessXXXerxees3Title"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            style="@style/style_normal_font" />
+
+        <EditText
+            android:id="@+id/accessXXXerxes3Code"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+
+        <Spinner
+            android:id="@+id/accessXXXerxes3Unit"
+            android:layout_width="wrap_content"
+            android:background="@drawable/my_edittext_background"
+            android:gravity="center"
+            style="@style/style_default_spinner" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessXXXerxes4Row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessXXXerxes4OK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accessXXXerxees4Title"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            style="@style/style_normal_font" />
+
+        <EditText
+            android:id="@+id/accessXXXerxes4Code"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessXXXerxes5Row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:id="@+id/accessXXXerxes5OK"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/accessXXXerxees5Title"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            style="@style/style_normal_font" />
+
+        <EditText
+            android:id="@+id/accessXXXerxes5Code"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/accessXXReadButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="@string/read_title" />
+
+            <Button
+                android:id="@+id/accessXXWriteButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="@string/write_title" />
+        </TableRow>
+    </LinearLayout>
+</LinearLayout>

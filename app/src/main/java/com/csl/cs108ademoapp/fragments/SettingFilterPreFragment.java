@@ -2,9 +2,15 @@ package com.csl.cs108ademoapp.fragments;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.Spanned;
+import android.text.method.DigitsKeyListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -23,6 +29,7 @@ public class SettingFilterPreFragment extends CommonFragment {
     private Spinner targetSpinner;
     private Spinner actionSpinner;
     private Spinner memoryBankSpinner;
+    private Spinner spinnerMaskDataType;
     private EditText preFilterOffset;
     private EditText filterPreMaskData;
     private Button button;
@@ -57,7 +64,7 @@ public class SettingFilterPreFragment extends CommonFragment {
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.filterPre_target_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         targetSpinner.setAdapter(targetAdapter);
-        targetSpinner.setEnabled(false);
+        if (false) targetSpinner.setEnabled(false);
 
         actionSpinner = (Spinner) getActivity().findViewById(R.id.preFilterAction);
         ArrayAdapter<CharSequence> actionAdapter;
@@ -68,22 +75,66 @@ public class SettingFilterPreFragment extends CommonFragment {
         }
         actionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         actionSpinner.setAdapter(actionAdapter);
-        actionSpinner.setEnabled(false);
+        if (false) actionSpinner.setEnabled(false);
 
         memoryBankSpinner = (Spinner) getActivity().findViewById(R.id.preFilterMemoryBank);
         ArrayAdapter<CharSequence> memoryBankAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
         memoryBankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         memoryBankSpinner.setAdapter(memoryBankAdapter);
-        memoryBankSpinner.setEnabled(false);
+        memoryBankSpinner.setEnabled(true);
+
+        spinnerMaskDataType = (Spinner) getActivity().findViewById(R.id.filterPreMaskDataType);
+        ArrayAdapter<CharSequence> maskDataTypeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.dataType_options, R.layout.custom_spinner_layout);
+        maskDataTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMaskDataType.setAdapter(maskDataTypeAdapter);
+        spinnerMaskDataType.setEnabled(true);
+        spinnerMaskDataType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (spinnerMaskDataType.getSelectedItemPosition() == 0) {
+                    filterPreMaskData.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                   // filterPreMaskData.setKeyListener(DigitsKeyListener.getInstance("ABCDEFabcdef"));
+                    Log.i("Hello8", "filterPreMaskData Type is TEXT");
+                } else {
+                    filterPreMaskData.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    filterPreMaskData.setKeyListener(DigitsKeyListener.getInstance("01"));
+                    Log.i("Hello8", "filterPreMaskData Type is NUMBER");
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
 
         preFilterOffset = (EditText) getActivity().findViewById(R.id.filterPreOffset);
         filterPreMaskData = (EditText) getActivity().findViewById(R.id.filterPreMaskData);
         ReaderDevice tagSelected = MainActivity.tagSelected;
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
+                spinnerMaskDataType.setSelection(0);
                 filterPreMaskData.setText(tagSelected.getAddress());
             }
         }
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                String strData = source.toString();
+                Log.i("Hello", "filterPreMaskData source String is " + strData + ", start = " + start + ", end = " + end);
+                if (source.length()>44) return "";// max 44chars// Here you can add more controls, e.g. allow only hex chars etc
+                for (int i = start; i < end; i++) {
+                    if ((source.charAt(i) >= '0' && source.charAt(i) <= '9')
+                            || (source.charAt(i) >= 'A' && source.charAt(i) <= 'F')
+                            || (source.charAt(i) >= 'a' && source.charAt(i) <= 'f')
+                    ) {
+                        Log.i("Hello", "filterPreMaskData return NULL ");
+                        return null;
+                    }
+                }
+                Log.i("Hello", "filterPreMaskData return EMPYT ");
+                return "";
+            }
+        };
+        filterPreMaskData.setFilters(new InputFilter[] { filter });
 
         button = (Button) getActivity().findViewById(R.id.filterPreSaveButton);
         button.setOnClickListener(new View.OnClickListener() {
@@ -191,7 +242,10 @@ public class SettingFilterPreFragment extends CommonFragment {
                     String strValue = MainActivity.mCs108Library4a.getSelectMaskData();
                     if (strValue == null) {
                         updating = true;
-                    } else filterPreMaskData.setText(strValue);
+                    } else {
+                        spinnerMaskDataType.setSelection(0);
+                        filterPreMaskData.setText(strValue);
+                    }
                 }
             }
             if (updating) {
@@ -217,6 +271,7 @@ public class SettingFilterPreFragment extends CommonFragment {
             {
                 boolean dataMatched = false;
                 invSelectMaskData = filterPreMaskData.getText().toString();
+                boolean maskbit = (spinnerMaskDataType.getSelectedItemPosition() == 0 ? false : true);
                 String strValue = MainActivity.mCs108Library4a.getSelectMaskData();
                 if (invSelectMaskData.length() != strValue.length()) { dataMatched = false; }
                 else if (invSelectMaskData.length() == 0 && strValue.length() == 0) { dataMatched = true; }
@@ -228,7 +283,7 @@ public class SettingFilterPreFragment extends CommonFragment {
                         || MainActivity.mCs108Library4a.getSelectMaskOffset() != invSelectMaskOffset
                         || dataMatched == false  || sameCheck == false) {
                     sameSetting = false;
-                    if (MainActivity.mCs108Library4a.setSelectCriteria(invSelectEnable, invSelectTarget, invSelectAction, invSelectMaskBank, invSelectMaskOffset, invSelectMaskData) == false)
+                    if (MainActivity.mCs108Library4a.setSelectCriteria(invSelectEnable, invSelectTarget, invSelectAction, invSelectMaskBank, invSelectMaskOffset, invSelectMaskData, maskbit) == false)
                         invalidRequest = true;
                 }
             }

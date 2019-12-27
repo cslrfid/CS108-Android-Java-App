@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,16 +21,23 @@ import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108library4a.ReaderDevice;
 
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 public class AccessUcodeFragment extends CommonFragment {
-    final boolean DEBUG = true;
+    final boolean DEBUG = true; int iTagType = -1;
 	EditText editTextRWTagID, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
     TextView textViewAesKey0ActivateOk, textViewAesKey1ActivateOk, textViewAesKey0Ok, textViewAesKey1Ok;
     Spinner spinnerHideTid;
+    CheckBox checkBoxAuthEncryptMode, checkBoxAuthValidMode;
     CheckBox checkBoxHideEpc, checkBoxHideTid, checkBoxHideUser, checkBoxHideRange;
     CheckBox checkBoxAesKey0Activate, checkBoxAesKey1Activate, checkBoxAesKey0, checkBoxAesKey1;
 
-    EditText editTextAuthMsg, editTextAuthResponse, editTextEpcSize, editTextAesKey0, editTextAesKey1;
-	private Button buttonRead, buttonWrite;
+    EditText editTextAuthKeyId, editTextAuthMsg, editTextAuthProfile, editTextAuthOffset, editTextAuthBlockId, editTextAuthProtMode, editTextEpcSize, editTextAesKey0, editTextAesKey1;
+    TextView editTextAuthResponse, textViewAuthResponseDecoded, textViewAuthResponseDecodedCustom, editTextAuthResponseEncodedMac;
+    private Button buttonRead, buttonWrite;
     private Button buttonReadBuffer, buttonTam1, buttonTam2, buttonUntrace, buttonShowEpc; String strShowEpcButtonBackup;
 
     enum ReadWriteTypes {
@@ -37,7 +45,7 @@ public class AccessUcodeFragment extends CommonFragment {
     }
     boolean operationRead = false;
     boolean readBufferChecked = false;
-    boolean authenChecked = false; boolean authenTam1;
+    boolean authenChecked = false; boolean authenTam1; int keyId, profile, offset, blockId, protMode; String strChallenge;
     boolean untraceChecked = false;
     boolean showEpcChecked = false;
     ReadWriteTypes readWriteTypes;
@@ -53,6 +61,7 @@ public class AccessUcodeFragment extends CommonFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        if (MainActivity.mDid != null) if (MainActivity.mDid.contains("E28240")) iTagType = 5;
 
         editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessUCTagID);
         editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessUCAccPasswordValue);
@@ -73,14 +82,41 @@ public class AccessUcodeFragment extends CommonFragment {
         checkBoxAesKey0Activate = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey0Activate);
         checkBoxAesKey1Activate = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey1Activate);
 
+        TableRow tableRow = (TableRow) getActivity().findViewById(R.id.accessUCAesKeysRow);
+        if (iTagType == 5) tableRow.setVisibility(View.GONE);
         textViewAesKey0Ok = (TextView) getActivity().findViewById(R.id.accessUCAesKey0OK);
         textViewAesKey1Ok = (TextView) getActivity().findViewById(R.id.accessUCAesKey1OK);
         checkBoxAesKey0 = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey0Title);
         checkBoxAesKey1 = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey1Title);
 
+        editTextAuthKeyId = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId);
+        editTextAuthKeyId.setText(String.valueOf(0));
         editTextAuthMsg = (EditText) getActivity().findViewById(R.id.accessUCAuthMsg);
         editTextAuthMsg.addTextChangedListener(new GenericTextWatcher(editTextAuthMsg, 20));
-        editTextAuthResponse = (EditText) getActivity().findViewById(R.id.accessUCAuthResponse);
+        editTextAuthProfile = (EditText) getActivity().findViewById(R.id.accessUCAuthProfile);
+        editTextAuthProfile.setText(String.valueOf(0));
+        editTextAuthOffset = (EditText) getActivity().findViewById(R.id.accessUCAuthOffset);
+        editTextAuthOffset.setText(String.valueOf(0));
+        editTextAuthBlockId = (EditText) getActivity().findViewById(R.id.accessUCAuthBlockId);
+        editTextAuthBlockId.setText(String.valueOf(1));
+
+        TextView textViewAuthProtModeLabel = (TextView) getActivity().findViewById(R.id.accessUCAuthProtModeLabel);
+        editTextAuthProtMode = (EditText) getActivity().findViewById(R.id.accessUCAuthProtMode);
+        TableRow tableRowAuthProtMode = (TableRow) getActivity().findViewById(R.id.accessUCAuthtModeRow);
+        checkBoxAuthEncryptMode = (CheckBox) getActivity().findViewById(R.id.accessUCAuthEncryptMode);
+        checkBoxAuthValidMode = (CheckBox) getActivity().findViewById(R.id.accessUCAuthValidMode);
+        if (iTagType == 5) {
+            textViewAuthProtModeLabel.setVisibility(View.GONE);
+            editTextAuthProtMode.setVisibility(View.GONE);
+        } else {
+            tableRowAuthProtMode.setVisibility(View.GONE);
+            editTextAuthProtMode.setText(String.valueOf(1));
+        }
+
+        editTextAuthResponse = (TextView) getActivity().findViewById(R.id.accessUCAuthResponse);
+        textViewAuthResponseDecoded = (TextView) getActivity().findViewById(R.id.accessUCAuthResponseDecoded);
+        textViewAuthResponseDecodedCustom = (TextView) getActivity().findViewById(R.id.accessUCAuthResponseDecodedCustom);
+        editTextAuthResponseEncodedMac = (TextView) getActivity().findViewById(R.id.accessUCAuthResponseEecodedMac);
         editTextEpcSize = (EditText) getActivity().findViewById(R.id.accessUCEpcSize);
         editTextAesKey0 = (EditText) getActivity().findViewById(R.id.accessUCAesKey0);
         editTextAesKey0.addTextChangedListener(new GenericTextWatcher(editTextAesKey0, 32));
@@ -91,6 +127,7 @@ public class AccessUcodeFragment extends CommonFragment {
         editTextaccessRWAntennaPower.setText(String.valueOf(300));
 
         buttonRead = (Button) getActivity().findViewById(R.id.accessUCReadButton);
+        if (iTagType == 5) buttonRead.setVisibility(View.GONE);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -146,7 +183,8 @@ public class AccessUcodeFragment extends CommonFragment {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                authenTam1 = true; authenChecked = true; startAccessTask();
+                authenTam1 = true; authenChecked = true; keyId = Integer.parseInt(editTextAuthKeyId.getText().toString()); strChallenge = editTextAuthMsg.getText().toString();
+                startAccessTask();
             }
         });
 
@@ -161,7 +199,17 @@ public class AccessUcodeFragment extends CommonFragment {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                authenTam1 = false; authenChecked = true; startAccessTask();
+                authenTam1 = false; authenChecked = true; keyId = Integer.parseInt(editTextAuthKeyId.getText().toString()); strChallenge = editTextAuthMsg.getText().toString();
+                profile = Integer.parseInt(editTextAuthProfile.getText().toString());
+                offset = Integer.parseInt(editTextAuthOffset.getText().toString());
+                blockId = Integer.parseInt(editTextAuthBlockId.getText().toString());
+                if (iTagType != 5)  protMode = Integer.parseInt(editTextAuthProtMode.getText().toString());
+                else {
+                    protMode = 0;
+                    if (checkBoxAuthEncryptMode.isChecked()) protMode += 1;
+                    if (checkBoxAuthValidMode.isChecked()) protMode += 2;
+                }
+                startAccessTask();
             }
         });
 
@@ -180,6 +228,8 @@ public class AccessUcodeFragment extends CommonFragment {
             }
         });
 
+        tableRow = (TableRow) getActivity().findViewById(R.id.accessUCShowEpcRow);
+        if (iTagType == 5) tableRow.setVisibility(View.GONE);
         buttonShowEpc = (Button) getActivity().findViewById(R.id.accessUCShowEpcButton);
         buttonShowEpc.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,7 +255,6 @@ public class AccessUcodeFragment extends CommonFragment {
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
         MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }
 
@@ -253,6 +302,182 @@ public class AccessUcodeFragment extends CommonFragment {
         }
     }
 
+    private byte[] doubleSubKey(byte[] k) {
+        byte[] ret = new byte[k.length];
+
+        boolean firstBitSet = ((k[0]&0x80) != 0);
+        for (int i=0; i<k.length; i++) {
+            ret[i] = (byte) (k[i] << 1);
+            if (i+1 < k.length && ((k[i+1]&0x80) != 0)) {
+                ret[i] |= 0x01;
+            }
+        }
+        if (firstBitSet) {
+            ret[ret.length-1] ^= (byte) 0x87;
+        }
+        return ret;
+    }
+    boolean processAESdata(String strData) {
+        boolean retValue = false;
+        String strKey, strKey0, strKey1;
+        strKey0 = editTextAesKey0.getText().toString();
+        strKey1 = editTextAesKey1.getText().toString();
+        if (keyId == 0) strKey = strKey0;
+        else if (keyId == 1) strKey = strKey1;
+        else return retValue;
+
+        if (strKey.length() != 32) return retValue;
+        byte[] key = new byte[strKey.length() / 2];
+        for (int i = 0; i < strKey.length(); i++) {
+            int iTemp = Integer.parseInt(strKey.substring(i, i+1), 16);
+            if (i % 2 == 0) key[i/2] = (byte)(iTemp << 4);
+            else key[i/2] |= iTemp;
+        }
+        byte[] key1 = new byte[strKey1.length() / 2];
+        for (int i = 0; i < strKey1.length(); i++) {
+            int iTemp = Integer.parseInt(strKey1.substring(i, i+1), 16);
+            if (i % 2 == 0) key1[i/2] = (byte)(iTemp << 4);
+            else key1[i/2] |= iTemp;
+        }
+
+        int iAesCbcLength = (strData.length() / 32 ) * 32;
+        if (iAesCbcLength == 0) return retValue;
+        String strData1 = strData.substring(0, iAesCbcLength);
+
+        byte[] dataIn = new byte[strData1.length() / 2];
+        for (int i = 0; i < strData1.length(); i++) {
+            int iTemp = Integer.parseInt(strData1.substring(i, i+1), 16);
+            if (i % 2 == 0) dataIn[i/2] = (byte)(iTemp << 4);
+            else dataIn[i/2] |= iTemp;
+        }
+
+        SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
+        try {
+            String strAlgo = "AES/CBC/NoPadding";    //PKCS5Padding, NoPadding
+            Cipher cipher = Cipher.getInstance(strAlgo);
+            if (false) {
+                byte[] data2enc = {(byte) 0x96, (byte) 0xC5, 0x4F, (byte) 0xA8, 0x1D, 0x3C,
+                        (byte) 0xFD, 0x5D, (byte) 0x80, (byte) 0x48, (byte) 0xF4, (byte) 0x8D, (byte) 0xD0, (byte) 0x9A, (byte) 0xAD, 0x22};
+                byte[] encValue = cipher.doFinal(data2enc);
+                textViewAuthResponseDecoded.setText(MainActivity.mCs108Library4a.byteArrayToString(encValue));
+            } else {
+                byte[] data2dec = dataIn;
+                byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
+                byte[] decValue = cipher.doFinal(data2dec);
+                byte[] decValue16 = new byte[16]; System.arraycopy(decValue, 0, decValue16, 0, 16);
+                textViewAuthResponseDecoded.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue16));
+
+                String strMatchResult = "Challenge";
+                String strMatching = textViewAuthResponseDecoded.getText().toString();
+                boolean bMatch = false;
+                if (strMatching == null) { }
+                else if (strMatching.length() != 32) { }
+                else if (strMatching.substring(0, 4).matches("96C5") == false) { }
+                else if (strMatching.substring(12).matches(strChallenge)) bMatch = true;
+                if (bMatch) strMatchResult += " Matched"; else strMatchResult += " Not Matched";
+
+                if (authenTam1 == false) {
+                    if (protMode == 0 || protMode == 2) {
+                        decValue16 = new byte[16];
+                        System.arraycopy(data2dec, 16, decValue16, 0, 16);
+                    } else {
+                        decValue16 = new byte[16];
+                        System.arraycopy(decValue, 16, decValue16, 0, 16);
+                    }
+                    textViewAuthResponseDecodedCustom.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue16));
+
+                    if (protMode >= 2) {
+                        if (true) {
+                            AesCmac mac = null;
+                            mac = new AesCmac();
+                            secretKey = new SecretKeySpec(key1, "AES");
+                            mac.init(secretKey);  //set master key
+                            mac.updateBlock(dataIn); //given input
+                            decValue = mac.doFinal();
+                        } else if (true) {
+                            cipher = Cipher.getInstance(strAlgo);
+                            secretKey = new SecretKeySpec(key1, "AES");
+                            cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
+
+                            // First calculate k0 from zero bytes
+                            byte[] k0 = new byte[16];
+                            cipher.update(k0, 0, k0.length, k0, 0);
+
+                            // Calculate values for k1 and k2
+                            byte[] k1 = doubleSubKey(k0);
+                            byte[] k2 = doubleSubKey(k1);
+                            cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
+                            int bufferCount;
+                        } else if (false) {
+                            secretKey = new SecretKeySpec(key1, "AES");
+                            Mac hmac = Mac.getInstance("HmacSHA256"); //HmacMD5, HmacSHA1, HmacSHA256
+                            hmac.init(secretKey);
+                            hmac.update(iv);
+                            decValue = hmac.doFinal(dataIn);
+                            MainActivity.mCs108Library4a.appendToLog("decValue1.length = " + decValue.length);
+                        } else {
+                            secretKey = new SecretKeySpec(key1, "AES");
+                            cipher = Cipher.getInstance(strAlgo);
+                            cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
+                            MainActivity.mCs108Library4a.appendToLog("Hello3: key = " + MainActivity.mCs108Library4a.byteArrayToString(key1) + ", iv = " + MainActivity.mCs108Library4a.byteArrayToString(iv) + ", dataIn = " + MainActivity.mCs108Library4a.byteArrayToString(dataIn));
+                            decValue = cipher.doFinal(dataIn);
+                        }
+                        String strMac = MainActivity.mCs108Library4a.byteArrayToString(decValue).substring(0, 24);
+                        editTextAuthResponseEncodedMac.setText(strMac);
+
+                        strMatchResult += ", MAC";
+                        strMatching = editTextAuthResponse.getText().toString();
+                        while (strMatching.length() > 32)
+                            strMatching = strMatching.substring(32).trim();
+                        bMatch = false;
+                        if (strMatching.matches(strMac)) bMatch = true;
+                        if (DEBUG)
+                            MainActivity.mCs108Library4a.appendToLog("Hello3: strMatching = " + strMatching + ", length = " + strMatching.length() + ", strMac = " + strMac + ", length = " + strMac.length());
+                        if (bMatch) strMatchResult += " Matched";
+                        else strMatchResult += " Not Matched";
+                    }
+                }
+                Toast.makeText(MainActivity.mContext, strMatchResult, Toast.LENGTH_SHORT).show();
+                retValue = true;
+            }
+
+            if (false) {
+                secretKey = new SecretKeySpec(key, "HmacSHA256");
+                try {
+                    Mac hmac = Mac.getInstance("HmacSHA256");
+
+                    byte[] data2dec = dataIn;
+                    byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+                    hmac.init(secretKey);
+                    hmac.update(iv);
+                    byte[] decValue = hmac.doFinal(data2dec);
+                    MainActivity.mCs108Library4a.appendToLog("decValue.length = " + decValue.length);
+                    editTextAuthResponseEncodedMac.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue));
+                    if (false) {
+                        byte[] decValue16 = new byte[16];
+                        System.arraycopy(decValue, 0, decValue16, 0, 16);
+                        textViewAuthResponseDecoded.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue16));
+                        if (protMode == 0 || protMode == 2) {
+                            decValue16 = new byte[16];
+                            System.arraycopy(data2dec, 16, decValue16, 0, 16);
+                        } else {
+                            decValue16 = new byte[16];
+                            System.arraycopy(decValue, 16, decValue16, 0, 16);
+                        }
+                        textViewAuthResponseDecodedCustom.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue16));
+                        retValue = true;
+                    }
+                } catch (Exception ex) {
+                    MainActivity.mCs108Library4a.appendToLog("Error while encrypting: " + ex.toString());
+                }
+            }
+        } catch (Exception ex) {
+            MainActivity.mCs108Library4a.appendToLog("Hello3: Error while encrypting: " + ex.toString());
+        }
+        return retValue;
+    }
     void startAccessTask() {
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
         if (updating == false) {
@@ -359,7 +584,18 @@ public class AccessUcodeFragment extends CommonFragment {
         else {
             accessResult = accessTask.accessResult;
             if (readBufferChecked) readBufferChecked = false;
-            else if (authenChecked) { authenChecked = false; if (accessResult != null) editTextAuthResponse.setText(accessResult); }
+            else if (authenChecked) {
+                authenChecked = false; if (accessResult != null) {
+                    String strValue = "";
+                    for (int i = 0; i < accessResult.length(); i += 32) {
+                        int i_end = i + 32; if (i_end >= accessResult.length()) i_end = accessResult.length();
+                        if (i != 0) strValue += "\n";
+                        strValue += accessResult.substring(i, i_end);
+                    }
+                    editTextAuthResponse.setText(strValue);
+                    processAESdata(accessResult);
+                }
+            }
             else if (untraceChecked) untraceChecked = false;
             else if (showEpcChecked) { showEpcChecked = false; if (strShowEpcButtonBackup != null) buttonShowEpc.setText(strShowEpcButtonBackup); strShowEpcButtonBackup = null; }
             else if (accessResult == null) {
@@ -392,18 +628,18 @@ public class AccessUcodeFragment extends CommonFragment {
     }
     boolean processTickItems() {
         boolean invalidRequest1 = false;
-        int accSize = 0, accOffset = 0;
+        int accSize = 0, accOffset = 0, accBank = 3;
         String writeData = "";
 
         if (readBufferChecked) {
             accOffset = 0; accSize = 1;
         } else if (authenChecked) {
             if (authenTam1) {
-                if (MainActivity.mCs108Library4a.setTam1Configuration(editTextAuthMsg.getText().toString()) == false)
+                if (MainActivity.mCs108Library4a.setTam1Configuration(keyId, strChallenge) == false)
                     invalidRequest1 = true;
-            } else if (MainActivity.mCs108Library4a.setTam2Configuration(editTextAuthMsg.getText().toString()) == false)
+            } else if (MainActivity.mCs108Library4a.setTam2Configuration(keyId, strChallenge, profile, offset, blockId, protMode) == false)
                 invalidRequest1 = true;
-            if (invalidRequest1 == false) editTextAuthResponse.setText("");
+            if (invalidRequest1 == false) { editTextAuthResponse.setText(""); textViewAuthResponseDecoded.setText(""); textViewAuthResponseDecodedCustom.setText(""); editTextAuthResponseEncodedMac.setText(""); }
             return invalidRequest1;
         } else if (untraceChecked) {
             if (MainActivity.mCs108Library4a.setUntraceableEpc(checkBoxHideEpc.isChecked(), checkBoxHideEpc.isChecked() ? 2 : 6, checkBoxHideTid.isChecked() ? 1: 0, checkBoxHideUser.isChecked(), checkBoxHideRange.isChecked()) == false) invalidRequest1 = true;
@@ -422,11 +658,13 @@ public class AccessUcodeFragment extends CommonFragment {
             accOffset = 0xD8; accSize = 1; readWriteTypes = ReadWriteTypes.AESKEY1ACTIVATE; textViewAesKey0ActivateOk.setText("");
             if (operationRead == false) writeData = "E200";
         } else if (checkBoxAesKey0.isChecked() == true) {
-            accOffset = 0xC0; accSize = 8; readWriteTypes = ReadWriteTypes.AESKEY0; textViewAesKey0Ok.setText("");
+            accOffset = 0xC0; if (iTagType == 5) { accOffset = 0x10; accBank = 0; }
+            accSize = 8; readWriteTypes = ReadWriteTypes.AESKEY0; textViewAesKey0Ok.setText("");
             if (operationRead) editTextAesKey0.setText("");
             else writeData = editTextAesKey0.getText().toString();
         } else if (checkBoxAesKey1.isChecked() == true) {
-            accOffset = 0xD0; accSize = 8; readWriteTypes = ReadWriteTypes.AESKEY1; textViewAesKey1Ok.setText("");
+            accOffset = 0xD0; if (iTagType == 5) { accOffset = 0x18; accBank = 0; }
+            accSize = 8; readWriteTypes = ReadWriteTypes.AESKEY1; textViewAesKey1Ok.setText("");
             if (operationRead) editTextAesKey1.setText("");
             else writeData = editTextAesKey1.getText().toString();
         } else {
@@ -434,7 +672,7 @@ public class AccessUcodeFragment extends CommonFragment {
         }
 
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(3) == false) {
+            if (MainActivity.mCs108Library4a.setAccessBank(accBank) == false) {
                 invalidRequest1 = true;
             }
         }

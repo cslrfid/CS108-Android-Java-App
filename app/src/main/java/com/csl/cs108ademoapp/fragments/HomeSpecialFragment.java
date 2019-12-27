@@ -13,7 +13,7 @@ public class HomeSpecialFragment extends CommonFragment {
     final boolean DEBUG = false;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState, true);
         return inflater.inflate(R.layout.home_special_layout, container, false);
     }
 

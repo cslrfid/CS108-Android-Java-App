@@ -10,21 +10,26 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     boolean selected;
     private String details;
     int extra1Bank, extra2Bank, extra1Offset, extra2Offset;
-    String strPc, strCrc16, strExtra1, strExtra2;
+    String strPc, strCrc16, strMdid, strExtra1, strExtra2;
     private int count;
     private double rssi;
-    private int phase, channel;
+    private int phase, channel, port;
+    public final int INVALID_STATUS = -1;
+    private int status = INVALID_STATUS;
+    public final int INVALID_BACKPORT = -1, INVALID_CODESENSOR = -1, INVALID_CODERSSI = -1; public final float INVALID_CODETEMPC = -300;
+    private int backport1 = INVALID_BACKPORT, backport2 = INVALID_BACKPORT;
+    private int codeSensor = INVALID_CODESENSOR, codeRssi = INVALID_CODERSSI; private float codeTempC = INVALID_CODETEMPC;
     private boolean isConnected;
     private String timeOfRead, timeZone;
     private String location;
     private String compass;
 
     public ReaderDevice(String name, String address, boolean selected, String details,
-                              String strPc, String strCrc16,
+                              String strPc, String strCrc16, String strMdid,
                               String strExtra1, int extra1Bank, int extra1Offset,
                               String strExtra2, int extra2Bank, int extra2Offset,
                               String strTimeOfRead, String strTimeZone, String strLocation, String strCompass,
-                              int count, double rssi, int phase, int channel) {
+                              int count, double rssi, int phase, int channel, int port, int status, int backPort1, int backPort2, int codeSensor, int codeRssi, float codeTempC) {
         if (address.contains(":")) {
             isUsbDevice = false;
         } else {
@@ -37,6 +42,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.details = details;
         this.strPc = strPc;
         this.strCrc16 = strCrc16;
+        this.strMdid = strMdid;
         this.strExtra1 = strExtra1;
         this.extra1Bank = extra1Bank;
         this.extra1Offset = extra1Offset;
@@ -54,6 +60,13 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
 
         this.phase = phase;
         this.channel = channel;
+        this.port = port;
+        this.status = status;
+        this.backport1 = backPort1;
+        this.backport2 = backPort2;
+        this.codeSensor = codeSensor;
+        this.codeRssi = codeRssi;
+        this.codeTempC = codeTempC;
     }
 
     public ReaderDevice(BluetoothDevice bluetoothDevice, String name, String address, boolean selected, String details, int count, double rssi) {
@@ -73,7 +86,10 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     }
 
     public String getName() {
-        return name;
+        String strName = name;
+        strName = strName.replaceAll("\\r|\\n", "");
+        strName = strName.trim();
+        return strName;
     }
 
     void setName(String name) {
@@ -98,7 +114,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
 
     public String getDetails() {
         if (details == null) {
-            String strDetail = "PC=" + strPc + ", CRC16=" + strCrc16;
+            String strDetail = "PC=" + strPc + ", CRC16=" + strCrc16; // + ", Port=" + String.valueOf(port+1);
             if (strExtra1 != null) {
                 String strHeader = null;
                 switch (extra1Bank) {
@@ -152,6 +168,11 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         else if (extra2Bank == 0) return strExtra2;
         else return null;
     }
+    public String getRes2() {
+        if (extra2Bank == 0) return strExtra2;
+        else if (extra1Bank == 0) return strExtra1;
+        else return null;
+    }
     public String getEpc() {
         if (extra1Bank == 1) return strExtra1;
         else if (extra2Bank == 1) return strExtra2;
@@ -167,11 +188,13 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         else if (extra2Bank == 3) return strExtra2;
         else return null;
     }
+    public String getMdid() {
+        return strMdid;
+    }
 
     public int getCount() {
         return count;
     }
-
     public void setCount(int count) {
         this.count = count;
     }
@@ -179,7 +202,6 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     public double getRssi() {
         return rssi;
     }
-
     public void setRssi(double rssi) {
         this.rssi = rssi;
     }
@@ -187,7 +209,6 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     public int getPhase() {
         return phase;
     }
-
     public void setPhase(int phase) {
         this.phase = phase;
     }
@@ -195,15 +216,61 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     public int getChannel() {
         return channel;
     }
-
     public void setChannel(int channel) {
         this.channel = channel;
     }
 
-    public void setExtra1(String strExtra1, int extra1Bank, int extra1Offset) {
+    public int getPort() {
+        return port;
+    }
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public int getStatus() { return status; }
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public int getBackport1() {
+        return backport1;
+    }
+    public void setBackport1(int backport1) {
+        this.backport1 = backport1;
+    }
+    public int getBackport2() {
+        return backport2;
+    }
+    public void setBackport2(int backport2) {
+        this.backport2 = backport2;
+    }
+
+    public int getCodeSensor() { return codeSensor; }
+    public void setCodeSensor(int codeSensor) {
+        this.codeSensor = codeSensor;
+    }
+
+    public int getCodeRssi() {
+        return codeRssi;
+    }
+    public void setCodeRssi(int codeRssi) {
+        this.codeRssi = codeRssi;
+    }
+
+    public float getCodeTempC() {
+        return codeTempC;
+    }
+    public void setCodeTempC(float codeTempC) {
+        this.codeTempC = codeTempC;
+    }
+
+    public void setExtra(String strExtra1, int extra1Bank, int extra1Offset, String strExtra2, int extra2Bank, int extra2Offset) {
         this.strExtra1 = strExtra1;
         this.extra1Bank = extra1Bank;
         this.extra1Offset = extra1Offset;
+        this.strExtra2 = strExtra2;
+        this.extra2Bank = extra2Bank;
+        this.extra2Offset = extra2Offset;
         this.details = null; getDetails();
     }
 

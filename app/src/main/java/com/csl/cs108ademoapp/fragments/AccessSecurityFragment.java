@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.adapters.SecurityAdapter;
 import com.csl.cs108ademoapp.R;
 
@@ -85,6 +86,8 @@ public class AccessSecurityFragment extends CommonFragment {
     public void onDestroy() {
         mAdapter.fragment0.onDestroy();
         mAdapter.fragment1.onDestroy();
+        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }
 

@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/default_left_padding"
-            android:paddingRight="10dp"
+            android:paddingRight="@dimen/default_left_padding"
             android:orientation="vertical" >
 
             <TableRow
@@ -23,25 +23,29 @@
                 android:visibility="gone">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:gravity="right"
                     style="@style/style_normal_font"
                     android:text="Select bank:" />
 
                 <Spinner
                     android:id="@+id/accessRWSelectBank"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     style="@style/style_default_spinner" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:gravity="right"
                     style="@style/style_normal_font"
                     android:text="Offset (bit):" />
 
                 <EditText
                     android:id="@+id/accessRWSelectOffset"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:gravity="center"
                     android:inputType="numberDecimal"
                     style="@style/style_normal_font"
@@ -345,11 +349,15 @@
             android:layout_width="wrap_content" />
 
         <CheckBox
-            android:id="@+id/accessRWEpc1Title"
+            android:id="@+id/accessRWEpc1"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font" />
+
+        <Spinner
+            android:id="@+id/accessRWEpc1Title1"
             android:layout_width="0dp"
-            android:layout_weight="3"
-            style="@style/style_normal_font"
-            android:text="@string/epc1_memory_title" />
+            android:layout_weight="2"
+            style="@style/style_default_spinner" />
 
         <TextView
             android:layout_width="0dp"

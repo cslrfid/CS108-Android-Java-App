@@ -12,6 +12,7 @@ import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
+import java.sql.DatabaseMetaData;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,12 +41,13 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     CustomMediaPlayer playerO, playerN; int requestSoundCount;
 
     int extra1Bank = -1, extra2Bank = -1;
-    String strExtra1Filter, strExtra1Decode;
+    String strExtra1Filter, strMdid;
 
     final boolean invalidDisplay = false;
     private int total, allTotal;
     private int yield, yield4RateCount, yieldRate;
     double rssi = 0; int phase, chidx, data1_count, data2_count, data1_offset, data2_offset;
+    int port = -1; int portstatus; int backport1, backport2, codeSensor, codeRssi; float codeTempC; final int INVALID_CODEVALUE = -500;
     long timeMillis, startTimeMillis, runTimeMillis;
     long firstTime;
     long lastTime;
@@ -256,20 +258,26 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                         rx000pkgData.decodedEpc = decodedEpcNew;
                     }
                     String strEpc = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedEpc);
+                    portstatus = INVALID_CODEVALUE; backport1 = INVALID_CODEVALUE; backport2 = INVALID_CODEVALUE; codeSensor = INVALID_CODEVALUE; codeRssi = INVALID_CODEVALUE; codeTempC = INVALID_CODEVALUE;
                     String strExtra2 = null; if (rx000pkgData.decodedData2 != null) strExtra2 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedData2);
-                    String strExtra1 = null; if (rx000pkgData.decodedData1 != null) {
-                        strExtra1 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedData1);
-                        if (strExtra1Decode != null && strExtra1 != null && strExtra2 != null) {
-                            if (strExtra1Decode.contains("E282403"))
-                                strExtra1 += decodeMicronData(strExtra2, strExtra1);
+                    if (strExtra2 != null && strMdid != null) {
+                        if (strMdid.contains("E200B0")) {
+                            portstatus = Integer.parseInt(strExtra2.substring(3, 4), 16);
                         }
                     }
-                    String strAddresss = strEpc; // strEpc, strEpc + strExtra1 + strExtra2
+                    String strExtra1 = null; if (rx000pkgData.decodedData1 != null) {
+                        strExtra1 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedData1);
+                        MainActivity.mCs108Library4a.appendToLog("Hello2: strExtra1 = " + strExtra1 + ", strExtra2 = " + strExtra2);
+                        if (strMdid != null && strExtra1 != null && strExtra2 != null)  {
+                            decodeMicronData(strExtra1, strExtra2);
+                        }
+                    }
+                    String strAddresss = strEpc;
                     String strCrc16 = null; if (rx000pkgData.decodedCrc != null) strCrc16 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedCrc);
                     if (strExtra1 != null && strExtra1Filter != null) {
                         MainActivity.mCs108Library4a.appendToLog("strEpc = " + strEpc + ", strExtra1 = " + strExtra1 + ", strExtra1Filter = " + strExtra1Filter + ", strExtra2 = " + strExtra2 );
-                        String stringExtra1Compare = "00" + strExtra1.substring(2, 6);
                         if (false) {
+                            String stringExtra1Compare = "00" + strExtra1.substring(2, 6);
                             int index = strEpc.indexOf(stringExtra1Compare);
                             if (index == -1) {
                                 MainActivity.mCs108Library4a.appendToLog("Continue 1");
@@ -287,6 +295,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     rssi = rx000pkgData.decodedRssi;
                     phase = rx000pkgData.decodedPhase;
                     chidx = rx000pkgData.decodedChidx;
+                    port = rx000pkgData.decodedPort;
 
                     timeMillis = System.currentTimeMillis();
 
@@ -302,22 +311,18 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             match = true;
                             updated = true;
                         }
-                    } else {
+                    } else if (readerListAdapter.getSelectDupElim()) {
                         ReaderDevice readerDevice = null;
                         int iMatchItem = -1;
-//                        MainActivity.mCs108Library4a.appendToLog("Matching Epc = " + strEpc);
-                        iMatchItem = -1;
                         if (true) {
                             int index = Collections.binarySearch(MainActivity.sharedObjects.tagsIndexList, new SharedObjects.TagsIndex(strAddresss, 0));
                             if (index >= 0) {
                                 iMatchItem = MainActivity.sharedObjects.tagsIndexList.size() - 1 - MainActivity.sharedObjects.tagsIndexList.get(index).getPosition();
-//                                MainActivity.mCs108Library4a.appendToLog("Binary matched index = " + index + ", iMatchItem = " + iMatchItem + ", Epc = " + tagsList.get(iMatchItem).getAddress());
                             }
                         } else {
                             for (int i = 0; i < tagsList.size(); i++) {
                                 if (strEpc.matches(tagsList.get(i).getAddress())) {
                                     iMatchItem = i;
-//                                    MainActivity.mCs108Library4a.appendToLog("Normal matched position = " + iMatchItem + ", Epc = " + tagsList.get(i).getAddress());
                                     break;
                                 }
                             }
@@ -330,8 +335,14 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             readerDevice.setRssi(rssi);
                             readerDevice.setPhase(phase);
                             readerDevice.setChannel(chidx);
-                            readerDevice.setExtra1(strExtra1, extra1Bank, data1_offset);
-                            MainActivity.mCs108Library4a.appendToLog("setExtra1 with strExtra1 = " + strExtra1);
+                            readerDevice.setPort(port);
+                            readerDevice.setStatus(portstatus);
+                            readerDevice.setBackport1((backport1));
+                            readerDevice.setBackport2(backport2);
+                            readerDevice.setCodeSensor(codeSensor);
+                            readerDevice.setCodeRssi(codeRssi);
+                            readerDevice.setCodeTempC(codeTempC);
+                            readerDevice.setExtra(strExtra1, extra1Bank, data1_offset, strExtra2, extra2Bank, data2_offset);
                             tagsList.set(iMatchItem, readerDevice);
                             match = true;
                             updated = true;
@@ -344,12 +355,12 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             updated = true;
                         } else {
                             ReaderDevice readerDevice = new ReaderDevice("", strEpc, false, null,
-                                    strPc, strCrc16,
+                                    strPc, strCrc16, strMdid,
                                     strExtra1, extra1Bank, data1_offset,
                                     strExtra2, extra2Bank, data2_offset,
                                     new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS").format(new Date()), new SimpleDateFormat("z").format(new Date()).replaceAll("GMT", ""),
                                     MainActivity.mSensorConnector.mLocationDevice.getLocation(), MainActivity.mSensorConnector.mSensorDevice.getEcompass(),
-                                    1, rssi, phase, chidx);
+                                    1, rssi, phase, chidx, port, portstatus, backport1, backport2, codeSensor, codeRssi, codeTempC);
                             if (bAdd2End) tagsList.add(readerDevice);
                             else tagsList.add(0, readerDevice);
                             SharedObjects.TagsIndex tagsIndex = new SharedObjects.TagsIndex(strAddresss, tagsList.size()-1); MainActivity.sharedObjects.tagsIndexList.add(tagsIndex); Collections.sort(MainActivity.sharedObjects.tagsIndexList);
@@ -411,51 +422,37 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     //}
                 }
             }
+            if (false) MainActivity.mCs108Library4a.appendToLogView("playerN = " + (playerN == null ? "Null" : "Valid") + ", playerO = " + (playerO == null ? "Null" : "Valid") );
             if (playerN != null && playerO != null) {
+                if (false) MainActivity.mCs108Library4a.appendToLogView("requestSound = " + requestSound + ", bStartBeepWaiting = " + bStartBeepWaiting + ", Op=" + playerO.isPlaying() + ", Np=" + playerN.isPlaying());
                 if (requestSound && playerO.isPlaying() == false && playerN.isPlaying() == false) {
                     if (true) {
                         if (bStartBeepWaiting == false) {
                             bStartBeepWaiting = true;
+                            if (false) MainActivity.mCs108Library4a.appendToLogView("Going to play old song");
                             handler.postDelayed(runnableStartBeep, 250);
                         }
                         if (MainActivity.mCs108Library4a.getInventoryVibrate()) {
                             boolean validVibrate0 = false, validVibrate = false;
-                            MainActivity.mCs108Library4a.appendToLog("Hello1: BBB");
                             if (MainActivity.mCs108Library4a.getVibrateModeSetting() == 0) {
-                                MainActivity.mCs108Library4a.appendToLog("Hello1: CCC");
-                                if (requestNewVibrate) {
-                                    MainActivity.mCs108Library4a.appendToLog("Hello1: DDD");
-                                    validVibrate0 = true;
-                                }
-                            } else if (bValidVibrateNewAll == false) {
-                                MainActivity.mCs108Library4a.appendToLog("Hello1: EEE");
-                                validVibrate0 = true;
-                            }
+                                if (requestNewVibrate) validVibrate0 = true;
+                            } else if (bValidVibrateNewAll == false) validVibrate0 = true;
                             requestNewVibrate = false;
 
                             if (validVibrate0) {
-                                MainActivity.mCs108Library4a.appendToLog("Hello1: FFF");
                                 if (bStartVibrateWaiting == false) {
-                                    MainActivity.mCs108Library4a.appendToLog("Hello1: GGG");
                                     validVibrate = true;
                                 } else if (bUseVibrateMode0 == false) {
                                     handler.removeCallbacks(runnableStartVibrate); int timeout = MainActivity.mCs108Library4a.getVibrateWindow() * 1000;
                                     handler.postDelayed(runnableStartVibrate, MainActivity.mCs108Library4a.getVibrateWindow() * 1000);
-                                    MainActivity.mCs108Library4a.appendToLog("Hello1: HHH with timeout = " + timeout);    ///
                                 }
                             }
 
                             if (validVibrate) {
-                                if (bUseVibrateMode0) {
-                                    MainActivity.mCs108Library4a.appendToLog("Hello1: JJJ");
-                                    MainActivity.mCs108Library4a.setVibrateOn(1);
-                                } else {
-                                    MainActivity.mCs108Library4a.appendToLog("Hello1: KKK");    //
-                                    MainActivity.mCs108Library4a.setVibrateOn(2);
-                                }
+                                if (bUseVibrateMode0) MainActivity.mCs108Library4a.setVibrateOn(1);
+                                else MainActivity.mCs108Library4a.setVibrateOn(2);
                                 bStartVibrateWaiting = true; int timeout = MainActivity.mCs108Library4a.getVibrateWindow() * 1000;
                                 handler.postDelayed(runnableStartVibrate, MainActivity.mCs108Library4a.getVibrateWindow() * 1000);
-                                MainActivity.mCs108Library4a.appendToLog("Hello1: III with timeout = " + timeout);
                             }
                         }
                     } else {
@@ -476,13 +473,14 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     Runnable runnableStartBeep = new Runnable() {
         @Override
         public void run() {
+            if (false) MainActivity.mCs108Library4a.appendToLogView("Playing old song");
             bStartBeepWaiting = false;
             requestSound = false;
             if (requestNewSound) {
                 requestNewSound = false;
-                playerN.start(); playerN.setVolume(300, 300);
+                playerN.start(); //playerN.setVolume(300, 300);
             } else {
-                playerO.start(); playerN.setVolume(30, 30);
+                playerO.start(); //playerO.setVolume(30, 30);
             }
         }
     };
@@ -492,11 +490,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         @Override
         public void run() {
             bStartVibrateWaiting = false;
-            MainActivity.mCs108Library4a.appendToLog("Hello1: LLL");
-            if (bUseVibrateMode0 == false) {
-                MainActivity.mCs108Library4a.appendToLog("Hello1: MMM");    //
-                MainActivity.mCs108Library4a.setVibrateOn(0);
-            }
+            if (bUseVibrateMode0 == false) MainActivity.mCs108Library4a.setVibrateOn(0);
         }
     };
 
@@ -519,7 +513,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     public InventoryRfidTask(Context context, int extra1Bank, int extra2Bank, int data1_count, int data2_count, int data1_offset, int data2_offset,
                              boolean invalidRequest, boolean beepEnable,
                              ArrayList<ReaderDevice> tagsList, ReaderListAdapter readerListAdapter, TextView geigerTagRssiView,
-                             String strExtra1Filter, String strExtra1Decode,
+                             String strExtra1Filter, String strMdid,
                              TextView rfidRunTime, TextView geigerTagGotView, TextView rfidVoltageLevel,
                              TextView rfidYieldView, Button button, TextView rfidRateView) {
         this.context = context;
@@ -537,7 +531,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         this.tagsList = tagsList;
         this.readerListAdapter = readerListAdapter;
         this.strExtra1Filter = strExtra1Filter;
-        this.strExtra1Decode = strExtra1Decode;
+        this.strMdid = strMdid;
 
         this.rfidRunTime = rfidRunTime;
         this.geigerTagGotView = geigerTagGotView;
@@ -547,9 +541,11 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         this.rfidRateView = rfidRateView;
         this.beepEnable = beepEnable;
 
+        MainActivity.mCs108Library4a.appendToLogView("going to create playerO and playerN with beepEnable = " + beepEnable);
         if (tagsList != null && readerListAdapter != null && beepEnable) {
             playerO = MainActivity.sharedObjects.playerO;
             playerN = MainActivity.sharedObjects.playerN;
+            MainActivity.mCs108Library4a.appendToLogView("playerO and playerN is created");
         }
     }
 
@@ -602,31 +598,89 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         MainActivity.mCs108Library4a.setVibrateOn(0);
     }
 
-    String decodeMicronData(String strCalData, String strActData) {
-        MainActivity.mCs108Library4a.appendToLog("strCalData = " + strCalData + ", strActData = " + strActData);
-        int calCode1, calTemp1, calCode2, calTemp2, calVer = -1;
-        if (strCalData == null) return null;
-        if (strCalData.length() < 16) return null;
-        int crc = Integer.parseInt(strCalData.substring(0, 4), 16);
-        calCode1 = Integer.parseInt(strCalData.substring(4, 7), 16);
-        calTemp1 = Integer.parseInt(strCalData.substring(7, 10), 16); calTemp1 >>= 1;
-        calCode2 = Integer.parseInt(strCalData.substring(9, 13), 16); calCode2 >>= 1; calCode2 &= 0xFFF;
-        calTemp2 = Integer.parseInt(strCalData.substring(12, 16), 16); calTemp2 >>= 2; calTemp2 &= 0x7FF;
-        calVer = Integer.parseInt(strCalData.substring(15, 16),16); calVer &= 0x3;
-        MainActivity.mCs108Library4a.appendToLog("bExtraFilter: crc = " + crc + ", code1 = " + calCode1 + ", temp1 = " + calTemp1 + ", code2 = " + calCode2 + ", temp2 = " + calTemp2 + ", ver = " + calVer);
+    String decodeMicronData(String strActData, String strCalData) {
+        MainActivity.mCs108Library4a.appendToLog("Hello2: strCalData = " + strCalData + ", strActData = " + strActData);
+        int iTag35 = -1;
+        if (strMdid.contains("E282402")) iTag35 = 2;
+        else if (strMdid.contains("E282403")) iTag35 = 3;
+        else if (strMdid.contains("E282405")) iTag35 = 5;
+        if (iTag35 < 2) return "";
 
-        if (strActData == null) return null;
-        if (strActData.length() < 8) return null;
+        if (iTag35 == 5) {
+            backport1 = Integer.parseInt(strActData.substring(0, 4), 16); backport2 = Integer.parseInt(strActData.substring(4, 8), 16);
+            MainActivity.mCs108Library4a.appendToLog("backport1 = " + backport1 + ", backport2 = " + backport2);
+            strActData = strActData.substring(8);
+        }
+        int iSensorCode = Integer.parseInt(strActData.substring(0,4), 16); iSensorCode &= 0x1FF; if (iTag35 == 2) iSensorCode &= 0x1F; codeSensor = iSensorCode;
+        int iRssi;
+        String strRetValue = "";
+        if (iTag35 == 2) {
+            iRssi = Integer.parseInt(strCalData.substring(0,4), 16); iRssi &= 0x1F; codeRssi = iRssi;
+        } else if (iTag35 == 3) {
+            iRssi = Integer.parseInt(strActData.substring(4,8), 16); iRssi &= 0x1F; codeRssi = iRssi;
 
-        int iRssi = Integer.parseInt(strActData.substring(0,4), 16);
-        float fTemperature = Integer.parseInt(strActData.substring(4,8), 16);
-        fTemperature = ((float)calTemp2 - (float)calTemp1) * (fTemperature - (float) calCode1);
-        fTemperature /= ((float) (calCode2) - (float)calCode1);
-        fTemperature += (float) calTemp1;
-        fTemperature -= 800;
-        fTemperature /= 10;
-        String strRetValue = "(T=" + String.format("%.1f", fTemperature) + (char) 0x00B0 + "C" + "; OCRSSI=" + String.format("%d", iRssi) + ")";
-        MainActivity.mCs108Library4a.appendToLog("bExtraFilter: strRetValue = " + strRetValue);
-        return strRetValue;
+            if (true) {
+                if (strActData.length() < 8) return null;
+                codeTempC = MainActivity.mCs108Library4a.decodeMicronTemperature(iTag35, strActData.substring(8, 12), strCalData);
+            } else {
+                int calCode1, calTemp1, calCode2, calTemp2, calVer = -1;
+                if (strCalData == null) return null;
+                if (strCalData.length() < 16) return null;
+                int crc = Integer.parseInt(strCalData.substring(0, 4), 16);
+                calCode1 = Integer.parseInt(strCalData.substring(4, 7), 16);
+                calTemp1 = Integer.parseInt(strCalData.substring(7, 10), 16);
+                calTemp1 >>= 1;
+                calCode2 = Integer.parseInt(strCalData.substring(9, 13), 16);
+                calCode2 >>= 1;
+                calCode2 &= 0xFFF;
+                calTemp2 = Integer.parseInt(strCalData.substring(12, 16), 16);
+                calTemp2 >>= 2;
+                calTemp2 &= 0x7FF;
+                calVer = Integer.parseInt(strCalData.substring(15, 16), 16);
+                calVer &= 0x3;
+                MainActivity.mCs108Library4a.appendToLog("Hello2: bExtraFilter: crc = " + crc + ", code1 = " + calCode1 + ", temp1 = " + calTemp1 + ", code2 = " + calCode2 + ", temp2 = " + calTemp2 + ", ver = " + calVer);
+
+                if (strActData == null) return null;
+                if (strActData.length() < 8) return null;
+
+                float fTemperature = Integer.parseInt(strActData.substring(8, 12), 16);
+                fTemperature = ((float) calTemp2 - (float) calTemp1) * (fTemperature - (float) calCode1);
+                fTemperature /= ((float) (calCode2) - (float) calCode1);
+                fTemperature += (float) calTemp1;
+                fTemperature -= 800;
+                fTemperature /= 10;
+                codeTempC = fTemperature;
+            }
+        } else if (iTag35 == 5) {
+            iRssi = Integer.parseInt(strActData.substring(4,8), 16); iRssi &= 0x1F; codeRssi = iRssi;
+
+            if (true) {
+                codeTempC = MainActivity.mCs108Library4a.decodeMicronTemperature(iTag35, strActData.substring(8, 12), strCalData);
+            } else {
+                int iTemp;
+                float calCode2 = Integer.parseInt(strCalData.substring(0, 4), 16);
+                calCode2 /= 16;
+                iTemp = Integer.parseInt(strCalData.substring(4, 8), 16);
+                iTemp &= 0x7FF;
+                float calTemp2 = iTemp;
+                calTemp2 -= 600;
+                calTemp2 /= 10;
+                float calCode1 = Integer.parseInt(strCalData.substring(8, 12), 16);
+                calCode1 /= 16;
+                iTemp = Integer.parseInt(strCalData.substring(12, 16), 16);
+                iTemp &= 0x7FF;
+                float calTemp1 = iTemp;
+                calTemp1 -= 600;
+                calTemp1 /= 10;
+
+                float fTemperature = Integer.parseInt(strActData.substring(8, 12), 16);
+                fTemperature -= calCode1;
+                fTemperature *= (calTemp2 - calTemp1);
+                fTemperature /= (calCode2 - calCode1);
+                fTemperature += calTemp1;
+                codeTempC = fTemperature;
+            }
+        }
+        return "";
     }
 }

@@ -2,6 +2,7 @@ package com.csl.cs108ademoapp;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class CustomMediaPlayer {
+    final boolean DEBUG = false;
     Context context;
     MediaPlayer player; boolean starting = false;
 
@@ -27,7 +29,7 @@ public class CustomMediaPlayer {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     starting = false;
-                    MainActivity.mCs108Library4a.appendToLog("MediaPlayer is completed.");
+                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("MediaPlayer is completed.");
                 }
             });
         } catch (IOException e) {
@@ -46,6 +48,17 @@ public class CustomMediaPlayer {
         player.pause();
     }
     void setVolume(int volume1, int volume2) {
-        player.setVolume(volume1, volume2);
+        if (false) player.setVolume(volume1, volume2);
+        else {
+            AudioManager audioManager = ((AudioManager) context.getSystemService(Context.AUDIO_SERVICE));
+            int iVolumeMax = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            MainActivity.mCs108Library4a.appendToLog("Hello8: currentVolume = " + currentVolume);
+            if (currentVolume > 0) {
+                int volume12 = volume1 + volume2;
+                volume12 = ( volume12 * iVolumeMax ) / 600;
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, iVolumeMax, 0);
+            }
+        }
     }
 }

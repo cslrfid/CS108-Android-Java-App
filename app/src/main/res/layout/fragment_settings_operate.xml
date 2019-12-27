@@ -5,6 +5,10 @@
     android:paddingRight="0dp"
     android:orientation="vertical">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -90,6 +94,53 @@
             android:visibility="visible"/>
 
         <TableRow
+            android:id="@+id/settingOperatePortChannelRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/settingOperatePortChannelLabel"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                style="@style/style_normal_font" />
+
+            <TextView
+                android:id="@+id/settingOperatePortChannel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+
+            <Button
+                android:id="@+id/settingOperatePortChannelSelect"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Select" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/settingOperatePortEnableRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Enable" />
+
+            <CheckBox
+                android:id="@+id/settingOperatePortEnable"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical">
@@ -103,6 +154,28 @@
 
             <EditText
                 android:id="@+id/settingOperatePower"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/settingOperatePortDwellRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/settingOperatePortDwellLabel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Dwell time" />
+
+            <EditText
+                android:id="@+id/settingOperatePortDwell"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:background="@drawable/my_edittext_background"
@@ -270,11 +343,11 @@
             android:layout_height="1dp"
             android:background="@android:color/darker_gray"/>
     </LinearLayout>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1"
+        android:layout_height="50dip"
         android:gravity="center|bottom"
         android:orientation="vertical" >
 

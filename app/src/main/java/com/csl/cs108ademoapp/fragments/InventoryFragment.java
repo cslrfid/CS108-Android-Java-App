@@ -92,7 +92,7 @@ public class InventoryFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("Inventory");
+        actionBar.setTitle("I"); //Inventory");
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
@@ -123,19 +123,6 @@ public class InventoryFragment extends CommonFragment {
     }
 
     @Override
-    public void onDestroy() {
-        if (mAdapter == null) Log.i("Hello", "InventoryFragment.onDestroy: NULL mAdapter");
-        else Log.i("Hello", "InventoryFragment.onDestroy: VALID mAdapter");
-        if (mAdapter.fragment0 == null) Log.i("Hello", "InventoryFragment.onDestroy: NULL mAdapter.fragment0");
-        else Log.i("Hello", "InventoryFragment.onDestroy: VALID mAdapter.fragment0");
-        if (mAdapter.fragment1 == null) Log.i("Hello", "InventoryFragment.onDestroy: NULL mAdapter.fragment1");
-        else Log.i("Hello", "InventoryFragment.onDestroy: VALID mAdapter.fragment1");
-        mAdapter.fragment0.onDestroy();
-        mAdapter.fragment1.onDestroy();
-        super.onDestroy();
-    }
-
-    @Override
     public void onPause() {
         mAdapter.fragment0.onPause();
         mAdapter.fragment1.onPause();
@@ -154,6 +141,13 @@ public class InventoryFragment extends CommonFragment {
         mAdapter.fragment0.onDestroyView();
         mAdapter.fragment1.onDestroyView();
         super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        mAdapter.fragment0.onDestroy();
+        mAdapter.fragment1.onDestroy();
+        super.onDestroy();
     }
 
     @Override

@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,9 +20,11 @@ import com.csl.cs108ademoapp.SettingTask;
 
 public class SettingOperateFragment extends CommonFragment {
     final String strOVERRIDE = "Override"; final String strRESET = "Reset";
+    private CheckBox checkBoxPortEnable;
     private Spinner spinnerRegulatoryRegion, spinnerFrequencyOrder, spinnerQueryTarget, spinnerQuerySession, spinnerInvAlgo, spinnerProfile;
-    private EditText editTextChannel, editTextPopulation, editTextStartQValue, editTextOperatePower;
-    private Button buttonOverride, button;
+    private EditText editTextChannel, editTextPopulation, editTextStartQValue, editTextOperatePower, editTextPortDwell;
+    private TextView textViewPortChannel;
+    private Button buttonPortSelect, buttonOverride, button;
 
     final boolean sameCheck = true;
     Handler mHandler = new Handler();
@@ -28,7 +32,10 @@ public class SettingOperateFragment extends CommonFragment {
     boolean overriding = false;
     int countrySelect = -1;
     int channelOrder = -1; int channelSelect = -1;
+    int channel = MainActivity.mCs108Library4a.getAntennaSelect() + 1; final int channelMin = 1; int channelMax = 1; int iPortNumber = 1;
+    boolean portEnable = MainActivity.mCs108Library4a.getAntennaEnable();
     long powerLevel = -1; final long powerLevelMin = 0; final long powerLevelMax = 300;
+    long dwellTime = MainActivity.mCs108Library4a.getAntennaDwell(); final long dwellTimeMin = 0; final long dwellTimeMax = 10000;
     int iPopulation = -1; int iPopulationMin = 1; int iPopulationMax = 9999;
     byte byteFixedQValue = -1; byte byteFixedQValueMin = 0; byte byteFixedQValueMax = 15;
     int queryTarget;
@@ -52,6 +59,49 @@ public class SettingOperateFragment extends CommonFragment {
         spinnerFrequencyOrder = (Spinner) getActivity().findViewById(R.id.settingOperateFrequencyOrder); spinnerFrequencyOrder.setEnabled(false);
         editTextChannel = (EditText) getActivity().findViewById(R.id.settingOperateChannel);
 
+        iPortNumber = MainActivity.mCs108Library4a.getPortNumber();
+        if (iPortNumber == 1 && false) {
+            TableRow tableRow = (TableRow) getActivity().findViewById(R.id.settingOperatePortChannelRow);
+            tableRow.setVisibility(View.GONE);
+            tableRow = (TableRow) getActivity().findViewById(R.id.settingOperatePortEnableRow);
+            tableRow.setVisibility(View.GONE);
+            tableRow = (TableRow) getActivity().findViewById(R.id.settingOperatePortDwellRow);
+            tableRow.setVisibility(View.GONE);
+        } else {
+            int iTemp = iPortNumber;
+            if (iTemp > 1) channelMax = iTemp;
+            else channelMax = 16;
+            if (channelMax != 1) {
+                TextView textViewPortChannelLabel = (TextView) getActivity().findViewById(R.id.settingOperatePortChannelLabel);
+                if (iPortNumber != 1) textViewPortChannelLabel.setText("Ant port #");
+                else textViewPortChannelLabel.setText("Power level");
+                String stringPortChannelLabel = textViewPortChannelLabel.getText().toString();
+                stringPortChannelLabel += "(" + String.valueOf(channelMin) + "-" + String.valueOf(channelMax) + ")";
+                textViewPortChannelLabel.setText(stringPortChannelLabel);
+            }
+            textViewPortChannel = (TextView) getActivity().findViewById(R.id.settingOperatePortChannel); textViewPortChannel.setText("1");
+            buttonPortSelect = (Button) getActivity().findViewById(R.id.settingOperatePortChannelSelect);
+            buttonPortSelect.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int channel = Integer.parseInt(textViewPortChannel.getText().toString());
+                    if (channel < 1) channel = channelMin;
+                    if (++channel > channelMax) channel = channelMin;
+                    textViewPortChannel.setText(""); if (MainActivity.mCs108Library4a.setAntennaSelect(channel-1))    textViewPortChannel.setText(String.valueOf(channel));
+                    editTextOperatePower.setText("");
+                    editTextPortDwell.setText("");
+                    mHandler.post(updateRunnable);
+                }
+            });
+
+            checkBoxPortEnable = (CheckBox) getActivity().findViewById(R.id.settingOperatePortEnable);
+
+            TextView textViewPortDwellLabel = (TextView) getActivity().findViewById(R.id.settingOperatePortDwellLabel);
+            String stringPortDwellLabel = textViewPortDwellLabel.getText().toString();
+            stringPortDwellLabel += "(" + String.valueOf(dwellTimeMin) + "-" + String.valueOf(dwellTimeMax) + ")";
+            textViewPortDwellLabel.setText(stringPortDwellLabel);
+            editTextPortDwell = (EditText) getActivity().findViewById(R.id.settingOperatePortDwell);
+        }
         TextView textViewOperatePowerLabel = (TextView) getActivity().findViewById(R.id.settingOperatePowerLabel);
         String stringOperationPowerLabel = textViewOperatePowerLabel.getText().toString();
         stringOperationPowerLabel += "(" + String.valueOf(powerLevelMin) + "-" + String.valueOf(powerLevelMax) + ")";
@@ -133,7 +183,10 @@ public class SettingOperateFragment extends CommonFragment {
                         countrySelect = spinnerRegulatoryRegion.getSelectedItemPosition();
                         channelOrder = spinnerFrequencyOrder.getSelectedItemPosition();
                         channelSelect = Integer.parseInt(editTextChannel.getText().toString());
+                        if (textViewPortChannel != null) channel = Integer.parseInt(textViewPortChannel.getText().toString());
+                        if (checkBoxPortEnable != null) portEnable = checkBoxPortEnable.isChecked();
                         powerLevel = Long.parseLong(editTextOperatePower.getText().toString());
+                        if (editTextPortDwell != null) dwellTime = Long.parseLong(editTextPortDwell.getText().toString());
                         iPopulation = Integer.parseInt(editTextPopulation.getText().toString());
                         byteFixedQValue = Byte.parseByte(editTextStartQValue.getText().toString());
                         queryTarget = spinnerQueryTarget.getSelectedItemPosition();
@@ -190,11 +243,19 @@ public class SettingOperateFragment extends CommonFragment {
                     }
                 }
                 if (updating == false) {
-                    MainActivity.mCs108Library4a.appendToLog("2A channel = ");
                     int channel = MainActivity.mCs108Library4a.getChannel();
                     if (channel < 0) updating = true;
-                    else { editTextChannel.setText(String.valueOf(channel)); MainActivity.mCs108Library4a.appendToLog("2 channel = "); }
+                    else { editTextChannel.setText(String.valueOf(channel)); }
                 }
+                if (updating == false && textViewPortChannel != null) {
+                    lValue = MainActivity.mCs108Library4a.getAntennaSelect();
+                    if (lValue < 0) {
+                        updating = true;
+                    } else {
+                        textViewPortChannel.setText(String.valueOf(lValue+1));
+                    }
+                }
+                if (checkBoxPortEnable != null) checkBoxPortEnable.setChecked(MainActivity.mCs108Library4a.getAntennaEnable());
                 if (updating == false) {
                     lValue = MainActivity.mCs108Library4a.getPwrlevel();
                     if (lValue < 0) {
@@ -203,7 +264,16 @@ public class SettingOperateFragment extends CommonFragment {
                         editTextOperatePower.setText(String.valueOf(lValue));
                     }
                 }
+                if (updating == false && editTextPortDwell != null) {
+                    lValue = MainActivity.mCs108Library4a.getAntennaDwell();
+                    if (lValue < 0) {
+                        updating = true;
+                    } else {
+                        editTextPortDwell.setText(String.valueOf(lValue));
+                    }
+                }
                 if (updating == false) {
+                    MainActivity.mCs108Library4a.appendToLog("Hello3: checkpoint 1");
                     spinnerQueryTarget.setSelection(MainActivity.mCs108Library4a.getQueryTarget());
                 }
                 if (updating == false) {
@@ -251,7 +321,7 @@ public class SettingOperateFragment extends CommonFragment {
                 }
             }
             if (updating) {
-                mHandler.postDelayed(updateRunnable, 1000);
+                mHandler.postDelayed(updateRunnable, 500);
             } else updateRunning = false;
         }
     };
@@ -259,6 +329,7 @@ public class SettingOperateFragment extends CommonFragment {
     void settingUpdate() {
         boolean sameSetting = true;
         boolean invalidRequest = false;
+        boolean changedChannel = false;
 
         if (invalidRequest == false && (MainActivity.mCs108Library4a.getCountryNumberInList() != countrySelect || sameCheck == false)) {
             sameSetting = false;
@@ -279,10 +350,26 @@ public class SettingOperateFragment extends CommonFragment {
                 invalidRequest = true;
             }
         }
+        if (false && invalidRequest == false && (MainActivity.mCs108Library4a.getAntennaSelect() + 1 != channel  || sameCheck == false)) {
+            sameSetting = false;
+            if (channel < channelMin || channel > channelMax) invalidRequest = true;
+            else if (MainActivity.mCs108Library4a.setAntennaSelect(channel - 1) == false) invalidRequest = true;
+            else changedChannel = true;
+        }
+        if (invalidRequest == false && (MainActivity.mCs108Library4a.getAntennaEnable() != portEnable || sameCheck == false || changedChannel)) {
+            sameSetting = false;
+            if (MainActivity.mCs108Library4a.setAntennaEnable(portEnable) == false)
+                invalidRequest = true;
+        }
         if (invalidRequest == false && (MainActivity.mCs108Library4a.getPwrlevel() != powerLevel || sameCheck == false)) {
             sameSetting = false;
             if (powerLevel < powerLevelMin || powerLevel > 330) invalidRequest = true;
             else if (MainActivity.mCs108Library4a.setPowerLevel(powerLevel) == false) invalidRequest = true;
+        }
+        if (invalidRequest == false && (MainActivity.mCs108Library4a.getAntennaDwell() != dwellTime || sameCheck == false || changedChannel)) {
+            sameSetting = false;
+            if (dwellTime < dwellTimeMin || dwellTime > dwellTimeMax) invalidRequest = true;
+            else if (MainActivity.mCs108Library4a.setAntennaDwell(dwellTime) == false) invalidRequest = true;
         }
 
         if (overriding) {
@@ -314,6 +401,7 @@ public class SettingOperateFragment extends CommonFragment {
                 sameSetting = false;
                 if (MainActivity.mCs108Library4a.setInvAlgo(invAlgoDynamic) == false)
                     invalidRequest = true;
+                MainActivity.mCs108Library4a.appendToLog("Hello3: checkpoint 2");
                 spinnerQueryTarget.setSelection(MainActivity.mCs108Library4a.getQueryTarget());
             }
         }

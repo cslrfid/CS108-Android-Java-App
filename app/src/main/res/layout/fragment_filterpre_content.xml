@@ -11,6 +11,12 @@
         android:layout_marginTop="@dimen/default_top_margin"
         android:paddingLeft="10dp">
 
+        <Spinner
+            android:id="@+id/filterPreMaskDataType"
+            android:layout_margin="0dp"
+            android:layout_weight="1"
+            style="@style/style_default_spinner" />
+
         <TextView
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -19,12 +25,11 @@
             style="@style/style_normal_font"
             android:text="@string/settingInvSelectMaskData_title" />
 
-        <include
+        <EditText
             android:id="@+id/filterPreMaskData"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            layout="@layout/custom_edittext" />
+            android:layout_weight="2"
+            android:layout_height="wrap_content" />
     </TableRow>
 
 
@@ -87,7 +92,7 @@
         <Spinner
             android:id="@+id/preFilterAction"
             android:layout_margin="0dp"
-            android:layout_weight="1"
+            android:layout_weight="6"
             style="@style/style_default_spinner" />
     </TableRow>
 

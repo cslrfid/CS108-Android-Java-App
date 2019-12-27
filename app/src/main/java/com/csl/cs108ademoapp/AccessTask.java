@@ -118,7 +118,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             if (repeat == false || nextNew) matchRep = 1;
             if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
             else if (skipSelect) { }
-            else if (MainActivity.mCs108Library4a.setSelectedTag(null, selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
+            else if (MainActivity.mCs108Library4a.setSelectedTag(selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
                 invalidRequest = true; MainActivity.mCs108Library4a.appendToLog("setSelectedTag is failed with selectMask = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", powerLevel = " + powerLevel);
             }
         }
