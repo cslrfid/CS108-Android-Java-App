@@ -189,9 +189,9 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
             requestSound = false;
             if (requestNewSound) {
                 requestNewSound = false;
-                playerN.start(); playerN.setVolume(300, 300);
+                playerN.start(); //playerN.setVolume(300, 300);
             } else {
-                playerO.start(); playerN.setVolume(30, 30);
+                playerO.start(); //playerO.setVolume(30, 30);
             }
         }
     };

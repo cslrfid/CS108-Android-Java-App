@@ -110,10 +110,20 @@
 
         <TableRow
             android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <CheckBox
+                android:id="@+id/accessInventoryDupElim"
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:checked="true"
+                android:text="duplicate elimination"/>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/default_left_padding">
-
-
         </TableRow>
     </LinearLayout>
 

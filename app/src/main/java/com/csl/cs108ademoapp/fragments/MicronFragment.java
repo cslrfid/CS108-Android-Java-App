@@ -19,7 +19,7 @@ public class MicronFragment extends CommonFragment {
     private ViewPager viewPager;
     MicronAdapter mAdapter;
 
-    private String[] tabs = {"Select Tag", "Read Temp."};
+    private String[] tabs = { "Config/Read", "Select Tag" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,6 +55,7 @@ public class MicronFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
+        MainActivity.mDid = "E28240";
         mAdapter = new MicronAdapter(getActivity().getSupportFragmentManager());
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
         viewPager.setAdapter(mAdapter);
@@ -82,41 +83,43 @@ public class MicronFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        mAdapter.fragment0.onPause();
-        mAdapter.fragment1.onPause();
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onPause();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onPause();
         super.onPause();
     }
 
     @Override
     public void onStop() {
-        mAdapter.fragment0.onStop();
-        mAdapter.fragment1.onStop();
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onStop();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onStop();
         super.onStop();
     }
 
     @Override
     public void onDestroyView() {
-        mAdapter.fragment0.onDestroyView();
-        mAdapter.fragment1.onDestroyView();
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onDestroyView();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onDestroyView();
         super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setInvSelectIndex(2);
-        MainActivity.mCs108Library4a.setSelectCriteria(false, 0, 0, 0, 0, ""); MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 2 = FALSE");
-        MainActivity.mCs108Library4a.setInvSelectIndex(1);
-        MainActivity.mCs108Library4a.setSelectCriteria(false, 0, 0, 0, 0, ""); MainActivity.mCs108Library4a.appendToLog("setSelectCriteria 1 = FALSE");
-        MainActivity.mCs108Library4a.setInvSelectIndex(0);
-        mAdapter.fragment0.onDestroy();
-        mAdapter.fragment1.onDestroy();
+        if (MainActivity.selectFor != -1) {
+            MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
+            MainActivity.mCs108Library4a.setSelectCriteriaDisable(2);
+            MainActivity.selectFor = -1;
+        }
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onDestroy();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onDestroy();
+        MainActivity.mCs108Library4a.appendToLog("Hello4: restoreAfterTagSelect");
+        MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }
 
     @Override
     public void onDetach() {
-        mAdapter.fragment0.onDetach();
-        mAdapter.fragment1.onDetach();
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onDetach();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onDetach();
         super.onDetach();
     }
 

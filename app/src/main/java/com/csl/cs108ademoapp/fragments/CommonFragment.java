@@ -133,6 +133,7 @@ public abstract class CommonFragment extends Fragment {
             if (fragmentName.matches("InventoryFragment")
                     || fragmentName.contains("InventoryRfidiMultiFragment")
                     || fragmentName.contains("ColdChainFragment")
+                    || fragmentName.contains("AxzonFragment")
                     || fragmentName.contains("MicronFragment")
                     || fragmentName.contains("UcodeFragment")
                     ) {
@@ -140,8 +141,12 @@ public abstract class CommonFragment extends Fragment {
                 menu.findItem(R.id.menuAction_2).setTitle("Sort");
                 menu.findItem(R.id.menuAction_3).setTitle("Save");
                 menu.findItem(R.id.menuAction_4).setIcon(android.R.drawable.ic_menu_share);
-//                MainActivity.mCs108Library4a.appendToLog("SAVE: fragmentName = " + fragmentName);
-            } //else MainActivity.mCs108Library4a.appendToLog("NO SAVE: fragmentName = " + fragmentName);
+            } else {
+                menu.removeItem(R.id.menuAction_1);
+                menu.removeItem(R.id.menuAction_2);
+                menu.removeItem(R.id.menuAction_3);
+                menu.removeItem(R.id.menuAction_4);
+            }
         }
     }
 

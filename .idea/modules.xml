@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/CslCs108AndroidJavaApp.iml" filepath="$PROJECT_DIR$/CslCs108AndroidJavaApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cs108library4a/cs108library4a.iml" filepath="$PROJECT_DIR$/cs108library4a/cs108library4a.iml" />
+    </modules>
+  </component>
+</project>

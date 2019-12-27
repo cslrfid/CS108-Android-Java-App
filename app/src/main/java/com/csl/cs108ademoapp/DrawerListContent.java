@@ -20,7 +20,7 @@ public class DrawerListContent {
         ABOUT, CONNECT,
         INVENTORY, SEARCH, MULTIBANK,
         SETTING, FILTER, READWRITE, SECURITY, REGISTER,
-        COLDCHAIN, MICROTEMPERATURE, UCODE,
+        COLDCHAIN, BAPCARD, AXZON, RFMICRON, UCODE, UCODE8,
         WEDGE, BLANK;
 
         public static DrawerPositions toDrawerPosition(int x) {
@@ -35,10 +35,13 @@ public class DrawerListContent {
                 case 7: return READWRITE;
                 case 8: return SECURITY;
                 case 9: return REGISTER;
-                case 10: return COLDCHAIN;
-                case 11: return MICROTEMPERATURE;
-                case 12: return UCODE;
-                case 13: return WEDGE;
+                case 11: return COLDCHAIN;
+                case 10: return BAPCARD;
+                case 12: return AXZON;
+                case 13: return RFMICRON;
+                case 14: return UCODE;
+                case 15: return UCODE8;
+                case 16: return WEDGE;
             }
             return null;
         }
@@ -57,9 +60,12 @@ public class DrawerListContent {
         addItem(new DrawerItem("8", "Security", R.drawable.dl_access));
         addItem(new DrawerItem("9", "Register Tag", R.drawable.dl_rr));
         addItem(new DrawerItem("10", "Cold Chain CS8300", R.drawable.dl_loc));
-        addItem(new DrawerItem("11", "RFMicron", R.drawable.dl_loc));
-        addItem(new DrawerItem("12", "UCODE DNA", R.drawable.dl_loc));
-        addItem(new DrawerItem("13", "Wedge", R.drawable.dl_rr));
+        addItem(new DrawerItem("11", "CS9010 BAP ID Card", R.drawable.dl_loc));
+        addItem(new DrawerItem("12", "Axzon", R.drawable.dl_loc));
+        addItem(new DrawerItem("13", "Temperature / Humidity", R.drawable.dl_loc));
+        addItem(new DrawerItem("14", "UCODE DNA", R.drawable.dl_loc));
+        addItem(new DrawerItem("15", "UCODE 8", R.drawable.dl_loc));
+        addItem(new DrawerItem("16", "Wedge", R.drawable.dl_rr));
     }
 
     private static void addItem(DrawerItem item) {

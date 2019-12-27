@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -15,9 +16,9 @@ import com.csl.cs108ademoapp.InventoryBarcodeTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SaveList2ExternalTask;
-import com.csl.cs108ademoapp.SharedObjects;
 import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
+import com.csl.cs108library4a.ReaderDevice;
 
 import java.util.Collections;
 
@@ -64,8 +65,33 @@ public class InventoryBarcodeFragment extends CommonFragment {
         barcodeListView = (ListView) getActivity().findViewById(R.id.inventoryBarcodeList);
         barcodeEmptyView = (TextView) getActivity().findViewById(R.id.inventoryBarcodeEmpty);
         barcodeListView.setEmptyView(barcodeEmptyView);
-        readerListAdapter = new ReaderListAdapter(getActivity(), R.layout.readers_list_item, MainActivity.sharedObjects.barsList, true);
+        readerListAdapter = new ReaderListAdapter(getActivity(), R.layout.readers_list_item, MainActivity.sharedObjects.barsList, true, false);
         barcodeListView.setAdapter(readerListAdapter);
+        barcodeListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        barcodeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ReaderDevice readerDevice = readerListAdapter.getItem(position);
+                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("Position  = " + position);
+                if (readerDevice.getSelected()) {
+                    readerDevice.setSelected(false);
+                } else {
+                    readerDevice.setSelected(true);
+                }
+                MainActivity.sharedObjects.tagsList.set(position, readerDevice);
+                MainActivity.tagSelected = readerDevice;
+                for (int i = 0; i < MainActivity.sharedObjects.tagsList.size(); i++) {
+                    if (i != position) {
+                        ReaderDevice readerDevice1 = MainActivity.sharedObjects.tagsList.get(i);
+                        if (readerDevice1.getSelected()) {
+                            readerDevice1.setSelected(false);
+                            MainActivity.sharedObjects.tagsList.set(i, readerDevice1);
+                        }
+                    }
+                }
+                readerListAdapter.notifyDataSetChanged();
+            }
+        });
 
         barcodeRunTime = (TextView) getActivity().findViewById(R.id.inventoryBarcodeRunTime);
         barcodeVoltageLevel = (TextView) getActivity().findViewById(R.id.inventoryBarcodeVoltageLevel);

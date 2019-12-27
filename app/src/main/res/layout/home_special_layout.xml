@@ -73,8 +73,45 @@
             android:layout_marginBottom="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="RFMicron"
-            android:onClick="microTemperatureClicked"/>
+            android:text="CS9010 BAP ID Card"
+            android:onClick="bapCardClicked" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="10dp"
+            android:layout_marginTop="@dimen/home_icon_margin_2"
+            android:layout_marginLeft="@dimen/home_icon_margin_1"
+            android:layout_marginRight="@dimen/home_icon_margin_2"
+            android:layout_marginBottom="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="Axzon"
+            android:onClick="axzonClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="10dp"
+            android:layout_marginTop="@dimen/home_icon_margin_2"
+            android:layout_marginLeft="@dimen/home_icon_margin_1"
+            android:layout_marginRight="@dimen/home_icon_margin_2"
+            android:layout_marginBottom="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:textSize="25dp"
+            android:text="Temperature/\nHumidity"
+            android:onClick="rfMicronClicked"/>
     </LinearLayout>
 
     <LinearLayout
@@ -99,6 +136,22 @@
 
         <Button
             style="@style/DashboardButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="10dp"
+            android:layout_marginTop="@dimen/home_icon_margin_2"
+            android:layout_marginLeft="@dimen/home_icon_margin_1"
+            android:layout_marginRight="@dimen/home_icon_margin_2"
+            android:layout_marginBottom="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="UCODE 8"
+            android:onClick="uCode8Clicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:visibility="gone"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

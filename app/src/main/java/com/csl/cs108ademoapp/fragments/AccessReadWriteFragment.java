@@ -26,7 +26,7 @@ import com.csl.cs108library4a.ReaderDevice;
 import static com.csl.cs108ademoapp.MainActivity.mContext;
 
 public class AccessReadWriteFragment extends CommonFragment {
-    Spinner spinnerSelectBank;
+    Spinner spinnerSelectBank, spinnerRWSelectEpc1;
     EditText editTextRWSelectOffset, editTextRWTagID, editTextAccessRWAccPassword, editTextAccessRWKillPwd, editTextAccessRWAccPwd, editTextAccPc, editTextAccessRWEpc, editTExtAccessRWXpc;
     EditText editTextTidValue, editTextUserValue, editTextEpcValue, editTextaccessRWAntennaPower;
     TextView textViewEpcLength;
@@ -64,6 +64,10 @@ public class AccessReadWriteFragment extends CommonFragment {
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSelectBank.setAdapter(targetAdapter);
         editTextRWSelectOffset = (EditText) getActivity().findViewById(R.id.accessRWSelectOffset);
+        spinnerRWSelectEpc1 = (Spinner) getActivity().findViewById(R.id.accessRWEpc1Title1);
+        ArrayAdapter<CharSequence> targetAdapter1 = ArrayAdapter.createFromResource(getActivity(), R.array.memoryBank_options, R.layout.custom_spinner_layout);
+        targetAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerRWSelectEpc1.setAdapter(targetAdapter1); spinnerRWSelectEpc1.setSelection(1);
 
         editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessRWTagID);
         editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessRWAccPasswordValue);
@@ -379,7 +383,7 @@ public class AccessReadWriteFragment extends CommonFragment {
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (accessResult.length() == 0 || operationRead == false) {
                     } else editTextTidValue.setText(accessResult);
-                } else if (accessBank == 3) {
+                } else if (readWriteTypes == ReadWriteTypes.USER) {
                     textViewUserOk.setText("O"); checkBoxUser.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (operationRead) {
@@ -422,7 +426,7 @@ public class AccessReadWriteFragment extends CommonFragment {
         checkBoxEpc = (CheckBox) getActivity().findViewById(R.id.accessRWEpcTitle);
         checkBoxTid = (CheckBox) getActivity().findViewById(R.id.accessRWTidTitle);
         checkBoxUser = (CheckBox) getActivity().findViewById(R.id.accessRWUserTitle);
-        checkBoxEpc1 = (CheckBox) getActivity().findViewById(R.id.accessRWEpc1Title);
+        checkBoxEpc1 = (CheckBox) getActivity().findViewById(R.id.accessRWEpc1);
 
         if (checkBoxReserve.isChecked() == true) {
             textViewReserveOk.setText("");
@@ -537,8 +541,7 @@ public class AccessReadWriteFragment extends CommonFragment {
             }
         } else if (checkBoxEpc1.isChecked() == true) {
             textViewEpc1Ok.setText("");
-            accessBank = 1; accOffset = 0; accSize = 0; readWriteTypes = ReadWriteTypes.EPC1;
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("processTickItems(): start EPC1 operation");
+            accessBank = spinnerRWSelectEpc1.getSelectedItemPosition(); accOffset = 0; accSize = 0; readWriteTypes = ReadWriteTypes.EPC1;
             int iValue = 0;
             try {
                 EditText editTextEpcOffset = (EditText) getActivity().findViewById(R.id.accessRWEpcOffset);

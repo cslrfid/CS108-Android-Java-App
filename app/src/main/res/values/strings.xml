@@ -43,6 +43,11 @@
         <item>User</item>
     </string-array>
 
+    <string-array name="dataType_options">
+        <item>Hex</item>
+        <item>Bit</item>
+    </string-array>
+
     <string-array name="write_memoryBank_options">
         <item>EPC</item>
         <item>User</item>
@@ -170,6 +175,39 @@
         <item>enable</item>
     </string-array>
 
+    <string-array name="disable_enable_options">
+        <item>disable</item>
+        <item>enable</item>
+    </string-array>
+
+    <string-array name="xerxesTag_options">
+        <item>All</item>
+        <item>S2</item>
+        <item>S3</item>
+        <item>Xerxes</item>
+    </string-array>
+
+    <string-array name="sensor_unit_options">
+        <item>%</item>
+        <item>code</item>
+    </string-array>
+
+    <string-array name="temperature_unit_options">
+        <item>\u2103</item>
+        <item>\u2109</item>
+    </string-array>
+
+    <string-array name="rfMicronTag_options">
+        <item>All</item>
+        <item>S2</item>
+        <item>S3</item>
+    </string-array>
+
+    <string-array name="micronDetect_options">
+        <item>temperature</item>
+        <item>snsor</item>
+    </string-array>
+
     <!-- Strings for StartStopTrigger Fragment -->
     <!-- Strings for start trigger Selection -->
     <!-- Strings for stop trigger Selection -->
@@ -242,7 +280,7 @@
     <string name="settingInvSelectMaskData_title">Mask data</string>
     <string name="kill_title">KILL</string>
     <string name="save_title">SAVE</string>
-    <string name="offset_bits_title">Offset (bits)</string>
+    <string name="offset_bits_title">Bit Offset (decimal)</string>
     <string name="index_title">Index</string>
     <string name="target_title">Target</string>
     <string name="action_title">Action</string>

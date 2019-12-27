@@ -44,13 +44,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import static android.content.ContentValues.TAG;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
 import static android.support.v4.app.ActivityCompat.requestPermissions;
 
 class BleConnector extends BluetoothGattCallback {
     final boolean appendToLogDisable = false;
-    final boolean DEBUG = true;
+    final boolean DEBUG = true; boolean DEBUG_BTDATA = false; boolean DEBUG_BTDATA1 = false; boolean DEBUG_BTDATA0 = false;
     final boolean DEBUGlowLevel = true;
 
     private Context mContext;
@@ -173,13 +174,12 @@ class BleConnector extends BluetoothGattCallback {
         if (gatt != mBluetoothGatt) {
             if (DEBUG) appendToLog("INVALID mBluetoothGatt");
         } else if (status != BluetoothGatt.GATT_SUCCESS) {
-            if (DEBUG) appendToLog("status=" + status);
-            appendToLog("restart discoverServices"); mBluetoothGatt.discoverServices();
+            if (true) appendToLog("status=" + status + ". restart discoverServices"); mBluetoothGatt.discoverServices();
         } else {
             mReaderStreamOutCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_OUT_CHARACTERISTIC);
             mReaderStreamInCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_IN_CHARACTERISTIC);
             if (mReaderStreamInCharacteristic == null || mReaderStreamOutCharacteristic == null) {
-                appendToLog("restart discoverServices");mBluetoothGatt.discoverServices(); return;
+                if (true) appendToLog("restart discoverServices");mBluetoothGatt.discoverServices(); return;
             }
             BluetoothGattDescriptor mReaderStreamInDescriptor = mReaderStreamInCharacteristic.getDescriptor(UUID_GATT_DESCRIPTOR_CLIENT_CHARACTERISTIC_CONFIG); //MUST BE AFTER getCharacteristic()
 
@@ -354,7 +354,7 @@ class BleConnector extends BluetoothGattCallback {
             onCharacteristicWriteFailue++;
             if (DEBUG) appendToLog("status=" + status);
         } else {
-            if (DEBUG) appendToLog("characteristic=" + characteristic.getUuid().toString().substring(4, 8) + ", sent " + (mStreamWriteCount - mStreamWriteCountOld) + " bytes");
+            if (DEBUG_BTDATA) appendToLog("characteristic=" + characteristic.getUuid().toString().substring(4, 8) + ", sent " + (mStreamWriteCount - mStreamWriteCountOld) + " bytes");
             _writeCharacteristic_in_progress = false;
         }
     }
@@ -368,11 +368,11 @@ class BleConnector extends BluetoothGattCallback {
         } else if (mReaderStreamOutCharacteristic == null) {
             if (DEBUG) appendToLog("ERROR with NULL mReaderStreamOutCharacteristic");
         } else if (isBleBusy() || characteristicListRead == false) {
-            appendToLog("isBleBusy()  = " + isBleBusy() + ", characteristicListRead = " + characteristicListRead);
+            if (DEBUG) appendToLog("isBleBusy()  = " + isBleBusy() + ", characteristicListRead = " + characteristicListRead);
         } else {
             mReaderStreamOutCharacteristic.setValue(value);
             if (((writeBleCounter / 100) * 100) == writeBleCounter) {
-                appendToLog("writeBleCounter = " + writeBleCounter + ", writeBleFailure = " + writeBleFailure + ", onCharacteristicWriteFailue = " + onCharacteristicWriteFailue);
+                if (true) appendToLog("writeBleCounter = " + writeBleCounter + ", writeBleFailure = " + writeBleFailure + ", onCharacteristicWriteFailue = " + onCharacteristicWriteFailue);
                 if (writeBleCounter == 1000) {
                     writeBleCounter = 0;
                     writeBleFailure = 0;
@@ -382,9 +382,9 @@ class BleConnector extends BluetoothGattCallback {
             writeBleCounter++;
             if (mBluetoothGatt.writeCharacteristic(mReaderStreamOutCharacteristic) == false) {
                 writeBleFailure++;
-                if (DEBUG) appendToLog("writeCharacteristic(): ERROR for " + byteArrayToString(value));
+                if (true) appendToLog("writeCharacteristic(): ERROR for " + byteArrayToString(value));
             } else {
-                appendToLog(byteArrayToString(value));
+                if (DEBUG_BTDATA0) appendToLog(byteArrayToString(value));
                 _writeCharacteristic_in_progress = true;
                 mStreamWriteCountOld = mStreamWriteCount;
                 mStreamWriteCount += value.length;
@@ -423,12 +423,14 @@ class BleConnector extends BluetoothGattCallback {
                 }
                 if (streamInBufferSize + v.length > streamInBuffer.length) {
                     writeDebug2File("A, " + System.currentTimeMillis() + ", Overflow");
+                    Log.i(TAG, ".Hello: missing data  = " + byteArrayToString(v));
                     if (streamInBytesMissing == 0) {
                         streamInOverflowTime = currentBleConnectTimeMillis();
                     }
                     streamInBytesMissing += v.length;
                 } else {
                     writeDebug2File("A, " + System.currentTimeMillis());
+                    if (DEBUG_BTDATA0) Log.i(TAG, ".Hello: streamIn = " + byteArrayToString(v));
                     if (isStreamInBufferRing) {
                         streamInBufferPush(v, 0, v.length);
                     } else {

@@ -60,45 +60,45 @@ public class ConnectionFragment extends CommonFragment {
         final ListView readerListView = (ListView) getActivity().findViewById(R.id.readersList);
         TextView readerEmptyView = (TextView) getActivity().findViewById(R.id.empty);
         readerListView.setEmptyView(readerEmptyView);
-        readerListAdapter = new ReaderListAdapter(getActivity(), R.layout.readers_list_item, readersList, true);
+        readerListAdapter = new ReaderListAdapter(getActivity(), R.layout.readers_list_item, readersList, true,  true);
         readerListView.setAdapter(readerListAdapter);
         readerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         readerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mCs108Library4a.appendToLog("bConnecting = " + bConnecting);
                 if (bConnecting) return;
 
                 ReaderDevice readerDevice = readerListAdapter.getItem(position);
-                if (readerDevice.getSelected()) {
-                    if (mCs108Library4a.isBleConnected() && readerDevice.isConnected()) { mCs108Library4a.disconnect(false); mCs108Library4a.appendToLog("done"); }
+                mCs108Library4a.appendToLog("bConnecting = " + bConnecting + ", postion = " + position);
+                boolean bSelectOld = readerDevice.getSelected();
+
+                if (mCs108Library4a.isBleConnected() && readerDevice.isConnected() && (readerDevice.getSelected() || false)) {
+                    mCs108Library4a.disconnect(false);
                     readerDevice.setConnected(false);
-                    readerDevice.setSelected(false);
-                    readersList.set(position, readerDevice);
-                } else {
-                    if (mCs108Library4a.isBleConnected() == false) {
-                        boolean validStart = false;
-                        if (deviceConnectTask == null) {
-                            validStart = true;
-                        } else if (deviceConnectTask.getStatus() == AsyncTask.Status.FINISHED) {
-                            validStart = true;
-                        }
-                        if (validStart) {
-                            bConnecting = true;
-                            readerDevice.setSelected(true);
-                            if (deviceScanTask != null)  deviceScanTask.cancel(true);
-                            MainActivity.mCs108Library4a.appendToLog("Connecting");
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                deviceConnectTask = new DeviceConnectTask(position, readerDevice, "Connecting with " + readerDevice.getName());
-                                deviceConnectTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                            } else {
-                                deviceConnectTask = new DeviceConnectTask(position, readerDevice, "Connecting with " + readerDevice.getName());
-                                deviceConnectTask.execute();
-                            }
+                } else if (mCs108Library4a.isBleConnected() == false && readerDevice.getSelected() == false) {
+                    boolean validStart = false;
+                    if (deviceConnectTask == null) {
+                        validStart = true;
+                    } else if (deviceConnectTask.getStatus() == AsyncTask.Status.FINISHED) {
+                        validStart = true;
+                    }
+                    if (validStart) {
+                        bConnecting = true;
+                        if (deviceScanTask != null) deviceScanTask.cancel(true);
+                        MainActivity.mCs108Library4a.appendToLog("Connecting");
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            deviceConnectTask = new DeviceConnectTask(position, readerDevice, "Connecting with " + readerDevice.getName());
+                            deviceConnectTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        } else {
+                            deviceConnectTask = new DeviceConnectTask(position, readerDevice, "Connecting with " + readerDevice.getName());
+                            deviceConnectTask.execute();
                         }
                     }
                 }
-//                readersList.set(position, readerDevice);
+
+                if (readerDevice.getSelected()) readerDevice.setSelected(false);
+                else readerDevice.setSelected(true);
+                readersList.set(position, readerDevice);
                 for (int i = 0; i < readersList.size(); i++) {
                     if (i != position) {
                         ReaderDevice readerDevice1 = readersList.get(i);
@@ -215,7 +215,7 @@ public class ConnectionFragment extends CommonFragment {
 
         @Override
         protected void onProgressUpdate(String... output) {
-            if (false) mCs108Library4a.appendToLog("Entry with mScanResultList.size() = " + mScanResultList.size());
+            if (true) mCs108Library4a.appendToLog("Hello3: Entry with mScanResultList.size() = " + mScanResultList.size());
             if (scanning == false) {
                 scanning = true;
                 if (mCs108Library4a.scanLeDevice(true) == false) cancel(true);
@@ -226,7 +226,7 @@ public class ConnectionFragment extends CommonFragment {
                 Cs108Connector.Cs108ScanData scanResultA = mScanResultList.get(0);
                 mScanResultList.remove(0);
                 if (false) mCs108Library4a.appendToLog("scanResultA.device.getType() = " + scanResultA.device.getType() + ". scanResultA.rssi = " + scanResultA.rssi);
-                if (scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE && scanResultA.rssi < 0) {
+                if (scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE && (true || scanResultA.rssi < 0)) {
                     boolean match = false;
                     for (int i = 0; i < readersList.size(); i++) {
                         if (readersList.get(i).getAddress().matches(scanResultA.device.getAddress())) {
@@ -250,7 +250,7 @@ public class ConnectionFragment extends CommonFragment {
                         readersList.add(readerDevice); listUpdated = true;
                     }
                 } else {
-                    if (DEBUG) mCs108Library4a.appendToLog("deviceScanTask: rssi=" + scanResultA.rssi + ", error type=" + scanResultA.device.getType());
+                    if (true) mCs108Library4a.appendToLog("deviceScanTask: rssi=" + scanResultA.rssi + ", error type=" + scanResultA.device.getType());
                 }
             }
             if (System.currentTimeMillis() - timeMillisUpdate > 10000) {
@@ -281,7 +281,7 @@ public class ConnectionFragment extends CommonFragment {
             }
             if (listUpdated) readerListAdapter.notifyDataSetChanged();
             wait4process = false;
-            if (false) mCs108Library4a.appendToLog("Exit....");
+            if (true) mCs108Library4a.appendToLog("Hello3: Exit....");
         }
 
         @Override
@@ -321,6 +321,7 @@ public class ConnectionFragment extends CommonFragment {
         protected void onPreExecute() {
             super.onPreExecute();
 
+            MainActivity.mCs108Library4a.appendToLog("start of Connection with mrfidToWriteSize = " + mCs108Library4a.mrfidToWriteSize());
             mCs108Library4a.connect(connectingDevice);
             waitTime = 20;
             setting = -1;
@@ -384,12 +385,12 @@ public class ConnectionFragment extends CommonFragment {
             MainActivity.sharedObjects.tagsIndexList.clear();
 
             Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.toast_ble_connected), Toast.LENGTH_SHORT).show();
+
             connectTimeMillis = System.currentTimeMillis();
             super.onPostExecute(result);
-            MainActivity.mCs108Library4a.appendToLog("doing onBackPressed with mrfidToWriteSize = " + mCs108Library4a.mrfidToWriteSize());
             getActivity().onBackPressed();
-
             bConnecting = false;
+            MainActivity.mCs108Library4a.appendToLog("end of Connection with mrfidToWriteSize = " + mCs108Library4a.mrfidToWriteSize());
         }
     }
 }

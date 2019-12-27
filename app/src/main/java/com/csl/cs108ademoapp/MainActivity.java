@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     public static ReaderDevice tagSelected;
     Handler mHandler = new Handler();
 
+    public static String mDid; public static int selectHold; public static int selectFor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState == null) Log.i(TAG, "MainActivity.onCreate: NULL savedInstanceState");
@@ -82,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onRestart() {
-        Log.i(TAG, "MainActivity.onRestart.onRestart");
         super.onRestart();
         MainActivity.mCs108Library4a.connect(null);
         if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onRestart()");
@@ -111,16 +111,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onStop()");
-        //serviceArrayList.clear();
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
         if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onDestroy()");
-        if (true) { mCs108Library4a.disconnect(true); if (DEBUG) mCs108Library4a.appendToLog("done"); }
+        if (true) { mCs108Library4a.disconnect(true); }
         super.onDestroy();
-//        finishAffinity();
     }
 
     boolean configureDisplaying = false;
@@ -177,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new InventoryRfidSearchFragment();
                 break;
             case MULTIBANK:
+                mDid = null;
                 fragment = InventoryRfidiMultiFragment.newInstance(true, null, false);
                 break;
             case SETTING:
@@ -197,11 +196,22 @@ public class MainActivity extends AppCompatActivity {
             case COLDCHAIN:
                 fragment = new ColdChainFragment();
                 break;
-            case MICROTEMPERATURE:
+            case BAPCARD:
+                mDid = "E200B0";
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "", false);
+//                fragment = new BapCardFragment();
+                break;
+            case AXZON:
+                fragment = new AxzonFragment();
+                break;
+            case RFMICRON:
                 fragment = new MicronFragment();
                 break;
             case UCODE:
                 fragment = new UcodeFragment();
+                break;
+            case UCODE8:
+                fragment = new Ucode8Fragment();
                 break;
             case WEDGE:
                 fragment = new HomeSpecialFragment();
@@ -225,10 +235,6 @@ public class MainActivity extends AppCompatActivity {
             fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, TAG_CONTENT_FRAGMENT).addToBackStack(null).commit();
         }
-
-        // update selected item and title, then close the drawer
-//        mDrawerList.setItemChecked(position, true);
-//        setTitle(mOptionTitles[position]);  // redundent instructions
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
@@ -292,17 +298,14 @@ public class MainActivity extends AppCompatActivity {
         selectItem(DrawerPositions.REGISTER);
     }
 
-    public void coldChainClicked(View view) {
-        selectItem(DrawerPositions.COLDCHAIN);
-    }
+    public void coldChainClicked(View view) { selectItem(DrawerPositions.COLDCHAIN); }
+    public void bapCardClicked(View view) { selectItem(DrawerPositions.BAPCARD); }
 
-    public void microTemperatureClicked(View view) {
-        selectItem(DrawerPositions.MICROTEMPERATURE);
-    }
+    public void axzonClicked(View view) { selectItem(DrawerPositions.AXZON); }
+    public void rfMicronClicked(View view) { selectItem(DrawerPositions.RFMICRON); }
 
-    public void uCodeClicked(View view) {
-        selectItem(DrawerPositions.UCODE);
-    }
+    public void uCodeClicked(View view) { selectItem(DrawerPositions.UCODE); }
+    public void uCode8Clicked(View view) { /*selectItem(DrawerPositions.UCODE8); */ }
 
     static boolean wedged = false;
     public void wedgeClicked(View view) {

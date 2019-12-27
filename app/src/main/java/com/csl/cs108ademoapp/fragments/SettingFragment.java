@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.adapters.SettingAdapter;
 import com.csl.cs108ademoapp.R;
 
@@ -23,7 +24,7 @@ public class SettingFragment extends CommonFragment {
     SettingAdapter mAdapter;
     Fragment fragment0, fragment1;
 
-    private String[] tabs = { "Operation", "Administration"};
+    private String[] tabs = { "Operation", "Administration" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -104,6 +105,7 @@ public class SettingFragment extends CommonFragment {
     public void onStop() {
         mAdapter.fragment0.onStop();
         mAdapter.fragment1.onStop();
+        MainActivity.mCs108Library4a.setAntennaSelect(0);
         super.onStop();
     }
 
