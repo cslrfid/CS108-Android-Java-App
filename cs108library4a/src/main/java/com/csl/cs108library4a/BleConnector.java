@@ -91,8 +91,7 @@ class BleConnector extends BluetoothGattCallback {
     private boolean _writeCharacteristic_in_progress;
     private ArrayList<BluetoothGattCharacteristic> mBluetoothGattCharacteristicToRead = new ArrayList<>();
 
-    private final int STREAM_IN_BUFFER_MAX = 0x4000; //0xC00;  //0x800;  //0x400;
-    private final int STREAM_IN_BUFFER_LIMIT = 0x3F80;   //0xB80;    //0x780;    //0x380;
+    private final int STREAM_IN_BUFFER_MAX = 0x100000; //0xC00;  //0x800;  //0x400;
     private byte[] streamInBuffer = new byte[STREAM_IN_BUFFER_MAX];
     int streamInBufferHead, streamInBufferTail, streamInBufferSize = 0;
 
@@ -178,6 +177,8 @@ class BleConnector extends BluetoothGattCallback {
         } else {
             mReaderStreamOutCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_OUT_CHARACTERISTIC);
             mReaderStreamInCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_IN_CHARACTERISTIC);
+            appendToLog("mReaderStreamOutCharacteristic flag = " + mReaderStreamOutCharacteristic.getProperties());
+            appendToLog("mReaderStreamInCharacteristic flag = " + mReaderStreamInCharacteristic.getProperties());
             if (mReaderStreamInCharacteristic == null || mReaderStreamOutCharacteristic == null) {
                 if (true) appendToLog("restart discoverServices");mBluetoothGatt.discoverServices(); return;
             }
@@ -430,7 +431,7 @@ class BleConnector extends BluetoothGattCallback {
                     streamInBytesMissing += v.length;
                 } else {
                     writeDebug2File("A, " + System.currentTimeMillis());
-                    if (DEBUG_BTDATA0) Log.i(TAG, ".Hello: streamIn = " + byteArrayToString(v));
+                    if (DEBUG_BTDATA0) Log.i(TAG, ".Hello: StreamIn = " + byteArrayToString(v));
                     if (isStreamInBufferRing) {
                         streamInBufferPush(v, 0, v.length);
                     } else {
@@ -716,18 +717,6 @@ class BleConnector extends BluetoothGattCallback {
                 appendToLog(s);
             }
         });
-    }
-
-    private byte[] peekSteamInBuffer(int size) {
-        synchronized (streamInBuffer) {
-            if (streamInBufferSize == 0)
-                return null;
-            if (size > streamInBufferSize)
-                size = streamInBufferSize;
-            byte[] data = new byte[size];
-            System.arraycopy(streamInBuffer, 0, data, 0, size);
-            return data;
-        }
     }
 
     int readBleSteamIn(byte[] buffer, int byteOffset, int byteCount) {

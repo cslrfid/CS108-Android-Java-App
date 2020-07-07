@@ -1,0 +1,251 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:layout_gravity="center"
+                    android:text="Scan by" />
+
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/accessAuraSensAtBoot"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sensing at boot"
+                        android:checked="true" />
+
+                    <RadioButton
+                        android:id="@+id/accessAuraSensAtSelect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sensing at select" />
+                </RadioGroup>
+            </TableRow>
+
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/custom_select" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/accessAuraSensorDataOK"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraSensorDataCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Read only Sensor Data" />
+
+                <include
+                    android:id="@+id/accessAuraSensorData"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/accessAuraWriteSensorDataOK"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraWriteSensorDataCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Write only SensAtWrite data to data:" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioGroup
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/default_left_padding"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/accessAuraSens2Null"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="null"
+                        android:checked="true" />
+
+                    <RadioButton
+                        android:id="@+id/accessAuraSens2Store"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="stored" />
+
+                    <RadioButton
+                        android:id="@+id/accessAuraSens2Calibration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="calibrated" />
+                </RadioGroup>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/accessAuraSystemConfigurationOK"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraSystemConfigurationCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="System Configuration" />
+
+                <include
+                    android:id="@+id/accessAuraSystemConfiguration"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/accessAuraTemperLockOK"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraTemperLockCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Temper Lock" />
+
+                <include
+                    android:id="@+id/accessAuraTemperLock"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/accessAuraSensorCalibrationOK"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraSensorCalibrationCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Calibration Data" />
+
+                <include
+                    android:id="@+id/accessAuraSensorCalibration"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/accessAuraSensorControlOK"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraSensorControlCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Sensor Control: At" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraSensAtBootCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Boot" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraSensAtSelectCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Select" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraSensAtWriteCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Write" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/accessAuraSensorDataStoredOK"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAuraSensorDataStoredCheck"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Stored Sensor Data" />
+
+                <include
+                    android:id="@+id/accessAuraSensorDataStored"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+        </LinearLayout>
+    </ScrollView>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/custom_readwrite" />
+</LinearLayout>

@@ -19,7 +19,7 @@ public class MicronFragment extends CommonFragment {
     private ViewPager viewPager;
     MicronAdapter mAdapter;
 
-    private String[] tabs = { "Config/Read", "Select Tag" };
+    private String[] tabs = { "Scan/Select", "Read" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -29,16 +29,16 @@ public class MicronFragment extends CommonFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) mAdapter.fragment1;
+        InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) mAdapter.fragment0;
         switch (item.getItemId()) {
             case R.id.menuAction_1:
-                fragment1.clearTagsList();
+                fragment.clearTagsList();
                 return true;
             case R.id.menuAction_2:
-                fragment1.sortTagsList();
+                fragment.sortTagsList();
                 return true;
             case R.id.menuAction_3:
-                fragment1.saveTagsList();
+                fragment.saveTagsList();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -55,7 +55,6 @@ public class MicronFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        MainActivity.mDid = "E28240";
         mAdapter = new MicronAdapter(getActivity().getSupportFragmentManager());
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
         viewPager.setAdapter(mAdapter);
@@ -111,7 +110,6 @@ public class MicronFragment extends CommonFragment {
         }
         if (mAdapter.fragment0 != null) mAdapter.fragment0.onDestroy();
         if (mAdapter.fragment1 != null) mAdapter.fragment1.onDestroy();
-        MainActivity.mCs108Library4a.appendToLog("Hello4: restoreAfterTagSelect");
         MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }

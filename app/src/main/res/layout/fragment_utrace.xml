@@ -1,0 +1,220 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_top_margin"
+                android:paddingLeft="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="left"
+                    style="@style/style_normal_font"
+                    android:text="@string/memory_bank_title" />
+
+                <Spinner
+                    android:id="@+id/utraceBank"
+                    android:layout_margin="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_default_spinner" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <include
+                    android:id="@+id/utraceTagID"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/password_title" />
+
+                <include
+                    android:id="@+id/utracePasswordValue"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext_password" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/settingAntennaPower_title" />
+
+                <EditText
+                    android:id="@+id/utraceAntennaPower"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font"
+                    android:inputType="numberDecimal" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/utraceAssertUXPC"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Assert U in XPC" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/utraceHideEpc"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Hide Epc" />
+
+                <TextView
+                    android:id="@+id/utraceEpcLengthTitle"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="new length"
+                    android:visibility="invisible" />
+
+                <EditText
+                    android:id="@+id/utraceEpcLength"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font"
+                    android:text="6"
+                    android:inputType="numberDecimal"
+                    android:visibility="invisible" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/utraceHideTid"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Hide Tid" />
+
+                <RadioGroup
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/utraceHideSomeTid"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="Some"
+                        android:visibility="invisible" />
+
+                    <RadioButton
+                        android:id="@+id/utraceHideAllTid"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="All"
+                        android:visibility="invisible" />
+                </RadioGroup>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/utraceHideUser"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Hide User" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/utraceHideRange"
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Special Range field" />
+
+                <RadioGroup
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/utraceRangeToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Toggle"
+                        android:visibility="invisible" />
+
+                    <RadioButton
+                        android:id="@+id/utraceRangeReduced"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Reduced"
+                        android:visibility="invisible" />
+                </RadioGroup>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/utraceUntraceButton"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Untrace" />
+            </TableRow>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -6,11 +6,10 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 
 import com.csl.cs108ademoapp.fragments.AccessMicronFragment;
-import com.csl.cs108ademoapp.fragments.AccessUcodeFragment;
 import com.csl.cs108ademoapp.fragments.InventoryRfidiMultiFragment;
 
 public class MicronAdapter extends FragmentStatePagerAdapter {
-    private final int NO_OF_TABS = 3;
+    private final int NO_OF_TABS = 2;
     public Fragment fragment0, fragment1, fragment2;
 
     @Override
@@ -18,16 +17,12 @@ public class MicronAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = null;
         switch (index) {
             case 0:
-                fragment = AccessMicronFragment.newInstance(false);
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "");
                 fragment0 = fragment;
                 break;
             case 1:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "", false);
+                fragment = AccessMicronFragment.newInstance(false);
                 fragment1 = fragment;
-                break;
-            case 2:
-                fragment = new AccessUcodeFragment();
-                fragment2 = fragment;
                 break;
             default:
                 fragment = null;

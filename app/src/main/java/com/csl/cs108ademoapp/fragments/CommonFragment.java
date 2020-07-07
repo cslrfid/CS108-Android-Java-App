@@ -136,6 +136,9 @@ public abstract class CommonFragment extends Fragment {
                     || fragmentName.contains("AxzonFragment")
                     || fragmentName.contains("MicronFragment")
                     || fragmentName.contains("UcodeFragment")
+                    || fragmentName.contains("Ucode8Fragment")
+                    || fragmentName.contains("ImpinjFragment")
+                    || fragmentName.contains("AuraSenseFragment")
                     ) {
                 menu.findItem(R.id.menuAction_1).setTitle("Clear");
                 menu.findItem(R.id.menuAction_2).setTitle("Sort");

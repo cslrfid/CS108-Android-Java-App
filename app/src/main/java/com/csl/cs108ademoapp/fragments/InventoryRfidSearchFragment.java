@@ -8,11 +8,14 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +28,8 @@ import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
+import static com.csl.cs108ademoapp.MainActivity.tagSelected;
+
 public class InventoryRfidSearchFragment extends CommonFragment {
     final double dBuV_dBm_constant = 106.98;
     final int labelMin = -90;
@@ -34,7 +39,8 @@ public class InventoryRfidSearchFragment extends CommonFragment {
     private EditText editTextGeigerTagID;
     private CheckBox checkBoxGeigerTone;
     private SeekBar seekGeiger;
-    private EditText editTextGeigerAntennaPower;
+    private Spinner memoryBankSpinner;
+    private EditText editTextRWSelectOffset, editTextGeigerAntennaPower;
     private TextView geigerThresholdView;
     private TextView geigerTagRssiView;
     private TextView geigerTagGotView;
@@ -72,10 +78,10 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         textViewProgressLabelMax.setText(String.format("%.0f", MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0 ? labelMax : labelMax + dBuV_dBm_constant));
 
         geigerProgress = (ProgressBar) getActivity().findViewById(R.id.geigerProgress);
-        editTextGeigerTagID = (EditText) getActivity().findViewById(R.id.geigerTagID);
+        editTextGeigerTagID = (EditText) getActivity().findViewById(R.id.selectTagID);
         checkBoxGeigerTone = (CheckBox) getActivity().findViewById(R.id.geigerToneCheck);
 
-        ReaderDevice tagSelected = MainActivity.tagSelected;
+        final ReaderDevice tagSelected = MainActivity.tagSelected;
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
                 editTextGeigerTagID.setText(tagSelected.getAddress());
@@ -98,7 +104,43 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             public void onStopTrackingTouch(SeekBar seekBar) { }
         });
 
-        editTextGeigerAntennaPower = (EditText) getActivity().findViewById(R.id.geigerAntennaPower);
+        memoryBankSpinner = (Spinner) getActivity().findViewById(R.id.selectMemoryBank);
+        ArrayAdapter<CharSequence> memoryBankAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
+        memoryBankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        memoryBankSpinner.setAdapter(memoryBankAdapter);
+        memoryBankSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: //if EPC
+                        if (tagSelected != null) editTextGeigerTagID.setText(tagSelected.getAddress());
+                        editTextRWSelectOffset.setText("32");
+                        break;
+                    case 1:
+                        if (tagSelected != null) { if (tagSelected.getTid() != null) editTextGeigerTagID.setText(tagSelected.getTid()); }
+                        editTextRWSelectOffset.setText("0");
+                        break;
+                    case 2:
+                        if (tagSelected != null) { if (tagSelected.getUser() != null) editTextGeigerTagID.setText(tagSelected.getUser()); }
+                        editTextRWSelectOffset.setText("0");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        editTextRWSelectOffset = (EditText) getActivity().findViewById(R.id.selectMemoryOffset);
+
+        TableRow tableRowSelectPassword = (TableRow) getActivity().findViewById(R.id.selectPasswordRow);
+        tableRowSelectPassword.setVisibility(View.GONE);
+
+        editTextGeigerAntennaPower = (EditText) getActivity().findViewById(R.id.selectAntennaPower);
         editTextGeigerAntennaPower.setText(String.valueOf(300));
 
         geigerThresholdView = (TextView) getActivity().findViewById(R.id.geigerThreshold);
@@ -146,7 +188,6 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             }
         });
 
-        MainActivity.mCs108Library4a.setSelectedTag(editTextGeigerTagID.getText().toString(), Integer.valueOf(editTextGeigerAntennaPower.getText().toString()));
         playerN = MainActivity.sharedObjects.playerL;
     }
 
@@ -248,15 +289,16 @@ public class InventoryRfidSearchFragment extends CommonFragment {
 
     void startInventoryTask() {
         started = true; boolean invalidRequest = false;
+        int memorybank = memoryBankSpinner.getSelectedItemPosition();
         int powerLevel = Integer.valueOf(editTextGeigerAntennaPower.getText().toString());
         if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
-        else if (MainActivity.mCs108Library4a.setSelectedTag(editTextGeigerTagID.getText().toString(), powerLevel) == false) {
+        else if (MainActivity.mCs108Library4a.setSelectedTag(editTextGeigerTagID.getText().toString(), memorybank+1, powerLevel) == false) {
             invalidRequest = true;
         } else {
             MainActivity.mCs108Library4a.startOperation(Cs108Library4A.OperationTypes.TAG_SEARCHING);
         }
         geigerSearchTask = new InventoryRfidTask(getContext(), -1,-1, 0, 0, 0, 0, invalidRequest, true,
-                null, null, geigerTagRssiView, null, null,
+                null, null, geigerTagRssiView, null,
                 geigerRunTime, geigerTagGotView, geigerVoltageLevelView, null, button, rfidRateView);
         geigerSearchTask.execute();
     }

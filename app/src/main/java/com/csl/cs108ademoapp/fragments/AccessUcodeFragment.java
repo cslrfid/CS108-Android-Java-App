@@ -420,7 +420,6 @@ public class AccessUcodeFragment extends CommonFragment {
                             secretKey = new SecretKeySpec(key1, "AES");
                             cipher = Cipher.getInstance(strAlgo);
                             cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
-                            MainActivity.mCs108Library4a.appendToLog("Hello3: key = " + MainActivity.mCs108Library4a.byteArrayToString(key1) + ", iv = " + MainActivity.mCs108Library4a.byteArrayToString(iv) + ", dataIn = " + MainActivity.mCs108Library4a.byteArrayToString(dataIn));
                             decValue = cipher.doFinal(dataIn);
                         }
                         String strMac = MainActivity.mCs108Library4a.byteArrayToString(decValue).substring(0, 24);
@@ -432,8 +431,6 @@ public class AccessUcodeFragment extends CommonFragment {
                             strMatching = strMatching.substring(32).trim();
                         bMatch = false;
                         if (strMatching.matches(strMac)) bMatch = true;
-                        if (DEBUG)
-                            MainActivity.mCs108Library4a.appendToLog("Hello3: strMatching = " + strMatching + ", length = " + strMatching.length() + ", strMac = " + strMac + ", length = " + strMac.length());
                         if (bMatch) strMatchResult += " Matched";
                         else strMatchResult += " Not Matched";
                     }
@@ -474,7 +471,7 @@ public class AccessUcodeFragment extends CommonFragment {
                 }
             }
         } catch (Exception ex) {
-            MainActivity.mCs108Library4a.appendToLog("Hello3: Error while encrypting: " + ex.toString());
+            MainActivity.mCs108Library4a.appendToLog("Error while encrypting: " + ex.toString());
         }
         return retValue;
     }
@@ -642,11 +639,11 @@ public class AccessUcodeFragment extends CommonFragment {
             if (invalidRequest1 == false) { editTextAuthResponse.setText(""); textViewAuthResponseDecoded.setText(""); textViewAuthResponseDecodedCustom.setText(""); editTextAuthResponseEncodedMac.setText(""); }
             return invalidRequest1;
         } else if (untraceChecked) {
-            if (MainActivity.mCs108Library4a.setUntraceableEpc(checkBoxHideEpc.isChecked(), checkBoxHideEpc.isChecked() ? 2 : 6, checkBoxHideTid.isChecked() ? 1: 0, checkBoxHideUser.isChecked(), checkBoxHideRange.isChecked()) == false) invalidRequest1 = true;
+            if (MainActivity.mCs108Library4a.setUntraceable(checkBoxHideEpc.isChecked(), checkBoxHideEpc.isChecked() ? 2 : 6, checkBoxHideTid.isChecked() ? 1: 0, checkBoxHideUser.isChecked(), checkBoxHideRange.isChecked()) == false) invalidRequest1 = true;
             return invalidRequest1;
         } else if (showEpcChecked) {
             try {
-                if (MainActivity.mCs108Library4a.setUntraceableEpc(false, Integer.parseInt(editTextEpcSize.getText().toString()), 0, false, false) == false) invalidRequest1 = true;
+                if (MainActivity.mCs108Library4a.setUntraceable(false, Integer.parseInt(editTextEpcSize.getText().toString()), 0, false, false) == false) invalidRequest1 = true;
             } catch (Exception ex) {
                 invalidRequest1 = true;
             }

@@ -1,7 +1,12 @@
 package com.csl.cs108ademoapp.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,14 +17,14 @@ import android.view.ViewGroup;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.Ucode8Adapter;
+import com.csl.cs108ademoapp.SelectTag;
 
-public class Ucode8Fragment extends CommonFragment {
+public class AuraSenseFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    Ucode8Adapter mAdapter;
+    AuraSenseAdapter mAdapter;
 
-    private String[] tabs = {"Configuration", "Scan" }; // {"Configuration", "Scan", "Untrace"};
+    private String[] tabs = {"Configuration", "Scan" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,11 +56,11 @@ public class Ucode8Fragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("u8"); //"UCODE 8")
+        actionBar.setTitle("au");
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        mAdapter = new Ucode8Adapter(getActivity().getSupportFragmentManager());
+        mAdapter = new AuraSenseAdapter(getActivity().getSupportFragmentManager());
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
         viewPager.setAdapter(mAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -82,7 +87,7 @@ public class Ucode8Fragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        mAdapter.fragment0.onPause();
+		mAdapter.fragment0.onPause();
         mAdapter.fragment1.onPause();
         super.onPause();
     }
@@ -116,7 +121,42 @@ public class Ucode8Fragment extends CommonFragment {
         super.onDetach();
     }
 
-    public Ucode8Fragment() {
-        super("Ucode8Fragment");
+    public AuraSenseFragment() {
+        super("AuraSenseFragment");
+    }
+
+    class AuraSenseAdapter extends FragmentStatePagerAdapter {
+        private final int NO_OF_TABS = 2;
+        public Fragment fragment0, fragment1, fragment2;
+
+        @Override
+        public Fragment getItem(int index) {
+            Fragment fragment = null;
+            switch (index) {
+                case 0:
+                    fragment = new AccessAuraSenseFragment();
+                    fragment0 = fragment;
+                    break;
+                default:
+                    fragment = InventoryRfidiMultiFragment.newInstance(true,"E280B12");
+                    fragment1 = fragment;
+                    break;
+            }
+            return fragment;
+        }
+
+        @Override
+        public int getCount() {
+            return NO_OF_TABS;
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            return PagerAdapter.POSITION_NONE;
+        }
+
+        public AuraSenseAdapter(FragmentManager fm) {
+            super(fm);
+        }
     }
 }

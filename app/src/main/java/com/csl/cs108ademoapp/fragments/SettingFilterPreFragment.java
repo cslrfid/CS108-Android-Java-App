@@ -2,11 +2,6 @@ package com.csl.cs108ademoapp.fragments;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.InputFilter;
-import android.text.InputType;
-import android.text.Spanned;
-import android.text.method.DigitsKeyListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +16,6 @@ import android.widget.Toast;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SettingTask;
-import com.csl.cs108library4a.ReaderDevice;
 
 public class SettingFilterPreFragment extends CommonFragment {
     private EditText editTextFilterPreSelectIndex;
@@ -31,7 +25,7 @@ public class SettingFilterPreFragment extends CommonFragment {
     private Spinner memoryBankSpinner;
     private Spinner spinnerMaskDataType;
     private EditText preFilterOffset;
-    private EditText filterPreMaskData;
+    private EditText filterPreMaskDataHex, filterPreMaskDataBit;
     private Button button;
 
     final boolean sameCheck = false;
@@ -92,13 +86,11 @@ public class SettingFilterPreFragment extends CommonFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (spinnerMaskDataType.getSelectedItemPosition() == 0) {
-                    filterPreMaskData.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                   // filterPreMaskData.setKeyListener(DigitsKeyListener.getInstance("ABCDEFabcdef"));
-                    Log.i("Hello8", "filterPreMaskData Type is TEXT");
+                    filterPreMaskDataHex.setVisibility(View.VISIBLE);
+                    filterPreMaskDataBit.setVisibility(View.GONE);
                 } else {
-                    filterPreMaskData.setInputType(InputType.TYPE_CLASS_NUMBER);
-                    filterPreMaskData.setKeyListener(DigitsKeyListener.getInstance("01"));
-                    Log.i("Hello8", "filterPreMaskData Type is NUMBER");
+                    filterPreMaskDataHex.setVisibility(View.GONE);
+                    filterPreMaskDataBit.setVisibility(View.VISIBLE);
                 }
             }
             @Override
@@ -107,34 +99,8 @@ public class SettingFilterPreFragment extends CommonFragment {
         });
 
         preFilterOffset = (EditText) getActivity().findViewById(R.id.filterPreOffset);
-        filterPreMaskData = (EditText) getActivity().findViewById(R.id.filterPreMaskData);
-        ReaderDevice tagSelected = MainActivity.tagSelected;
-        if (tagSelected != null) {
-            if (tagSelected.getSelected() == true) {
-                spinnerMaskDataType.setSelection(0);
-                filterPreMaskData.setText(tagSelected.getAddress());
-            }
-        }
-        InputFilter filter = new InputFilter() {
-            public CharSequence filter(CharSequence source, int start, int end,
-                                       Spanned dest, int dstart, int dend) {
-                String strData = source.toString();
-                Log.i("Hello", "filterPreMaskData source String is " + strData + ", start = " + start + ", end = " + end);
-                if (source.length()>44) return "";// max 44chars// Here you can add more controls, e.g. allow only hex chars etc
-                for (int i = start; i < end; i++) {
-                    if ((source.charAt(i) >= '0' && source.charAt(i) <= '9')
-                            || (source.charAt(i) >= 'A' && source.charAt(i) <= 'F')
-                            || (source.charAt(i) >= 'a' && source.charAt(i) <= 'f')
-                    ) {
-                        Log.i("Hello", "filterPreMaskData return NULL ");
-                        return null;
-                    }
-                }
-                Log.i("Hello", "filterPreMaskData return EMPYT ");
-                return "";
-            }
-        };
-        filterPreMaskData.setFilters(new InputFilter[] { filter });
+        filterPreMaskDataHex = (EditText) getActivity().findViewById(R.id.filterPreMaskDataHex);
+        filterPreMaskDataBit = (EditText) getActivity().findViewById(R.id.filterPreMaskDataBit);
 
         button = (Button) getActivity().findViewById(R.id.filterPreSaveButton);
         button.setOnClickListener(new View.OnClickListener() {
@@ -244,7 +210,7 @@ public class SettingFilterPreFragment extends CommonFragment {
                         updating = true;
                     } else {
                         spinnerMaskDataType.setSelection(0);
-                        filterPreMaskData.setText(strValue);
+                        filterPreMaskDataHex.setText(strValue);
                     }
                 }
             }
@@ -270,8 +236,9 @@ public class SettingFilterPreFragment extends CommonFragment {
         if (sameSetting == true && invalidRequest == false) {
             {
                 boolean dataMatched = false;
-                invSelectMaskData = filterPreMaskData.getText().toString();
                 boolean maskbit = (spinnerMaskDataType.getSelectedItemPosition() == 0 ? false : true);
+                if (maskbit) invSelectMaskData = filterPreMaskDataBit.getText().toString();
+                else invSelectMaskData = filterPreMaskDataHex.getText().toString();
                 String strValue = MainActivity.mCs108Library4a.getSelectMaskData();
                 if (invSelectMaskData.length() != strValue.length()) { dataMatched = false; }
                 else if (invSelectMaskData.length() == 0 && strValue.length() == 0) { dataMatched = true; }
@@ -283,7 +250,7 @@ public class SettingFilterPreFragment extends CommonFragment {
                         || MainActivity.mCs108Library4a.getSelectMaskOffset() != invSelectMaskOffset
                         || dataMatched == false  || sameCheck == false) {
                     sameSetting = false;
-                    if (MainActivity.mCs108Library4a.setSelectCriteria(invSelectEnable, invSelectTarget, invSelectAction, invSelectMaskBank, invSelectMaskOffset, invSelectMaskData, maskbit) == false)
+                    if (MainActivity.mCs108Library4a.setSelectCriteria(0, invSelectEnable, invSelectTarget, invSelectAction, invSelectMaskBank, invSelectMaskOffset, invSelectMaskData, maskbit) == false)
                         invalidRequest = true;
                 }
             }

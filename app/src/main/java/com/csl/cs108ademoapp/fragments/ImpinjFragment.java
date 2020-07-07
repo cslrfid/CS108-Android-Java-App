@@ -1,6 +1,8 @@
 package com.csl.cs108ademoapp.fragments;
 
+import android.arch.lifecycle.Lifecycle;
 import android.os.Bundle;
+import android.support.annotation.Keep;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -12,14 +14,15 @@ import android.view.ViewGroup;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.Ucode8Adapter;
+import com.csl.cs108ademoapp.adapters.ImpinjAdapter;
 
-public class Ucode8Fragment extends CommonFragment {
+public class ImpinjFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    Ucode8Adapter mAdapter;
+    ImpinjAdapter mAdapter;
 
-    private String[] tabs = {"Configuration", "Scan" }; // {"Configuration", "Scan", "Untrace"};
+    private String[] tabs = {"Configuration", "Scan"};
+    int iTargetOld, iSessionOld;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,11 +54,11 @@ public class Ucode8Fragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("u8"); //"UCODE 8")
+        actionBar.setTitle("Im"); //"UCODE 8")
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        mAdapter = new Ucode8Adapter(getActivity().getSupportFragmentManager());
+        mAdapter = new ImpinjAdapter(getActivity().getSupportFragmentManager());
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
         viewPager.setAdapter(mAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -78,6 +81,9 @@ public class Ucode8Fragment extends CommonFragment {
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
+
+        iTargetOld = MainActivity.mCs108Library4a.getQueryTarget();
+        iSessionOld = MainActivity.mCs108Library4a.getQuerySession();
     }
 
     @Override
@@ -103,9 +109,10 @@ public class Ucode8Fragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
         mAdapter.fragment0.onDestroy();
         mAdapter.fragment1.onDestroy();
+        MainActivity.mCs108Library4a.setTagGroup(MainActivity.mCs108Library4a.getQuerySelect(), iSessionOld, iTargetOld);
+        //MainActivity.mCs108Library4a.macWrite(0x203, 0);
         super.onDestroy();
     }
 
@@ -116,7 +123,7 @@ public class Ucode8Fragment extends CommonFragment {
         super.onDetach();
     }
 
-    public Ucode8Fragment() {
-        super("Ucode8Fragment");
+    public ImpinjFragment() {
+        super("ImpinjFragment");
     }
 }
