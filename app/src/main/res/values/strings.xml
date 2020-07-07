@@ -146,6 +146,26 @@
         <item>3: Maximum throughput</item>
     </string-array>
 
+    <string-array name="rflnagain_options">
+        <item>1 dB</item>
+        <item>7 dB</item>
+        <item>13 dB</item>
+    </string-array>
+
+    <string-array name="iflnagain_options">
+        <item>24 dB</item>
+        <item>18 dB</item>
+        <item>12 dB</item>
+        <item>6 dB</item>
+    </string-array>
+
+    <string-array name="agcgain_options">
+        <item>-12 dB</item>
+        <item>-6 dB</item>
+        <item>0 dB</item>
+        <item>6 dB</item>
+    </string-array>
+
     <string-array name="query_select_options">
         <item>All</item>
         <item>All</item>

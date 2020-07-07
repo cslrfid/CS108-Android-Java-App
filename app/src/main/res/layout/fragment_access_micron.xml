@@ -14,306 +14,318 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="Tag type" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
 
-        <Spinner
-            android:id="@+id/accessMNTagType"
-            android:layout_width="0dp"
-            android:layout_weight="2"
-            android:background="@drawable/my_edittext_background"
-            android:gravity="center"
-            style="@style/style_default_spinner" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Tag type" />
 
-        <TextView
-            android:id="@+id/accessMNSelectHoldTimeLabel"
-            android:layout_width="0dp"
-            android:layout_weight="2"
-            style="@style/style_normal_font"
-            android:text="select hold(ms)" />
+                <Spinner
+                    android:id="@+id/accessMNTagType"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:gravity="center"
+                    style="@style/style_default_spinner" />
+            </TableRow>
 
-        <EditText
-            android:id="@+id/accessMNSelectHoldTime"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            style="@style/style_normal_font"
-            android:inputType="numberDecimal" />
-    </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <include
+                    android:id="@+id/accessMNTagID"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
 
-        <include
-            android:id="@+id/accessMNTagID"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/custom_edittext" />
-    </TableRow>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/default_left_padding">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="@string/password_title" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="@string/password_title" />
 
-        <include
-            android:id="@+id/accessMNAccPasswordValue"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            layout="@layout/custom_edittext_password" />
-    </TableRow>
+                    <include
+                        android:id="@+id/accessMNAccPasswordValue"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        layout="@layout/custom_edittext_password" />
+                </TableRow>
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/default_left_padding">
 
-        <TextView
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="@string/settingAntennaPower_title" />
+                    <TextView
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="@string/settingAntennaPower_title" />
 
-        <EditText
-            android:id="@+id/accessMNAntennaPower"
-            android:layout_weight="1"
-            android:gravity="center"
-            style="@style/style_normal_font"
-            android:inputType="numberDecimal" />
-    </TableRow>
+                    <EditText
+                        android:id="@+id/accessMNAntennaPower"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        style="@style/style_normal_font"
+                        android:inputType="numberDecimal" />
+                </TableRow>
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/default_left_padding">
 
-        <TextView
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="Upper Limit of On Chip RSSI" />
+                    <TextView
+                        android:id="@+id/accessMNSelectHoldTimeLabel"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="select hold(ms)" />
 
-        <EditText
-            android:id="@+id/accessMNRssiUpperLimit"
-            android:layout_weight="1"
-            android:gravity="center"
-            style="@style/style_normal_font"
-            android:inputType="numberDecimal"
-            android:text="21" />
-    </TableRow>
+                    <EditText
+                        android:id="@+id/accessMNSelectHoldTime"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        style="@style/style_normal_font"
+                        android:inputType="numberDecimal" />
+                </TableRow>
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/default_left_padding">
 
-        <TextView
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="Lower Limit On Chip RSSI" />
+                    <TextView
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Upper Limit of On Chip RSSI" />
 
-        <EditText
-            android:id="@+id/accessMNRssiLowerLimit"
-            android:layout_weight="1"
-            android:gravity="center"
-            style="@style/style_normal_font"
-            android:inputType="numberDecimal"
-            android:text="13" />
-    </TableRow>
+                    <EditText
+                        android:id="@+id/accessMNRssiUpperLimit"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        style="@style/style_normal_font"
+                        android:inputType="numberDecimal" />
+                </TableRow>
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/default_left_padding">
 
-        <TextView
-            android:id="@+id/accessMNModelCodeOK"
-            android:layout_width="wrap_content" />
+                    <TextView
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Lower Limit On Chip RSSI" />
 
-        <CheckBox
-            android:id="@+id/accessMNModelCodeTitle"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:visibility="visible"
-            style="@style/style_normal_font"
-            android:text="Model code:" />
+                    <EditText
+                        android:id="@+id/accessMNRssiLowerLimit"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        style="@style/style_normal_font"
+                        android:inputType="numberDecimal" />
+                </TableRow>
+            </LinearLayout>
 
-        <TextView
-            android:id="@+id/accessMNModelCode"
-            android:layout_width="0dp"
-            android:layout_weight="1" />
-    </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
 
-    <TableRow
-        android:id="@+id/accessMNAnalogPort1CodeRow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <TextView
+                    android:id="@+id/accessMNModelCodeOK"
+                    android:layout_width="wrap_content" />
 
-        <TextView
-            android:id="@+id/accessMNAnalogPort1CodeOK"
-            android:layout_width="wrap_content" />
+                <CheckBox
+                    android:id="@+id/accessMNModelCodeTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:visibility="visible"
+                    style="@style/style_normal_font"
+                    android:text="Model code:" />
 
-        <CheckBox
-            android:id="@+id/accessMNAnalogPort1CodeTitle"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="Backport 1 code:" />
+                <TextView
+                    android:id="@+id/accessMNModelCode"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+            </TableRow>
 
-        <TextView
-            android:id="@+id/accessMNAnalogPort1Code"
-            android:layout_width="0dp"
-            android:layout_weight="1" />
-    </TableRow>
+            <TableRow
+                android:id="@+id/accessMNAnalogPort1CodeRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
 
-    <TableRow
-        android:id="@+id/accessMNAnalogPort2CodeRow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <TextView
+                    android:id="@+id/accessMNAnalogPort1CodeOK"
+                    android:layout_width="wrap_content" />
 
-        <TextView
-            android:id="@+id/accessMNAnalogPort2CodeOK"
-            android:layout_width="wrap_content" />
+                <CheckBox
+                    android:id="@+id/accessMNAnalogPort1CodeTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Backport 1 code:" />
 
-        <CheckBox
-            android:id="@+id/accessMNAnalogPort2CodeTitle"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="Backport 2 code:" />
+                <TextView
+                    android:id="@+id/accessMNAnalogPort1Code"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+            </TableRow>
 
-        <TextView
-            android:id="@+id/accessMNAnalogPort2Code"
-            android:layout_width="0dp"
-            android:layout_weight="1" />
-    </TableRow>
+            <TableRow
+                android:id="@+id/accessMNAnalogPort2CodeRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <TextView
+                    android:id="@+id/accessMNAnalogPort2CodeOK"
+                    android:layout_width="wrap_content" />
 
-        <TextView
-            android:id="@+id/accessMNSensorCodeOK"
-            android:layout_width="wrap_content" />
+                <CheckBox
+                    android:id="@+id/accessMNAnalogPort2CodeTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Backport 2 code:" />
 
-        <CheckBox
-            android:id="@+id/accessMNSensorCodeTitle"
-            android:layout_width="0dp"
-            android:layout_weight="2"
-            style="@style/style_normal_font"
-            android:text="Sensor code:" />
+                <TextView
+                    android:id="@+id/accessMNAnalogPort2Code"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+            </TableRow>
 
-        <TextView
-            android:id="@+id/accessMNSensorCode"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:gravity="right" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
 
-        <Spinner
-            android:id="@+id/accessMNSensorUnit"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/my_edittext_background"
-            android:gravity="left"
-            style="@style/style_default_spinner" />
-    </TableRow>
+                <TextView
+                    android:id="@+id/accessMNSensorCodeOK"
+                    android:layout_width="wrap_content" />
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <CheckBox
+                    android:id="@+id/accessMNSensorCodeTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font"
+                    android:text="Sensor code:" />
 
-        <TextView
-            android:id="@+id/accessMNRssiCodeOK"
-            android:layout_width="wrap_content" />
+                <TextView
+                    android:id="@+id/accessMNSensorCode"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="right" />
 
-        <CheckBox
-            android:id="@+id/accessMNRssiCodeTitle"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="On chip RSSI code:" />
+                <Spinner
+                    android:id="@+id/accessMNSensorUnit"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:gravity="left"
+                    style="@style/style_default_spinner" />
+            </TableRow>
 
-        <TextView
-            android:id="@+id/accessMNRssiCode"
-            android:layout_width="0dp"
-            android:layout_weight="1" />
-    </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
 
-    <TableRow
-        android:id="@+id/accessMNTemperatureCodeRow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+                <TextView
+                    android:id="@+id/accessMNRssiCodeOK"
+                    android:layout_width="wrap_content" />
 
-        <TextView
-            android:id="@+id/accessMNTemperatureCodeOK"
-            android:layout_width="wrap_content" />
+                <CheckBox
+                    android:id="@+id/accessMNRssiCodeTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="On chip RSSI code:" />
 
-        <CheckBox
-            android:id="@+id/accessMNTemperatureCodeTitle"
-            android:layout_width="0dp"
-            android:layout_weight="2"
-            style="@style/style_normal_font"
-            android:text="Temperature:" />
+                <TextView
+                    android:id="@+id/accessMNRssiCode"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+            </TableRow>
 
-        <TextView
-            android:id="@+id/accessMNTemperatureCode"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:gravity="right" />
+            <TableRow
+                android:id="@+id/accessMNTemperatureCodeRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
 
-        <Spinner
-            android:id="@+id/accessMNTemperatureUnit"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/my_edittext_background"
-            android:gravity="left"
-            style="@style/style_default_spinner" />
-    </TableRow>
+                <TextView
+                    android:id="@+id/accessMNTemperatureCodeOK"
+                    android:layout_width="wrap_content" />
 
-    <TableRow
-        android:id="@+id/accessMNCalibrationRow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding"
-        android:visibility="visible">
+                <CheckBox
+                    android:id="@+id/accessMNTemperatureCodeTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font"
+                    android:text="Temperature:" />
 
-        <TextView
-            android:id="@+id/accessMNCalibrationOK"
-            android:layout_width="wrap_content" />
+                <TextView
+                    android:id="@+id/accessMNTemperatureCode"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="right" />
 
-        <CheckBox
-            android:id="@+id/accessMNCalibrationTitle"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:visibility="visible"
-            style="@style/style_normal_font"
-            android:text="Calibration data:" />
+                <Spinner
+                    android:id="@+id/accessMNTemperatureUnit"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:gravity="left"
+                    style="@style/style_default_spinner" />
+            </TableRow>
 
-        <TextView
-            android:id="@+id/accessMNCalibrationVersion"
-            android:layout_width="0dp"
-            android:layout_weight="1" />
-    </TableRow>
+            <TableRow
+                android:id="@+id/accessMNCalibrationRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/accessMNCalibrationOK"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessMNCalibrationTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:visibility="visible"
+                    style="@style/style_normal_font"
+                    android:text="Calibration data:" />
+
+                <TextView
+                    android:id="@+id/accessMNCalibrationVersion"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+            </TableRow>
         </LinearLayout>
     </ScrollView>
 

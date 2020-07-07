@@ -41,9 +41,9 @@
                 android:layout_gravity="right"
                 android:gravity="right"
                 android:text="100" />
-        </TableRow>
+    </TableRow>
 
-        <ProgressBar
+    <ProgressBar
             android:id="@+id/geigerProgress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,10 +57,9 @@
             android:textSize="@dimen/dashboard_textSize"/>
 
         <include
-            android:id="@+id/geigerTagID"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            layout="@layout/custom_edittext" />
+            layout="@layout/custom_select" />
 
         <TableRow
             android:layout_width="match_parent"
@@ -94,26 +93,6 @@
             android:id="@+id/geigerSeek"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                style="@style/style_normal_font"
-                android:text="@string/settingAntennaPower_title" />
-
-            <EditText
-                android:id="@+id/geigerAntennaPower"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                style="@style/style_normal_font"
-                android:inputType="numberDecimal" />
-        </TableRow>
     </LinearLayout>
 
     <LinearLayout

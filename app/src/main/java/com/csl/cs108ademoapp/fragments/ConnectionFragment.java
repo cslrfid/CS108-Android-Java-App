@@ -7,8 +7,10 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +30,11 @@ import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 public class ConnectionFragment extends CommonFragment {
@@ -145,24 +152,12 @@ public class ConnectionFragment extends CommonFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_0:
-//                MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.mRx000Setting.setOEMAddress(2);
-//                MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.sendHostRegRequestHST_CMD(Cs108Connector.HostCommands.CMD_RDOEM);
-                if (MainActivity.mCs108Library4a.isBleConnected()) MainActivity.mCs108Library4a.forceBTdisconnect();
                 return true;
 
             case R.id.action_1:
-//                MainActivity.mCs108Library4a.barcodeSendCommandSerialNumber();
-//                MainActivity.mCs108Library4a.setBarcodeOn(false);
-//                MainActivity.mCs108Library4a.hostProcessorICGetFirmwareVersion();
-//                if (MainActivity.mCs108Library4a.isBleConnected()) MainActivity.mCs108Library4a.setVibrateOn(true);
                 return true;
 
             case R.id.action_2:
-                for (int i = 0; i < 300; i++) MainActivity.mCs108Library4a.setPowerLevel(i);
-//                MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelConfig(false);
-//                MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelSelect(3);
-//                MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelConfig(true);
-//                if (MainActivity.mCs108Library4a.isBleConnected()) MainActivity.mCs108Library4a.setVibrateOn(false);
                 return true;
 
             default:
@@ -215,7 +210,6 @@ public class ConnectionFragment extends CommonFragment {
 
         @Override
         protected void onProgressUpdate(String... output) {
-            if (true) mCs108Library4a.appendToLog("Hello3: Entry with mScanResultList.size() = " + mScanResultList.size());
             if (scanning == false) {
                 scanning = true;
                 if (mCs108Library4a.scanLeDevice(true) == false) cancel(true);
@@ -281,7 +275,6 @@ public class ConnectionFragment extends CommonFragment {
             }
             if (listUpdated) readerListAdapter.notifyDataSetChanged();
             wait4process = false;
-            if (true) mCs108Library4a.appendToLog("Hello3: Exit....");
         }
 
         @Override

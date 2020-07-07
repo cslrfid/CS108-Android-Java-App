@@ -27,10 +27,11 @@ import com.csl.cs108library4a.ReaderDevice;
 public class AccessMicronFragment extends CommonFragment {
     final boolean DEBUG = true;
     boolean bXerxesEnable = false;
-	EditText editTextaccessRWSelectHoldTime, editTextRWTagID, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
-    TextView textViewConfigOk, textViewCalibrationOk, textViewAnalogPort2CodeOk, textViewAnalogPort1CodeOk, textViewSensorCodeOk, textViewRssiCodeOk, textViewTemperatureCodeOk;
+    EditText editTextaccessRWSelectHoldTime, editTextRWTagID, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
+    TextView textViewSelectHoldTimeLabel, textViewConfigOk, textViewCalibrationOk, textViewAnalogPort2CodeOk, textViewAnalogPort1CodeOk, textViewSensorCodeOk, textViewRssiCodeOk, textViewTemperatureCodeOk;
     CheckBox checkBoxConfig, checkBoxCalibration, checkBoxAnalogPort1Code, checkBoxAnalogPort2Code, checkBoxSensorCode, checkBoxRssiCode, checkBoxTemperatureCode;
     Spinner spinnerTagType, spinnerSensorUnit, spinnerTemperatureUnit;
+    boolean btagTypeSelected = false;
 
     TextView textViewModelCode, textViewCalibrationVersion, textViewAnalogPort1Code, textViewAnalogPort2Code, textViewSensorCode, textViewRssiCode, textViewTemperatureCode;
 	private Button buttonRead;
@@ -49,7 +50,6 @@ public class AccessMicronFragment extends CommonFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState, false);
-        MainActivity.mCs108Library4a.appendToLog("Hello5: buttonWrite ======");
         return inflater.inflate(R.layout.fragment_access_micron, container, false);
     }
 
@@ -60,7 +60,13 @@ public class AccessMicronFragment extends CommonFragment {
         editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessMNTagID);
         editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessMNAccPasswordValue);
         editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
-        editTextAccessRWAccPassword.setText("00000000");
+        editTextAccessRWAccPassword.setText(MainActivity.config.configPassword);
+
+        if (MainActivity.config != null) { if (MainActivity.config.config0 != null) selectHold = Integer.parseInt(MainActivity.config.config0); }
+        EditText editText = (EditText) getActivity().findViewById(R.id.accessMNRssiUpperLimit);
+        editText.setText(MainActivity.config.config1);
+        editText = (EditText) getActivity().findViewById(R.id.accessMNRssiLowerLimit);
+        editText.setText(MainActivity.config.config2);
 
         textViewConfigOk = (TextView) getActivity().findViewById(R.id.accessMNModelCodeOK);
         textViewCalibrationOk = (TextView) getActivity().findViewById(R.id.accessMNCalibrationOK);
@@ -93,6 +99,13 @@ public class AccessMicronFragment extends CommonFragment {
         arrayAdapterTagType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTagType = (Spinner) getActivity().findViewById(R.id.accessMNTagType);
         spinnerTagType.setAdapter(arrayAdapterTagType);
+        spinnerTagType.setEnabled(false);
+        if (MainActivity.mDid != null) {
+            if (MainActivity.mDid.matches("E28240")) spinnerTagType.setSelection(0);
+            else if (MainActivity.mDid.matches("E282402")) spinnerTagType.setSelection(1);
+            else if (MainActivity.mDid.matches("E282403")) spinnerTagType.setSelection(2);
+            else if (MainActivity.mDid.matches("E282405")) spinnerTagType.setSelection(3);
+        }
         spinnerTagType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -115,26 +128,32 @@ public class AccessMicronFragment extends CommonFragment {
                         MainActivity.mDid = "E282405";
                         break;
                 }
+                if (btagTypeSelected) {
+                    switch (spinnerTagType.getSelectedItemPosition()) {
+                        case 0:
+                        case 1:
+                            editTextaccessRWSelectHoldTime.setText("0");
+                            break;
+                        case 2:
+                            editTextaccessRWSelectHoldTime.setText("3");
+                            break;
+                        case 3:
+                            editTextaccessRWSelectHoldTime.setText("9");
+                            break;
+                    }
+                } else btagTypeSelected = true;
                 switch (spinnerTagType.getSelectedItemPosition()) {
                     case 0:
                     case 1:
-                        editTextaccessRWSelectHoldTime.setText("0");
-                        break;
                     case 2:
-                        editTextaccessRWSelectHoldTime.setText("3");
-                        break;
-                    case 3:
-                        editTextaccessRWSelectHoldTime.setText("9");
-                        break;
-                }
-                switch (spinnerTagType.getSelectedItemPosition()) {
-                    case 0:
-                    case 1:
-                    case 2:
+                        textViewSelectHoldTimeLabel.setVisibility(View.GONE);
+                        editTextaccessRWSelectHoldTime.setVisibility(View.GONE);
                         tableRowAnalogPort1.setVisibility(View.GONE);
                         tableRowAnalogPort2.setVisibility(View.GONE);
                         break;
                     case 3:
+                        textViewSelectHoldTimeLabel.setVisibility(View.VISIBLE);
+                        editTextaccessRWSelectHoldTime.setVisibility(View.VISIBLE);
                         tableRowAnalogPort1.setVisibility(View.VISIBLE);
                         tableRowAnalogPort2.setVisibility(View.VISIBLE);
                         break;
@@ -158,7 +177,6 @@ public class AccessMicronFragment extends CommonFragment {
 
             }
         });
-        MainActivity.mCs108Library4a.appendToLog("Hello5: buttonWrite ...");
 
         ArrayAdapter<CharSequence> arrayAdapterSensorUnit = ArrayAdapter.createFromResource(getActivity(), R.array.sensor_unit_options, R.layout.custom_spinner_layout);
         arrayAdapterSensorUnit.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -192,16 +210,12 @@ public class AccessMicronFragment extends CommonFragment {
             }
         });
 
+        textViewSelectHoldTimeLabel = (TextView) getActivity().findViewById(R.id.accessMNSelectHoldTimeLabel);
         editTextaccessRWSelectHoldTime = (EditText) getActivity().findViewById(R.id.accessMNSelectHoldTime);
         editTextaccessRWSelectHoldTime.setText(String.valueOf(selectHold));
-        if (bXerxesEnable == false) {
-            TextView textViewSelectHoldTimeLabel = (TextView) getActivity().findViewById(R.id.accessMNSelectHoldTimeLabel);
-            textViewSelectHoldTimeLabel.setVisibility(View.GONE);
-            editTextaccessRWSelectHoldTime.setVisibility(View.GONE);
-        }
 
         editTextaccessRWAntennaPower = (EditText) getActivity().findViewById(R.id.accessMNAntennaPower);
-        editTextaccessRWAntennaPower.setText(String.valueOf(300));
+        editTextaccessRWAntennaPower.setText(String.valueOf(MainActivity.config.configPower));
 
         buttonRead = (Button) getActivity().findViewById(R.id.accessMNReadButton);
         buttonRead.setOnClickListener(new View.OnClickListener() {
@@ -225,7 +239,6 @@ public class AccessMicronFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.appendToLog("Hello5");
         if (accessTask != null) accessTask.cancel(true);
         MainActivity.mCs108Library4a.setSameCheck(true);
         super.onDestroy();
@@ -238,11 +251,9 @@ public class AccessMicronFragment extends CommonFragment {
         if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED) == false) return;
         if(getUserVisibleHint()) {
             userVisibleHint = true;
-            MainActivity.mCs108Library4a.appendToLog("Hello5: AccessMicronFragment is now VISIBLE");
             setupTagID();
         } else {
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("Hello5: AccessMicronFragment is now INVISIBLE");
 
             if (editTextaccessRWSelectHoldTime == null) return;
             int iValue = Integer.parseInt(editTextaccessRWSelectHoldTime.getText().toString());
@@ -250,6 +261,11 @@ public class AccessMicronFragment extends CommonFragment {
             else if (iValue < 0) editTextaccessRWSelectHoldTime.setText("0");
             iValue = Integer.parseInt(editTextaccessRWSelectHoldTime.getText().toString());
             MainActivity.selectHold = iValue;
+
+            EditText editText = (EditText) getActivity().findViewById(R.id.accessMNRssiUpperLimit);
+            MainActivity.config.config1 = editText.getText().toString();
+            editText = (EditText) getActivity().findViewById(R.id.accessMNRssiLowerLimit);
+            MainActivity.config.config2 = editText.getText().toString();
         }
     }
 
@@ -516,47 +532,47 @@ public class AccessMicronFragment extends CommonFragment {
             if (accessResult == null) {
                 if (readWriteTypes == ReadWriteTypes.MODELCODE) {
                     textViewConfigOk.setText("E");
-                    checkBoxConfig.setChecked(false);
+                    //checkBoxConfig.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.CALIBRATION) {
                     textViewCalibrationOk.setText("E");
-                    checkBoxCalibration.setChecked(false);
+                    //checkBoxCalibration.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.SENSORCODE) {
                     textViewSensorCodeOk.setText("E");
-                    checkBoxSensorCode.setChecked(false);
+                    //checkBoxSensorCode.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.RSSICODE) {
                     textViewRssiCodeOk.setText("E");
-                    checkBoxRssiCode.setChecked(false);
+                    //checkBoxRssiCode.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.TEMPERATURECODE) {
                     textViewTemperatureCodeOk.setText("E");
-                    checkBoxTemperatureCode.setChecked(false);
+                    //checkBoxTemperatureCode.setChecked(false);
                 }
             } else {
                 if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.MODELCODE) {
                     textViewConfigOk.setText("O");
-                    checkBoxConfig.setChecked(false);
+                    //checkBoxConfig.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     boolean valid = setModelCode(accessResult);
                     if (valid) textViewModelCode.setText(accessResult.substring(5));
                     else Toast.makeText(MainActivity.mContext, "This is not Micron 0X tag !!!", Toast.LENGTH_SHORT).show();
                 } else if (readWriteTypes == ReadWriteTypes.CALIBRATION) {
                     textViewCalibrationOk.setText("O");
-                    checkBoxCalibration.setChecked(false);
+                    //checkBoxCalibration.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     setCalibrationVersion(accessResult);
                 } else if (readWriteTypes == ReadWriteTypes.SENSORCODE) {
                     textViewSensorCodeOk.setText("O");
-                    checkBoxSensorCode.setChecked(false);
+                    //checkBoxSensorCode.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     setSensorCode(accessResult);
                 } else if (readWriteTypes == ReadWriteTypes.RSSICODE) {
                     textViewRssiCodeOk.setText("O");
-                    checkBoxRssiCode.setChecked(false);
+                    //checkBoxRssiCode.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     setRssiCode(accessResult);
                 } else if (readWriteTypes == ReadWriteTypes.TEMPERATURECODE) {
                     textViewTemperatureCodeOk.setText("O");
-                    checkBoxTemperatureCode.setChecked(false);
+                    //checkBoxTemperatureCode.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (accessResult.length() >= 4) {
                         setTemperatureCode(accessResult.substring(0,4));

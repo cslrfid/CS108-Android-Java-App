@@ -1,0 +1,132 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/password_title" />
+
+                <include
+                    android:id="@+id/accessConfigPasswordValue"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext_password" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/settingAntennaPower_title" />
+
+                <EditText
+                    android:id="@+id/accessConfigAntennaPower"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font"
+                    android:inputType="numberDecimal"
+                    android:text="300" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessConfigData0Label"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessConfigData0"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font"
+                    android:inputType="numberDecimal" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessConfigData1Label"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessConfigData1"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font"
+                    android:inputType="numberDecimal" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessConfigData2Label"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessConfigData2"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font"
+                    android:inputType="numberDecimal" />
+            </TableRow>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/accessConfigOKButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="OK" />
+        </TableRow>
+    </LinearLayout>
+</LinearLayout>

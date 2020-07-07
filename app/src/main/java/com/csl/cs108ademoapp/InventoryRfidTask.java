@@ -12,7 +12,6 @@ import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
-import java.sql.DatabaseMetaData;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,13 +40,13 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     CustomMediaPlayer playerO, playerN; int requestSoundCount;
 
     int extra1Bank = -1, extra2Bank = -1;
-    String strExtra1Filter, strMdid;
+    String strMdid;
 
     final boolean invalidDisplay = false;
     private int total, allTotal;
     private int yield, yield4RateCount, yieldRate;
     double rssi = 0; int phase, chidx, data1_count, data2_count, data1_offset, data2_offset;
-    int port = -1; int portstatus; int backport1, backport2, codeSensor, codeRssi; float codeTempC; final int INVALID_CODEVALUE = -500;
+    int port = -1; int portstatus; int backport1, backport2, codeSensor, codeRssi; float codeTempC; final int INVALID_CODEVALUE = -500; String brand;
     long timeMillis, startTimeMillis, runTimeMillis;
     long firstTime;
     long lastTime;
@@ -56,9 +55,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     int batteryCountInventory_old;
 
     boolean requestSound = false; boolean requestNewSound = false; boolean requestNewVibrate = false; long timeMillisNewVibrate;
-    long timeMillisSound = 0;
     String strEpcOld = "";
-    private ArrayList<byte[]> epcDataArray = new ArrayList<>();
     private ArrayList<Cs108Connector.Rx000pkgData> rx000pkgDataArrary = new ArrayList<Cs108Connector.Rx000pkgData>();
     private String endingMessaage;
 
@@ -108,7 +105,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                 MainActivity.mCs108Library4a.appendToLog("openServer has Exception");
             }
         }
-        MainActivity.mCs108Library4a.appendToLog("serverConnectValid = " + serverConnectValid + ", strExtra1Filter = " + strExtra1Filter);
+        MainActivity.mCs108Library4a.appendToLog("serverConnectValid = " + serverConnectValid);
 
 
         if (MainActivity.mCs108Library4a.getInventoryVibrate() && bUseVibrateMode0 == false && MainActivity.mCs108Library4a.getVibrateModeSetting() == 1 && MainActivity.mCs108Library4a.getAntennaDwell() == 0) bValidVibrateNewAll = true;
@@ -248,6 +245,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     boolean match = false;
                     boolean updated = false;
                     currentTime = rx000pkgData.decodedTime;
+                    int iFlag = rx000pkgData.flags;
                     String strPc = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedPc);
                     int extraLength = 0;
                     if (extra1Bank != -1 && rx000pkgData.decodedData1 != null) extraLength += rx000pkgData.decodedData1.length;
@@ -258,38 +256,111 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                         rx000pkgData.decodedEpc = decodedEpcNew;
                     }
                     String strEpc = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedEpc);
-                    portstatus = INVALID_CODEVALUE; backport1 = INVALID_CODEVALUE; backport2 = INVALID_CODEVALUE; codeSensor = INVALID_CODEVALUE; codeRssi = INVALID_CODEVALUE; codeTempC = INVALID_CODEVALUE;
+                    MainActivity.mCs108Library4a.appendToLog("HelloC: decodePc = " + strPc + ", decodedEpc = " + strEpc + ", iFlags = " + String.format("%2X", iFlag));
+                    portstatus = INVALID_CODEVALUE; backport1 = INVALID_CODEVALUE; backport2 = INVALID_CODEVALUE; codeSensor = INVALID_CODEVALUE; codeRssi = INVALID_CODEVALUE; codeTempC = INVALID_CODEVALUE; brand = null;
                     String strExtra2 = null; if (rx000pkgData.decodedData2 != null) strExtra2 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedData2);
                     if (strExtra2 != null && strMdid != null) {
-                        if (strMdid.contains("E200B0")) {
-                            portstatus = Integer.parseInt(strExtra2.substring(3, 4), 16);
-                        }
+                        MainActivity.mCs108Library4a.appendToLog("HelloK: strExtra2 = " + strExtra2 + ", strMdid = " + strMdid);
+                        if (strMdid.contains("E200B0")) portstatus = Integer.parseInt(strExtra2.substring(3, 4), 16);
                     }
                     String strExtra1 = null; if (rx000pkgData.decodedData1 != null) {
                         strExtra1 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedData1);
-                        MainActivity.mCs108Library4a.appendToLog("Hello2: strExtra1 = " + strExtra1 + ", strExtra2 = " + strExtra2);
                         if (strMdid != null && strExtra1 != null && strExtra2 != null)  {
                             decodeMicronData(strExtra1, strExtra2);
                         }
                     }
                     String strAddresss = strEpc;
                     String strCrc16 = null; if (rx000pkgData.decodedCrc != null) strCrc16 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedCrc);
-                    if (strExtra1 != null && strExtra1Filter != null) {
-                        MainActivity.mCs108Library4a.appendToLog("strEpc = " + strEpc + ", strExtra1 = " + strExtra1 + ", strExtra1Filter = " + strExtra1Filter + ", strExtra2 = " + strExtra2 );
-                        if (false) {
-                            String stringExtra1Compare = "00" + strExtra1.substring(2, 6);
-                            int index = strEpc.indexOf(stringExtra1Compare);
-                            if (index == -1) {
-                                MainActivity.mCs108Library4a.appendToLog("Continue 1");
-                                continue;
-                            } else strEpc = strEpc.substring(index);
-                            MainActivity.mCs108Library4a.appendToLog("Continue 2: index = " + index + ", Extra1compare = " + stringExtra1Compare);
-                        } else {
-                            if (strExtra1.contains(strExtra1Filter) == false) {
-                                MainActivity.mCs108Library4a.appendToLog("Continue 3");
-                                continue;
+
+                    int extra1Bank = this.extra1Bank;
+                    int data1_offset = this.data1_offset;
+
+                    if (strMdid != null) {
+                        if (strMdid.indexOf("E203510") == 0) {
+                            if (strEpc.length() == 24 && strExtra2 != null) {
+                                codeTempC = MainActivity.mCs108Library4a.decodeCtesiusTemperature(strEpc.substring(16, 24), strExtra2);
+                                strEpc = strEpc.substring(0, 16); strAddresss = strEpc;
                             }
-                            MainActivity.mCs108Library4a.appendToLog("Continue 4");
+                        }
+                    }
+
+                    boolean bFastId = false; boolean bTempId = false;
+                    if (MainActivity.mDid != null) {
+                        if (MainActivity.mDid.indexOf("E28011") == 0) {
+                            int iValue = Integer.valueOf(MainActivity.mDid.substring("E28011".length()), 16);
+                            if ((iValue & 0x20) != 0) bFastId = true;
+                            MainActivity.mCs108Library4a.appendToLog("HelloK: iValue = " + String.format("%02X", iValue));
+                        }
+                    }
+                    MainActivity.mCs108Library4a.appendToLog("HelloK: strMdid = " + strMdid + ", MainMdid = " + MainActivity.mDid + ", bFastId = " + bFastId);
+
+                    int iPc = Integer.parseInt(strPc, 16);
+                    String strXpc = null; int iSensorData = ReaderDevice.INVALID_SENSORDATA; if ((iPc & 0x0200) != 0) {
+                        int iXpcw1 = Integer.parseInt(strEpc.substring(0,4), 16);
+                        if ((iXpcw1 & 0x8000) != 0) {
+                            strXpc = strEpc.substring(0,8);
+                            strEpc = strEpc.substring(8); strAddresss = strEpc;
+                            if (strMdid != null) {
+                                if (strMdid.indexOf("E280B12") == 0) {
+                                    int iXpcw2 = Integer.parseInt(strXpc.substring(4,8), 16);
+                                    if ((iXpcw1 & 0x8100) != 0 && (iXpcw2 & 0xF000) == 0) {
+                                        if ((iXpcw2 & 0x0C00) == 0x0C00) {
+                                            //iXpcw2 |= 0x200;
+                                            iSensorData = iXpcw2 & 0x1FF;
+                                            if ((iXpcw2 & 0x200) != 0) {
+                                                iSensorData ^= 0x1FF; iSensorData++; iSensorData = -iSensorData;
+                                                //MainActivity.mCs108Library4a.appendToLog(String.format("Hello123: iXpcw2 = %04X, iSensorData = %d", iXpcw2, iSensorData ));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            strXpc = strEpc.substring(0,4);
+                            strEpc = strEpc.substring(4); strAddresss = strEpc;
+                        }
+                    }
+
+                    if (bFastId) {
+                        String strEpc1 = null, strTid = null;
+                        boolean bValidFastId = false;
+                        if (strEpc.length() > 24) {
+                            strEpc1 = strEpc.substring(0, strEpc.length() - 24);
+                            strTid = strEpc.substring(strEpc.length() - 24, strEpc.length());
+                            if (strTid.indexOf("E28011") == 0) {
+                                strEpc = strEpc1; strAddresss = strEpc;
+                                strExtra2 = strTid;
+                                extra2Bank = 2;
+                                data2_offset = 0;
+                                bValidFastId = true;
+                            }
+                        }
+                        if (bValidFastId == false) return;
+                        MainActivity.mCs108Library4a.appendToLog("HelloK: Doing IMPINJ Inventory  with strMdid = " + strMdid + ", strEpc1 = " + strEpc1 + ":, strTid = " + strTid);
+                    } else if (strMdid != null && MainActivity.mDid != null) {
+                        if (MainActivity.mDid.matches("E2806894B")) {
+                            if (strEpc.length() >= 24) {
+                                String strEpc1 = strEpc.substring(0, strEpc.length() - 24);
+                                String strTid = strEpc.substring(strEpc.length() - 24, strEpc.length());
+                                if (strExtra1 != null) {
+                                    if (strExtra1.length() == 8 && strTid.contains(strExtra1)) {
+                                        strEpc = strEpc1; strAddresss = strEpc;
+                                        strExtra2 = strTid;
+                                        extra2Bank = 2;
+                                        data2_offset = 0;
+                                    }
+                                }
+                            }
+                        } else if (MainActivity.mDid.matches("E2806894C")) {
+                            if (strExtra1 != null && strEpc.length() >= 4) {
+                                if (strExtra1.contains("E2806894")) {
+                                    String strEpc1 = strEpc.substring(0, strEpc.length() - 4);
+                                    String strTid = strEpc.substring(strEpc.length() - 4, strEpc.length());
+                                    strEpc = strEpc1; strAddresss = strEpc;
+                                    brand = strTid;
+                                    MainActivity.mCs108Library4a.appendToLog("HelloK: brand 1 = " + brand + ", strEpc = " + strEpc);
+                                }
+                            }
                         }
                     }
                     rssi = rx000pkgData.decodedRssi;
@@ -331,7 +402,9 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             readerDevice = tagsList.get(iMatchItem);
                             int count = readerDevice.getCount();
                             count++;
+                            MainActivity.mCs108Library4a.appendToLog("HelloK: updated Epc = " + readerDevice.getAddress() + ", brand = " + brand);
                             readerDevice.setCount(count);
+                            readerDevice.setXpc(strXpc);
                             readerDevice.setRssi(rssi);
                             readerDevice.setPhase(phase);
                             readerDevice.setChannel(chidx);
@@ -341,7 +414,9 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             readerDevice.setBackport2(backport2);
                             readerDevice.setCodeSensor(codeSensor);
                             readerDevice.setCodeRssi(codeRssi);
+                            readerDevice.setBrand(brand);
                             readerDevice.setCodeTempC(codeTempC);
+                            readerDevice.setSensorData(iSensorData);
                             readerDevice.setExtra(strExtra1, extra1Bank, data1_offset, strExtra2, extra2Bank, data2_offset);
                             tagsList.set(iMatchItem, readerDevice);
                             match = true;
@@ -354,13 +429,14 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             strEpcOld = strEpc;
                             updated = true;
                         } else {
+                            MainActivity.mCs108Library4a.appendToLog("HelloK: New Epc = " + strEpc + ", brand = " + brand);
                             ReaderDevice readerDevice = new ReaderDevice("", strEpc, false, null,
-                                    strPc, strCrc16, strMdid,
+                                    strPc, strXpc, strCrc16, strMdid,
                                     strExtra1, extra1Bank, data1_offset,
                                     strExtra2, extra2Bank, data2_offset,
                                     new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS").format(new Date()), new SimpleDateFormat("z").format(new Date()).replaceAll("GMT", ""),
                                     MainActivity.mSensorConnector.mLocationDevice.getLocation(), MainActivity.mSensorConnector.mSensorDevice.getEcompass(),
-                                    1, rssi, phase, chidx, port, portstatus, backport1, backport2, codeSensor, codeRssi, codeTempC);
+                                    1, rssi, phase, chidx, port, portstatus, backport1, backport2, codeSensor, codeRssi, codeTempC, brand, iSensorData);
                             if (bAdd2End) tagsList.add(readerDevice);
                             else tagsList.add(0, readerDevice);
                             SharedObjects.TagsIndex tagsIndex = new SharedObjects.TagsIndex(strAddresss, tagsList.size()-1); MainActivity.sharedObjects.tagsIndexList.add(tagsIndex); Collections.sort(MainActivity.sharedObjects.tagsIndexList);
@@ -513,7 +589,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     public InventoryRfidTask(Context context, int extra1Bank, int extra2Bank, int data1_count, int data2_count, int data1_offset, int data2_offset,
                              boolean invalidRequest, boolean beepEnable,
                              ArrayList<ReaderDevice> tagsList, ReaderListAdapter readerListAdapter, TextView geigerTagRssiView,
-                             String strExtra1Filter, String strMdid,
+                             String strMdid,
                              TextView rfidRunTime, TextView geigerTagGotView, TextView rfidVoltageLevel,
                              TextView rfidYieldView, Button button, TextView rfidRateView) {
         this.context = context;
@@ -530,8 +606,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         this.geigerTagRssiView = geigerTagRssiView;
         this.tagsList = tagsList;
         this.readerListAdapter = readerListAdapter;
-        this.strExtra1Filter = strExtra1Filter;
-        this.strMdid = strMdid;
+        this.strMdid = strMdid; MainActivity.mCs108Library4a.appendToLog("HelloK: strMdid = " + strMdid);
 
         this.rfidRunTime = rfidRunTime;
         this.geigerTagGotView = geigerTagGotView;
@@ -599,7 +674,6 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     }
 
     String decodeMicronData(String strActData, String strCalData) {
-        MainActivity.mCs108Library4a.appendToLog("Hello2: strCalData = " + strCalData + ", strActData = " + strActData);
         int iTag35 = -1;
         if (strMdid.contains("E282402")) iTag35 = 2;
         else if (strMdid.contains("E282403")) iTag35 = 3;
@@ -638,7 +712,6 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                 calTemp2 &= 0x7FF;
                 calVer = Integer.parseInt(strCalData.substring(15, 16), 16);
                 calVer &= 0x3;
-                MainActivity.mCs108Library4a.appendToLog("Hello2: bExtraFilter: crc = " + crc + ", code1 = " + calCode1 + ", temp1 = " + calTemp1 + ", code2 = " + calCode2 + ", temp2 = " + calTemp2 + ", ver = " + calVer);
 
                 if (strActData == null) return null;
                 if (strActData.length() < 8) return null;

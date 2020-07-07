@@ -20,7 +20,8 @@ public class AxzonFragment extends CommonFragment {
     private ViewPager viewPager;
     AxzonAdapter mAdapter;
 
-    private String[] tabs = { "Config/Read", "Select Tag", "Logger", "Security" };
+    private String[] tabs = { "Scan/Select", "Read" };
+    private String[] tabsXerxes = { "Logger", "Security" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -30,16 +31,16 @@ public class AxzonFragment extends CommonFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) mAdapter.fragment1;
+        InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) mAdapter.fragment0;
         switch (item.getItemId()) {
             case R.id.menuAction_1:
-                fragment1.clearTagsList();
+                fragment.clearTagsList();
                 return true;
             case R.id.menuAction_2:
-                fragment1.sortTagsList();
+                fragment.sortTagsList();
                 return true;
             case R.id.menuAction_3:
-                fragment1.saveTagsList();
+                fragment.saveTagsList();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -54,16 +55,23 @@ public class AxzonFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_inv);
         actionBar.setTitle("A"); //"Axzon");
 
+        boolean bXervesTag = false;
+        if (MainActivity.mDid != null) if (MainActivity.mDid.matches("E282405")) bXervesTag = true;
+
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        MainActivity.mDid = "E28240";
-        mAdapter = new AxzonAdapter(getActivity().getSupportFragmentManager());
+        mAdapter = AxzonAdapter.newinstance(getActivity().getSupportFragmentManager(), (bXervesTag ? 4 : 2));
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
         viewPager.setAdapter(mAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
         for (String tab_name : tabs) {
             tabLayout.addTab(tabLayout.newTab().setText(tab_name));
+        }
+        if (bXervesTag) {
+            for (String tab_name : tabsXerxes) {
+                tabLayout.addTab(tabLayout.newTab().setText(tab_name));
+            }
         }
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -120,7 +128,6 @@ public class AxzonFragment extends CommonFragment {
         if (mAdapter.fragment1 != null) if (mAdapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment1.onDestroy();
         if (mAdapter.fragment2 != null) if (mAdapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment2.onDestroy();
         if (mAdapter.fragment3 != null) if (mAdapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment3.onDestroy();
-        MainActivity.mCs108Library4a.appendToLog("Hello4: restoreAfterTagSelect");
         MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }
@@ -134,7 +141,5 @@ public class AxzonFragment extends CommonFragment {
         super.onDetach();
     }
 
-    public AxzonFragment() {
-        super("AxzonFragment");
-    }
+    public AxzonFragment() { super("AxzonFragment"); }
 }

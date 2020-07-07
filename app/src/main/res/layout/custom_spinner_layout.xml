@@ -4,4 +4,5 @@
     android:singleLine="true"
     android:layout_width="wrap_content"
     android:gravity="center"
+	android:background="#00FFFF"
     android:layout_height="wrap_content"/>

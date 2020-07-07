@@ -20,7 +20,7 @@ import com.csl.cs108ademoapp.SettingTask;
 
 public class SettingAdminFragment extends CommonFragment {
     private CheckBox checkBoxInventoryBeep, checkBoxInventoryVibrate, checkBoxSaveFileEnable, checkBoxSaveCloudEnable, checkBoxSaveNewCloudEnable, checkBoxSaveAllCloudEnable;
-    private EditText editTextDeviceName, editTextTagDelay, editTextCycleDelay, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout;
+    private EditText editTextDeviceName, editTextCycleDelay, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout;
     private TextView textViewReaderModel;
     private Spinner spinnerQueryBattery, spinnerQueryRssi, spinnerQueryVibrateMode;
     private Button buttonCSLServer, button;
@@ -32,7 +32,6 @@ public class SettingAdminFragment extends CommonFragment {
     int rssiDisplaySelect = -1;
     int vibrateModeSelect = -1;
     String deviceName = "";
-    byte byteTagDelay = -1; byte byteTagDelayMin = 0; byte byteTagDelayMax = 63;
     long cycleDelay = -1; long cycleDelayMin = 0; long cycleDelayMax = 2000;
     int iBeepCount = -1; int iBeepCountMin = 1; int iBeepCountMax = 100;
     int iVibrateTime = -1; int iVibrateTimeMin = 1; int iVibrateTimeMax = 999;
@@ -81,12 +80,6 @@ public class SettingAdminFragment extends CommonFragment {
             targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerQueryVibrateMode.setAdapter(targetAdapter);
         }
-
-        TextView textViewAdminTagDelayLabel = (TextView) getActivity().findViewById(R.id.settingAdminTagDelayLabel);
-        String stringAdminTagDelayLabel = textViewAdminTagDelayLabel.getText().toString();
-        stringAdminTagDelayLabel += "(" + String.valueOf(byteTagDelayMin) + "-" + String.valueOf(byteTagDelayMax) + "ms)";
-        textViewAdminTagDelayLabel.setText(stringAdminTagDelayLabel);
-        editTextTagDelay = (EditText) getActivity().findViewById(R.id.settingAdminTagDelay);
 
         TextView textViewAdminCycleDelayLabel = (TextView) getActivity().findViewById(R.id.settingAdminCycleDelayLabel);
         String stringAdminCycleDelayLabel = textViewAdminCycleDelayLabel.getText().toString();
@@ -251,7 +244,6 @@ public class SettingAdminFragment extends CommonFragment {
                         batteryDisplaySelect = spinnerQueryBattery.getSelectedItemPosition();
                         rssiDisplaySelect = spinnerQueryRssi.getSelectedItemPosition();
                         vibrateModeSelect = spinnerQueryVibrateMode.getSelectedItemPosition();
-                        if (editTextTagDelay != null)   byteTagDelay = Byte.parseByte(editTextTagDelay.getText().toString());
                         if (editTextCycleDelay != null)   cycleDelay = Long.parseLong(editTextCycleDelay.getText().toString());
                         if (editTextBeepCount != null)   iBeepCount = Integer.parseInt(editTextBeepCount.getText().toString());
                         if (editTextVibrateTime != null)    iVibrateTime = Integer.parseInt(editTextVibrateTime.getText().toString());
@@ -313,7 +305,6 @@ public class SettingAdminFragment extends CommonFragment {
             spinnerQueryBattery.setSelection(MainActivity.mCs108Library4a.getBatteryDisplaySetting());
             spinnerQueryRssi.setSelection(MainActivity.mCs108Library4a.getRssiDisplaySetting());
             spinnerQueryVibrateMode.setSelection(MainActivity.mCs108Library4a.getVibrateModeSetting());
-            if (editTextTagDelay != null)   editTextTagDelay.setText(String.valueOf(MainActivity.mCs108Library4a.getTagDelay()));
             if (editTextCycleDelay != null)   editTextCycleDelay.setText(String.valueOf(MainActivity.mCs108Library4a.getCycleDelay()));
             if (editTextBeepCount != null)   editTextBeepCount.setText(String.valueOf(MainActivity.mCs108Library4a.getBeepCount()));
             if (editTextVibrateTime != null)   editTextVibrateTime.setText(String.valueOf(MainActivity.mCs108Library4a.getVibrateTime()));
@@ -361,14 +352,6 @@ public class SettingAdminFragment extends CommonFragment {
             sameSetting = false;
             if (MainActivity.mCs108Library4a.setVibrateModeSetting(vibrateModeSelect) == false)
                 invalidRequest = true;
-        }
-        if (invalidRequest == false && editTextTagDelay != null) {
-            if (MainActivity.mCs108Library4a.getTagDelay() != byteTagDelay || sameCheck == false) {
-                sameSetting = false;
-                if (byteTagDelay < byteTagDelayMin || byteTagDelay > byteTagDelayMax) invalidRequest = true;
-                else if (MainActivity.mCs108Library4a.setTagDelay(byteTagDelay) == false)
-                    invalidRequest = true;
-            }
         }
         if (invalidRequest == false && editTextCycleDelay != null) {
             if (MainActivity.mCs108Library4a.getCycleDelay() != cycleDelay || sameCheck == false) {

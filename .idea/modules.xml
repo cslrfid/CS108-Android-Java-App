@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CslCs108AndroidJavaApp.iml" filepath="$PROJECT_DIR$/CslCs108AndroidJavaApp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/cs108library4a/cs108library4a.iml" filepath="$PROJECT_DIR$/cs108library4a/cs108library4a.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CslCs108AndroidJavaApp.iml" filepath="$PROJECT_DIR$/CslCs108AndroidJavaApp.iml" group="CslCs108AndroidJavaApp" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="CslCs108AndroidJavaApp/app" />
+      <module fileurl="file://$PROJECT_DIR$/cs108library4a/cs108library4a.iml" filepath="$PROJECT_DIR$/cs108library4a/cs108library4a.iml" group="CslCs108AndroidJavaApp/cs108library4a" />
     </modules>
   </component>
 </project>

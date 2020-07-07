@@ -3,44 +3,39 @@ package com.csl.cs108library4a;
 import android.bluetooth.BluetoothDevice;
 
 public class ReaderDevice implements Comparable<ReaderDevice>  {
-    boolean isUsbDevice;
     private BluetoothDevice bluetoothDevice;
     private String name;
     private String address;
     boolean selected;
     private String details;
     int extra1Bank, extra2Bank, extra1Offset, extra2Offset;
-    String strPc, strCrc16, strMdid, strExtra1, strExtra2;
+    String strPc, strXpc, strCrc16, strMdid, strExtra1, strExtra2;
     private int count;
     private double rssi;
     private int phase, channel, port;
     public final int INVALID_STATUS = -1;
     private int status = INVALID_STATUS;
-    public final int INVALID_BACKPORT = -1, INVALID_CODESENSOR = -1, INVALID_CODERSSI = -1; public final float INVALID_CODETEMPC = -300;
+    public static final int INVALID_BACKPORT = -1, INVALID_CODESENSOR = -1, INVALID_CODERSSI = -1, INVALID_BRAND = -1, INVALID_SENSORDATA = 0x1000; public final float INVALID_CODETEMPC = -300;
     private int backport1 = INVALID_BACKPORT, backport2 = INVALID_BACKPORT;
-    private int codeSensor = INVALID_CODESENSOR, codeRssi = INVALID_CODERSSI; private float codeTempC = INVALID_CODETEMPC;
+    private int codeSensor = INVALID_CODESENSOR, codeRssi = INVALID_CODERSSI, sensorData = INVALID_SENSORDATA; private float codeTempC = INVALID_CODETEMPC; private String brand;
     private boolean isConnected;
     private String timeOfRead, timeZone;
     private String location;
     private String compass;
 
     public ReaderDevice(String name, String address, boolean selected, String details,
-                              String strPc, String strCrc16, String strMdid,
+                              String strPc, String strXpc, String strCrc16, String strMdid,
                               String strExtra1, int extra1Bank, int extra1Offset,
                               String strExtra2, int extra2Bank, int extra2Offset,
                               String strTimeOfRead, String strTimeZone, String strLocation, String strCompass,
-                              int count, double rssi, int phase, int channel, int port, int status, int backPort1, int backPort2, int codeSensor, int codeRssi, float codeTempC) {
-        if (address.contains(":")) {
-            isUsbDevice = false;
-        } else {
-            isUsbDevice = true;
-        }
+                              int count, double rssi, int phase, int channel, int port, int status, int backPort1, int backPort2, int codeSensor, int codeRssi, float codeTempC, String brand, int sensorData) {
         bluetoothDevice = null;
         this.name = name;
         this.address = address;
         this.selected = selected;
         this.details = details;
         this.strPc = strPc;
+        this.strXpc = strXpc;
         this.strCrc16 = strCrc16;
         this.strMdid = strMdid;
         this.strExtra1 = strExtra1;
@@ -67,15 +62,11 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.codeSensor = codeSensor;
         this.codeRssi = codeRssi;
         this.codeTempC = codeTempC;
+        this.brand = brand;
+        this.sensorData = sensorData;
     }
 
     public ReaderDevice(BluetoothDevice bluetoothDevice, String name, String address, boolean selected, String details, int count, double rssi) {
-        if (address == null) isUsbDevice = false;
-        else if (address.contains(":")) {
-            isUsbDevice = false;
-        } else {
-            isUsbDevice = true;
-        }
         this.bluetoothDevice = bluetoothDevice;
         this.name = name;
         this.address = address;
@@ -96,11 +87,9 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.name = name;
     }
 
-    public String getAddress() {
-        return address;
-    }
+    public String getAddress() { return address; }
 
-    void setAddress(String address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 
@@ -115,6 +104,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     public String getDetails() {
         if (details == null) {
             String strDetail = "PC=" + strPc + ", CRC16=" + strCrc16; // + ", Port=" + String.valueOf(port+1);
+            if (strXpc != null) strDetail += "\nXPC=" + strXpc;
             if (strExtra1 != null) {
                 String strHeader = null;
                 switch (extra1Bank) {
@@ -163,6 +153,14 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     }
 
     public String getPc() { return strPc; }
+
+    public String getXpc() {
+        return strXpc;
+    }
+    public void setXpc(String strXpc) {
+        this.strXpc = strXpc;
+    }
+
     public String getRes() {
         if (extra1Bank == 0) return strExtra1;
         else if (extra2Bank == 0) return strExtra2;
@@ -206,12 +204,8 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.rssi = rssi;
     }
 
-    public int getPhase() {
-        return phase;
-    }
-    public void setPhase(int phase) {
-        this.phase = phase;
-    }
+    public int getPhase() { return phase; }
+    public void setPhase(int phase) { this.phase = phase; }
 
     public int getChannel() {
         return channel;
@@ -257,12 +251,20 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.codeRssi = codeRssi;
     }
 
-    public float getCodeTempC() {
-        return codeTempC;
-    }
+    public float getCodeTempC() { return codeTempC; }
     public void setCodeTempC(float codeTempC) {
         this.codeTempC = codeTempC;
     }
+
+    public String getBrand() {
+        return brand;
+    }
+    public void setBrand(String brand) { this.brand = brand; }
+
+    public int getSensorData() {
+        return sensorData;
+    }
+    public void setSensorData(int sensorData) { this.sensorData = sensorData; }
 
     public void setExtra(String strExtra1, int extra1Bank, int extra1Offset, String strExtra2, int extra2Bank, int extra2Offset) {
         this.strExtra1 = strExtra1;
@@ -288,14 +290,6 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     public void setLocation(String location) { this.location = location; }
     public String getCompass() { return compass; }
     public void setCcompass(String compass) { this.compass = compass; }
-
-    BluetoothDevice getBluetoothDevice() {
-        return bluetoothDevice;
-    }
-
-    void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
-        this.bluetoothDevice = bluetoothDevice;
-    }
 
     @Override
     public boolean equals(Object o) {

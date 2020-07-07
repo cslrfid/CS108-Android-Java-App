@@ -21,7 +21,7 @@ public class UcodeAdapter extends FragmentStatePagerAdapter {
                 fragment0 = fragment;
                 break;
             case 1:
-                fragment = InventoryRfidiMultiFragment.newInstance(true,"E2C06", true);
+                fragment = InventoryRfidiMultiFragment.newInstance(true,"E2C06");
                 fragment1 = fragment;
                 break;
             default:

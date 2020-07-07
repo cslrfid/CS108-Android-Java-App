@@ -1,6 +1,7 @@
 package com.csl.cs108ademoapp.adapters;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,12 +48,12 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("position = " + position);
         ReaderDevice reader = readersList.get(position);
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(resourceId, null);
         }
+
         CheckedTextView checkedTextView = (CheckedTextView) convertView.findViewById(R.id.reader_checkedtextview);
         String text1 = "";
         if (reader.getName() != null) {
@@ -101,41 +102,55 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
             portTextView.setVisibility(View.VISIBLE);
             int codeStatus = reader.getStatus();
             int codeSensor = reader.getCodeSensor(); int codeRssi = reader.getCodeRssi(); float codeTempC = reader.getCodeTempC();
-            if (codeStatus > reader.INVALID_STATUS) {
-                String strExtra = "";
+            String brand = reader.getBrand();
+            String strExtra = "";
+            if (codeStatus > reader.INVALID_STATUS) { //for Bap tags
                 int portstatus = reader.getStatus(); if (portstatus > reader.INVALID_STATUS) {
                     if ((portstatus & 2) == 0) strExtra += "Bat OK";
                     else strExtra += "Bat NG";
                     if ((portstatus & 4) != 0) strExtra += "\nTemper NG";
-                    portTextView.setText(strExtra);
                 }
-            } else if (codeSensor > reader.INVALID_CODESENSOR && codeRssi > reader.INVALID_CODERSSI) {
-                String strExtra = "";
-                int backport = reader.getBackport1(); if (backport > reader.INVALID_BACKPORT) strExtra += String.format("BP1=%d", backport);
-                backport = reader.getBackport2(); if (backport > reader.INVALID_BACKPORT) { if (strExtra.length() != 0) strExtra += "\n"; strExtra += String.format("BP2=%d", backport); }
-                if (strExtra.length() != 0) strExtra += "\n"; strExtra += "SC=" + String.format("%d", codeSensor);
-                strExtra += ("\nOCRSSI=" + String.format("%d", codeRssi));
-                if (codeTempC > reader.INVALID_CODETEMPC) strExtra += ("\nT=" + String.format("%.1f", codeTempC) + (char) 0x00B0 + "C");
-                portTextView.setText(strExtra);
+            } else if (codeSensor > reader.INVALID_CODESENSOR && codeRssi > reader.INVALID_CODERSSI) { //for Axzon/Magnus tags
+                strExtra = "SC=" + String.format("%d", codeSensor);
+                int ocrssiMin = -1; int ocrssiMax = -1; boolean bValidOcrssi = false;
+                ocrssiMax = Integer.parseInt(MainActivity.config.config1);
+                ocrssiMin = Integer.parseInt(MainActivity.config.config2);
+                if (ocrssiMax > 0 && ocrssiMin > 0 && (codeRssi > ocrssiMax || codeRssi < ocrssiMin)) strExtra += ("\n<font color=red>OCRSSI=" + String.format("%d", codeRssi) + "</font>");
+                else {
+                    bValidOcrssi = true; strExtra += ("\nOCRSSI=" + String.format("%d", codeRssi));
+                }
+                if (codeTempC > reader.INVALID_CODETEMPC) {
+                    if (bValidOcrssi || portTextView.getText().toString().indexOf("T=") >= 0)
+                        strExtra += ("\nT=" + String.format("%.1f", codeTempC) + (char) 0x00B0 + "C");
+                }
+                int backport = reader.getBackport1(); if (backport > reader.INVALID_BACKPORT) strExtra += String.format("\nBP1=%d", backport);
+                backport = reader.getBackport2(); if (backport > reader.INVALID_BACKPORT) strExtra += String.format("\nBP2=%d", backport);
+            } else if (codeTempC > reader.INVALID_CODETEMPC) { //for Ctesius tags
+                strExtra = ("T=" + String.format("%.1f", codeTempC) + (char) 0x00B0 + "C");
+            } else if (reader.getDetails().contains("E2806894")) { //for code8 tags
+                strExtra = ((brand != null) ? ("Brand=" + brand) : "");
+            } else if (reader.getSensorData() < reader.INVALID_SENSORDATA) {
+                strExtra = "SD=" + String.valueOf(reader.getSensorData());
             }
+            if (strExtra.length() != 0) portTextView.setText(Html.fromHtml(strExtra));
         }
 
         TextView readerDetailA = (TextView) convertView.findViewById(R.id.reader_detailA);
         TextView readerDetailB = (TextView) convertView.findViewById(R.id.reader_detailB);
         if (reader.isConnected() || checkedTextView.isChecked() || select4detail == false) {
-            if (reader.getDetails().length() != 0) {
-                readerDetailA.setText(reader.getDetails());
-            }
+            readerDetailA.setText(reader.getDetails());
             readerDetailB.setText("");
             if (reader.isConnected()) {
                 readerDetailB.setText("Connected");
             } else {
                 int channel = reader.getChannel();
                 int phase = reader.getPhase();
+                String stringDetailB = null;
                 if (channel != 0 || phase != 0) {
                     double dChannel = MainActivity.mCs108Library4a.getLogicalChannel2PhysicalFreq(reader.getChannel());
-                    readerDetailB.setText("Phase=" + reader.getPhase() + "\n" + dChannel + "MHz");
+                    stringDetailB = "Phase=" + phase + "\n" + dChannel + "MHz";
                 }
+                if (stringDetailB != null) readerDetailB.setText(stringDetailB);
             }
             if (readerDetailA.getText().toString().length() != 0 || readerDetailB.getText().toString().length() != 0) {
                 readerDetailA.setVisibility(View.VISIBLE);

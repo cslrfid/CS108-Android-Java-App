@@ -21,7 +21,7 @@ public class ColdChainAdapter extends FragmentStatePagerAdapter {
                 fragment0 = fragment;
                 break;
             case 1:
-                fragment = InventoryRfidiMultiFragment.newInstance(true,"E280B", true);
+                fragment = InventoryRfidiMultiFragment.newInstance(true,"E280B");
                 fragment1 = fragment;
                 break;
             default:

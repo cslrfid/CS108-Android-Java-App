@@ -6,8 +6,8 @@ android {
         applicationId "com.csl.cs108ademoapp"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 22
-        versionName "1.17.0"
+        versionCode 24
+        versionName "1.19.0"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -16,7 +16,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':cs108library4a')
-    compile 'com.android.support:design:28.0.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':cs108library4a')
+    implementation 'com.android.support:design:28.0.0'
 }

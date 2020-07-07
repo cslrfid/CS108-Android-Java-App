@@ -112,27 +112,6 @@
             android:layout_gravity="center_vertical">
 
             <TextView
-                android:id="@+id/settingAdminTagDelayLabel"
-                android:layout_width="0dp"
-                android:layout_weight="4"
-                style="@style/style_normal_font"
-                android:text="'Compact' Inventory delay time" />
-
-            <EditText
-                android:id="@+id/settingAdminTagDelay"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
                 android:id="@+id/settingAdminCycleDelayLabel"
                 android:layout_width="0dp"
                 android:layout_weight="4"

@@ -5,29 +5,24 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 
-import com.csl.cs108ademoapp.fragments.AccessUcode8Fragment;
+import com.csl.cs108ademoapp.fragments.AccessImpinjFragment;
 import com.csl.cs108ademoapp.fragments.InventoryRfidiMultiFragment;
-import com.csl.cs108ademoapp.fragments.UtraceFragment;
 
-public class Ucode8Adapter extends FragmentStatePagerAdapter {
+public class ImpinjAdapter extends FragmentStatePagerAdapter {
     private final int NO_OF_TABS = 2;
-    public Fragment fragment0, fragment1, fragment2;
+    public Fragment fragment0, fragment1;
 
     @Override
     public Fragment getItem(int index) {
         Fragment fragment = null;
         switch (index) {
             case 0:
-                fragment = new AccessUcode8Fragment();
+                fragment = new AccessImpinjFragment();
                 fragment0 = fragment;
                 break;
             case 1:
-                fragment = InventoryRfidiMultiFragment.newInstance(true,"E2806894");
+                fragment = InventoryRfidiMultiFragment.newInstance(false,"");
                 fragment1 = fragment;
-                break;
-            case 2:
-                fragment = new UtraceFragment();
-                fragment2 = fragment;
                 break;
             default:
                 fragment = null;
@@ -46,7 +41,7 @@ public class Ucode8Adapter extends FragmentStatePagerAdapter {
         return PagerAdapter.POSITION_NONE;
     }
 
-    public Ucode8Adapter(FragmentManager fm) {
+    public ImpinjAdapter(FragmentManager fm) {
         super(fm);
     }
 }

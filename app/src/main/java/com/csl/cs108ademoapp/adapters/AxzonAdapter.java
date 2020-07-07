@@ -11,7 +11,7 @@ import com.csl.cs108ademoapp.fragments.AccessXerxesLoggerFragment;
 import com.csl.cs108ademoapp.fragments.InventoryRfidiMultiFragment;
 
 public class AxzonAdapter extends FragmentStatePagerAdapter {
-    private final int NO_OF_TABS = 4;
+    public int NO_OF_TABS = 4;
     public Fragment fragment0, fragment1, fragment2, fragment3;
 
     @Override
@@ -19,11 +19,11 @@ public class AxzonAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = null;
         switch (index) {
             case 0:
-                fragment = AccessMicronFragment.newInstance(true);
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "");
                 fragment0 = fragment;
                 break;
             case 1:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "", false);
+                fragment = AccessMicronFragment.newInstance(true);
                 fragment1 = fragment;
                 break;
             case 2:
@@ -51,6 +51,11 @@ public class AxzonAdapter extends FragmentStatePagerAdapter {
         return PagerAdapter.POSITION_NONE;
     }
 
+    public static AxzonAdapter newinstance(FragmentManager fm, int tabsCount) {
+        AxzonAdapter adapter = new AxzonAdapter(fm);
+        adapter.NO_OF_TABS = tabsCount;
+        return adapter;
+    }
     public AxzonAdapter(FragmentManager fm) {
         super(fm);
     }

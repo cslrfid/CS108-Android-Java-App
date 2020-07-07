@@ -46,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
     Handler mHandler = new Handler();
 
     public static String mDid; public static int selectHold; public static int selectFor;
+    public static class Config {
+        public String configPassword, configPower, config0, config1, config2;
+    };
+    public static Config config  = new Config();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState == null) Log.i(TAG, "MainActivity.onCreate: NULL savedInstanceState");
@@ -176,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case MULTIBANK:
                 mDid = null;
-                fragment = InventoryRfidiMultiFragment.newInstance(true, null, false);
+                fragment = InventoryRfidiMultiFragment.newInstance(true, null);
                 break;
             case SETTING:
                 fragment = new SettingFragment();
@@ -197,21 +202,28 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new ColdChainFragment();
                 break;
             case BAPCARD:
-                mDid = "E200B0";
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "", false);
-//                fragment = new BapCardFragment();
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "E200B0");
+                break;
+            case CTESIUS:
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "E203510");
+                break;
+            case AURASENSE:
+                fragment = new AuraSenseFragment();
                 break;
             case AXZON:
-                fragment = new AxzonFragment();
+                fragment = AxzonSelectorFragment.newInstance(true);
                 break;
             case RFMICRON:
-                fragment = new MicronFragment();
+                fragment = AxzonSelectorFragment.newInstance(false);
                 break;
             case UCODE:
                 fragment = new UcodeFragment();
                 break;
             case UCODE8:
                 fragment = new Ucode8Fragment();
+                break;
+            case IMPINVENTORY:
+                fragment = new ImpinjFragment();
                 break;
             case WEDGE:
                 fragment = new HomeSpecialFragment();
@@ -300,12 +312,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void coldChainClicked(View view) { selectItem(DrawerPositions.COLDCHAIN); }
     public void bapCardClicked(View view) { selectItem(DrawerPositions.BAPCARD); }
+    public void ctesiusClicked(View view) { selectItem(DrawerPositions.CTESIUS); }
 
     public void axzonClicked(View view) { selectItem(DrawerPositions.AXZON); }
     public void rfMicronClicked(View view) { selectItem(DrawerPositions.RFMICRON); }
 
     public void uCodeClicked(View view) { selectItem(DrawerPositions.UCODE); }
-    public void uCode8Clicked(View view) { /*selectItem(DrawerPositions.UCODE8); */ }
+    public void uCode8Clicked(View view) { selectItem(DrawerPositions.UCODE8); }
+
+    public void impInventoryClicked(View view) { selectItem(DrawerPositions.IMPINVENTORY); }
+    public void aurasenseClicked(View view) { selectItem(DrawerPositions.AURASENSE); }
 
     static boolean wedged = false;
     public void wedgeClicked(View view) {
@@ -318,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void blankClicked(View view) {
-        selectItem(DrawerPositions.BLANK);
+//        selectItem(DrawerPositions.BLANK);
     }
 
     // The click listener for ListView in the navigation drawer

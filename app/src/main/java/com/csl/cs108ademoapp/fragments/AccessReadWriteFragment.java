@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -24,6 +25,7 @@ import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.ReaderDevice;
 
 import static com.csl.cs108ademoapp.MainActivity.mContext;
+import static com.csl.cs108ademoapp.MainActivity.tagSelected;
 
 public class AccessReadWriteFragment extends CommonFragment {
     Spinner spinnerSelectBank, spinnerRWSelectEpc1;
@@ -33,7 +35,7 @@ public class AccessReadWriteFragment extends CommonFragment {
     private Button buttonRead;
     private Button buttonWrite;
     Handler mHandler = new Handler();
-    String strPCValueRef;
+    String strPCValueRef = "";
 
     String accEpcValue = ""; String accXpcValue = ""; String accTidValue = ""; String accUserValue = "";
     enum ReadWriteTypes {
@@ -59,18 +61,45 @@ public class AccessReadWriteFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_access);
         actionBar.setTitle(R.string.title_activity_readwrite);
 
-        spinnerSelectBank = (Spinner) getActivity().findViewById(R.id.accessRWSelectBank);
+        spinnerSelectBank = (Spinner) getActivity().findViewById(R.id.selectMemoryBank);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSelectBank.setAdapter(targetAdapter);
-        editTextRWSelectOffset = (EditText) getActivity().findViewById(R.id.accessRWSelectOffset);
+        spinnerSelectBank.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: //if EPC
+                        if (tagSelected != null) editTextRWTagID.setText(tagSelected.getAddress());
+                        editTextRWSelectOffset.setText("32");
+                        break;
+                    case 1:
+                        if (tagSelected != null) { if (tagSelected.getTid() != null) editTextRWTagID.setText(tagSelected.getTid()); }
+                        editTextRWSelectOffset.setText("0");
+                        break;
+                    case 2:
+                        if (tagSelected != null) { if (tagSelected.getUser() != null) editTextRWTagID.setText(tagSelected.getUser()); }
+                        editTextRWSelectOffset.setText("0");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        editTextRWSelectOffset = (EditText) getActivity().findViewById(R.id.selectMemoryOffset);
         spinnerRWSelectEpc1 = (Spinner) getActivity().findViewById(R.id.accessRWEpc1Title1);
         ArrayAdapter<CharSequence> targetAdapter1 = ArrayAdapter.createFromResource(getActivity(), R.array.memoryBank_options, R.layout.custom_spinner_layout);
         targetAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerRWSelectEpc1.setAdapter(targetAdapter1); spinnerRWSelectEpc1.setSelection(1);
 
-        editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessRWTagID);
-        editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessRWAccPasswordValue);
+        editTextRWTagID = (EditText) getActivity().findViewById(R.id.selectTagID);
+        editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.selectPasswordValue);
         editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
         editTextAccessRWAccPassword.setText("00000000");
         editTextAccessRWKillPwd = (EditText) getActivity().findViewById(R.id.accessRWKillPwdValue);
@@ -89,7 +118,7 @@ public class AccessReadWriteFragment extends CommonFragment {
         editTextEpcValue = (EditText) getActivity().findViewById(R.id.accessRWEpcValue);
         editTextEpcValue.setHint("Data Pattern");
 
-        editTextaccessRWAntennaPower = (EditText) getActivity().findViewById(R.id.accessRWAntennaPower);
+        editTextaccessRWAntennaPower = (EditText) getActivity().findViewById(R.id.selectAntennaPower);
         editTextaccessRWAntennaPower.setText(String.valueOf(300));
 
         textViewEpcLength = (TextView) getActivity().findViewById(R.id.accessRWAccEpcLength);
@@ -159,67 +188,48 @@ public class AccessReadWriteFragment extends CommonFragment {
         return number2;
     }
     void updatePCEpc(String strPCValue, String strEpcValue) {
-        if (false) {
-            int iWordCount = 0;
-            if (strPCValue != null) {
-                if (strPCValue.length() != 0) editTextAccPc.setText(strPCValue);
-                iWordCount = getPC2EpcWordCount(strPCValue);
-                textViewEpcLength.setText("EPC has " + (iWordCount * 16) + " bits");
+        boolean needPopup = false;
+        if (strPCValue == null) strPCValue = "";
+        if (strPCValue.length() != 0) editTextAccPc.setText(strPCValue);
+        else strPCValue = strPCValueRef;
+        if (strPCValueRef != null && strPCValue != null) {
+            if (strPCValue.matches(strPCValueRef) == false && strPCValue.length() == 4) {
+                needPopup = true;
+                strPCValueRef = strPCValue;
             }
-            if (strEpcValue != null) {
-                if (strEpcValue.length() != 0) {
-                    editTextRWTagID.setText(strEpcValue); editTextAccessRWEpc.setText(strEpcValue);
-                    editTextAccessRWEpc.addTextChangedListener(new GenericTextWatcher(editTextAccessRWEpc, iWordCount * 4));
-                }
-            }
+        }
+
+        int iWordCount = getPC2EpcWordCount(strPCValue);
+        textViewEpcLength.setText("EPC has " + (iWordCount * 16) + " bits");
+        if (strEpcValue != null) {
+            tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) editTextRWTagID.setText(strEpcValue);
+            editTextAccessRWEpc.setText(strEpcValue);
         } else {
-            boolean needPopup = false;
-            boolean needMaskUpdate = false;
-            if (spinnerSelectBank.getSelectedItemPosition() == 0) needMaskUpdate = true;
-            if (DEBUG)
-                MainActivity.mCs108Library4a.appendToLog("strPCValueRef strPCValue = " + strPCValue + "strPCValueRef A = " + strPCValueRef + ", strEpcValue = " + strEpcValue);
-            if (strPCValue == null) strPCValue = "";
-            if (strPCValue.length() != 0) editTextAccPc.setText(strPCValue);
-            else strPCValue = strPCValueRef;
-            if (strPCValueRef != null && strPCValue != null) {
-                if (strPCValue.matches(strPCValueRef) == false && strPCValue.length() == 4) {
-                    needPopup = true;
-                    strPCValueRef = strPCValue;
-                }
+            if (iWordCount * 4 < editTextRWTagID.getText().toString().length()) {
+                // needPopup = true;
+                String strTemp = editTextRWTagID.getText().toString().substring(0, iWordCount * 4);
+                tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) editTextRWTagID.setText(strTemp);
             }
-
-            int iWordCount = getPC2EpcWordCount(strPCValue);
-            textViewEpcLength.setText("EPC has " + (iWordCount * 16) + " bits");
-            if (strEpcValue != null) {
-                if (needMaskUpdate) editTextRWTagID.setText(strEpcValue);
-                editTextAccessRWEpc.setText(strEpcValue);
-            } else {
-                if (iWordCount * 4 < editTextRWTagID.getText().toString().length()) {
+            if (iWordCount * 4 < editTextAccessRWEpc.getText().toString().length()) {
+                // needPopup = true;
+                String strTemp = editTextAccessRWEpc.getText().toString().substring(0, iWordCount * 4);
+                editTextAccessRWEpc.setText(strTemp);
+            }
+            if (editTextAccessRWEpc.getText().toString().length() != 0) {
+                String strTemp = editTextAccessRWEpc.getText().toString();
+                if (editTextRWTagID.getText().toString().matches(strTemp) == false) {
                     // needPopup = true;
-                    String strTemp = editTextRWTagID.getText().toString().substring(0, iWordCount * 4);
-                    if (needMaskUpdate) editTextRWTagID.setText(strTemp);
-                }
-                if (iWordCount * 4 < editTextAccessRWEpc.getText().toString().length()) {
-                    // needPopup = true;
-                    String strTemp = editTextAccessRWEpc.getText().toString().substring(0, iWordCount * 4);
-                    editTextAccessRWEpc.setText(strTemp);
-                }
-                if (editTextAccessRWEpc.getText().toString().length() != 0) {
-                    String strTemp = editTextAccessRWEpc.getText().toString();
-                    if (editTextRWTagID.getText().toString().matches(strTemp) == false) {
-                        // needPopup = true;
-                        if (needMaskUpdate) editTextRWTagID.setText(strTemp);
-                    }
+                    tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) editTextRWTagID.setText(strTemp);
                 }
             }
-            editTextAccessRWEpc.addTextChangedListener(new GenericTextWatcher(editTextAccessRWEpc, iWordCount * 4));
-            String strTemp = editTextAccessRWEpc.getText().toString();
-            editTextAccessRWEpc.setText(strTemp);
+        }
+        editTextAccessRWEpc.addTextChangedListener(new GenericTextWatcher(editTextAccessRWEpc, iWordCount * 4));
+        String strTemp = editTextAccessRWEpc.getText().toString();
+        editTextAccessRWEpc.setText(strTemp);
 
-            if (needPopup) {
-                CustomPopupWindow customPopupWindow = new CustomPopupWindow(mContext);
-                customPopupWindow.popupStart("Changing EPC Length will automatically modify to " + (iWordCount * 16) + " bits.", false);
-            }
+        if (needPopup) {
+            CustomPopupWindow customPopupWindow = new CustomPopupWindow(mContext);
+            customPopupWindow.popupStart("Changing EPC Length will automatically modify to " + (iWordCount * 16) + " bits.", false);
         }
     }
 
@@ -443,7 +453,7 @@ public class AccessReadWriteFragment extends CommonFragment {
                     writeData = strValue + strValue1;
                 }
             }
-        } else if (checkBoxPc.isChecked() == true) {
+        } else if (checkBoxPc.isChecked() == true || ((checkBoxEpc.isChecked() == true) && (strPCValueRef.length() != 4) )) {
             textViewPcOk.setText("");
             accessBank = 1; accOffset = 1; accSize = 1; readWriteTypes = ReadWriteTypes.PC;
             if (operationRead) {

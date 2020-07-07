@@ -49,7 +49,6 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState, false);
-        MainActivity.mCs108Library4a.appendToLog("Hello5: buttonWrite ======");
         return inflater.inflate(R.layout.fragment_access_xerxes, container, false);
     }
 
@@ -161,7 +160,6 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.appendToLog("Hello5");
         if (accessTask != null) accessTask.cancel(true);
         MainActivity.mCs108Library4a.setSameCheck(true);
         super.onDestroy();
@@ -174,11 +172,9 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
         if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED) == false) return;
         if(getUserVisibleHint()) {
             userVisibleHint = true;
-            MainActivity.mCs108Library4a.appendToLog("Hello5: AccessXerxesLoggerFragment is now VISIBLE");
             setupTagID();
         } else {
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("Hello5: AccessXerxesLoggerFragment is now INVISIBLE");
         }
     }
 
@@ -315,25 +311,25 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
             if (accessResult == null) {
                 if (readWriteTypes == ReadWriteTypes.USERCODE1) {
                     textViewUserCode1OK.setText("E");
-                    checkBoxUserCode1.setChecked(false);
+                    //checkBoxUserCode1.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.USERCODE2) {
                     textViewUserCode2OK.setText("E");
-                    checkBoxUserCode2.setChecked(false);
+                    //checkBoxUserCode2.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.USERCODE3) {
                     textViewUserCode3OK.setText("E");
-                    checkBoxUserCode3.setChecked(false);
+                    //checkBoxUserCode3.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.USERCODE4) {
                     textViewUserCode4OK.setText("E");
-                    checkBoxUserCode4.setChecked(false);
+                    //checkBoxUserCode4.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.USERCODE5) {
                     textViewUserCode5OK.setText("E");
-                    checkBoxUserCode5.setChecked(false);
+                    //checkBoxUserCode5.setChecked(false);
                 }
             } else {
                 if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.USERCODE1) {
                     textViewUserCode1OK.setText("O");
-                    checkBoxUserCode1.setChecked(false);
+                    //checkBoxUserCode1.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (operationRead) {
                         int iValue = Integer.parseInt(accessResult, 16);
@@ -342,17 +338,17 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                     }
                 } else if (readWriteTypes == ReadWriteTypes.USERCODE2) {
                     textViewUserCode2OK.setText("O");
-                    checkBoxUserCode2.setChecked(false);
+                    //checkBoxUserCode2.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (operationRead)  setTemperatureCode(accessResult, 0);
                 } else if (readWriteTypes == ReadWriteTypes.USERCODE3) {
                     textViewUserCode3OK.setText("O");
-                    checkBoxUserCode3.setChecked(false);
+                    //checkBoxUserCode3.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (operationRead)  setTemperatureCode(accessResult, 1);
                 } else if (readWriteTypes == ReadWriteTypes.USERCODE4) {
                     textViewUserCode4OK.setText("O");
-                    checkBoxUserCode4.setChecked(false);
+                    //checkBoxUserCode4.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (operationRead) {
                         int iValue = Integer.parseInt(accessResult, 16);
@@ -361,7 +357,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                     }
                 } else if (readWriteTypes == ReadWriteTypes.USERCODE5) {
                     textViewUserCode5OK.setText("O");
-                    checkBoxUserCode5.setChecked(false);
+                    //checkBoxUserCode5.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (operationRead) {
                         int iValue = Integer.parseInt(accessResult, 16);

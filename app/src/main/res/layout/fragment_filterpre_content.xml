@@ -25,13 +25,23 @@
             style="@style/style_normal_font"
             android:text="@string/settingInvSelectMaskData_title" />
 
-        <EditText
-            android:id="@+id/filterPreMaskData"
+        <include
+            android:id="@+id/filterPreMaskDataHex"
             android:layout_width="0dp"
             android:layout_weight="2"
-            android:layout_height="wrap_content" />
-    </TableRow>
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
 
+        <EditText
+            android:id="@+id/filterPreMaskDataBit"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:digits="01"
+            style="@style/style_normal_font"
+            android:visibility="gone" />
+    </TableRow>
 
     <TableRow
         android:layout_width="match_parent"
@@ -100,7 +110,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_top_margin"
-        android:paddingLeft="10dp">
+        android:paddingLeft="10dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="0dp"
