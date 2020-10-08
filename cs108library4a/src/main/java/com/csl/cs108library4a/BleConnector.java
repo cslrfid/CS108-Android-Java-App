@@ -51,7 +51,7 @@ import static android.support.v4.app.ActivityCompat.requestPermissions;
 
 class BleConnector extends BluetoothGattCallback {
     final boolean appendToLogDisable = false;
-    final boolean DEBUG = true; boolean DEBUG_BTDATA = false; boolean DEBUG_BTDATA1 = false; boolean DEBUG_BTDATA0 = false;
+    final boolean DEBUG = true; boolean DEBUG_BTDATA = false; boolean DEBUG_BTDATA1 = false; boolean DEBUG_BTDATA0 = true;
     final boolean DEBUGlowLevel = true;
 
     private Context mContext;
@@ -395,6 +395,7 @@ class BleConnector extends BluetoothGattCallback {
         return false;
     }
 
+    boolean streamInRequest = false;
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
@@ -440,6 +441,10 @@ class BleConnector extends BluetoothGattCallback {
                     streamInBufferSize += v.length;
                     streamInAddCounter++;
                     streamInAddTime = currentBleConnectTimeMillis();
+                    if (streamInRequest == false) {
+                        streamInRequest = true;
+                        mHandler.removeCallbacks(runnableProcessCs108DataIn); mHandler.post(runnableProcessCs108DataIn);
+                    }
                 }
             }
         }
@@ -449,6 +454,16 @@ class BleConnector extends BluetoothGattCallback {
 
     void processCs108DataIn() {
     }
+
+    int intervalProcessCs108Data = 50;
+    public final Runnable runnableProcessCs108DataIn = new Runnable() {
+        @Override
+        public void run() {
+            streamInRequest = false;
+            processCs108DataIn();
+            mHandler.postDelayed(runnableProcessCs108DataIn, intervalProcessCs108Data);
+        }
+    };
 
     @Override
     public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {

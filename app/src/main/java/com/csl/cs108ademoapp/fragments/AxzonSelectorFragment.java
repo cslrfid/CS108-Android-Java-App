@@ -98,6 +98,8 @@ public class AxzonSelectorFragment extends CommonFragment {
         MainActivity.config.config0 = Integer.toString(9);
         MainActivity.config.config1 = Integer.toString(21);
         MainActivity.config.config2 = Integer.toString(13);
+        if (tagType == 2) MainActivity.config.config3 = Integer.toString(13);
+        else MainActivity.config.config3 = Integer.toString(160);
 
         if (true) {
             Fragment fragment;

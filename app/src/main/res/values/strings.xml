@@ -208,8 +208,8 @@
     </string-array>
 
     <string-array name="sensor_unit_options">
-        <item>%</item>
         <item>code</item>
+        <item>humidity</item>
     </string-array>
 
     <string-array name="temperature_unit_options">

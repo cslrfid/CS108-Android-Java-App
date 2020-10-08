@@ -126,7 +126,7 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
                 }
             }
             if (match == false) {
-                ReaderDevice readerDevice = new ReaderDevice(null, "", output[1], false, "", 1, 0);
+                ReaderDevice readerDevice = new ReaderDevice("", output[1], false, "", 1, 0);
                 if (tagsList != null) {
                     if (bAdd2End) tagsList.add(readerDevice);
                     else tagsList.add(0, readerDevice);
