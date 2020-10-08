@@ -67,6 +67,10 @@ public class AccessMicronFragment extends CommonFragment {
         editText.setText(MainActivity.config.config1);
         editText = (EditText) getActivity().findViewById(R.id.accessMNRssiLowerLimit);
         editText.setText(MainActivity.config.config2);
+        editText = (EditText) getActivity().findViewById(R.id.accessMNHumidityThreshold);
+        editText.setText(MainActivity.config.config3);
+        TableRow tableRow = (TableRow) getActivity().findViewById(R.id.accessMNHumidityThresholdRow);
+        if (MainActivity.mDid.matches("E28240")) tableRow.setVisibility(View.GONE);
 
         textViewConfigOk = (TextView) getActivity().findViewById(R.id.accessMNModelCodeOK);
         textViewCalibrationOk = (TextView) getActivity().findViewById(R.id.accessMNCalibrationOK);
@@ -193,6 +197,7 @@ public class AccessMicronFragment extends CommonFragment {
 
             }
         });
+        if (MainActivity.mDid.matches("E28240")) spinnerSensorUnit.setEnabled(false);
 
         ArrayAdapter<CharSequence> arrayAdapterTemperatureUnit = ArrayAdapter.createFromResource(getActivity(), R.array.temperature_unit_options, R.layout.custom_spinner_layout);
         arrayAdapterTemperatureUnit.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -266,6 +271,8 @@ public class AccessMicronFragment extends CommonFragment {
             MainActivity.config.config1 = editText.getText().toString();
             editText = (EditText) getActivity().findViewById(R.id.accessMNRssiLowerLimit);
             MainActivity.config.config2 = editText.getText().toString();
+            editText = (EditText) getActivity().findViewById(R.id.accessMNHumidityThreshold);
+            MainActivity.config.config3 = editText.getText().toString();
         }
     }
 
@@ -473,12 +480,20 @@ public class AccessMicronFragment extends CommonFragment {
         if (strData.length() < 4) return false;
         strSensorCode0 = strData;
         strData = str2Decimal(strData);
-        if (spinnerSensorUnit.getSelectedItemPosition() == 0) {
+        if (spinnerSensorUnit.getSelectedItemPosition() == 1) {
             float fValue = (float) Integer.parseInt(strData);
-            if (modelCode == 2) fValue /= (float) 0x1F;
-            else fValue /= (float) 0x1FF;
-            fValue *= 100;
-            strData = String.format("%.1f", fValue);
+            if (true) {
+                EditText editText = (EditText) getActivity().findViewById(R.id.accessMNHumidityThreshold);
+                int iValue = Integer.parseInt(editText.getText().toString());
+                MainActivity.mCs108Library4a.appendToLog("iValue for Dry/Wet comparision = " + iValue);
+                if (fValue >=  iValue) strData = "dry";
+                else strData = "wet";
+            } else {
+                if (modelCode == 2) fValue /= (float) 0x1F;
+                else fValue /= (float) 0x1FF;
+                fValue *= 100;
+                strData = String.format("%.1f", fValue);
+            }
         }
         textViewSensorCode.setText(strData);
         return true;

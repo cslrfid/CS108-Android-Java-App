@@ -15,15 +15,15 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:paddingTop="10dp"
-            android:layout_marginTop="@dimen/home_icon_margin_2"
+            android:paddingTop="@dimen/default_top_padding"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
             android:layout_marginLeft="@dimen/home_icon_margin_1"
             android:layout_marginRight="@dimen/home_icon_margin_1"
             android:layout_marginBottom="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="@string/home_regTag"
-            android:onClick="regClicked" />
+            android:text="@string/home_read_write"
+            android:onClick="rrClicked" />
 
         <Button
             style="@style/DashboardButton"
@@ -58,8 +58,8 @@
             android:layout_marginBottom="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="@string/home_locate"
-            android:onClick="locateClicked" />
+            android:text="@string/home_settings"
+            android:onClick="settClicked" />
 
         <Button
             style="@style/DashboardButton"
@@ -94,44 +94,29 @@
             android:layout_marginBottom="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="@string/home_settings"
-            android:onClick="settClicked" />
+            android:text="@string/home_locate"
+            android:onClick="locateClicked" />
 
         <Button
             style="@style/DashboardButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:paddingTop="5dp"
+            android:paddingTop="10dp"
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:layout_marginLeft="@dimen/home_icon_margin_1"
             android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
+            android:layout_marginBottom="@dimen/home_icon_margin_2"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="@string/home_filter"
-            android:onClick="filterClicked" />
+            android:text="@string/title_activity_special"
+            android:onClick="sfnClicked" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-
-        <Button
-            style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="@dimen/default_top_padding"
-            android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
-            android:background="@drawable/btn_back"
-            android:gravity="center"
-            android:text="@string/home_read_write"
-            android:onClick="rrClicked" />
 
         <Button
             style="@style/DashboardButton"
@@ -148,6 +133,21 @@
             android:gravity="center"
             android:text="@string/home_access"
             android:onClick="accessClicked" />
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:layout_marginLeft="@dimen/home_icon_margin_1"
+            android:layout_marginRight="@dimen/home_icon_margin_1"
+            android:layout_marginBottom="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="@string/home_filter"
+            android:onClick="filterClicked" />
     </LinearLayout>
 
     <LinearLayout
@@ -177,13 +177,13 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:paddingTop="10dp"
-            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:layout_marginTop="@dimen/home_icon_margin_2"
             android:layout_marginLeft="@dimen/home_icon_margin_1"
             android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_2"
+            android:layout_marginBottom="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="@string/title_activity_special"
-            android:onClick="sfnClicked" />
+            android:text="About"
+            android:onClick="aboutClicked" />
     </LinearLayout>
 </LinearLayout>

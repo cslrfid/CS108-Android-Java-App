@@ -235,7 +235,7 @@ public class ConnectionFragment extends CommonFragment {
                         }
                     }
                     if (match == false) {
-                        ReaderDevice readerDevice = new ReaderDevice(scanResultA.device, scanResultA.device.getName(), scanResultA.device.getAddress(), false, "", 1, scanResultA.rssi);
+                        ReaderDevice readerDevice = new ReaderDevice(scanResultA.device.getName(), scanResultA.device.getAddress(), false, "", 1, scanResultA.rssi);
                         String strInfo = "";
                         if (scanResultA.device.getBondState() == 12) {
                             strInfo += "BOND_BONDED\n";
@@ -264,7 +264,7 @@ public class ConnectionFragment extends CommonFragment {
                         }
                     }
                     if (matched == false) {
-                        ReaderDevice readerDevice1 = new ReaderDevice(null, null, readerDeviceNew.getAddress(), false, null, readerDeviceNew.getCount(), 0);
+                        ReaderDevice readerDevice1 = new ReaderDevice(null, readerDeviceNew.getAddress(), false, null, readerDeviceNew.getCount(), 0);
                         readersListOld.add(readerDevice1);
                     }
                 }

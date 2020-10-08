@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static String mDid; public static int selectHold; public static int selectFor;
     public static class Config {
-        public String configPassword, configPower, config0, config1, config2;
+        public String configPassword, configPower, config0, config1, config2, config3;
     };
     public static Config config  = new Config();
 
@@ -195,20 +195,8 @@ public class MainActivity extends AppCompatActivity {
             case SECURITY:
                 fragment = new AccessSecurityFragment();
                 break;
-            case REGISTER:
-                fragment = new AccessRegisterFragment();
-                break;
             case COLDCHAIN:
                 fragment = new ColdChainFragment();
-                break;
-            case BAPCARD:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "E200B0");
-                break;
-            case CTESIUS:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "E203510");
-                break;
-            case AURASENSE:
-                fragment = new AuraSenseFragment();
                 break;
             case AXZON:
                 fragment = AxzonSelectorFragment.newInstance(true);
@@ -216,14 +204,29 @@ public class MainActivity extends AppCompatActivity {
             case RFMICRON:
                 fragment = AxzonSelectorFragment.newInstance(false);
                 break;
+            case CTESIUS:
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "E203510");
+                break;
             case UCODE:
                 fragment = new UcodeFragment();
                 break;
             case UCODE8:
                 fragment = new Ucode8Fragment();
                 break;
+            case BAPCARD:
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "E200B0");
+                break;
             case IMPINVENTORY:
                 fragment = new ImpinjFragment();
+                break;
+            case AURASENSE:
+                fragment = new AuraSenseFragment();
+                break;
+            case REGISTER:
+                fragment = new AccessRegisterFragment();
+                break;
+            case READWRITEUSER:
+                fragment = new AccessReadWriteUserFragment();
                 break;
             case WEDGE:
                 fragment = new HomeSpecialFragment();
@@ -276,6 +279,9 @@ public class MainActivity extends AppCompatActivity {
         selectItem(DrawerPositions.SPECIAL);
     }
 
+    public void aboutClicked(View view) {
+        selectItem(DrawerPositions.ABOUT);
+    }
     public void connectClicked(View view) {
         selectItem(DrawerPositions.CONNECT);
     }
@@ -301,6 +307,7 @@ public class MainActivity extends AppCompatActivity {
     public void rrClicked(View view) {
         selectItem(DrawerPositions.READWRITE);
     }
+    public void rrUserClicked(View view) { selectItem(DrawerPositions.READWRITEUSER); }
 
     public void accessClicked(View view) {
         selectItem(DrawerPositions.SECURITY);

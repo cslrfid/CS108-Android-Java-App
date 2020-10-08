@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,15 +26,10 @@ import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.ReaderDevice;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoField;
-
 import static com.csl.cs108ademoapp.MainActivity.mContext;
 import static com.csl.cs108ademoapp.MainActivity.tagSelected;
 
-public class AccessReadWriteFragment extends CommonFragment {
+public class AccessReadWriteUserFragment extends CommonFragment {
     Spinner spinnerSelectBank, spinnerRWSelectEpc1;
     EditText editTextRWSelectOffset, editTextRWTagID, editTextAccessRWAccPassword, editTextAccessRWKillPwd, editTextAccessRWAccPwd, editTextAccPc, editTextAccessRWEpc, editTExtAccessRWXpc;
     EditText editTextTidValue, editTextUserValue, editTextEpcValue, editTextaccessRWAntennaPower;
@@ -98,6 +94,23 @@ public class AccessReadWriteFragment extends CommonFragment {
             }
         });
 
+        TableRow tableRow = (TableRow) getActivity().findViewById(R.id.accessRWReserveTitleRow);
+        tableRow.setVisibility(View.GONE);
+        tableRow = (TableRow) getActivity().findViewById(R.id.accessRWReserveValueRow);
+        tableRow.setVisibility(View.GONE);
+        tableRow = (TableRow) getActivity().findViewById(R.id.accessRWPcTitleRow);
+        tableRow.setVisibility(View.GONE);
+        tableRow = (TableRow) getActivity().findViewById(R.id.accessRWEpcTitleRow);
+        tableRow.setVisibility(View.GONE);
+        tableRow = (TableRow) getActivity().findViewById(R.id.accessRWTidTitleRow);
+        tableRow.setVisibility(View.GONE);
+        tableRow = (TableRow) getActivity().findViewById(R.id.accessRWTidValueRow);
+        tableRow.setVisibility(View.GONE);
+        tableRow = (TableRow) getActivity().findViewById(R.id.accessRWAnyTitleRow);
+        tableRow.setVisibility(View.GONE);
+        tableRow = (TableRow) getActivity().findViewById(R.id.accessRWAnyValueRow);
+        tableRow.setVisibility(View.GONE);
+
         editTextRWSelectOffset = (EditText) getActivity().findViewById(R.id.selectMemoryOffset);
         spinnerRWSelectEpc1 = (Spinner) getActivity().findViewById(R.id.accessRWEpc1Title1);
         ArrayAdapter<CharSequence> targetAdapter1 = ArrayAdapter.createFromResource(getActivity(), R.array.memoryBank_options, R.layout.custom_spinner_layout);
@@ -119,6 +132,8 @@ public class AccessReadWriteFragment extends CommonFragment {
         editTExtAccessRWXpc = (EditText) getActivity().findViewById(R.id.accessRWAccXpcValue);
         editTextTidValue = (EditText) getActivity().findViewById(R.id.accessRWTidValue);
         editTextTidValue.setHint("Data Pattern");
+        EditText editTextUserLength = (EditText) getActivity().findViewById(R.id.accessRWUserLength);
+        editTextUserLength.setText("512");
         editTextUserValue = (EditText) getActivity().findViewById(R.id.accessRWUserValue); editTextUserValue.setTypeface(Typeface.MONOSPACE);
         editTextUserValue.setHint("Data Pattern");
         editTextEpcValue = (EditText) getActivity().findViewById(R.id.accessRWEpcValue);
@@ -182,8 +197,8 @@ public class AccessReadWriteFragment extends CommonFragment {
         super.onDestroy();
     }
 
-    public AccessReadWriteFragment() {
-        super("AccessReadWriteFragment");
+    public AccessReadWriteUserFragment() {
+        super("AccessReadWriteUserFragment");
     }
 
     int getPC2EpcWordCount(String detail) {
@@ -246,6 +261,8 @@ public class AccessReadWriteFragment extends CommonFragment {
             Toast.makeText(MainActivity.mContext, "Please select tag first !!!", Toast.LENGTH_SHORT).show();
             return;
         }
+        CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessRWUserTitle);
+        checkBox.setChecked(true);
         if (updating == false) {
             msStartTime = SystemClock.elapsedRealtime();
             textViewRunTime.setText("");
@@ -271,7 +288,7 @@ public class AccessReadWriteFragment extends CommonFragment {
                         restartAccessBank = accessBank;
                         restartCounter = 3;
                     }
-                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteFragment().InventoryRfidTask(): tagID=" + editTextRWTagID.getText() + ", operationrRead=" + operationRead + ", accessBank=" + accessBank + ", accOffset=" + accOffset + ", accSize=" + accSize);
+                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteUserFragment().InventoryRfidTask(): tagID=" + editTextRWTagID.getText() + ", operationrRead=" + operationRead + ", accessBank=" + accessBank + ", accOffset=" + accOffset + ", accSize=" + accSize);
                     int selectOffset = 0;
                     selectOffset = Integer.parseInt(editTextRWSelectOffset.getText().toString());
                     EditText editTextBlockCount = (EditText) getActivity().findViewById(R.id.accessRWBlockCount);
@@ -293,7 +310,7 @@ public class AccessReadWriteFragment extends CommonFragment {
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 100);
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteFragment().updateRunnable(): Restart");
+                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteUserFragment().updateRunnable(): Restart");
             }
             else {
                 if (bankProcessing == 0 && bcheckBoxAll) {

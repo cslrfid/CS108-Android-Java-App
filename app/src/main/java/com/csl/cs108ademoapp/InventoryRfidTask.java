@@ -240,13 +240,20 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                 while (rx000pkgDataArrary.size() != 0) {
                     Cs108Connector.Rx000pkgData rx000pkgData = rx000pkgDataArrary.get(0);
                     rx000pkgDataArrary.remove(0);
-                    if (rx000pkgData == null) continue;;
+                    if (rx000pkgData == null) {
+                        MainActivity.mCs108Library4a.appendToLog("InventoryRfidTask: null rx000pkgData !!!");
+                        continue;
+                    };
 
                     boolean match = false;
                     boolean updated = false;
                     currentTime = rx000pkgData.decodedTime;
                     int iFlag = rx000pkgData.flags;
                     String strPc = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedPc);
+                    if (strPc.length() != 4) {
+                        MainActivity.mCs108Library4a.appendToLog("InventoryRfidTask: !!! rx000pkgData.Pc length = " + strPc.length());
+                        continue;
+                    }
                     int extraLength = 0;
                     if (extra1Bank != -1 && rx000pkgData.decodedData1 != null) extraLength += rx000pkgData.decodedData1.length;
                     if (extra2Bank != -1 && rx000pkgData.decodedData2 != null) extraLength += rx000pkgData.decodedData2.length;
@@ -437,6 +444,10 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                                     new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS").format(new Date()), new SimpleDateFormat("z").format(new Date()).replaceAll("GMT", ""),
                                     MainActivity.mSensorConnector.mLocationDevice.getLocation(), MainActivity.mSensorConnector.mSensorDevice.getEcompass(),
                                     1, rssi, phase, chidx, port, portstatus, backport1, backport2, codeSensor, codeRssi, codeTempC, brand, iSensorData);
+                            if (strMdid != null) {
+                                if (strMdid.indexOf("E282402") == 0) readerDevice.setCodeSensorMax(0x1F);
+                                else readerDevice.setCodeSensorMax(0x1FF);
+                            }
                             if (bAdd2End) tagsList.add(readerDevice);
                             else tagsList.add(0, readerDevice);
                             SharedObjects.TagsIndex tagsIndex = new SharedObjects.TagsIndex(strAddresss, tagsList.size()-1); MainActivity.sharedObjects.tagsIndexList.add(tagsIndex); Collections.sort(MainActivity.sharedObjects.tagsIndexList);

@@ -146,6 +146,25 @@
                         style="@style/style_normal_font"
                         android:inputType="numberDecimal" />
                 </TableRow>
+
+                <TableRow
+                    android:id="@+id/accessMNHumidityThresholdRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/default_left_padding">
+
+                    <TextView
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Wet/Dry sensor code level" />
+
+                    <EditText
+                        android:id="@+id/accessMNHumidityThreshold"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        style="@style/style_normal_font"
+                        android:inputType="numberDecimal" />
+                </TableRow>
             </LinearLayout>
 
             <TableRow
@@ -242,7 +261,7 @@
                 <Spinner
                     android:id="@+id/accessMNSensorUnit"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:background="@drawable/my_edittext_background"
                     android:gravity="left"
                     style="@style/style_default_spinner" />

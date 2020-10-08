@@ -19,11 +19,11 @@ public class DrawerListContent {
         MAIN, SPECIAL,
         ABOUT, CONNECT,
         INVENTORY, SEARCH, MULTIBANK,
-        SETTING, FILTER, READWRITE, SECURITY, REGISTER,
-        COLDCHAIN, CTESIUS, AXZON, RFMICRON,
+        SETTING, FILTER, READWRITE, SECURITY,
+        COLDCHAIN, AXZON, RFMICRON, CTESIUS,
         UCODE, UCODE8,
         BAPCARD, IMPINVENTORY, AURASENSE,
-        WEDGE, BLANK;
+        REGISTER, READWRITEUSER, WEDGE, BLANK;
 
         public static DrawerPositions toDrawerPosition(int x) {
             switch(x) {
@@ -36,17 +36,18 @@ public class DrawerListContent {
                 case 6: return FILTER;
                 case 7: return READWRITE;
                 case 8: return SECURITY;
-                case 9: return REGISTER;
-                case 10: return COLDCHAIN;
-                case 11: return AXZON;
-                case 12: return RFMICRON;
-                case 13: return CTESIUS;
-                case 14: return UCODE;
-                case 15: return UCODE8;
-                case 16: return BAPCARD;
-                case 17: return IMPINVENTORY;
-                case 18: return AURASENSE;
-                case 19: return WEDGE;
+                case 9: return COLDCHAIN;
+                case 10: return AXZON;
+                case 11: return RFMICRON;
+                case 12: return CTESIUS;
+                case 13: return UCODE;
+                case 14: return UCODE8;
+                case 15: return BAPCARD;
+                case 16: return IMPINVENTORY;
+                case 17: return AURASENSE;
+                case 18: return REGISTER;
+                case 19: return READWRITEUSER;
+                case 20: return WEDGE;
             }
             return null;
         }
@@ -63,17 +64,18 @@ public class DrawerListContent {
         addItem(new DrawerItem("6", "Filters", R.drawable.dl_filters));
         addItem(new DrawerItem("7", "Read/Write", R.drawable.dl_access));
         addItem(new DrawerItem("8", "Security", R.drawable.dl_access));
-        addItem(new DrawerItem("9", "Register Tag", R.drawable.dl_rr));
-        addItem(new DrawerItem("10", "Cold Chain CS8300", R.drawable.dl_loc));
-        addItem(new DrawerItem("11", "Axzon", R.drawable.dl_loc));
-        addItem(new DrawerItem("12", "Axzon Magnus", R.drawable.dl_loc));
-        addItem(new DrawerItem("13", "CTESIUS Temp", R.drawable.dl_loc));
-        addItem(new DrawerItem("14", "UCODE DNA", R.drawable.dl_loc));
-        addItem(new DrawerItem("15", "UCODE 8", R.drawable.dl_loc));
-        addItem(new DrawerItem("16", "CS9010 BAP ID Card", R.drawable.dl_loc));
-        addItem(new DrawerItem("17", "Impinj FastID", R.drawable.dl_loc));
-        addItem(new DrawerItem("18", "Aura-sense", R.drawable.dl_loc));
-        addItem(new DrawerItem("19", "Wedge", R.drawable.dl_rr));
+        addItem(new DrawerItem("9", "Cold Chain CS8300", R.drawable.dl_loc));
+        addItem(new DrawerItem("10", "Axzon", R.drawable.dl_loc));
+        addItem(new DrawerItem("11", "Axzon Magnus", R.drawable.dl_loc));
+        addItem(new DrawerItem("12", "CTESIUS Temp", R.drawable.dl_loc));
+        addItem(new DrawerItem("13", "UCODE DNA", R.drawable.dl_loc));
+        addItem(new DrawerItem("14", "UCODE 8", R.drawable.dl_loc));
+        addItem(new DrawerItem("15", "CS9010 BAP ID Card", R.drawable.dl_loc));
+        addItem(new DrawerItem("16", "Impinj FastID", R.drawable.dl_loc));
+        addItem(new DrawerItem("17", "Aura-sense", R.drawable.dl_loc));
+        addItem(new DrawerItem("18", "Register Tag", R.drawable.dl_rr));
+        addItem(new DrawerItem("19", "Large sized memroy read/write", R.drawable.dl_rr));
+        addItem(new DrawerItem("20", "Wedge", R.drawable.dl_rr));
     }
 
     private static void addItem(DrawerItem item) {

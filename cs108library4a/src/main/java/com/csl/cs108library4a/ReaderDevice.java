@@ -3,7 +3,6 @@ package com.csl.cs108library4a;
 import android.bluetooth.BluetoothDevice;
 
 public class ReaderDevice implements Comparable<ReaderDevice>  {
-    private BluetoothDevice bluetoothDevice;
     private String name;
     private String address;
     boolean selected;
@@ -17,7 +16,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     private int status = INVALID_STATUS;
     public static final int INVALID_BACKPORT = -1, INVALID_CODESENSOR = -1, INVALID_CODERSSI = -1, INVALID_BRAND = -1, INVALID_SENSORDATA = 0x1000; public final float INVALID_CODETEMPC = -300;
     private int backport1 = INVALID_BACKPORT, backport2 = INVALID_BACKPORT;
-    private int codeSensor = INVALID_CODESENSOR, codeRssi = INVALID_CODERSSI, sensorData = INVALID_SENSORDATA; private float codeTempC = INVALID_CODETEMPC; private String brand;
+    private int codeSensor = INVALID_CODESENSOR, codeSensorMax = INVALID_CODESENSOR, codeRssi = INVALID_CODERSSI, sensorData = INVALID_SENSORDATA; private float codeTempC = INVALID_CODETEMPC; private String brand;
     private boolean isConnected;
     private String timeOfRead, timeZone;
     private String location;
@@ -29,7 +28,6 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
                               String strExtra2, int extra2Bank, int extra2Offset,
                               String strTimeOfRead, String strTimeZone, String strLocation, String strCompass,
                               int count, double rssi, int phase, int channel, int port, int status, int backPort1, int backPort2, int codeSensor, int codeRssi, float codeTempC, String brand, int sensorData) {
-        bluetoothDevice = null;
         this.name = name;
         this.address = address;
         this.selected = selected;
@@ -66,8 +64,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.sensorData = sensorData;
     }
 
-    public ReaderDevice(BluetoothDevice bluetoothDevice, String name, String address, boolean selected, String details, int count, double rssi) {
-        this.bluetoothDevice = bluetoothDevice;
+    public ReaderDevice(String name, String address, boolean selected, String details, int count, double rssi) {
         this.name = name;
         this.address = address;
         this.selected = selected;
@@ -242,6 +239,11 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     public int getCodeSensor() { return codeSensor; }
     public void setCodeSensor(int codeSensor) {
         this.codeSensor = codeSensor;
+    }
+
+    public int getCodeSensorMax() { return codeSensorMax; }
+    public void setCodeSensorMax(int codeSensor) {
+        this.codeSensorMax = codeSensor;
     }
 
     public int getCodeRssi() {

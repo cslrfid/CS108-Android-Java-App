@@ -36,11 +36,35 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     boolean done = false;
     boolean ending = false;
     private String endingMessaage;
-    int qValue;
-    boolean repeat, nextNew;
+
+    int qValue=0;
+    boolean repeat=false, nextNew=false;
+    boolean bEnableErrorPopWindow=true;
+
     boolean gotInventory;
     int batteryCountInventory_old;
 
+    public AccessTask(Button button, boolean invalidRequest,
+                      String selectMask, int selectBank, int selectOffset,
+                      String strPassword, int powerLevel, Cs108Connector.HostCommands hostCommand, boolean bEnableErrorPopWindow) {
+        this.button = button;
+        this.registerTagGot = registerTagGot;
+        this.registerVoltageLevel = registerVoltageLevel;
+
+        this.invalidRequest = invalidRequest; MainActivity.mCs108Library4a.appendToLog("invalidRequest = " + invalidRequest);
+        this.selectMask = selectMask;
+        this.selectBank = selectBank;
+        this.selectOffset = selectOffset;
+        this.strPassword = strPassword;
+        this.powerLevel = powerLevel;
+        this.hostCommand = hostCommand;
+        this.bEnableErrorPopWindow = bEnableErrorPopWindow;
+        if (true) {
+            total = 0;
+            tagList.clear();
+        }
+        preExecute();
+    }
     public AccessTask(Button button, TextView textViewWriteCount, boolean invalidRequest,
                       String selectMask, int selectBank, int selectOffset,
                       String strPassword, int powerLevel, Cs108Connector.HostCommands hostCommand,
@@ -69,15 +93,15 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             total = 0;
             tagList.clear();
         }
+        preExecute();
+    }
 
+    void preExecute() {
         accessResult = null;
         playerO = MainActivity.sharedObjects.playerO;
         playerN = MainActivity.sharedObjects.playerN;
-        playerN.start();
-    }
+        //playerN.start();
 
-    @Override
-    protected void onPreExecute() {
         buttonText = button.getText().toString().trim();
         String buttonText1 = null; String strLastChar = buttonText.substring(buttonText.length()-1);
         if (strLastChar.toUpperCase().matches("E")) {
@@ -158,7 +182,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 } else if (rx000pkgData.responseType == Cs108Connector.HostCmdResponseTypes.TYPE_18K6C_TAG_ACCESS) {
                     if (true) {
                         if (rx000pkgData.decodedError == null) {
-                            if (done == false) { accessResult = rx000pkgData.decodedResult; }
+                            if (done == false) { accessResult = rx000pkgData.decodedResult; MainActivity.mCs108Library4a.appendToLog("HelloA, accResult=" + accessResult);}
                             done = true;
                             publishProgress(null, rx000pkgData.decodedResult);
                         }
@@ -194,11 +218,11 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     String tagInventoried = null;
     @Override
     protected void onProgressUpdate(String... output) {
-        if (output[0] != null) {
+        if (true) progressUpdate(output);
+        else if (output[0] != null) {
             if (output[0].length() == 2) {
                 if (output[0].contains("TT")) {
                     gotInventory = true;
-                  if (registerTagGot != null) registerTagGot.setText(output[1]);
                     boolean matched = false;
                     for (int i = 0; i < tagList.size(); i++) {
                         if (output[1].matches(tagList.get(i))) {
@@ -206,6 +230,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                             break;
                         }
                     }
+                    if (registerTagGot != null) registerTagGot.setText(output[1]);
                     if (matched == false) tagInventoried = output[1];
                 } else if (output[0].contains("WW")) {
                     long timePeriod = (System.currentTimeMillis() - startTimeMillis) / 1000;
@@ -249,6 +274,45 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         DeviceConnectTask4RegisterEnding();
     }
 
+    protected void progressUpdate(String... output) {
+        if (output[0] != null) {
+            if (output[0].length() == 2) {
+                if (output[0].contains("TT")) {
+                    gotInventory = true;
+                    boolean matched = false;
+                    for (int i = 0; i < tagList.size(); i++) {
+                        if (output[1].matches(tagList.get(i))) {
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (registerTagGot != null) registerTagGot.setText(output[1]);
+                    if (matched == false) tagInventoried = output[1];
+                } else if (output[0].contains("WW")) {
+                    long timePeriod = (System.currentTimeMillis() - startTimeMillis) / 1000;
+                    if (timePeriod > 0) {
+                        if (registerRunTime != null) registerRunTime.setText(String.format("Run time: %d sec", timePeriod));
+                    }
+                } else if (taskCancelReason == TaskCancelRReason.NULL) {
+                    if (registerVoltageLevel != null) registerVoltageLevel.setText(MainActivity.mCs108Library4a.getBatteryDisplay(true));
+                }
+            } else {
+                resultError += output[0];
+                if (true)
+                    MainActivity.mCs108Library4a.appendToLog("output[0]: " + output[0] + ", resultError = " + resultError);
+            }
+        } else {
+            if (registerYield != null) {
+                if (tagInventoried != null) {
+                    tagList.add(tagInventoried);
+                    tagInventoried = null;
+                }
+                registerYield.setText("Unique:" + Integer.toString(tagList.size()));
+            }
+            if (registerTotal != null) registerTotal.setText("Total:" + Integer.toString(++total));
+        }
+    }
+
     void DeviceConnectTask4RegisterEnding() {
         String strErrorMessage = "";
         if (false) {
@@ -267,7 +331,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             switch (taskCancelReason) {
                 case NULL:
                     if (accessResult == null || (resultError != null && resultError.length() != 0) || (endingMessaage != null && endingMessaage.length() != 0)) strErrorMessage += ("Finish as COMMAND END is received " + (gotInventory ? "WITH" : "WITHOUT") + " tag response");
-                    else Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
+                    //else Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
                     break;
                 case STOP:
                     strErrorMessage += "Finish as STOP is pressed. ";
@@ -290,9 +354,12 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         if (strErrorMessage.length() != 0) endingMessaage = strErrorMessage;
         button.setText(buttonText);
         if (endingMessaage != null) {
-            if (endingMessaage.length() != 0) {
-                CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
-                customPopupWindow.popupStart(endingMessaage, false);
+            if (endingMessaage.length() != 0 || true) {
+                MainActivity.mCs108Library4a.appendToLog("endingMessage=" + endingMessaage);
+                if (bEnableErrorPopWindow) {
+                    CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                    customPopupWindow.popupStart(endingMessaage, false);
+                }
             }
         }
     }

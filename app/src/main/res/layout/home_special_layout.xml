@@ -5,21 +5,19 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
 
         <Button
             style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
-            android:layout_marginTop="@dimen/home_icon_margin_2"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
             android:text="Cold Chain CS8300"
@@ -27,35 +25,8 @@
 
         <Button
             style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
-            android:layout_marginTop="@dimen/home_icon_margin_2"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
-            android:background="@drawable/btn_back"
-            android:gravity="center"
-            android:text="CTESIUS Temp"
-            android:onClick="ctesiusClicked"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <Button
-            style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
+            android:layout_height="50dp"
             android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
             android:text="Axzon"
@@ -63,35 +34,26 @@
 
         <Button
             style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
+            android:layout_height="50dp"
             android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
             android:text="Axzon Magnus"
             android:onClick="rfMicronClicked"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
 
         <Button
             style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
+            android:layout_height="50dp"
             android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="CTESIUS Temp"
+            android:onClick="ctesiusClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
             android:text="UCODE DNA"
@@ -99,71 +61,8 @@
 
         <Button
             style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
+            android:layout_height="50dp"
             android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
-            android:background="@drawable/btn_back"
-            android:gravity="center"
-            android:text="Wedge"
-            android:onClick="wedgeClicked" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <Button
-            style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
-            android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
-            android:background="@drawable/btn_back"
-            android:gravity="center"
-            android:text="CS9010 BAP"
-            android:onClick="bapCardClicked" />
-
-        <Button
-            style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
-            android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_1"
-            android:background="@drawable/btn_back"
-            android:gravity="center"
-            android:text="Impinj FastID"
-            android:onClick="impInventoryClicked"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <Button
-            style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
-            android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_2"
             android:background="@drawable/btn_back"
             android:gravity="center"
             android:text="UCODE 8"
@@ -171,53 +70,64 @@
 
         <Button
             style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
+            android:layout_height="50dp"
             android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_2"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="CS9010 BAP"
+            android:onClick="bapCardClicked" />
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="Impinj FastID"
+            android:onClick="impInventoryClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
             android:text="Aura-sense"
             android:onClick="aurasenseClicked"/>
-    </LinearLayout>
 
-    <LinearLayout
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="Register Tag"
+            android:onClick="regClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:textSize="25sp"
+            android:text="Large Sized Memory Read"
+            android:onClick="rrUserClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="Wedge"
+            android:onClick="wedgeClicked" />
+    </LinearLayout>
+    </ScrollView>
+
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:visibility="gone">
-
-        <Button
-            style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
-            android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_2"
-            android:background="@drawable/btn_back"
-            android:gravity="center"
-            android:text="aura-sense"
-            android:onClick="uCode8Clicked"/>
-
-        <Button
-            style="@style/DashboardButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingTop="10dp"
-            android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:layout_marginLeft="@dimen/home_icon_margin_1"
-            android:layout_marginRight="@dimen/home_icon_margin_1"
-            android:layout_marginBottom="@dimen/home_icon_margin_2"
-            android:background="@drawable/btn_back"
-            android:gravity="center"
-            android:onClick="blankClicked"/>
-    </LinearLayout>
+        android:layout_height="20dp"
+        android:gravity="center"
+        android:text="More"/>
 </LinearLayout>

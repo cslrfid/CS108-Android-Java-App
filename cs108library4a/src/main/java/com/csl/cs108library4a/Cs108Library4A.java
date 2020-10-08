@@ -220,18 +220,13 @@ public class Cs108Library4A extends Cs108Connector {
     File file;
     @Override
     @Keep public boolean isBleConnected() {
-        boolean bleConnectionNew = false;
-        bleConnectionNew = super.isBleConnected();
+        boolean bleConnectionNew = super.isBleConnected();
         if (bleConnectionNew) {
             if (bleConnection == false) {
                 bleConnection = bleConnectionNew;
                 if (true) appendToLog("Newly connected");
                 cs108ConnectorDataInit();
                 setRfidOn(true);
-                if (false) {
-                    //mRfidDevice.mRx000Device.mRx000Setting.setInvModeCompact(true);
-                    return(bleConnection);
-                }
                 setBarcodeOn(true);
                 hostProcessorICGetFirmwareVersion();
                 getBluetoothICFirmwareVersion();
@@ -248,6 +243,9 @@ public class Cs108Library4A extends Cs108Connector {
                 regionCode = null; mRfidDevice.mRx000Device.mRx000OemSetting.getCountryCode();
 
                 mHandler.postDelayed(checkVersionRunnable, 500);
+            } else if (bFirmware_reset_before) {
+                bFirmware_reset_before = false;
+                mHandler.postDelayed(reinitaliseDataRunnable, 500);
             }
         } else if (bleConnection) {
             bleConnection = bleConnectionNew;
@@ -309,6 +307,19 @@ public class Cs108Library4A extends Cs108Connector {
         setCurrentLinkProfile(1);
     }
 
+    private final Runnable reinitaliseDataRunnable = new Runnable() {
+        @Override
+        public void run() {
+            appendToLog("reset before: reinitaliseDataRunnable starts with inventoring=" + inventoring + ", mrfidToWriteSize=" + mrfidToWriteSize());
+            if (inventoring || mrfidToWriteSize() != 0) {
+                mHandler.removeCallbacks(reinitaliseDataRunnable);
+                mHandler.postDelayed(reinitaliseDataRunnable, 500);
+            } else {
+                mHandler.postDelayed(checkVersionRunnable, 500);
+            }
+        }
+    };
+
     private final Runnable checkVersionRunnable = new Runnable() {
         @Override
         public void run() {
@@ -317,6 +328,7 @@ public class Cs108Library4A extends Cs108Connector {
                 mHandler.removeCallbacks(checkVersionRunnable);
                 mHandler.postDelayed(checkVersionRunnable, 500);
             } else {
+                setSameCheck(false);
                 if (true) appendToLog("checkVersionRunnable(): END");
                 if (isBarcodeFailure() == false) {
                     barcodeSendCommandSetPreSuffix();
@@ -331,7 +343,6 @@ public class Cs108Library4A extends Cs108Connector {
                     setAntennaDwell(0);
                     setAntennaInvCount(0xfffffffeL);
                 }
-                getMacLastCommandDuration(true);
                 mRfidDevice.mRx000Device.mRx000Setting.setDiagnosticConfiguration(false);
                 loadSetting1File();
                 if (DEBUG) appendToLog("macVersion  = " + getMacVer());
@@ -345,6 +356,7 @@ public class Cs108Library4A extends Cs108Connector {
                     mRfidDevice.mRx000Device.mRx000Setting.setTagDelay(tagDelayDefaultNormalSetting);
                     mRfidDevice.mRx000Device.mRx000Setting.setCycleDelay(cycleDelaySetting);
                 }
+                setSameCheck(true);
             }
         }
     };
@@ -452,12 +464,37 @@ public class Cs108Library4A extends Cs108Connector {
                             } else if (dataArray[0].matches("barcode2TriggerMode")) {
                                 if (dataArray[1].matches("true")) barcode2TriggerMode = true;
                                 else barcode2TriggerMode = false;
+
+                            } else if (dataArray[0].matches("preFilterData.enable")) {
+                                if (preFilterData == null) preFilterData = new PreFilterData();
+                                if (dataArray[1].matches("true")) preFilterData.enable = true;
+                                else preFilterData.enable  = false;
+                            } else if (dataArray[0].matches("preFilterData.target")) {
+                                if (preFilterData == null) preFilterData = new PreFilterData();
+                                preFilterData.target = Integer.valueOf(dataArray[1]);
+                            } else if (dataArray[0].matches("preFilterData.action")) {
+                                if (preFilterData == null) preFilterData = new PreFilterData();
+                                preFilterData.action = Integer.valueOf(dataArray[1]);
+                            } else if (dataArray[0].matches("preFilterData.bank")) {
+                                if (preFilterData == null) preFilterData = new PreFilterData();
+                                preFilterData.bank = Integer.valueOf(dataArray[1]);
+                            } else if (dataArray[0].matches("preFilterData.offset")) {
+                                if (preFilterData == null) preFilterData = new PreFilterData();
+                                preFilterData.offset = Integer.valueOf(dataArray[1]);
+                            } else if (dataArray[0].matches("preFilterData.mask")) {
+                                if (preFilterData == null) preFilterData = new PreFilterData();
+                                preFilterData.mask = dataArray[1];
+                            } else if (dataArray[0].matches("preFilterData.maskbit")) {
+                                if (preFilterData == null) preFilterData = new PreFilterData();
+                                if (dataArray[1].matches("true")) preFilterData.maskbit = true;
+                                else preFilterData.maskbit = false;
                             }
                         }
                     }
                     setInvAlgo(invAlgo); setRetryCount(retry);
                     setTagGroup(querySelect, querySession, queryTarget); setTagFocus(tagFocus > 0 ? true : false);
                     setPopulation(population);
+                    if (preFilterData != null && preFilterData.enable) setSelectCriteria(0, preFilterData.enable, preFilterData.target, preFilterData.action, preFilterData.bank, preFilterData.offset, preFilterData.mask, preFilterData.maskbit);
                 }
                 instream.close();
                 if (DEBUG) appendToLog("Data is read from FILE.");
@@ -510,7 +547,17 @@ public class Cs108Library4A extends Cs108Connector {
             outData = "serverLocation," + getServerLocation() + "\n"; stream.write(outData.getBytes());
             outData = "serverTimeout," + String.valueOf(getServerTimeout() +"\n"); stream.write(outData.getBytes());
 
-            outData = "barcode2TriggerMode," + String.valueOf(barcode2TriggerMode +"\n"); stream.write(outData.getBytes());
+            outData = "barcode2TriggerMode," + String.valueOf(barcode2TriggerMode +"\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+
+            if (preFilterData != null) {
+                outData = "preFilterData.enable," + String.valueOf(preFilterData.enable + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+                outData = "preFilterData.target," + String.valueOf(preFilterData.target + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+                outData = "preFilterData.action," + String.valueOf(preFilterData.action + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+                outData = "preFilterData.bank," + String.valueOf(preFilterData.bank + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+                outData = "preFilterData.offset," + String.valueOf(preFilterData.offset + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+                outData = "preFilterData.mask," + String.valueOf(preFilterData.mask + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+                outData = "preFilterData.maskbit," + String.valueOf(preFilterData.maskbit + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+            }
 
             stream.write("End of data\n".getBytes());
             stream.close();
@@ -2131,6 +2178,20 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public boolean setInvSelectIndex(int invSelect) {
         return mRfidDevice.mRx000Device.mRx000Setting.setInvSelectIndex(invSelect);
     }
+    class PreFilterData {
+        boolean enable; int target, action, bank, offset; String mask; boolean maskbit;
+        PreFilterData() { }
+        PreFilterData(boolean enable, int target, int action, int bank, int offset, String mask, boolean maskbit) {
+            this.enable = enable;
+            this.target = target;
+            this.action = action;
+            this.bank = bank;
+            this.offset = offset;
+            this.mask = mask;
+            this.maskbit = maskbit;
+        }
+    }
+    PreFilterData preFilterData;
     class PreMatchData {
         boolean enable; int target, action; int bank, offset; String mask; int maskblen; int querySelect; long pwrlevel; boolean invAlgo; int qValue;
         PreMatchData(boolean enable, int target, int action, int bank, int offset, String mask, int maskblen, int querySelect, long pwrlevel, boolean invAlgo, int qValue) {
@@ -2152,7 +2213,7 @@ public class Cs108Library4A extends Cs108Connector {
         return setSelectCriteria(index, false, 0, 0, 0, 0, 0, "");
     }
     public boolean setSelectCriteria(int index, boolean enable, int target, int action, int bank, int offset, String mask, boolean maskbit) {
-        appendToLog("Hello8: setSelectCriteria(enable, target...), maskbit = " + maskbit);
+        if (index == 0) preFilterData = new PreFilterData(enable, target, action, bank, offset, mask, maskbit);
         int maskblen = mask.length() * 4;
         String maskHex = ""; int iHex = 0;
         if (maskbit) {
@@ -2173,10 +2234,10 @@ public class Cs108Library4A extends Cs108Connector {
             maskblen = mask.length();
             mask = maskHex;
         }
-        appendToLog("Hello8: 2 mask = " + mask + ", maskblen = " + maskblen);
         return setSelectCriteria(index, enable, target, action, 0, bank, offset, mask, maskblen);
     }
     public boolean setSelectCriteria(int index, boolean enable, int target, int action, int delay, int bank, int offset, String mask) {
+        if (index == 0) preFilterData = new PreFilterData(enable, target, action, bank, offset, mask, false);
         if (mask.length() > 64) mask = mask.substring(0, 64);
         if (index == 0) preMatchData = new PreMatchData(enable, target, action, bank, offset, mask, mask.length() * 4, mRfidDevice.mRx000Device.mRx000Setting.getQuerySelect(), getPwrlevel(), getInvAlgo(), getQValue());
         boolean result = true;
@@ -2307,9 +2368,10 @@ public class Cs108Library4A extends Cs108Connector {
         return retValue;
     }
     @Keep public boolean abortOperation() {
+        boolean bRetValue = false;
+        if (mRfidDevice.mRx000Device != null) bRetValue = mRfidDevice.mRx000Device.sendControlCommand(Cs108Connector.ControlCommands.ABORT);
         inventoring = false;
-        if (mRfidDevice.mRx000Device == null)   return false;
-        return mRfidDevice.mRx000Device.sendControlCommand(Cs108Connector.ControlCommands.ABORT);
+        return bRetValue;
     }
     @Keep public void restoreAfterTagSelect() {
         if (DEBUG) appendToLog("postMatchDataChanged = " + postMatchDataChanged + ",  preMatchDataChanged = " + preMatchDataChanged + ", macVersion = " + getMacVer());
@@ -3090,46 +3152,48 @@ public class Cs108Library4A extends Cs108Connector {
         if (DEBUG) appendToLog("getHostProcessorICBoardVersion = " + getHostProcessorICBoardVersion() + ", strVersionMBoard = " + strVersionMBoard);
         if (false || checkHostProcessorVersion(getHostProcessorICBoardVersion(), Integer.parseInt(strMBoardVersions[0].trim()), Integer.parseInt(strMBoardVersions[1].trim()), 0)) {
             final float[] fValueStbyRef = {
-                    (float) 4.106, (float) 4.069, (float) 4.048, (float) 4.032, (float) 4.011,
-                    (float) 3.995, (float) 3.974, (float) 3.964, (float) 3.948, (float) 3.932,
-                    (float) 3.911, (float) 3.895, (float) 3.879, (float) 3.863, (float) 3.853,
-                    (float) 3.842, (float) 3.826, (float) 3.811, (float) 3.800, (float) 3.784,
-                    (float) 3.774, (float) 3.758, (float) 3.747, (float) 3.737, (float) 3.726,
-                    (float) 3.721, (float) 3.710, (float) 3.705, (float) 3.695, (float) 3.689,
-                    (float) 3.684, (float) 3.679, (float) 3.673, (float) 3.668, (float) 3.663,
-                    (float) 3.658, (float) 3.658, (float) 3.652, (float) 3.647, (float) 3.642,
-                    (float) 3.636, (float) 3.631, (float) 3.626, (float) 3.615, (float) 3.605,
-                    (float) 3.594, (float) 3.578, (float) 3.573, (float) 3.563, (float) 3.552,
-                    (float) 3.504, (float) 3.394, (float) 3.124, (float) 2.517
+                    (float) 4.212, (float) 4.175, (float) 4.154, (float) 4.133, (float) 4.112,
+                    (float) 4.085, (float) 4.069, (float) 4.054, (float) 4.032, (float) 4.011,
+                    (float) 3.990, (float) 3.969, (float) 3.953, (float) 3.937, (float) 3.922,
+                    (float) 3.901, (float) 3.885, (float) 3.869, (float) 3.853, (float) 3.837,
+                    (float) 3.821, (float) 3.806, (float) 3.790, (float) 3.774, (float) 3.769,
+                    (float) 3.763, (float) 3.758, (float) 3.753, (float) 3.747, (float) 3.742,
+                    (float) 3.732, (float) 3.721, (float) 3.705, (float) 3.684, (float) 3.668,
+                    (float) 3.652, (float) 3.642, (float) 3.626, (float) 3.615, (float) 3.605,
+                    (float) 3.594, (float) 3.584, (float) 3.568, (float) 3.557, (float) 3.542,
+                    (float) 3.531, (float) 3.510, (float) 3.494, (float) 3.473, (float) 3.457,
+                    (float) 3.436, (float) 3.410, (float) 3.362, (float) 3.235, (float) 2.987,
+                    (float) 2.982
             };
             final float[] fPercentStbyRef = {
-                    (float) 100, (float) 100, (float) 100, (float) 99, (float) 98,
-                    (float)  97, (float)  95, (float)  93, (float) 90, (float) 87,
-                    (float)  84, (float)  81, (float)  78, (float) 75, (float) 73,
-                    (float)  71, (float)  69, (float)  68, (float) 66, (float) 64,
-                    (float)  62, (float)  60, (float)  58, (float) 56, (float) 54,
-                    (float)  52, (float)  50, (float)  48, (float) 47, (float) 45,
-                    (float)  43, (float)  41, (float)  39, (float) 37, (float) 35,
-                    (float)  33, (float)  31, (float)  29, (float) 27, (float) 26,
-                    (float)  24, (float)  22, (float)  20, (float) 18, (float) 16,
-                    (float)  14, (float)  12, (float)  10, (float)  8, (float)  6,
-                    (float)   5, (float)   3, (float)   1, (float)  0
+                    (float) 100, (float) 98, (float) 96, (float) 95, (float) 93,
+                    (float)  91, (float) 89, (float) 87, (float) 85, (float) 84,
+                    (float)  82, (float) 80, (float) 78, (float) 76, (float) 75,
+                    (float)  73, (float) 71, (float) 69, (float) 67, (float) 65,
+                    (float)  64, (float) 62, (float) 60, (float) 58, (float) 56,
+                    (float)  55, (float) 53, (float) 51, (float) 49, (float) 47,
+                    (float)  45, (float) 44, (float) 42, (float) 40, (float) 38,
+                    (float)  36, (float) 35, (float) 33, (float) 31, (float) 29,
+                    (float)  27, (float) 25, (float) 24, (float) 22, (float) 20,
+                    (float)  18, (float) 16, (float) 15, (float) 13, (float) 11,
+                    (float)   9, (float)  7, (float)  5, (float)  4, (float)  2,
+                    (float)   0
             };
             final float[] fValueRunRef = {
-                    (float) 4.011, (float) 3.953, (float) 3.921, (float) 3.890, (float) 3.863,
-                    (float) 3.826, (float) 3.795, (float) 3.768, (float) 3.742, (float) 3.721,
-                    (float) 3.700, (float) 3.679, (float) 3.652, (float) 3.642, (float) 3.621,
-                    (float) 3.605, (float) 3.589, (float) 3.573, (float) 3.563, (float) 3.557,
-                    (float) 3.552, (float) 3.536, (float) 3.526, (float) 3.520, (float) 3.499,
-                    (float) 3.478, (float) 3.457, (float) 3.415, (float) 3.241, (float) 2.612
+                    (float) 4.106, (float) 4.017, (float) 3.98 , (float) 3.937, (float) 3.895,
+                    (float) 3.853, (float) 3.816, (float) 3.779, (float) 3.742, (float) 3.711,
+                    (float) 3.679, (float) 3.658, (float) 3.637, (float) 3.626, (float) 3.61 ,
+                    (float) 3.584, (float) 3.547, (float) 3.515, (float) 3.484, (float) 3.457,
+                    (float) 3.431, (float) 3.399, (float) 3.362, (float) 3.32 , (float) 3.251,
+                    (float) 3.135
             };
             final float[] fPercentRunRef = {
-                    (float) 100, (float) 100, (float) 100, (float) 99, (float) 98,
-                    (float)  97, (float)  96, (float)  94, (float) 92, (float) 89,
-                    (float)  85, (float)  80, (float)  75, (float) 70, (float) 65,
-                    (float)  60, (float)  55, (float)  50, (float) 45, (float) 40,
-                    (float)  35, (float)  30, (float)  24, (float) 20, (float) 16,
-                    (float)  13, (float)   9, (float)   6, (float)  2, (float) 0
+                    (float) 100, (float) 96, (float) 92, (float) 88, (float) 84,
+                    (float) 80,  (float) 76, (float) 72, (float) 67, (float) 63,
+                    (float) 59,  (float) 55, (float) 51, (float) 47, (float) 43,
+                    (float) 39,  (float) 35, (float) 31, (float) 27, (float) 23,
+                    (float) 19,  (float) 15, (float) 11,  (float) 7, (float)  2,
+                    (float) 0
             };
             float[] fValueRef = fValueStbyRef;
             float[] fPercentRef = fPercentStbyRef;

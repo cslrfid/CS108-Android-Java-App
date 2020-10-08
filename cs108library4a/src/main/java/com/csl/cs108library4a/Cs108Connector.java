@@ -7,6 +7,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +87,7 @@ public class Cs108Connector extends BleConnector {
 
     long ltimeLogView;
     public void appendToLogView(String s) {
+        appendToLog(s);
         if (appendToLogViewDisable) return;
         if (ltimeLogView == 0) ltimeLogView = System.currentTimeMillis();
         if (s.trim().length() == 0) mLogView.setText("");
@@ -93,9 +95,9 @@ public class Cs108Connector extends BleConnector {
     }
     public void appendToLog(String s) { super.appendToLog(s); }
 
-    boolean dataRead = false; int dataReadDisplayCount = 0;
+    boolean dataRead = false; int dataReadDisplayCount = 0; boolean mCs108DataReadRequest = false;
     int inventoryLength = 0;
-    public int invalidata; int iSequenceNumber; boolean bDifferentSequence = false;
+    public int invalidata; int iSequenceNumber; boolean bDifferentSequence = false, bFirstSequence = true;
     public int validata;
     boolean dataInBufferResetting;
     @Override
@@ -149,8 +151,7 @@ public class Cs108Connector extends BleConnector {
         while (true) {
             if (System.currentTimeMillis() - lTime > (intervalProcessCs108Data/2)) {
                 writeDebug2File("B" + String.valueOf(intervalProcessCs108Data) + ", " + System.currentTimeMillis() + ", Timeout");
-                appendToLog("processCs108DataIn(): TIMEOUT");
-                appendToLogView(". Timeout !!!");
+                appendToLogView("processCs108DataIn_TIMEOUT");
                 break;
             }
 
@@ -183,85 +184,103 @@ public class Cs108Connector extends BleConnector {
                 while (cs108DataLeftOffset >= cs108DataReadStart + 8) {
                     validHeader = false;
                     byte[] dataIn = cs108DataLeft;
+                    int iPayloadLength = (dataIn[cs108DataReadStart + 2] & 0xFF);
                     if ((dataIn[cs108DataReadStart + 0] == (byte) 0xA7)
-//                            && (dataIn[cs108DataReadStart + 1] == (byte) 0xB3)
+                            && (dataIn[cs108DataReadStart + 1] == (byte) 0xB3)
                             && (dataIn[cs108DataReadStart + 3] == (byte) 0xC2
                             || dataIn[cs108DataReadStart + 3] == (byte) 0x6A
                             || dataIn[cs108DataReadStart + 3] == (byte) 0xD9
                             || dataIn[cs108DataReadStart + 3] == (byte) 0xE8
                             || dataIn[cs108DataReadStart + 3] == (byte) 0x5F)
-//                            && (dataIn[cs108DataReadStart + 4] == (byte) 0x82)
+                            && ((dataIn[cs108DataReadStart + 4] == (byte) 0x82) || ((dataIn[cs108DataReadStart + 3] == (byte) 0xC2) && (dataIn[cs108DataReadStart + 8] == (byte) 0x81)))
                             && (dataIn[cs108DataReadStart + 5] == (byte) 0x9E)) {
-                        if (cs108DataLeftOffset - cs108DataReadStart < (dataIn[cs108DataReadStart + 2] + 8)) break;
+                        if (cs108DataLeftOffset - cs108DataReadStart < (iPayloadLength + 8))
+                            break;
 
                         int checksum = ((byte) dataIn[cs108DataReadStart + 6] & 0xFF) * 256 + ((byte) dataIn[cs108DataReadStart + 7] & 0xFF);
                         int checksum2 = 0;
-                        if (checksum != 0) {
-                            for (int i = cs108DataReadStart; i < cs108DataReadStart + 8 + (dataIn[cs108DataReadStart + 2]); i++) {
-                                if (i != (cs108DataReadStart + 6) && i != (cs108DataReadStart + 7)) {
-                                    int index = (checksum2 ^ ((byte) dataIn[i] & 0x0FF)) & 0x0FF;
-                                    int table_value = crc_lookup_table[index];
-                                    checksum2 = (checksum2 >> 8) ^ table_value;
-                                }
+                        for (int i = cs108DataReadStart; i < cs108DataReadStart + 8 + iPayloadLength; i++) {
+                            if (i != (cs108DataReadStart + 6) && i != (cs108DataReadStart + 7)) {
+                                int index = (checksum2 ^ ((byte) dataIn[i] & 0x0FF)) & 0x0FF;
+                                int table_value = crc_lookup_table[index];
+                                checksum2 = (checksum2 >> 8) ^ table_value;
                             }
                         }
                         if (checksum != checksum2) {
-                            if (false) appendToLogView("ERROR, INCORRECT checksum. checksum=" + Integer.toString(checksum, 16) + ", checksum2=" + Integer.toString(checksum2, 16));
-                            if (DEBUG) appendToLog("ERROR, INCORRECT checksum. checksum=" + Integer.toString(checksum, 16) + ", checksum2=" + Integer.toString(checksum2, 16));
+                            if (iPayloadLength < 0) appendToLog("processCs108DataIn_ERROR, iPayloadLength=" + iPayloadLength + ", cs108DataLeftOffset=" + cs108DataLeftOffset + ", dataIn=" + byteArrayToString(dataIn));
+                            if (true) {
+                                byte[] invalidPart = new byte[8 + iPayloadLength];
+                                System.arraycopy(dataIn, cs108DataReadStart, invalidPart, 0, invalidPart.length);
+                                appendToLog("processCs108DataIn_ERROR, INCORRECT RevChecksum=" + Integer.toString(checksum, 16) + ", CalChecksum2=" + Integer.toString(checksum2, 16) + ",data=" + byteArrayToString(invalidPart));
+                            }
                         } else {
                             validHeader = true;
                             if (cs108DataReadStart > cs108DataReadStartOld) {
                                 if (true) {
                                     byte[] invalidPart = new byte[cs108DataReadStart - cs108DataReadStartOld];
                                     System.arraycopy(dataIn, cs108DataReadStartOld, invalidPart, 0, invalidPart.length);
-                                    if (false) appendToLogView("ERROR, LOOPING invalid data content: " + invalidPart.length + ", " + byteArrayToString(invalidPart));
-                                    if (DEBUG) appendToLog("ERROR, LOOPING invalid data content: " + invalidPart.length + ", " + byteArrayToString(invalidPart));
+                                    appendToLog("processCs108DataIn_ERROR, before valid data, invalid unused data: " + invalidPart.length + ", " + byteArrayToString(invalidPart));
                                 }
-                            }
+                            } else if (cs108DataReadStart < cs108DataReadStartOld)
+                                appendToLog("processCs108DataIn_ERROR, invalid cs108DataReadStartdata=" + cs108DataReadStart + " < cs108DataReadStartOld=" + cs108DataReadStartOld);
                             cs108DataReadStartOld = cs108DataReadStart;
 
-                            byte[] HeaderValues = new byte[8 + dataIn[cs108DataReadStart + 2]];
-                            System.arraycopy(dataIn, cs108DataReadStart, HeaderValues, 0, HeaderValues.length);
-                            if (DEBUG) appendToLog("RawData = " + byteArrayToString(HeaderValues));
                             Cs108ReadData cs108ReadData = new Cs108ReadData();
-                            byte[] dataValues = new byte[dataIn[cs108DataReadStart + 2]];
+                            byte[] dataValues = new byte[iPayloadLength];
                             System.arraycopy(dataIn, cs108DataReadStart + 8, dataValues, 0, dataValues.length);
                             cs108ReadData.dataValues = dataValues;
+                            if (true) {
+                                byte[] headerbytes = new byte[8];
+                                System.arraycopy(dataIn, cs108DataReadStart, headerbytes, 0, headerbytes.length);
+                                appendToLog("processCs108DataIn: Got package=" + byteArrayToString(headerbytes) + " " + byteArrayToString(dataValues));
+                            }
+                            boolean bRecdOldSequence = false;
                             switch (dataIn[cs108DataReadStart + 3]) {
                                 case (byte) 0xC2:
                                     cs108ReadData.cs108ConnectedDevices = Cs108ConnectedDevices.RFID;
-
-                                    int iSequenceNumber = (int) (dataIn[cs108DataReadStart + 4] & 0xFF);
-                                    if (DEBUG) appendToLog("Reserve byte = " + String.format("%X, %X", iSequenceNumber, this.iSequenceNumber));
-                                    if (DEBUG) appendToLogView(String.format("invalidata = %d: %X - %X", invalidata, iSequenceNumber, this.iSequenceNumber));
-                                    if (iSequenceNumber != this.iSequenceNumber) {
+                                    if (dataIn[cs108DataReadStart + 8] == (byte) 0x81) {
+                                        int iSequenceNumber = (int) (dataIn[cs108DataReadStart + 4] & 0xFF);
                                         int itemp = iSequenceNumber;
                                         if (itemp < this.iSequenceNumber) {
                                             itemp += 256;
                                         }
                                         itemp -= (this.iSequenceNumber + 1);
-                                        if (itemp != 0 && iSequenceNumber != 0x82 && this.iSequenceNumber != 0x82) {
-                                            invalidata += itemp;
-                                            if (DEBUG) appendToLog(String.format("invalidata = %d: %X - %X = %d", invalidata, iSequenceNumber, this.iSequenceNumber, itemp));
-                                            if (false) appendToLogView(String.format("invalidata = %d: %X - %X = %d", invalidata, iSequenceNumber, this.iSequenceNumber, itemp));
-                                            if (true) {
-                                                String stringSequenceList = "";
-                                                for (int i = 0; i < itemp; i++) {
-                                                    stringSequenceList += (i != 0 ? ", " : "") + String.valueOf(iSequenceNumber - i - 1);
+                                        if (itemp != 0) {
+                                            cs108ReadData.invalidSequence = true;
+                                            if (bFirstSequence == false) {
+                                                if (itemp > 128) {
+                                                    bRecdOldSequence = true;
+                                                    appendToLogView(String.format("processCs108DataIn_ERROR: invalidata = %d, %X - %X = %d. Assume old package.", invalidata, iSequenceNumber, this.iSequenceNumber, itemp));
                                                 }
-                                                appendToLogView(stringSequenceList);
+                                                else {
+                                                    invalidata += itemp;
+                                                    if (true) {
+                                                        String stringSequenceList = "";
+                                                        for (int i = 0; i < itemp; i++) {
+                                                            int iMissedNumber = (iSequenceNumber - i - 1);
+                                                            if (iMissedNumber < 0)
+                                                                iMissedNumber += 256;
+                                                            stringSequenceList += (i != 0 ? ", " : "") + String.format("%X", iMissedNumber);
+                                                        }
+                                                        appendToLogView(String.format("processCs108DataIn_ERROR: invalidata = %d, %X - %X, miss %d: ", invalidata, iSequenceNumber, this.iSequenceNumber, itemp) + stringSequenceList);
+                                                    }
+                                                    this.iSequenceNumber = iSequenceNumber;
+                                                }
                                             }
                                         }
-                                        this.iSequenceNumber = iSequenceNumber; bDifferentSequence = true;
-                                    } else bDifferentSequence = false;
+                                        bFirstSequence = false;
+                                        if (bRecdOldSequence == false) this.iSequenceNumber = iSequenceNumber;
+                                    }
                                     validata++;
                                     break;
                                 case (byte) 0x6A:
-                                    if (DEBUG) appendToLog("BarData = " + byteArrayToString(cs108ReadData.dataValues));
+                                    if (DEBUG)
+                                        appendToLog("BarData = " + byteArrayToString(cs108ReadData.dataValues));
                                     cs108ReadData.cs108ConnectedDevices = Cs108ConnectedDevices.BARCODE;
                                     break;
                                 case (byte) 0xD9:
-                                    if (DEBUG) appendToLog("BARTRIGGER NotificationData = " + byteArrayToString(cs108ReadData.dataValues));
+                                    if (DEBUG)
+                                        appendToLog("BARTRIGGER NotificationData = " + byteArrayToString(cs108ReadData.dataValues));
                                     cs108ReadData.cs108ConnectedDevices = Cs108ConnectedDevices.NOTIFICATION;
                                     break;
                                 case (byte) 0xE8:
@@ -272,18 +291,18 @@ public class Cs108Connector extends BleConnector {
                                     break;
                             }
                             mCs108DataRead.add(cs108ReadData);
-                            if (false){
-                                byte[] debugBytes = new byte[8 + cs108ReadData.dataValues.length];
-                                System.arraycopy(dataIn, cs108DataReadStart, debugBytes, 0, debugBytes.length);
-                                if (DEBUG) appendToLog("mCs108DataRead.Odata = " + byteArrayToString(debugBytes));
-                            }
-                            cs108DataReadStart += ((8 + dataValues.length));
+                            cs108DataReadStart += ((8 + iPayloadLength));
 
                             byte[] cs108DataLeftNew = new byte[CS108DATALEFT_SIZE];
                             System.arraycopy(cs108DataLeft, cs108DataReadStart, cs108DataLeftNew, 0, cs108DataLeftOffset - cs108DataReadStart);
                             cs108DataLeft = cs108DataLeftNew;
-                            cs108DataLeftOffset -= cs108DataReadStart; cs108DataReadStart = 0;
+                            cs108DataLeftOffset -= cs108DataReadStart;
+                            cs108DataReadStart = 0;
                             cs108DataReadStart = -1;
+                            if (mCs108DataReadRequest == false) {
+                                mCs108DataReadRequest = true;
+                                mHandler.removeCallbacks(mReadWriteRunnable); mHandler.post(mReadWriteRunnable);
+                            }
                         }
                     }
                     if (validHeader && cs108DataReadStart < 0) {
@@ -294,15 +313,18 @@ public class Cs108Connector extends BleConnector {
                     }
                 }
                 if (cs108DataReadStart != 0 && cs108DataLeftOffset >= 8) {
-                    byte[] invalidPart = new byte[cs108DataReadStart];
-                    if (true) System.arraycopy(cs108DataLeft, 0, invalidPart, 0, invalidPart.length);
+                    if (true) {
+                        byte[] invalidPart = new byte[cs108DataReadStart];
+                        System.arraycopy(cs108DataLeft, 0, invalidPart, 0, invalidPart.length);
+                        byte[] validPart = new byte[cs108DataLeftOffset - cs108DataReadStart];
+                        System.arraycopy(cs108DataLeft, cs108DataReadStart, validPart, 0, validPart.length);
+                        if (true) appendToLog("processCs108DataIn_ERROR, ENDLOOP invalid unused data: " + invalidPart.length + ", " + byteArrayToString(invalidPart) + ", with valid data length=" + validPart.length + ", " + byteArrayToString(validPart));
+                    }
 
                     byte[] cs108DataLeftNew = new byte[CS108DATALEFT_SIZE];
                     System.arraycopy(cs108DataLeft, cs108DataReadStart, cs108DataLeftNew, 0, cs108DataLeftOffset - cs108DataReadStart);
                     cs108DataLeft = cs108DataLeftNew;
                     cs108DataLeftOffset -= cs108DataReadStart; cs108DataReadStart = 0;
-                    if (false) appendToLogView("ERROR, ENDLOOP invalid data content: " + invalidPart.length + ", " + byteArrayToString(invalidPart) + ", with start=" + cs108DataReadStart + ", new offset=" + cs108DataLeftOffset);
-                    if (DEBUG) appendToLog("ERROR, ENDLOOP invalid data content: " + invalidPart.length + ", " + byteArrayToString(invalidPart) + ", with start=" + cs108DataReadStart + ", new offset=" + cs108DataLeftOffset);
                 }
             }
         }
@@ -364,6 +386,8 @@ public class Cs108Connector extends BleConnector {
         CS108Connection cs108Connection;
         Cs108ConnectedDevices cs108ConnectedDevices;
         byte[] dataValues;
+        boolean invalidSequence;
+
     }
     final int CS108DATALEFT_SIZE = 300; //4000;    //100;
     private ArrayList<Cs108ReadData> mCs108DataRead;
@@ -473,13 +497,13 @@ public class Cs108Connector extends BleConnector {
             //if (streamInBufferSize > 0)
                 //processCs108DataIn();
             boolean bFirst = true;
+            mCs108DataReadRequest = false;
             while (mCs108DataRead.size() != 0) {
                 if (isBleConnected() == false) {
                     mCs108DataRead.clear();
                 } else if (System.currentTimeMillis() - lTime > (intervalRx000UplinkHandler / 2)) {
                         writeDebug2File("C" + String.valueOf(intervalReadWrite) + ", " + System.currentTimeMillis() + ", Timeout");
-                        appendToLog("mReadWriteRunnable(): TIMEOUT");
-                        appendToLogView(". Timeout !!! mCs108DataRead.size() = " + mCs108DataRead.size());
+                        appendToLogView("mReadWriteRunnable_TIMEOUT !!! mCs108DataRead.size() = " + mCs108DataRead.size());
                         break;
                 } else {
                     if (bFirst) { bFirst = false; writeDebug2File("C" + String.valueOf(intervalReadWrite) + ", " + System.currentTimeMillis()); }
@@ -570,7 +594,7 @@ public class Cs108Connector extends BleConnector {
             }
         }
     };
-
+/*
     int intervalProcessCs108Data = 50;
     private final Runnable runnableProcessCs108DataIn = new Runnable() {
         @Override
@@ -578,7 +602,7 @@ public class Cs108Connector extends BleConnector {
             processCs108DataIn();
             mHandler.postDelayed(runnableProcessCs108DataIn, intervalProcessCs108Data);
         }
-    };
+    }; */
 
     int intervalRx000UplinkHandler = 250;
     private final Runnable runnableRx000UplinkHandler = new Runnable() {
@@ -638,6 +662,7 @@ public class Cs108Connector extends BleConnector {
         boolean downlinkResponsed = false;
         RfidPayloadEvents rfidPayloadEvent;
         byte[] dataValues;
+        boolean invalidSequence;
     }
     public class RfidDevice {
         private boolean onStatus = false; boolean getOnStatus() { return onStatus;}
@@ -763,6 +788,7 @@ public class Cs108Connector extends BleConnector {
                     case 0:
                         cs108RfidReadData.rfidPayloadEvent = RfidPayloadEvents.RFID_DATA_READ;
                         cs108RfidReadData.dataValues = dataValues;
+                        cs108RfidReadData.invalidSequence = cs108ReadData.invalidSequence;
                         mRfidToRead.add(cs108RfidReadData);
                         found = true;
                         break;
@@ -3200,6 +3226,7 @@ public class Cs108Connector extends BleConnector {
         final int ACCPWD_INVALID = 0; final long ACCPWD_MIN = 0; final long ACCPWD_MAX = 0x0FFFFFFFF;
         boolean setRx000AccessPassword(String password) {
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 6, (byte) 0x0A, 0, 0, 0, 0};
+            if (password == null) password = "";
             String hexString = "0123456789ABCDEF";
             for (int j = 0; j < 16; j++) {
                 if (j + 1 <= password.length()) {
@@ -4377,7 +4404,8 @@ public class Cs108Connector extends BleConnector {
         }
     }
 
-    final int RFID_READING_BUFFERSIZE = 150;
+    boolean bFirmware_reset_before = false;
+    final int RFID_READING_BUFFERSIZE = 1024;
     public class Rx000Device {
         byte[] mRfidToReading = new byte[RFID_READING_BUFFERSIZE];
         int mRfidToReadingOffset = 0;
@@ -4421,11 +4449,12 @@ public class Cs108Connector extends BleConnector {
             return dValue;
         }
 
+        long firmware_ontime_ms = 0; long date_time_ms = 0;
         void mRx000UplinkHandler() {
             int startIndex = 0;
             int startIndexOld = 0;
             int startIndexNew = 0;
-            boolean packageFound = false;
+            boolean packageFound = false; int packageType = 0;
             long lTime = System.currentTimeMillis();
             boolean bdebugging = false;
             if (mRfidDevice.mRfidToRead.size() != 0) { bdebugging = true; if (DEBUGTHREAD) appendToLog("mRx000UplinkHandler(): START"); }
@@ -4436,38 +4465,42 @@ public class Cs108Connector extends BleConnector {
                     mRfidDevice.mRfidToRead.clear();
                 } else if (System.currentTimeMillis() - lTime > (intervalRx000UplinkHandler/2)) {
                     writeDebug2File("D" + String.valueOf(intervalRx000UplinkHandler) + ", " + System.currentTimeMillis() + ", Timeout");
-                    appendToLog("mRx000UplinkHandler(): TIMEOUT");
-                    appendToLogView(". Timeout !!! mRfidToRead.size() = " + mRfidDevice.mRfidToRead.size());
+                    appendToLogView("mRx000UplinkHandler_TIMEOUT !!! mRfidToRead.size() = " + mRfidDevice.mRfidToRead.size());
                     break;
                 } else {
                     if (bFirst) { bFirst = false; writeDebug2File("D" + String.valueOf(intervalRx000UplinkHandler) + ", " + System.currentTimeMillis()); }
                     byte[] dataIn = mRfidDevice.mRfidToRead.get(0).dataValues;
-                    if (DEBUG) appendToLog("Processing data = " + byteArrayToString(dataIn));
+                    boolean invalidSequence = mRfidDevice.mRfidToRead.get(0).invalidSequence;
+                    if (true) appendToLog("mRx000UplinkHandler(): invalidSequence = " + invalidSequence + ", Processing data = " + byteArrayToString(dataIn) + ", length=" + dataIn.length + ", mRfidToReading.length=" + mRfidToReading.length + ", startIndex=" + startIndex + ", startIndexNew=" + startIndexNew + ", mRfidToReadingOffset=" + mRfidToReadingOffset);
                     mRfidDevice.mRfidToRead.remove(0);
 
-                    if (DEBUG)
-                        if (DEBUG) appendToLog("dataIn.length=" + dataIn.length + ", mRfidToReading.length=" + mRfidToReading.length + ", mRfidToReadingOffset=" + mRfidToReadingOffset);
                     if (dataIn.length >= mRfidToReading.length - mRfidToReadingOffset) {
                         byte[] unhandledBytes = new byte[mRfidToReadingOffset];
                         System.arraycopy(mRfidToReading, 0, unhandledBytes, 0, unhandledBytes.length);
-                        if (DEBUG) appendToLog("ERROR insufficient buffer, mRfidToReadingOffset=" + mRfidToReadingOffset + ", dataIn.length=" + dataIn.length + ", clear mRfidToReading: " + byteArrayToString(unhandledBytes));
+                        if (true) appendToLogView("mRx000UplinkHandler(): ERROR insufficient buffer, mRfidToReadingOffset=" + mRfidToReadingOffset + ", dataIn.length=" + dataIn.length + ", clear mRfidToReading: " + byteArrayToString(unhandledBytes));
                         byte[] mRfidToReadingNew = new byte[RFID_READING_BUFFERSIZE];
                         mRfidToReading = mRfidToReadingNew;
                         mRfidToReadingOffset = 0;
                         invalidUpdata++;
                     }
+                    if (mRfidToReadingOffset != 0 && invalidSequence) {
+                        byte[] unhandledBytes = new byte[mRfidToReadingOffset];
+                        System.arraycopy(mRfidToReading, 0, unhandledBytes, 0, unhandledBytes.length);
+                        if (true) appendToLog("mRx000UplinkHandler(): ERROR invalidSequence with nonzero mRfidToReadingOffset=" + mRfidToReadingOffset + ", throw invalid unused data=" + unhandledBytes.length + ", " + byteArrayToString(unhandledBytes));
+                        mRfidToReadingOffset = 0;
+                        startIndex = 0;
+                        startIndexNew = 0;
+                    }
                     System.arraycopy(dataIn, 0, mRfidToReading, mRfidToReadingOffset, dataIn.length);
                     mRfidToReadingOffset += dataIn.length;
-                    if (DEBUG) appendToLog("mRfidToReadingOffset= " + mRfidToReadingOffset + ", mRfidToReading= " + byteArrayToString(mRfidToReading));
-                    startIndex = 0;
-                    startIndexNew = 0;
-                    startIndexOld = 0;
+                    if (true) {
+                        byte[] bufferData = new byte[mRfidToReadingOffset];
+                        System.arraycopy(mRfidToReading, 0, bufferData, 0, bufferData.length);
+                        appendToLog("mRx000UplinkHandler(): mRfidToReadingOffset= " + mRfidToReadingOffset + ", mRfidToReading= " + byteArrayToString(bufferData));
+                    }
 
-                    while (mRfidToReadingOffset > startIndex) {
-                        int packageLengthRead = 0;
-                        if (mRfidToReadingOffset - startIndex >= 8) {
-                            packageLengthRead = (mRfidToReading[startIndex + 5] & 0xFF) * 256 + (mRfidToReading[startIndex + 4] & 0xFF);
-                        }
+                    while (mRfidToReadingOffset - startIndex >= 8) {
+                        int packageLengthRead = (mRfidToReading[startIndex + 5] & 0xFF) * 256 + (mRfidToReading[startIndex + 4] & 0xFF);
                         int expectedLength = 8 + packageLengthRead * 4;
                         if (mRfidToReading[startIndex + 0] == 0x04) expectedLength = 8 + packageLengthRead;
                         if (DEBUG) appendToLog("loop: mRfidToReading.length=" + mRfidToReading.length + ", 1Byte=" + mRfidToReading[startIndex + 0] + ", mRfidToReadingOffset=" + mRfidToReadingOffset + ", startIndex=" + startIndex + ", expectedLength=" + expectedLength);
@@ -4506,7 +4539,7 @@ public class Cs108Connector extends BleConnector {
                                         if (DEBUG) appendToLog("matched control command with mRfidToWrite.size=" + mRfidDevice.mRfidToWrite.size());
                                     }
                                 }
-                                packageFound = true;
+                                packageFound = true; packageType = 1;
                                 startIndexNew = startIndex + 8;
                             }
                         /*else if (dataIn[startIndex + 1] == 3 && mRx000ToWrite.size() != 0) {   //input as GetVersion Control Command Response
@@ -4526,22 +4559,28 @@ public class Cs108Connector extends BleConnector {
                             }
                         }*/
                             else if ((mRfidToReading[startIndex + 0] == (byte) 0x00 || mRfidToReading[startIndex + 0] == (byte) 0x70)
-                                    && mRfidToReading[startIndex + 1] == 0) {   //if input as HOST_REG_RESP
+                                    && mRfidToReading[startIndex + 1] == 0
+                                    && mRfidDevice.mRfidToWrite.size() != 0
+                                    && mRfidDevice.mRfidToWrite.get(0).dataValues != null
+                                    && mRfidDevice.mRfidToWrite.get(0).dataValues[0] == 0x70
+                                    && mRfidDevice.mRfidToWrite.get(0).dataValues[1] == 0
+                            ) {   //if input as HOST_REG_RESP
                                 if (DEBUG) appendToLog("loop: decoding HOST_REG_RESP data with startIndex = " + startIndex + ", mRfidToReading=" + byteArrayToString(mRfidToReading));
                                 dataIn = mRfidToReading;
                                 byte[] dataInPayload = new byte[4];
                                 System.arraycopy(dataIn, startIndex + 4, dataInPayload, 0, dataInPayload.length);
-                                if (mRfidDevice.mRfidToWrite.size() == 0) {
-                                    if (DEBUG) appendToLog("HOST_REG_RESP is received with null mRfidToWrite: " + byteArrayToString(dataInPayload));
-                                } else if (mRfidDevice.mRfidToWrite.get(0).dataValues == null) {
-                                    if (DEBUG) appendToLog("NULL mRfidToWrite.get(0).dataValues"); //.length = " + mRfidDevice.mRfidToWrite.get(0).dataValues.length);
-                                } else if (!(mRfidDevice.mRfidToWrite.get(0).dataValues[0] == 0x70 && mRfidDevice.mRfidToWrite.get(0).dataValues[1] == 0)) {
-                                    if (DEBUG) appendToLog("HOST_REG_RESP is received with invalid mRfidToWrite");
-                                } else {
+                                //if (mRfidDevice.mRfidToWrite.size() == 0) {
+                                //    if (true) appendToLog("mRx000UplinkHandler(): HOST_REG_RESP is received with null mRfidToWrite: " + byteArrayToString(dataInPayload));
+                                //} else if (mRfidDevice.mRfidToWrite.get(0).dataValues == null) {
+                                //    if (true) appendToLog("mRx000UplinkHandler(): NULL mRfidToWrite.get(0).dataValues"); //.length = " + mRfidDevice.mRfidToWrite.get(0).dataValues.length);
+                                //} else if (!(mRfidDevice.mRfidToWrite.get(0).dataValues[0] == 0x70 && mRfidDevice.mRfidToWrite.get(0).dataValues[1] == 0)) {
+                                //    if (true) appendToLog("mRx000UplinkHandler(): HOST_REG_RESP is received with invalid mRfidDevice.mRfidToWrite.get(0).dataValues=" + byteArrayToString(mRfidDevice.mRfidToWrite.get(0).dataValues));
+                                //} else
+                                    {
                                     int addressToWrite = mRfidDevice.mRfidToWrite.get(0).dataValues[2] + mRfidDevice.mRfidToWrite.get(0).dataValues[3] * 256;
                                     int addressToRead = dataIn[startIndex + 2] + dataIn[startIndex + 3] * 256;
                                     if (addressToRead != addressToWrite) {
-                                        if (DEBUG) appendToLog("HOST_REG_RESP is received with misMatch address: addressToRead=" + addressToRead + ", " + startIndex + ", " + byteArrayToString(dataInPayload) + ", addressToWrite=" + addressToWrite);
+                                        if (true) appendToLog("mRx000UplinkHandler(): HOST_REG_RESP is received with misMatch address: addressToRead=" + addressToRead + ", " + startIndex + ", " + byteArrayToString(dataInPayload) + ", addressToWrite=" + addressToWrite);
                                     } else {
                                         switch (addressToRead) {
                                             case 0:
@@ -4898,10 +4937,12 @@ public class Cs108Connector extends BleConnector {
                                         mRfidDevice.mRfidToWrite.remove(0); mRfidDevice.sendRfidToWriteSent = 0; mRfidDevice.mRfidToWriteRemoved = true;
                                     }
                                 }
-                                packageFound = true;
+                                packageFound = true; packageType = 2;
                                 startIndexNew = startIndex + 8;
                             } else if ((mRfidToReading[startIndex + 0] >= 1 && mRfidToReading[startIndex + 0] <= 4) //02 for begin and end, 03 for inventory, 01 for access
-                                    && expectedLength >= 0
+                                    && (expectedLength >= 0 && expectedLength < mRfidToReading.length)
+                                    && (mRfidToReading[startIndex + 2] == 0 || mRfidToReading[startIndex + 2] == 1 || (mRfidToReading[startIndex + 2] >= 5 && mRfidToReading[startIndex + 2] <= 8))
+                                    && (mRfidToReading[startIndex + 3] == 0 || mRfidToReading[startIndex + 3] == 0x30 || mRfidToReading[startIndex + 3] == (byte)0x80)
 //                                    && mRfidToReading[startIndex + 6] == 0    //for packageTypeRead = 0x3007, this byte is 0x20. Others are 0
                                     && mRfidToReading[startIndex + 7] == 0) {  //if input as command response
                                 {
@@ -4944,7 +4985,7 @@ public class Cs108Connector extends BleConnector {
                                                 byte[] dataWritten = mRfidDevice.mRfidToWrite.get(0).dataValues;
                                                 if (dataWritten == null) { }
                                                 else if (!(dataWritten[0] == (byte) 0x70 && dataWritten[1] == 1 && dataWritten[2] == 0 && dataWritten[3] == (byte) 0xF0)) {
-                                                    if (DEBUG) appendToLog("command COMMAND_BEGIN is found with invalid mRfidToWrite: " + byteArrayToString(dataWritten));
+                                                    if (true) appendToLog("command COMMAND_BEGIN is found with invalid mRfidToWrite: " + byteArrayToString(dataWritten));
                                                 } else {
                                                     boolean matched = true;
                                                     for (int i = 0; i < 4; i++) {
@@ -4953,12 +4994,32 @@ public class Cs108Connector extends BleConnector {
                                                             break;
                                                         }
                                                     }
+                                                    long lValue = 0; int multipler = 1;
+                                                    for (int i = 0; i < 4; i++) {
+                                                        lValue += (dataIn[startIndex + 12 + i] & 0xFF) * multipler;
+                                                        multipler *= 256;
+                                                    }
                                                     if (matched == false) {
-                                                        if (DEBUG) appendToLog("command COMMAND_BEGIN is found with mis-matched command:" + byteArrayToString(dataWritten));
+                                                        if (true) appendToLog("command COMMAND_BEGIN is found with mis-matched command:" + byteArrayToString(dataWritten));
                                                     } else {
                                                         mRfidDevice.mRfidToWrite.remove(0); mRfidDevice.sendRfidToWriteSent = 0; mRfidDevice.mRfidToWriteRemoved = true;
                                                         inventoring = true;
-                                                        if (DEBUG) appendToLog("command COMMAND_BEGIN is found with packageLength=" + packageLengthRead);
+                                                        Date date = new Date();
+                                                        long date_time = date.getTime();
+                                                        long expected_firmware_ontime_ms = firmware_ontime_ms;
+                                                        if (date_time_ms != 0) {
+                                                            long firmware_ontime_ms_difference = date_time - date_time_ms;
+                                                            if (firmware_ontime_ms_difference > 2000) {
+                                                                expected_firmware_ontime_ms += (firmware_ontime_ms_difference - 2000);
+                                                            }
+                                                        }
+                                                        if (lValue < expected_firmware_ontime_ms) {
+                                                            bFirmware_reset_before = true;
+                                                            appendToLogView("command COMMAND_BEGIN --- Firmware reset before !!!");
+                                                        }
+                                                        firmware_ontime_ms = lValue;
+                                                        date_time_ms = date_time;
+                                                        if (true) appendToLog("command COMMAND_BEGIN is found with packageLength=" + packageLengthRead + ", with firmware count=" + lValue + ", date_time=" + date_time + ", expected firmware count=" + expected_firmware_ontime_ms);
                                                         //if (mUsbConnector != null) mUsbConnector.inventorRunning = true;
                                                     }
                                                 }
@@ -4972,11 +5033,11 @@ public class Cs108Connector extends BleConnector {
                                             } else {
                                                 dataA.responseType = HostCmdResponseTypes.TYPE_COMMAND_END;
                                                 inventoring = false;
-                                                if (true) appendToLog("command COMMAND_END is found with packageLength=" + packageLengthRead);
-                                                if (dataA.dataValues.length >= 16) {
+                                                if (true) appendToLog("command COMMAND_END is found with packageLength=" + packageLengthRead + ", length = " + dataA.dataValues.length + ", dataValues=" + byteArrayToString(dataA.dataValues) );
+                                                if (dataA.dataValues.length >= 8) {
                                                     int status = dataA.dataValues[12 - 8] + dataA.dataValues[13 - 8] * 256;
                                                     if (status != 0)
-                                                        dataA.decodedError = "Received COMMAND_END with status = " + status + ", error_port = " + dataA.dataValues[14];
+                                                        dataA.decodedError = "Received COMMAND_END with status=" + String.format("0x%X", status) + ", error_port=" + dataA.dataValues[14 - 8];
                                                     if (dataA.decodedError != null)
                                                         appendToLog(dataA.decodedError);
                                                 }
@@ -5217,6 +5278,9 @@ public class Cs108Connector extends BleConnector {
                                                 }
                                             }
                                             mRx000ToRead.add(dataA);
+                                            if (true) {
+                                                appendToLog("mRx000UplinkHandler(): package read = " + byteArrayToString(dataA.dataValues));
+                                            }
                                             break;
                                         case 0x0007:
                                         case 0x8007:    //RFID_PACKET_TYPE_ANTENNA_CYCLE_END    //original 7
@@ -5296,7 +5360,7 @@ public class Cs108Connector extends BleConnector {
                                                     mRx000OemSetting.serialNumber[(address - 4) * 4 + i] = dataIn[startIndex + 12 + i];
                                                 }
                                             }*/
-                                            if (DEBUG) appendToLog("command OEMCFG_READ is found with address = " + address + ", packageLength=" + packageLengthRead + ", " + byteArrayToString(dataInPayload));
+                                            if (true) appendToLog("command OEMCFG_READ is found with address = " + address + ", packageLength=" + packageLengthRead + ", " + byteArrayToString(dataInPayload));
                                             break;
                                         case 0x3008:    //RFID_PACKET_TYPE_ENG_RSSI
                                             appendToLog("Hello123: RFID_PACKET_TYPE_ENG_RSSI S is found: " + byteArrayToString(dataInPayload));
@@ -5310,7 +5374,7 @@ public class Cs108Connector extends BleConnector {
                                             if (DEBUG) appendToLog("command OTHERS is found: " + byteArrayToString(dataInPayload) + ", with packagelength=" + packageLengthRead + ", packageTypeRead=" + packageTypeRead);
                                             break;
                                     }
-                                    packageFound = true;
+                                    packageFound = true; packageType = 3;
                                     startIndexNew = startIndex + expectedLength;
                                 }
                             }
@@ -5318,19 +5382,18 @@ public class Cs108Connector extends BleConnector {
 
                         if (packageFound) {
                             packageFound = false;
-                            if (DEBUG)
-                                if (DEBUG) appendToLog("mRfidToReadingOffset=" + mRfidToReadingOffset + ", startIndexOld= " + startIndexOld + " > startIndex= " + startIndex + ", startIndexNew=" + startIndexNew);
-                            if (startIndex > startIndexOld) {
+                            if (true) appendToLog("mRx000UplinkHandler(): packageFound " + packageType + " with mRfidToReadingOffset=" + mRfidToReadingOffset + ", startIndexOld= " + startIndexOld + ", startIndex= " + startIndex + ", startIndexNew=" + startIndexNew);
+                            if (startIndex != startIndexOld) {
                                 byte[] unhandledBytes = new byte[startIndex - startIndexOld];
                                 System.arraycopy(mRfidToReading, startIndexOld, unhandledBytes, 0, unhandledBytes.length);
-                                if (DEBUG) appendToLog("ERROR, invalid data content: " + unhandledBytes.length + ", " + byteArrayToString(unhandledBytes));
+                                if (true) appendToLog("mRx000UplinkHandler(): packageFound with invalid unused data: " + unhandledBytes.length + ", " + byteArrayToString(unhandledBytes));
                                 invalidUpdata++;
-                            } else if (startIndex != startIndexOld) {
-                                if (DEBUG) appendToLog("startIndexOld= " + startIndexOld + " > startIndex= " + startIndex);
                             }
-                            startIndex = startIndexNew;
-                            startIndexOld = startIndexNew;
-                            //if (startIndexNew != mRfidToReadingOffset) {
+                            if (true) {
+                                byte[] usedBytes = new byte[startIndexNew - startIndex];
+                                System.arraycopy(mRfidToReading, startIndex, usedBytes, 0, usedBytes.length);
+                                appendToLog("mRx000UplinkHandler(): used data = " + usedBytes.length + ", " + byteArrayToString(usedBytes));
+                            }
                             byte[] mRfidToReadingNew = new byte[RFID_READING_BUFFERSIZE];
                             System.arraycopy(mRfidToReading, startIndexNew, mRfidToReadingNew, 0, mRfidToReadingOffset - startIndexNew);
                             mRfidToReading = mRfidToReadingNew;
@@ -5338,19 +5401,23 @@ public class Cs108Connector extends BleConnector {
                             startIndex = 0;
                             startIndexNew = 0;
                             startIndexOld = 0;
-                            if (DEBUG) {
+                            if (mRfidToReadingOffset != 0) {
                                 byte[] remainedBytes = new byte[mRfidToReadingOffset];
                                 System.arraycopy(mRfidToReading, 0, remainedBytes, 0, remainedBytes.length);
-                                if (DEBUG) appendToLog("moved with remained bytes=" + byteArrayToString(remainedBytes));
+                                if (true) appendToLog("mRx000UplinkHandler(): moved with remained bytes=" + byteArrayToString(remainedBytes));
                             }
                             //}
                         } else {
                             startIndex++;
                         }
                     }
+                    appendToLog("mRx000UplinkHandler(): exit while(-8) loop with startIndex = " + startIndex + ( startIndex == 0 ? "" : "(NON-ZERO)" ) + ", mRfidToReadingOffset=" + mRfidToReadingOffset);
                 }
             }
-            if (mRfidToReadingOffset == startIndexNew) {
+            if (mRfidToReadingOffset == startIndexNew && mRfidToReadingOffset != 0) {
+                byte[] unusedData = new byte[mRfidToReadingOffset];
+                System.arraycopy(mRfidToReading, 0, unusedData, 0, unusedData.length);
+                appendToLog("mRx000UplinkHandler(): Ending with invaid unused data: " + mRfidToReadingOffset + ", " + byteArrayToString(unusedData));
                 mRfidToReading = new byte[RFID_READING_BUFFERSIZE];
                 mRfidToReadingOffset = 0;
             }
@@ -5563,10 +5630,50 @@ public class Cs108Connector extends BleConnector {
             }
         }
 
+        ArrayList<byte[]> macAccessHistory = new ArrayList<>();
+        int findMacAccessHistory(byte[] msgBuffer) {
+            if (sameCheck == false) return -1;
+            if (msgBuffer.length != 8) return -1;
+            if (msgBuffer[0] != (byte)0x70 || msgBuffer[1] != 1) return -1;
+            if (msgBuffer[2] == 0 && msgBuffer[3] == (byte)0xF0) return -1;
+
+            int i = -1;
+            appendToLog("msgbuffer=" + byteArrayToString(msgBuffer));
+            for (i = 0; i < macAccessHistory.size(); i++) {
+//                appendToLog("macAccessHistory(" + i + ")=" + byteArrayToString(macAccessHistory.get(i)));
+                if (Arrays.equals(macAccessHistory.get(i), msgBuffer)) break;
+            }
+            if (i == macAccessHistory.size()) i = -1;
+            appendToLog("returnValue=" + i);
+            return i;
+        }
+        void addMacAccessHistory(byte[] msgBuffer) {
+            if (sameCheck == false) return;
+            if (msgBuffer.length != 8) return;
+            if (msgBuffer[0] != (byte)0x70 || msgBuffer[1] != 1) return;
+            if (msgBuffer[2] == 0 && msgBuffer[3] == (byte)0xF0) return;
+
+            byte[] msgBuffer4 = Arrays.copyOf(msgBuffer, 4);
+            for (int i = 0; i < macAccessHistory.size(); i++) {
+                byte[] macAccessHistory4 = Arrays.copyOf(macAccessHistory.get(i), 4);
+                if (Arrays.equals(msgBuffer4, macAccessHistory4)) {
+                    appendToLog("deleted old record=" + byteArrayToString(macAccessHistory4));
+                    macAccessHistory.remove(i);
+                    break;
+                }
+            }
+            appendToLog("added msgbuffer=" + byteArrayToString(msgBuffer));
+            macAccessHistory.add(msgBuffer);
+        }
+
         boolean sendHostRegRequest(HostRegRequests hostRegRequests, boolean writeOperation, byte[] msgBuffer) {
             boolean needResponse = false;
             boolean validRequest = false;
+
             if (isBleConnected() == false) return false;
+            if (findMacAccessHistory(msgBuffer) >= 0) return true;
+            addMacAccessHistory(msgBuffer);
+
             switch (hostRegRequests) {
                 case MAC_OPERATION:
 //                case MAC_VER:

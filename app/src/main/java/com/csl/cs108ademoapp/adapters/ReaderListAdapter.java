@@ -112,6 +112,15 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
                 }
             } else if (codeSensor > reader.INVALID_CODESENSOR && codeRssi > reader.INVALID_CODERSSI) { //for Axzon/Magnus tags
                 strExtra = "SC=" + String.format("%d", codeSensor);
+                int iHumidityThreshold = Integer.parseInt(MainActivity.config.config3);
+                if (false && reader.getCodeSensorMax() > 0) {
+                    float fValue = (float) codeSensor;
+                    fValue /= (float) reader.getCodeSensorMax();
+                    fValue *= 100;
+                    strExtra += "\nSC=" + String.format("%.1f", fValue) + "%";
+                } else if (iHumidityThreshold > 0) {
+                    strExtra += "\nSC=" + (codeSensor >= iHumidityThreshold ? "Dry" : "Wet");
+                }
                 int ocrssiMin = -1; int ocrssiMax = -1; boolean bValidOcrssi = false;
                 ocrssiMax = Integer.parseInt(MainActivity.config.config1);
                 ocrssiMin = Integer.parseInt(MainActivity.config.config2);
