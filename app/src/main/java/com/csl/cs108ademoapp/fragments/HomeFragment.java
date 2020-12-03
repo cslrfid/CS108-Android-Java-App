@@ -2,8 +2,8 @@ package com.csl.cs108ademoapp.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -102,6 +102,7 @@ public class HomeFragment extends CommonFragment {
                     MainActivity.sharedObjects.versioinWarningShown = true;
                 }
             }
+            MainActivity.mCs108Library4a.setPwrManagementMode(true);
         }
     };
 }

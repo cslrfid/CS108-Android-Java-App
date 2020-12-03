@@ -3,7 +3,6 @@ package com.csl.cs108ademoapp.fragments;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,8 +54,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
         radioButtonAuraSensAtSelect = (RadioButton) getActivity().findViewById(R.id.accessAuraSensAtSelect);
 
         selectTag = new SelectTag((Activity)getActivity ());
-        TableRow tableRow = (TableRow) getActivity().findViewById(R.id.selectMemoryBankRow);
-        tableRow.setVisibility(View.GONE);
+        selectTag.tableRowSelectMemoryBank.setVisibility(View.GONE);
 
         textViewUserCode2OK = (TextView) getActivity().findViewById(R.id.accessAuraSystemConfigurationOK);
         textViewUserCode3OK = (TextView) getActivity().findViewById(R.id.accessAuraSensorCalibrationOK);
@@ -173,7 +170,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                 MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
                 if (bankProcessing++ != 0 && invalid == true)   rerunRequest = false;
                 else {
-                    String selectMask = selectTag.editTextRWTagID.getText().toString();
+                    String selectMask = selectTag.editTextTagID.getText().toString();
                     int selectBank = selectTag.spinnerSelectBank.getSelectedItemPosition()+1;
                     int selectOffset = Integer.valueOf(selectTag.editTextRWSelectOffset.getText().toString());
                     accessTask = new AccessTask(
@@ -282,7 +279,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
         int accBank = 0, accSize = 0, accOffset = 0;
         String writeData = "";
 
-        if (selectTag.editTextRWTagID.getText().toString().length() == 0) invalidRequest1 = true;
+        if (selectTag.editTextTagID.getText().toString().length() == 0) invalidRequest1 = true;
         else if (checkBoxUserCode1.isChecked() == true && checkProcessing < 1) {
             accBank = 1; accSize = 1; accOffset = 0x22; readWriteTypes = ReadWriteTypes.USERCODE1; checkProcessing = 1;
             if (operationRead) {

@@ -75,7 +75,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
             MainActivity.mCs108Library4a.appendToLog("yield = " + yield + ", allTotal = " + allTotal);
         }
         MainActivity.mCs108Library4a.invalidata = 0;
-        MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.invalidUpdata = 0;
+        MainActivity.mCs108Library4a.invalidUpdata = 0;
         MainActivity.mCs108Library4a.validata = 0;
 
         timeMillis = System.currentTimeMillis(); startTimeMillis = System.currentTimeMillis(); runTimeMillis = startTimeMillis;
@@ -157,7 +157,23 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     } else  ending = true;
                 }
             }
-            if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0)   timeMillis = System.currentTimeMillis();
+            if (false) {
+                if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0)   timeMillis = System.currentTimeMillis();
+            } else {
+                //suspend the current thread up to 5 seconds until all the commands on the output buffer got sent out
+                long toCnt = System.currentTimeMillis();
+                if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0) {
+                    while (System.currentTimeMillis() - toCnt < 50000 && MainActivity.mCs108Library4a.mrfidToWriteSize() != 0) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    MainActivity.mCs108Library4a.appendToLog("InventoryRfidTask: send commands elapsed time: " + String.format("%d", System.currentTimeMillis() - toCnt));
+                    timeMillis = System.currentTimeMillis();
+                }
+            }
 /*                if (System.currentTimeMillis() - timeMillis > 10000) {
                     if (debugEndRequest)    MainActivity.mCs108Library4a.getMacLastCommandDuration(true);
                     taskCancelReason = TaskCancelRReason.TIMEOUT; taskCancelling = true;
@@ -484,14 +500,14 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
             if (readerListAdapter != null) readerListAdapter.notifyDataSetChanged();
             if (invalidDisplay) {
                 if (rfidYieldView != null) rfidYieldView.setText(String.valueOf(total) + "," + String.valueOf(MainActivity.mCs108Library4a.validata));
-                if (rfidRateView != null) rfidRateView.setText(String.valueOf(MainActivity.mCs108Library4a.invalidata) + "," + String.valueOf(MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.invalidUpdata));
+                if (rfidRateView != null) rfidRateView.setText(String.valueOf(MainActivity.mCs108Library4a.invalidata) + "," + String.valueOf(MainActivity.mCs108Library4a.invalidUpdata));
             } else {
                 String stringTemp = "Unique:" + String.valueOf(yield);
                 if (true) {
                     float fErrorRate = (float) MainActivity.mCs108Library4a.invalidata / ( (float) MainActivity.mCs108Library4a.validata + (float) MainActivity.mCs108Library4a.invalidata ) * 100;
                     stringTemp += "\nE" + String.valueOf(MainActivity.mCs108Library4a.invalidata) + "/" + String.valueOf(MainActivity.mCs108Library4a.validata) + "/" + String.valueOf((int)fErrorRate);
                 } else if (true) {
-                    stringTemp += "\nE" + String.valueOf(MainActivity.mCs108Library4a.invalidata) + "," + String.valueOf(MainActivity.mCs108Library4a.mRfidDevice.mRx000Device.invalidUpdata) + "/" + String.valueOf(MainActivity.mCs108Library4a.validata);
+                    stringTemp += "\nE" + String.valueOf(MainActivity.mCs108Library4a.invalidata) + "," + String.valueOf(MainActivity.mCs108Library4a.invalidUpdata) + "/" + String.valueOf(MainActivity.mCs108Library4a.validata);
                 }
                 if (rfidYieldView != null) rfidYieldView.setText(stringTemp);
                 if (total != 0) {

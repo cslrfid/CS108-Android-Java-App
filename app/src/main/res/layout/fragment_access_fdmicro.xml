@@ -1,0 +1,429 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+        <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_top_margin"
+        layout="@layout/custom_select" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"/>
+
+    <TableRow
+        android:id="@+id/selectMemoryBankRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <CheckBox
+            android:id="@+id/accessFDSelectCommand"
+            android:layout_width="wrap_content"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Select command" />
+
+        <Spinner
+            android:id="@+id/selectCommand"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_default_spinner" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessFDOffsetLengthRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="@string/readWriteOffset_title" />
+
+        <EditText
+            android:id="@+id/accessFDmemoryOffset"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            layout="@layout/custom_edittext"
+            android:text="0" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="@string/readWriteSize_title" />
+
+        <EditText
+            android:id="@+id/accessFDmemoryLength"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            layout="@layout/custom_edittext"
+            android:inputType="numberDecimal"
+            android:text="4" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessFDValueRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Memory Value" />
+
+        <include
+            android:id="@+id/accessFDMemoryValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessFDAuthRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <Spinner
+            android:id="@+id/accessFDselectAuth"
+            android:layout_margin="0dp"
+            android:layout_weight="2"
+            style="@style/style_default_spinner" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            style="@style/style_normal_font"
+            android:text="@string/password_title" />
+
+        <include
+            android:id="@+id/selectFDAuthPassword"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            layout="@layout/custom_edittext_password" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessFDGetTemperatureRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <CheckBox
+            android:id="@+id/accessFDGetTemperatureStartGet"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font"
+            android:enabled="false"
+            android:text="Get" />
+
+        <Spinner
+            android:id="@+id/accessFDSelectGetSource"
+            android:layout_width="wrap_content"
+            style="@style/style_default_spinner" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessFDGetTemperatureRow1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <CheckBox
+            android:id="@+id/accessFDGetTemperatureResultType"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font"
+            android:text="processed" />
+
+        <CheckBox
+            android:id="@+id/accessFDGetTemperatureCheckField"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font"
+            android:text="field check" />
+
+        <CheckBox
+            android:id="@+id/accessFDGetTemperatureStorageEnable"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font"
+            android:text="store to" />
+
+        <include
+            android:id="@+id/accessFDStoreOffset"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessFDLoggingRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            style="@style/style_normal_font"
+            android:text="@string/password_title" />
+
+        <include
+            android:id="@+id/selectFDLoggingPassword"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext_password" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessFDRegRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Reg offset" />
+
+        <EditText
+            android:id="@+id/accessFDRegOffset"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            layout="@layout/custom_edittext"
+            android:text="0" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Reg value" />
+
+        <include
+            android:id="@+id/accessFDRegValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/accessFDEnableRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <CheckBox
+            android:id="@+id/accessFDEnable"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font"
+            android:text="Enable" />
+    </TableRow>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"/>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <Button
+            android:id="@+id/accessFDcheckTemperature"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Check temperature" />
+
+        <TextView
+            android:id="@+id/accessFDtemperatureValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <Button
+            android:id="@+id/accessFDcheckBattery"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Check battery" />
+
+        <TextView
+            android:id="@+id/accessFDbatteryValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Delay to start (minutes)" />
+
+                <EditText
+                    android:id="@+id/accessFDvdetDelayStartCfg"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    layout="@layout/custom_edittext"
+                    android:inputType="numberDecimal"
+                    android:text="1"/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="# of samples" />
+
+                <EditText
+                    android:id="@+id/accessFDrtcCntLimit"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    layout="@layout/custom_edittext"
+                    android:inputType="numberDecimal"
+                    android:text="3"/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Time step (seconds)" />
+
+                <EditText
+                    android:id="@+id/accessFDstepCfg"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    layout="@layout/custom_edittext"
+                    android:inputType="numberDecimal"
+                    android:text="20"/>
+            </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+
+        <Button
+            android:id="@+id/accessFDSetLogging"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Start Logging" />
+
+        <TextView
+            android:id="@+id/accessFDloggingValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            layout="@layout/custom_edittext" />
+
+        <Button
+            android:id="@+id/accessFDCheckLogging"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            style="@style/style_normal_font"
+            android:text="Check Logging"
+            android:visibility="gone" />
+    </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp">
+
+                <Button
+                    android:id="@+id/accessFDGetLogging"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Get Logging result" />
+
+                <TextView
+                    android:id="@+id/accessFDloggingValue1"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/accessCCReadButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="@string/read_title" />
+
+            <Button
+                android:id="@+id/accessCCWriteButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="@string/write_title" />
+        </TableRow>
+    </LinearLayout>
+</LinearLayout>

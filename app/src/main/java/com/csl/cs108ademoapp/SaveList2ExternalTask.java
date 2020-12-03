@@ -40,7 +40,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import static android.content.Context.WIFI_SERVICE;
-import static android.support.v4.app.ActivityCompat.requestPermissions;
+import static androidx.core.app.ActivityCompat.requestPermissions;
 import static com.csl.cs108ademoapp.MainActivity.mContext;
 import static com.csl.cs108ademoapp.MainActivity.mCs108Library4a;
 

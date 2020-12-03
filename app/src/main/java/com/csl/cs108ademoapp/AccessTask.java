@@ -1,6 +1,7 @@
 package com.csl.cs108ademoapp;
 
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,10 +14,12 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     final boolean DEBUG = true;
     final boolean skipSelect = false;
     public enum TaskCancelRReason {
-        NULL, INVALD_REQUEST, DESTORY, STOP, BUTTON_RELEASE, TIMEOUT
+        NULL, INVALD_REQUEST, DESTORY, STOP, BUTTON_RELEASE, ERROR, TIMEOUT
     }
     public TaskCancelRReason taskCancelReason;
     public String accessResult;
+    Handler mHandler = new Handler();
+    Runnable updateRunnable = null;
 
     Button button; String buttonText;
     TextView registerRunTime, registerTagGot, registerVoltageLevel;
@@ -46,7 +49,8 @@ public class AccessTask extends AsyncTask<Void, String, String> {
 
     public AccessTask(Button button, boolean invalidRequest,
                       String selectMask, int selectBank, int selectOffset,
-                      String strPassword, int powerLevel, Cs108Connector.HostCommands hostCommand, boolean bEnableErrorPopWindow) {
+                      String strPassword, int powerLevel, Cs108Connector.HostCommands hostCommand,
+                      boolean bEnableErrorPopWindow, Runnable updateRunnable) {
         this.button = button;
         this.registerTagGot = registerTagGot;
         this.registerVoltageLevel = registerVoltageLevel;
@@ -59,6 +63,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         this.powerLevel = powerLevel;
         this.hostCommand = hostCommand;
         this.bEnableErrorPopWindow = bEnableErrorPopWindow;
+        this.updateRunnable = updateRunnable;
         if (true) {
             total = 0;
             tagList.clear();
@@ -95,6 +100,9 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         }
         preExecute();
     }
+    public void setRunnable(Runnable updateRunnable) {
+        this.updateRunnable = updateRunnable;
+    }
 
     void preExecute() {
         accessResult = null;
@@ -106,13 +114,14 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         String buttonText1 = null; String strLastChar = buttonText.substring(buttonText.length()-1);
         if (strLastChar.toUpperCase().matches("E")) {
             buttonText1 = buttonText.substring(0, buttonText.length()-1);
-            if (strLastChar.matches("E")) buttonText1 += "ING";
-            else buttonText1 += "ing";
-        }
+        } else if (buttonText.toUpperCase().matches("STOP")) {
+            buttonText1 = buttonText; buttonText1 += buttonText1.substring(buttonText.length()-1);
+        } else buttonText1 = buttonText;
         if (repeat || buttonText.length() == 0) button.setText("Stop");
-        else if (buttonText1 != null) button.setText(buttonText1);
-        else if (Character.isUpperCase(strLastChar.charAt(0))) button.setText(buttonText + "ING");
-        else button.setText(buttonText + "ing");
+        else {
+            if (Character.isUpperCase(strLastChar.charAt(0))) button.setText(buttonText1 + "ING");
+            else button.setText(buttonText1 + "ing");
+        }
         if (registerYield != null && tagList.size()==0) registerYield.setText("");
         if (registerTotal != null && total == 0) registerTotal.setText("");
 
@@ -163,6 +172,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     @Override
     protected String doInBackground(Void... a) {
         boolean ending = false;
+        int iTimeOut = 5000;
 
         while (MainActivity.mCs108Library4a.isBleConnected() && isCancelled() == false && ending == false) {
             int batteryCount = MainActivity.mCs108Library4a.getBatteryCount();
@@ -174,6 +184,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 runTimeMillis = System.currentTimeMillis();
                 publishProgress("WW");
             }
+            byte[] notificationData = MainActivity.mCs108Library4a.onNotificationEvent();
             Cs108Connector.Rx000pkgData rx000pkgData = MainActivity.mCs108Library4a.onRFIDEvent();
             if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0)   timeMillis = System.currentTimeMillis();
             else if (rx000pkgData != null) {
@@ -182,11 +193,19 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 } else if (rx000pkgData.responseType == Cs108Connector.HostCmdResponseTypes.TYPE_18K6C_TAG_ACCESS) {
                     if (true) {
                         if (rx000pkgData.decodedError == null) {
-                            if (done == false) { accessResult = rx000pkgData.decodedResult; MainActivity.mCs108Library4a.appendToLog("HelloA, accResult=" + accessResult);}
+                            if (done == false) {
+                                accessResult = rx000pkgData.decodedResult;
+                                MainActivity.mCs108Library4a.appendToLog("StreamOut, accResult=" + accessResult);
+                                if (updateRunnable != null) {
+                                    MainActivity.mCs108Library4a.appendToLog("StreamOut: start updateRunnable");
+                                    mHandler.post(updateRunnable);
+                                }
+                            }
                             done = true;
                             publishProgress(null, rx000pkgData.decodedResult);
                         }
                         else publishProgress(rx000pkgData.decodedError);
+                        iTimeOut = 500;
                     }
                 } else if (rx000pkgData.responseType == Cs108Connector.HostCmdResponseTypes.TYPE_COMMAND_END) {
                     if (rx000pkgData.decodedError != null) { endingMessaage = rx000pkgData.decodedError; ending = true; }
@@ -204,11 +223,20 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 }
                 timeMillis = System.currentTimeMillis();
             }
-            if (System.currentTimeMillis() - timeMillis > 5000) {
-                cancel(true);
+            else if (notificationData != null) {
+                MainActivity.mCs108Library4a.appendToLog("resultError=" + MainActivity.mCs108Library4a.byteArrayToString(notificationData));
+                publishProgress("Received notification uplink event 0xA101 with error code=" + MainActivity.mCs108Library4a.byteArrayToString(notificationData));
+                timeMillis = System.currentTimeMillis();
+                iTimeOut = 500;
+            }
+            if (System.currentTimeMillis() - timeMillis > iTimeOut) {
+                MainActivity.mCs108Library4a.appendToLog("endingMessage: iTimeout = " + iTimeOut);
                 taskCancelReason = TaskCancelRReason.TIMEOUT;
             }
-            if (taskCancelReason != TaskCancelRReason.NULL) cancel(true);
+            if (taskCancelReason != TaskCancelRReason.NULL) {
+                MainActivity.mCs108Library4a.appendToLog("taskCancelReason=" + TaskCancelRReason.values());
+                cancel(true);
+            }
         }
         return "End of Asynctask():" + ending;
     }
@@ -244,6 +272,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 resultError += output[0];
                 if (true)
                     MainActivity.mCs108Library4a.appendToLog("output[0]: " + output[0] + ", resultError = " + resultError);
+                taskCancelReason = TaskCancelRReason.ERROR;
             }
         } else {
             if (registerYield != null) {
@@ -260,8 +289,8 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessSecurityLockFragment.InventoryRfidTask.onCancelled()");
-
+        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("endingMesssage: taskCancelReason = " + taskCancelReason);
+        //if (taskCancelReason != TaskCancelRReason.NULL) MainActivity.mCs108Library4a.abortOperation1(); else
         MainActivity.mCs108Library4a.abortOperation();
         if (taskCancelReason == TaskCancelRReason.NULL)  taskCancelReason = TaskCancelRReason.DESTORY;
         DeviceConnectTask4RegisterEnding();
@@ -339,6 +368,9 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 case BUTTON_RELEASE:
                     strErrorMessage += "Finish as BUTTON is released. ";
                     break;
+                case ERROR:
+                    strErrorMessage += "Finish due to error received.";
+                    break;
                 case TIMEOUT:
                     strErrorMessage += "TIMEOUT without COMMAND_END. ";
                     break;
@@ -354,7 +386,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         if (strErrorMessage.length() != 0) endingMessaage = strErrorMessage;
         button.setText(buttonText);
         if (endingMessaage != null) {
-            if (endingMessaage.length() != 0 || true) {
+            if (endingMessaage.length() != 0) {
                 MainActivity.mCs108Library4a.appendToLog("endingMessage=" + endingMessaage);
                 if (bEnableErrorPopWindow) {
                     CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);

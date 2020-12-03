@@ -4,13 +4,10 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.support.annotation.Keep;
-import android.support.annotation.NonNull;
-
-import com.csl.cs108library4a.ReaderDevice;
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class CustomMediaPlayer {
     final boolean DEBUG = false;

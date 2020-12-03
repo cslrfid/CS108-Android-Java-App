@@ -1,6 +1,6 @@
 package com.csl.cs108ademoapp.fragments;
 
-import android.arch.lifecycle.Lifecycle;
+import androidx.lifecycle.Lifecycle;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;

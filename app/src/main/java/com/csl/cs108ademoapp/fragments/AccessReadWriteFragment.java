@@ -1,10 +1,11 @@
 package com.csl.cs108ademoapp.fragments;
 
+import android.app.Activity;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,22 +21,19 @@ import android.widget.Toast;
 import com.csl.cs108ademoapp.AccessTask1;
 import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.GenericTextWatcher;
+import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.ReaderDevice;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoField;
-
 import static com.csl.cs108ademoapp.MainActivity.mContext;
 import static com.csl.cs108ademoapp.MainActivity.tagSelected;
 
 public class AccessReadWriteFragment extends CommonFragment {
+    SelectTag selectTag;
     Spinner spinnerSelectBank, spinnerRWSelectEpc1;
-    EditText editTextRWSelectOffset, editTextRWTagID, editTextAccessRWAccPassword, editTextAccessRWKillPwd, editTextAccessRWAccPwd, editTextAccPc, editTextAccessRWEpc, editTExtAccessRWXpc;
+    EditText editTextRWSelectOffset, editTextAccessRWAccPassword, editTextAccessRWKillPwd, editTextAccessRWAccPwd, editTextAccPc, editTextAccessRWEpc, editTExtAccessRWXpc;
     EditText editTextTidValue, editTextUserValue, editTextEpcValue, editTextaccessRWAntennaPower;
     TextView textViewEpcLength, textViewRunTime;
     private Button buttonRead;
@@ -62,10 +60,12 @@ public class AccessReadWriteFragment extends CommonFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        android.support.v7.app.ActionBar actionBar;
+        androidx.appcompat.app.ActionBar actionBar;
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_access);
         actionBar.setTitle(R.string.title_activity_readwrite);
+
+        selectTag = new SelectTag((Activity)getActivity ());
 
         spinnerSelectBank = (Spinner) getActivity().findViewById(R.id.selectMemoryBank);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
@@ -76,15 +76,15 @@ public class AccessReadWriteFragment extends CommonFragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0: //if EPC
-                        if (tagSelected != null) editTextRWTagID.setText(tagSelected.getAddress());
+                        if (tagSelected != null) selectTag.editTextTagID.setText(tagSelected.getAddress());
                         editTextRWSelectOffset.setText("32");
                         break;
                     case 1:
-                        if (tagSelected != null) { if (tagSelected.getTid() != null) editTextRWTagID.setText(tagSelected.getTid()); }
+                        if (tagSelected != null) { if (tagSelected.getTid() != null) selectTag.editTextTagID.setText(tagSelected.getTid()); }
                         editTextRWSelectOffset.setText("0");
                         break;
                     case 2:
-                        if (tagSelected != null) { if (tagSelected.getUser() != null) editTextRWTagID.setText(tagSelected.getUser()); }
+                        if (tagSelected != null) { if (tagSelected.getUser() != null) selectTag.editTextTagID.setText(tagSelected.getUser()); }
                         editTextRWSelectOffset.setText("0");
                         break;
                     default:
@@ -104,7 +104,6 @@ public class AccessReadWriteFragment extends CommonFragment {
         targetAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerRWSelectEpc1.setAdapter(targetAdapter1); spinnerRWSelectEpc1.setSelection(1);
 
-        editTextRWTagID = (EditText) getActivity().findViewById(R.id.selectTagID);
         editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.selectPasswordValue);
         editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
         editTextAccessRWAccPassword.setText("00000000");
@@ -209,13 +208,13 @@ public class AccessReadWriteFragment extends CommonFragment {
         int iWordCount = getPC2EpcWordCount(strPCValue);
         textViewEpcLength.setText("EPC has " + (iWordCount * 16) + " bits");
         if (strEpcValue != null) {
-            tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) editTextRWTagID.setText(strEpcValue);
+            tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) selectTag.editTextTagID.setText(strEpcValue);
             editTextAccessRWEpc.setText(strEpcValue);
         } else {
-            if (iWordCount * 4 < editTextRWTagID.getText().toString().length()) {
+            if (iWordCount * 4 < selectTag.editTextTagID.getText().toString().length()) {
                 // needPopup = true;
-                String strTemp = editTextRWTagID.getText().toString().substring(0, iWordCount * 4);
-                tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) editTextRWTagID.setText(strTemp);
+                String strTemp = selectTag.editTextTagID.getText().toString().substring(0, iWordCount * 4);
+                tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) selectTag.editTextTagID.setText(strTemp);
             }
             if (iWordCount * 4 < editTextAccessRWEpc.getText().toString().length()) {
                 // needPopup = true;
@@ -224,9 +223,9 @@ public class AccessReadWriteFragment extends CommonFragment {
             }
             if (editTextAccessRWEpc.getText().toString().length() != 0) {
                 String strTemp = editTextAccessRWEpc.getText().toString();
-                if (editTextRWTagID.getText().toString().matches(strTemp) == false) {
+                if (selectTag.editTextTagID.getText().toString().matches(strTemp) == false) {
                     // needPopup = true;
-                    tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) editTextRWTagID.setText(strTemp);
+                    tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) selectTag.editTextTagID.setText(strTemp);
                 }
             }
         }
@@ -242,7 +241,7 @@ public class AccessReadWriteFragment extends CommonFragment {
 
     long msStartTime;
     void startAccessTask() {
-        if (editTextRWTagID.getText().toString().length() == 0) {
+        if (selectTag.editTextTagID.getText().toString().length() == 0) {
             Toast.makeText(MainActivity.mContext, "Please select tag first !!!", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -271,7 +270,7 @@ public class AccessReadWriteFragment extends CommonFragment {
                         restartAccessBank = accessBank;
                         restartCounter = 3;
                     }
-                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteFragment().InventoryRfidTask(): tagID=" + editTextRWTagID.getText() + ", operationrRead=" + operationRead + ", accessBank=" + accessBank + ", accOffset=" + accOffset + ", accSize=" + accSize);
+                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteFragment().InventoryRfidTask(): tagID=" + selectTag.editTextTagID.getText() + ", operationrRead=" + operationRead + ", accessBank=" + accessBank + ", accOffset=" + accOffset + ", accSize=" + accSize);
                     int selectOffset = 0;
                     selectOffset = Integer.parseInt(editTextRWSelectOffset.getText().toString());
                     EditText editTextBlockCount = (EditText) getActivity().findViewById(R.id.accessRWBlockCount);
@@ -283,10 +282,10 @@ public class AccessReadWriteFragment extends CommonFragment {
                     accessTask = new AccessTask1(
                             (operationRead ? buttonRead : buttonWrite), invalid,
                             accessBank, accOffset, accSize, accBlockCount, accWriteData,
-                            editTextRWTagID.getText().toString(), spinnerSelectBank.getSelectedItemPosition() + 1, selectOffset,
+                            selectTag.editTextTagID.getText().toString(), spinnerSelectBank.getSelectedItemPosition() + 1, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                            (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE));
+                            (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE), updateRunnable);
                     accessTask.execute();
                     rerunRequest = true;
                 }

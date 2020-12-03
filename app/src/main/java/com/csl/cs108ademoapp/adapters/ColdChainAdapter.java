@@ -1,9 +1,9 @@
 package com.csl.cs108ademoapp.adapters;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.PagerAdapter;
 
 import com.csl.cs108ademoapp.fragments.AccessColdChainFragment;
 import com.csl.cs108ademoapp.fragments.InventoryRfidiMultiFragment;
@@ -16,11 +16,11 @@ public class ColdChainAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int index) {
         Fragment fragment = null;
         switch (index) {
-            case 0:
+            case 1:
                 fragment = new AccessColdChainFragment();
                 fragment0 = fragment;
                 break;
-            case 1:
+            case 0:
                 fragment = InventoryRfidiMultiFragment.newInstance(true,"E280B");
                 fragment1 = fragment;
                 break;

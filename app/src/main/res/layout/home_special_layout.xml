@@ -20,17 +20,8 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="Cold Chain CS8300"
+            android:text="uEm EM4325"
             android:onClick="coldChainClicked" />
-
-        <Button
-            style="@style/DashboardButton"
-            android:layout_height="50dp"
-            android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:background="@drawable/btn_back"
-            android:gravity="center"
-            android:text="Axzon"
-            android:onClick="axzonClicked"/>
 
         <Button
             style="@style/DashboardButton"
@@ -47,7 +38,16 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="CTESIUS Temp"
+            android:text="Axzon"
+            android:onClick="axzonClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="Johar CTESIUS"
             android:onClick="ctesiusClicked"/>
 
         <Button
@@ -56,7 +56,16 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="UCODE DNA"
+            android:text="FM13DT160"
+            android:onClick="fdmicroClicked" />
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="NXP UCODE DNA"
             android:onClick="uCodeClicked"/>
 
         <Button
@@ -65,7 +74,7 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="UCODE 8"
+            android:text="NXP UCODE 8"
             android:onClick="uCode8Clicked"/>
 
         <Button
@@ -83,7 +92,7 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="Impinj FastID"
+            android:text="Impinj FastID Focus"
             android:onClick="impInventoryClicked"/>
 
         <Button
@@ -92,7 +101,7 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="Aura-sense"
+            android:text="uEm Aura-sense"
             android:onClick="aurasenseClicked"/>
 
         <Button

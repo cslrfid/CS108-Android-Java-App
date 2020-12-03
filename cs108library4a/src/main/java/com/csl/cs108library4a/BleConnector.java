@@ -22,7 +22,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -47,7 +47,7 @@ import java.util.UUID;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
-import static android.support.v4.app.ActivityCompat.requestPermissions;
+import static androidx.core.app.ActivityCompat.requestPermissions;
 
 class BleConnector extends BluetoothGattCallback {
     final boolean appendToLogDisable = false;
@@ -67,7 +67,7 @@ class BleConnector extends BluetoothGattCallback {
 
     private BluetoothAdapter mBluetoothAdapter;
 
-    BluetoothGatt mBluetoothGatt;
+    private BluetoothGatt mBluetoothGatt;
     private BluetoothLeScanner mleScanner;
 
     private int mBluetoothProfile; boolean isBleConnected() { return mBluetoothProfile == BluetoothProfile.STATE_CONNECTED && mReaderStreamOutCharacteristic != null; }
@@ -186,14 +186,9 @@ class BleConnector extends BluetoothGattCallback {
 
             if (!mBluetoothGatt.setCharacteristicNotification(mReaderStreamInCharacteristic, true)) {
                 if (DEBUG) appendToLog("setCharacteristicNotification() FAIL");
-//            } else if (!writeDescriptor(mReaderStreamInDescriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)) {
-//                if (DEBUG) appendToLog("writeDescriptor() FAIL");
             } else {
                 if (DEBUG) appendToLog("writeDescriptor() starts with characteristicListRead = " + characteristicListRead);
                 if (characteristicListRead == false) {
-//                    mHandler.post(new Runnable() {
-//                        @Override
-//                        public void run() {
                     if (DEBUG) appendToLog("with services");
                             mBluetoothGattCharacteristicToRead.clear();
                             List<BluetoothGattService> ss = mBluetoothGatt.getServices();
@@ -226,8 +221,6 @@ class BleConnector extends BluetoothGattCallback {
                             mHandler.removeCallbacks(mReadCharacteristicRunnable);
                     if (DEBUG) appendToLog("starts in onServicesDiscovered");
                             mHandler.postDelayed(mReadCharacteristicRunnable, 500);
-//                        }
-//                    });
                 }
             }
         }
@@ -255,8 +248,6 @@ class BleConnector extends BluetoothGattCallback {
             } else {
                 if (DEBUG) appendToLog("mReadRssiRunnable(): readRemoteRssi FAIL");
             }
-//            if (isBleConnected())
-//                mHandler.postDelayed(mReadRssiRunnable, 5000);
         }
     };
 
@@ -413,7 +404,7 @@ class BleConnector extends BluetoothGattCallback {
         } else {
             byte[] v = characteristic.getValue();
             if (false) appendToLogRunnable("onCharacteristicChanged(): VALID mBluetoothGatt, values =" + byteArrayToString(v));
-            synchronized (streamInBuffer) {
+            synchronized (arrayListStreamIn) {
                 if (v.length != 0) {
                     streamInTotalCounter++;
                 }
@@ -524,11 +515,6 @@ class BleConnector extends BluetoothGattCallback {
         if (locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) appendToLog("ProviderEnabled PASSIVE_PROVIDER");
     }
 
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        //
-    }
-
     PopupWindow popupWindow; boolean popupWindowShown = false;
     boolean bleEnableRequestShown = false;
     boolean scanLeDevice(final boolean enable, BluetoothAdapter.LeScanCallback mLeScanCallback, ScanCallback mScanCallBack) {
@@ -564,7 +550,7 @@ class BleConnector extends BluetoothGattCallback {
                 }
                 return false;
             } else if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(activity, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 123);
+                requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 123);
             }
         }
 
@@ -628,6 +614,10 @@ class BleConnector extends BluetoothGattCallback {
                     mBluetoothGatt = mBluetoothAdapter.getRemoteDevice(address).connectGatt(mContext, false, this, BluetoothDevice.TRANSPORT_LE);
                 } else {
                     mBluetoothGatt = mBluetoothAdapter.getRemoteDevice(address).connectGatt(mContext, false, this);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (true) mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+                    else mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_BALANCED);
                 }
                 mBluetoothDevice = readerDevice;
                 characteristicListRead = false;
@@ -735,8 +725,20 @@ class BleConnector extends BluetoothGattCallback {
     }
 
     int readBleSteamIn(byte[] buffer, int byteOffset, int byteCount) {
-        synchronized (streamInBuffer) {
+        synchronized (arrayListStreamIn) {
             if (0 == streamInBufferSize) return 0;
+            if (isArrayListStreamInBuffering) {
+                int byteGot = 0;
+                while (arrayListStreamIn.size() != 0) {
+                    int length1 = arrayListStreamIn.get(0).length;
+                    if (buffer.length - byteOffset < length1) break;
+                    System.arraycopy(arrayListStreamIn.get(0), 0, buffer, byteOffset, length1);
+                    arrayListStreamIn.remove(0);
+                    byteOffset += length1;
+                    byteGot += length1;
+                }
+                byteCount = byteGot;
+            } else {
             if (byteCount > streamInBufferSize)
                 byteCount = streamInBufferSize;
             if (byteOffset + byteCount > buffer.length) {
@@ -749,6 +751,7 @@ class BleConnector extends BluetoothGattCallback {
                 System.arraycopy(streamInBuffer, 0, buffer, byteOffset, byteCount);
                 System.arraycopy(streamInBuffer, byteCount, streamInBuffer, 0, streamInBufferSize - byteCount);
             }
+            }
             streamInBufferSize -= byteCount;
             return byteCount;
         }
@@ -760,10 +763,15 @@ class BleConnector extends BluetoothGattCallback {
         return totalReceived * 1000 / totalTime;
     }
 
+    ArrayList<byte[]> arrayListStreamIn = new ArrayList<byte[]>(); private boolean isArrayListStreamInBuffering = true;
     private boolean isStreamInBufferRing = true;
     private void streamInBufferPush(byte[] inData, int inDataOffset, int length) {
         int length1 = streamInBuffer.length - streamInBufferTail;
         int totalCopy = 0;
+        if (isArrayListStreamInBuffering) {
+            arrayListStreamIn.add(inData);
+            totalCopy = length;
+        } else {
         if (length > length1) {
             totalCopy = length1;
             System.arraycopy(inData, inDataOffset, streamInBuffer, streamInBufferTail, length1);
@@ -775,6 +783,7 @@ class BleConnector extends BluetoothGattCallback {
             totalCopy += length;
             System.arraycopy(inData, inDataOffset, streamInBuffer, streamInBufferTail, length);
             streamInBufferTail += length;
+        }
         }
         if (totalCopy != 0) {
             totalTemp += totalCopy;
@@ -788,6 +797,7 @@ class BleConnector extends BluetoothGattCallback {
         }
     }
     private void streamInBufferPull(byte[] buffer, int byteOffset, int length) {
+        synchronized (arrayListStreamIn) {
         int length1 = streamInBuffer.length - streamInBufferHead;
         if (length > length1) {
             System.arraycopy(streamInBuffer, streamInBufferHead, buffer, byteOffset, length1);
@@ -798,7 +808,7 @@ class BleConnector extends BluetoothGattCallback {
         if (length != 0) {
             System.arraycopy(streamInBuffer, streamInBufferHead, buffer, byteOffset, length);
             streamInBufferHead += length;
-        }
+        }}
     }
 
     File fileDebug; boolean inventoring = false;

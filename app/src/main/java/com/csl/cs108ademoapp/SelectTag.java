@@ -11,11 +11,15 @@ import android.widget.TableRow;
 import static com.csl.cs108ademoapp.MainActivity.tagSelected;
 
 public class SelectTag {
-    public EditText editTextRWTagID, editTextRWSelectOffset, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
+    public EditText editTextTagID, editTextRWSelectOffset, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
     public Spinner spinnerSelectBank;
+    public TableRow tableRowSelectMemoryBank, tableRowSelectPassword;
 
     public SelectTag(Activity activity) {
-        editTextRWTagID = (EditText) activity.findViewById(R.id.selectTagID);
+        tableRowSelectMemoryBank = (TableRow) activity.findViewById(R.id.selectMemoryBankRow);
+        tableRowSelectPassword = (TableRow) activity.findViewById(R.id.selectPasswordRow);
+
+        editTextTagID = (EditText) activity.findViewById(R.id.selectTagID);
         editTextRWSelectOffset = (EditText) activity.findViewById(R.id.selectMemoryOffset);
         //editTextRWSelectOffset.setVisibility(View.VISIBLE);
 
@@ -35,9 +39,6 @@ public class SelectTag {
             }
         });
 
-        TableRow tableRowSelectPassword = (TableRow) activity.findViewById(R.id.selectPasswordRow);
-        //tableRowSelectPassword.setVisibility(View.GONE);
-
         editTextAccessRWAccPassword = (EditText) activity.findViewById(R.id.selectPasswordValue);
         editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
         editTextAccessRWAccPassword.setText("00000000");
@@ -53,15 +54,15 @@ public class SelectTag {
         if (position < 0 || position > 2) position = spinnerSelectBank.getSelectedItemPosition();
         switch (position) {
             case 0: //if EPC
-                if (tagSelected != null) editTextRWTagID.setText(tagSelected.getAddress());
+                if (tagSelected != null) editTextTagID.setText(tagSelected.getAddress());
                 editTextRWSelectOffset.setText("32");
                 break;
             case 1:
-                if (tagSelected != null) { if (tagSelected.getTid() != null) editTextRWTagID.setText(tagSelected.getTid()); }
+                if (tagSelected != null) { if (tagSelected.getTid() != null) editTextTagID.setText(tagSelected.getTid()); }
                 editTextRWSelectOffset.setText("0");
                 break;
             case 2:
-                if (tagSelected != null) { if (tagSelected.getUser() != null) editTextRWTagID.setText(tagSelected.getUser()); }
+                if (tagSelected != null) { if (tagSelected.getUser() != null) editTextTagID.setText(tagSelected.getUser()); }
                 editTextRWSelectOffset.setText("0");
                 break;
             default:
