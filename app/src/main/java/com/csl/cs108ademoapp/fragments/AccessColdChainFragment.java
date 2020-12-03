@@ -5,10 +5,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,12 +30,13 @@ public class AccessColdChainFragment extends CommonFragment {
 
     EditText editTextTempThresUnder, editTextTempThresOver, editTextTempCountUnder, editTextTempCountOver, editTextMonitorDelay, editTextSamplingInterval;
     TextView textViewTemperature, textViewUnderAlarm, textViewOverAlarm, textViewBatteryAlarm;
-    Spinner spinnerDelayUnit, spinnerIntervalUnit, spinnerEnable;
-	private Button buttonRead;
-    private Button buttonWrite;
+    Spinner spinnerDelayUnit, spinnerIntervalUnit, spinnerEnable, spinnerTagType;
+	Button buttonRead, buttonWrite, buttonStartLogging, buttonStopLogging, buttonCheckAlarm, buttonGetLogging;
+	TextView textViewStartLoggingStatus, textViewStopLoggingStatus, textViewCheckAlaramStatus, textViewGetLoggingStatus;
 
     enum ReadWriteTypes {
-        NULL, TEMPERATURE, CONFIGURATION, ENABLE
+        NULL, TEMPERATURE, CONFIGURATION, ENABLE,
+        STARTLOGGING, STOPLOGGING, CHECKLOGGING, GETLOGGING
     }
     boolean operationRead = false;
     ReadWriteTypes readWriteTypes;
@@ -92,20 +95,86 @@ public class AccessColdChainFragment extends CommonFragment {
         spinnerEnable = (Spinner) getActivity().findViewById(R.id.accessCCEnable);
         spinnerEnable.setAdapter(arrayAdapterEnable);
 
+        ArrayAdapter<CharSequence> arrayAdapterTagType = ArrayAdapter.createFromResource(getActivity(), R.array.coldChain_tagtype_options, R.layout.custom_spinner_layout);
+        arrayAdapterTagType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerTagType = (Spinner) getActivity().findViewById(R.id.selectCCTagType);
+        spinnerTagType.setAdapter(arrayAdapterTagType);
+        spinnerTagType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                switch(position) {
+                    case 0:
+                        LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCC8304Layout);
+                        linearLayout.setVisibility(View.VISIBLE);
+                        linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCCmaxduraLayout);
+                        linearLayout.setVisibility(View.GONE);
+                        break;
+                    case 1:
+                        linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCC8304Layout);
+                        linearLayout.setVisibility(View.GONE);
+                        linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCCmaxduraLayout);
+                        linearLayout.setVisibility(View.VISIBLE);
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+        });
+
         editTextaccessRWAntennaPower = (EditText) getActivity().findViewById(R.id.accessCCAntennaPower);
         editTextaccessRWAntennaPower.setText(String.valueOf(300));
+
+        buttonStartLogging = (Button) getActivity().findViewById(R.id.accessCCStartLogging);
+        buttonStartLogging.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isOperationRunning()) return;
+                readWriteTypes = ReadWriteTypes.STARTLOGGING;
+                operationRead = true; startAccessTask();
+            }
+        });
+        buttonStopLogging = (Button) getActivity().findViewById(R.id.accessCCStopLogging);
+        buttonStopLogging.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isOperationRunning()) return;
+                readWriteTypes = ReadWriteTypes.STOPLOGGING;
+                operationRead = true; startAccessTask();
+            }
+        });
+        buttonCheckAlarm = (Button) getActivity().findViewById(R.id.accessCCcheckAlarm);
+        buttonCheckAlarm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isOperationRunning()) return;
+                readWriteTypes = ReadWriteTypes.CHECKLOGGING;
+                operationRead = true; startAccessTask();
+            }
+        });
+        buttonGetLogging = (Button) getActivity().findViewById(R.id.accessCCGetLogging);
+        buttonGetLogging.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isOperationRunning()) return;
+                readWriteTypes = ReadWriteTypes.GETLOGGING;
+                operationRead = true; startAccessTask();
+            }
+        });
+
+        textViewStartLoggingStatus = (TextView) getActivity().findViewById(R.id.accessCCStartLoggingStatus);
+        textViewStopLoggingStatus = (TextView) getActivity().findViewById(R.id.accessCCStopLoggingStatus);
+        textViewCheckAlaramStatus = (TextView) getActivity().findViewById(R.id.accessCCcheckAlarmStatus);
+        textViewGetLoggingStatus = (TextView) getActivity().findViewById(R.id.accessCCGetLoggingStatus);
 
         buttonRead = (Button) getActivity().findViewById(R.id.accessCCReadButton);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
-                    return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                if (isOperationRunning()) return;
+                readWriteTypes = ReadWriteTypes.NULL;
                 operationRead = true; startAccessTask();
             }
         });
@@ -114,13 +183,8 @@ public class AccessColdChainFragment extends CommonFragment {
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
-                    return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                if (isOperationRunning()) return;
+                readWriteTypes = ReadWriteTypes.NULL;
                 operationRead = false; startAccessTask();
             }
         });
@@ -181,11 +245,26 @@ public class AccessColdChainFragment extends CommonFragment {
         }
     }
 
+    boolean isOperationRunning() {
+        if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+            Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+            Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (accessTask != null) {
+            if (accessTask.getStatus() == AsyncTask.Status.RUNNING) {
+                Toast.makeText(MainActivity.mContext, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        }
+        return false;
+    }
+
     void startAccessTask() {
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
         if (updating == false) {
-            updating = true; bankProcessing = 0; //restartAccessBank = -1;
-//            MainActivity.mCs108Library4a.
+            updating = true; bankProcessing = 0;
             mHandler.removeCallbacks(updateRunnable);
             mHandler.post(updateRunnable);
         }
@@ -209,7 +288,7 @@ public class AccessColdChainFragment extends CommonFragment {
             else if (taskRequest) {
                 boolean invalid = processTickItems();
                 MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
-                if (bankProcessing++ != 0 && invalid == true)   rerunRequest = false;
+                if (bankProcessing++ != 0 && invalid) rerunRequest = false;
                 else {
                     accessTask = new AccessTask(
                             (operationRead ? buttonRead : buttonWrite), null,
@@ -273,7 +352,12 @@ public class AccessColdChainFragment extends CommonFragment {
         else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
-            if (accessResult == null) {
+            MainActivity.mCs108Library4a.appendToLog("accessResult 2 bankProcewssing = " + bankProcessing + ", accessResult = " + accessTask.accessResult );
+            if (readWriteTypes == ReadWriteTypes.STARTLOGGING) textViewStartLoggingStatus.setText(accessResult);
+            else if (readWriteTypes == ReadWriteTypes.STOPLOGGING) textViewStopLoggingStatus.setText(accessResult);
+            else if (readWriteTypes == ReadWriteTypes.CHECKLOGGING) textViewCheckAlaramStatus.setText(accessResult);
+            else if (readWriteTypes == ReadWriteTypes.GETLOGGING) textViewGetLoggingStatus.setText(accessResult);
+            else if (accessResult == null) {
                 if (readWriteTypes == ReadWriteTypes.CONFIGURATION) {
                     textViewConfigOk.setText("E"); checkBoxConfig.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.TEMPERATURE) {
@@ -342,7 +426,114 @@ public class AccessColdChainFragment extends CommonFragment {
         int accSize = 0, accOffset = 0;
         String writeData = "";
 
-        if (checkBoxConfig.isChecked() == true) {
+        if (readWriteTypes == ReadWriteTypes.STARTLOGGING || readWriteTypes == ReadWriteTypes.STOPLOGGING || readWriteTypes == ReadWriteTypes.CHECKLOGGING || readWriteTypes == ReadWriteTypes.GETLOGGING) {
+            MainActivity.mCs108Library4a.appendToLog("accessResult 1 bankProcewssing = " + bankProcessing );
+            accOffset = 0xF0; accSize = 1; operationRead = true;
+            if (readWriteTypes == ReadWriteTypes.STARTLOGGING) {
+                switch(bankProcessing) {
+                    case 0:
+                        textViewStartLoggingStatus.setText("");
+                        break;
+                    case 1:
+                        long seconds = System.currentTimeMillis() / (long)1000;
+                        int interval = 10;
+                        float temperatureOffset = 10; //range 20 to 0 represents -20 to 0 degreeC
+                        accOffset = 0; accSize = 4; writeData = "";
+
+                        writeData += String.format("%08X", seconds);
+                        writeData += String.format("%04X", interval);
+                        float fTemp = temperatureOffset / (float) 0.25;
+                        short sTemp = (short) fTemp;
+                        writeData += String.format("%04X", sTemp);
+                        operationRead = false;
+                        MainActivity.mCs108Library4a.appendToLog("accessResult: UTC seconds = " + seconds + ", writedata = " + writeData);
+                        break;
+                    case 2:
+                        float overTemperature = 20;
+                        float underTemperature = -10;
+                        accOffset = 0x106; accSize = 3; writeData = "";
+
+                        fTemp = overTemperature / (float) 0.25;
+                        sTemp = (short) fTemp;
+                        writeData += String.format("%04X", sTemp);
+                        fTemp = underTemperature / (float) 0.25;
+                        sTemp = (short) fTemp;
+                        writeData += String.format("%04X", sTemp);
+                        writeData += "0000";    //clear Alarm status
+                        operationRead = false;
+                        MainActivity.mCs108Library4a.appendToLog("accessResult: temperature alarm: writeData = " + writeData);
+                        break;
+                    case 3:
+                        accOffset = 0x104; accSize = 1; writeData = "0001";
+                        operationRead = false;
+                        MainActivity.mCs108Library4a.appendToLog("accessResult: status: writeData = " + writeData);
+                        break;
+                    case 4:
+                        accOffset = 0xF0; accSize = 1; writeData = "A000";
+                        operationRead = false;
+                        MainActivity.mCs108Library4a.appendToLog("accessResult: control: writeData = " + writeData);
+                        break;
+                    default:
+                        invalidRequest1 = true; readWriteTypes = ReadWriteTypes.NULL;
+                        break;
+                }
+            } else if (readWriteTypes == ReadWriteTypes.STOPLOGGING) {
+                switch(bankProcessing) {
+                    case 0:
+                        textViewStartLoggingStatus.setText("");
+                        break;
+                    case 1:
+                        accOffset = 0x104; accSize = 1; writeData = "0002";
+                        operationRead = false;
+                        MainActivity.mCs108Library4a.appendToLog("accessResult: status: writeData = " + writeData);
+                        break;
+                    case 2:
+                    case 3:
+                        accOffset = 0xF0; accSize = 1; writeData = "A600";
+                        operationRead = false;
+                        MainActivity.mCs108Library4a.appendToLog("accessResult: control: writeData = " + writeData);
+                        break;
+                    default:
+                        invalidRequest1 = true; readWriteTypes = ReadWriteTypes.NULL;
+                        break;
+                }
+            } else if (readWriteTypes == ReadWriteTypes.CHECKLOGGING) {
+                switch(bankProcessing) {
+                    case 0:
+                        textViewStartLoggingStatus.setText("");
+                        break;
+                    case 1:
+                        accOffset = 0x108; accSize = 1; writeData = "";
+                        operationRead = true;
+                        break;
+                    case 2:
+                        int iValue = 0;
+                        try {
+                            iValue = Integer.parseInt(textViewCheckAlaramStatus.getText().toString(), 16);
+                        } catch (Exception ex) { }
+                        if ((iValue & 2) != 0) {
+                            accOffset = 0x108; accSize = 1; writeData = "";
+                            iValue &= 0x3; iValue |= 1;
+                            writeData = String.format("%04X", iValue);
+                            operationRead = false;
+                            MainActivity.mCs108Library4a.appendToLog("accessResult: writeData = " + writeData);
+                            break;
+                        }
+                    default:
+                        invalidRequest1 = true; readWriteTypes = ReadWriteTypes.NULL;
+                        break;
+                }
+            } else if (readWriteTypes == ReadWriteTypes.GETLOGGING) {
+                switch(bankProcessing) {
+                    case 0:
+                        textViewGetLoggingStatus.setText("");
+                        break;
+                    default:
+                        invalidRequest1 = true; readWriteTypes = ReadWriteTypes.NULL;
+                        break;
+                }
+            }
+        } else if (checkBoxConfig.isChecked() == true) {
             accOffset = 0xEC; accSize = 3; readWriteTypes = ReadWriteTypes.CONFIGURATION; textViewConfigOk.setText("");
             if (operationRead) {
                 editTextTempThresUnder.setText("");

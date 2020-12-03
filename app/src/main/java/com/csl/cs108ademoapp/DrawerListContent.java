@@ -20,7 +20,7 @@ public class DrawerListContent {
         ABOUT, CONNECT,
         INVENTORY, SEARCH, MULTIBANK,
         SETTING, FILTER, READWRITE, SECURITY,
-        COLDCHAIN, AXZON, RFMICRON, CTESIUS,
+        COLDCHAIN, AXZON, RFMICRON, CTESIUS, FDMICRO,
         UCODE, UCODE8,
         BAPCARD, IMPINVENTORY, AURASENSE,
         REGISTER, READWRITEUSER, WEDGE, BLANK;
@@ -40,14 +40,15 @@ public class DrawerListContent {
                 case 10: return AXZON;
                 case 11: return RFMICRON;
                 case 12: return CTESIUS;
-                case 13: return UCODE;
-                case 14: return UCODE8;
-                case 15: return BAPCARD;
-                case 16: return IMPINVENTORY;
-                case 17: return AURASENSE;
-                case 18: return REGISTER;
-                case 19: return READWRITEUSER;
-                case 20: return WEDGE;
+                case 13: return FDMICRO;
+                case 14: return UCODE;
+                case 15: return UCODE8;
+                case 16: return BAPCARD;
+                case 17: return IMPINVENTORY;
+                case 18: return AURASENSE;
+                case 19: return REGISTER;
+                case 20: return READWRITEUSER;
+                case 21: return WEDGE;
             }
             return null;
         }

@@ -43,6 +43,31 @@
         <item>User</item>
     </string-array>
 
+    <string-array name="fd_command_options">
+        <item>Read/Write Memory</item>
+        <item>Auth</item>
+        <item>Get Temperature</item>
+        <item>Start/Stop Logging</item>
+        <item>Read/Write Reg</item>
+        <item>Deep Sleep</item>
+        <item>Op Mode Check</item>
+        <item>Initial Regfile</item>
+        <item>Led Ctrl</item>
+    </string-array>
+
+    <string-array name="fd_auth_options">
+        <item>user area</item>
+        <item>unlock</item>
+        <item>stop logging</item>
+    </string-array>
+
+    <string-array name="fd_getSource_options">
+        <item>temperature</item>
+        <item>battery voltage</item>
+        <item>external voltage</item>
+        <item>external pressure sensore voltage</item>
+    </string-array>
+
     <string-array name="dataType_options">
         <item>Hex</item>
         <item>Bit</item>
@@ -198,6 +223,11 @@
     <string-array name="disable_enable_options">
         <item>disable</item>
         <item>enable</item>
+    </string-array>
+
+    <string-array name="coldChain_tagtype_options">
+        <item>CS8304 Cold Chain</item>
+        <item>Avery Maxdura</item>
     </string-array>
 
     <string-array name="xerxesTag_options">

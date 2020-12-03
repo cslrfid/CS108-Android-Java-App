@@ -16,12 +16,13 @@ public class AccessTask1 {
     String strPassword;
     int powerLevel;
     Cs108Connector.HostCommands hostCommand;
+    Runnable updateRunnable = null;
 
     AccessTask accessTask;
     public AccessTask1(Button button, boolean invalidRequest,
                        int accBank, int accOffset, int accSize, int accBlockCount, String accWriteData,
                       String selectMask, int selectBank, int selectOffset,
-                      String strPassword, int powerLevel, Cs108Connector.HostCommands hostCommand) {
+                      String strPassword, int powerLevel, Cs108Connector.HostCommands hostCommand, Runnable updateRunnable) {
         this.button = button;
         this.invalidRequest = invalidRequest;
         MainActivity.mCs108Library4a.appendToLog("HelloK: invalidRequest=" + invalidRequest);
@@ -51,6 +52,7 @@ public class AccessTask1 {
         this.strPassword = strPassword;
         this.powerLevel = powerLevel;
         this.hostCommand = hostCommand;
+        this.updateRunnable = updateRunnable;
         MainActivity.mCs108Library4a.appendToLog("HelloA, AccessTask1");
         CustomMediaPlayer playerN = MainActivity.sharedObjects.playerN;
         playerN.start();
@@ -187,6 +189,6 @@ public class AccessTask1 {
         MainActivity.mCs108Library4a.appendToLog("HelloK: invalidRequest=" + invalidRequest);
         accessTask = new AccessTask(button, invalidRequest,
                 selectMask, selectBank, selectOffset,
-                strPassword, powerLevel, hostCommand, tryCount==tryCountMax);
+                strPassword, powerLevel, hostCommand, tryCount==tryCountMax, updateRunnable);
     }
 }

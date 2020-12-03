@@ -85,7 +85,7 @@
                     android:id="@+id/accessAuraWriteSensorDataCheck"
                     android:layout_width="wrap_content"
                     style="@style/style_normal_font"
-                    android:text="Write only SensAtWrite data to data:" />
+                    android:text="Write only SensAtWrite data to data" />
             </TableRow>
 
             <TableRow

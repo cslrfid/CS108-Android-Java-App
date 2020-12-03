@@ -5,10 +5,20 @@
     android:paddingRight="0dp"
     android:orientation="vertical">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/default_left_padding"
+            android:orientation="vertical" >
+
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <include
             android:id="@+id/accessCCTagID"
@@ -19,8 +29,7 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="0dp"
@@ -38,8 +47,7 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_weight="1"
@@ -56,8 +64,7 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/accessCCConfigOK"
@@ -73,8 +80,7 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-		android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="wrap_content"
@@ -109,8 +115,7 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="wrap_content"
@@ -146,13 +151,12 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="wrap_content"
             style="@style/style_normal_font"
-            android:text="Monitor delay(0-63):" />
+            android:text="Monitor delay(0-63)" />
 
         <EditText
             android:id="@+id/accessCCMonitorDelay"
@@ -170,13 +174,12 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="wrap_content"
             style="@style/style_normal_font"
-            android:text="Sampling interval(0-63):" />
+            android:text="Sampling interval(0-63)" />
 
         <EditText
             android:id="@+id/accessCCSamplingInverval"
@@ -194,8 +197,7 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/accessCCTemperatureOK"
@@ -243,8 +245,7 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/default_left_padding">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/accessCCEnableOK"
@@ -262,11 +263,132 @@
             android:gravity="right"/>
     </TableRow>
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="center_vertical" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Select Tag Type" />
+
+                <Spinner
+                    android:id="@+id/selectCCTagType"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_default_spinner" />
+            </TableRow>
+
+            <LinearLayout
+                android:id="@+id/accessCC8304Layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center|bottom"
+                android:orientation="vertical" >
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <Button
+                        android:id="@+id/accessCCStartLogging"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Start logging" />
+
+                    <TextView
+                        android:id="@+id/accessCCStartLoggingStatus"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        layout="@layout/custom_edittext" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <Button
+                        android:id="@+id/accessCCStopLogging"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Stop logging" />
+
+                    <TextView
+                        android:id="@+id/accessCCStopLoggingStatus"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        layout="@layout/custom_edittext" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <Button
+                        android:id="@+id/accessCCcheckAlarm"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Check Alarm" />
+
+                    <TextView
+                        android:id="@+id/accessCCcheckAlarmStatus"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        layout="@layout/custom_edittext" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <Button
+                        android:id="@+id/accessCCGetLogging"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Get logging" />
+
+                    <TextView
+                        android:id="@+id/accessCCGetLoggingStatus"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:textAlignment="center"
+                        layout="@layout/custom_edittext" />
+                </TableRow>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/accessCCmaxduraLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center|bottom"
+                android:orientation="vertical" >
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Maxdura lines" />
+                </TableRow>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"

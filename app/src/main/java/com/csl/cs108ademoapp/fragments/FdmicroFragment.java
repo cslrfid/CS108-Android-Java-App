@@ -2,10 +2,7 @@ package com.csl.cs108ademoapp.fragments;
 
 import android.os.Bundle;
 import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.PagerAdapter;
+
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,15 +11,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
+import com.csl.cs108ademoapp.adapters.FdmicroAdapter;
 
-public class AuraSenseFragment extends CommonFragment {
+public class FdmicroFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    AuraSenseAdapter mAdapter;
+    FdmicroAdapter mAdapter;
 
-    private String[] tabs = {"Configuration", "Scan" };
+    private String[] tabs = {"Scan", "Configuration"};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,16 +29,16 @@ public class AuraSenseFragment extends CommonFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) mAdapter.fragment1;
+        InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) mAdapter.fragment0;
         switch (item.getItemId()) {
             case R.id.menuAction_1:
-                fragment1.clearTagsList();
+                fragment.clearTagsList();
                 return true;
             case R.id.menuAction_2:
-                fragment1.sortTagsList();
+                fragment.sortTagsList();
                 return true;
             case R.id.menuAction_3:
-                fragment1.saveTagsList();
+                fragment.saveTagsList();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -54,19 +51,12 @@ public class AuraSenseFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("au");
+        actionBar.setTitle("C");
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
-
-        mAdapter = new AuraSenseAdapter(getActivity().getSupportFragmentManager());
-        viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
-        viewPager.setAdapter(mAdapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-
         for (String tab_name : tabs) {
             tabLayout.addTab(tabLayout.newTab().setText(tab_name));
         }
-
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -81,11 +71,16 @@ public class AuraSenseFragment extends CommonFragment {
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
+
+        mAdapter = new FdmicroAdapter(getActivity().getSupportFragmentManager());
+        viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
+        viewPager.setAdapter(mAdapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
     }
 
     @Override
     public void onPause() {
-		mAdapter.fragment0.onPause();
+        mAdapter.fragment0.onPause();
         mAdapter.fragment1.onPause();
         super.onPause();
     }
@@ -106,7 +101,6 @@ public class AuraSenseFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
         mAdapter.fragment0.onDestroy();
         mAdapter.fragment1.onDestroy();
         super.onDestroy();
@@ -119,42 +113,7 @@ public class AuraSenseFragment extends CommonFragment {
         super.onDetach();
     }
 
-    public AuraSenseFragment() {
-        super("AuraSenseFragment");
-    }
-
-    class AuraSenseAdapter extends FragmentStatePagerAdapter {
-        private final int NO_OF_TABS = 2;
-        public Fragment fragment0, fragment1, fragment2;
-
-        @Override
-        public Fragment getItem(int index) {
-            Fragment fragment = null;
-            switch (index) {
-                case 0:
-                    fragment = new AccessAuraSenseFragment();
-                    fragment0 = fragment;
-                    break;
-                default:
-                    fragment = InventoryRfidiMultiFragment.newInstance(true,"E280B12");
-                    fragment1 = fragment;
-                    break;
-            }
-            return fragment;
-        }
-
-        @Override
-        public int getCount() {
-            return NO_OF_TABS;
-        }
-
-        @Override
-        public int getItemPosition(Object object) {
-            return PagerAdapter.POSITION_NONE;
-        }
-
-        public AuraSenseAdapter(FragmentManager fm) {
-            super(fm);
-        }
+    public FdmicroFragment() {
+        super("FdmicroFragment");
     }
 }

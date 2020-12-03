@@ -1,9 +1,8 @@
 package com.csl.cs108ademoapp.fragments;
 
-import android.arch.lifecycle.Lifecycle;
+import androidx.lifecycle.Lifecycle;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;

@@ -2,7 +2,6 @@ package com.csl.cs108library4a;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
@@ -10,7 +9,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.Keep;
+import androidx.annotation.Keep;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -151,9 +150,8 @@ public class Cs108Library4A extends Cs108Connector {
         }
     }
 
-    public String getlibraryVersion() {
-        return BuildConfig.VERSION_NAME;
-    }
+    public String getlibraryVersion() { return BuildConfig.VERSION_NAME; }
+
     @Keep public String byteArrayToString(byte[] packet) { return super.byteArrayToString(packet); }
 
     @Override
@@ -233,6 +231,7 @@ public class Cs108Library4A extends Cs108Connector {
                 getBarcodeSerial();
                 getBarcodePreSuffix(); getBarcodeReadingMode();
                 setBatteryAutoReport(true);
+                abortOperation();
                 getMacVer();
                 getHostProcessorICSerialNumber();
                 mRfidDevice.mRx000Device.mRx000Setting.writeMAC(0xC08, 0x100);
@@ -241,7 +240,6 @@ public class Cs108Library4A extends Cs108Connector {
                 mRfidDevice.mRx000Device.mRx000OemSetting.getSpecialCountryVersion();
                 getSerialNumber();
                 regionCode = null; mRfidDevice.mRx000Device.mRx000OemSetting.getCountryCode();
-
                 mHandler.postDelayed(checkVersionRunnable, 500);
             } else if (bFirmware_reset_before) {
                 bFirmware_reset_before = false;
@@ -636,8 +634,8 @@ public class Cs108Library4A extends Cs108Connector {
 
     int tagFocus = -1;
     public int getTagFocus() {
-        tagFocus = mRfidDevice.mRx000Device.mRx000Setting.getImpinjExtension();
-        if (tagFocus > 0) tagFocus = ((tagFocus & 0x10) >> 4);
+        int iValue = mRfidDevice.mRx000Device.mRx000Setting.getImpinjExtension();
+        if (iValue > 0) tagFocus = ((iValue & 0x10) >> 4);
         return tagFocus;
     }
     public boolean setTagFocus(boolean tagFocusNew) {
@@ -668,13 +666,17 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public boolean setCurrentLinkProfile(int profile) {
         if (profile == getCurrentProfile()) return true;
         boolean result = mRfidDevice.mRx000Device.mRx000Setting.setCurrentProfile(profile);
-        if (result) result = mRfidDevice.mRx000Device.sendHostRegRequestHST_CMD(Cs108Connector.HostCommands.CMD_UPDATELINKPROFILE);
+        if (result) {
+            mRfidDevice.mRx000Device.setPwrManagementMode(false);
+            result = mRfidDevice.mRx000Device.sendHostRegRequestHST_CMD(Cs108Connector.HostCommands.CMD_UPDATELINKPROFILE);
+        }
         return result;
     }
 
     public void resetEnvironmentalRSSI() { mRfidDevice.mRx000Device.mRx000EngSetting.resetRSSI(); }
     public String getEnvironmentalRSSI() {
         appendToLog("Hello123: getEnvironmentalRSSI");
+        mRfidDevice.mRx000Device.setPwrManagementMode(false);
         int iValue =  mRfidDevice.mRx000Device.mRx000EngSetting.getwideRSSI();
         if (iValue < 0) return null;
         if (iValue > 255) return "Invalid data";
@@ -684,15 +686,14 @@ public class Cs108Library4A extends Cs108Connector {
 
     public int getHighCompression() { return mRfidDevice.mRx000Device.mRx000MbpSetting.getHighCompression(); }
     public int getRflnaGain() { return mRfidDevice.mRx000Device.mRx000MbpSetting.getRflnaGain(); }
-    public int getIflnaGain() {
-        return mRfidDevice.mRx000Device.mRx000MbpSetting.getIflnaGain();
-    }
+    public int getIflnaGain() { return mRfidDevice.mRx000Device.mRx000MbpSetting.getIflnaGain(); }
     public int getAgcGain() { return mRfidDevice.mRx000Device.mRx000MbpSetting.getAgcGain(); }
     public int getRxGain() { return mRfidDevice.mRx000Device.mRx000MbpSetting.getRxGain(); }
     public boolean setRxGain(int highCompression, int rflnagain, int iflnagain, int agcgain) { return mRfidDevice.mRx000Device.mRx000MbpSetting.setRxGain(highCompression, rflnagain, iflnagain, agcgain); }
     public boolean setRxGain(int rxGain) { return mRfidDevice.mRx000Device.mRx000MbpSetting.setRxGain(rxGain); }
 
     @Keep public boolean starAuthOperation() {
+        mRfidDevice.mRx000Device.setPwrManagementMode(false);
         return mRfidDevice.mRx000Device.sendHostRegRequestHST_CMD(HostCommands.CMD_AUTHENTICATE);
     }
 
@@ -2351,21 +2352,19 @@ public class Cs108Library4A extends Cs108Connector {
                     mRfidDevice.mRx000Device.mRx000Setting.setCycleDelay(cycleDelaySetting);
                     mRfidDevice.mRx000Device.mRx000Setting.setInvModeCompact(false);
                 }
-                if (false) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        boolean bUsbConnected = false;
-                        if (getConnectionHSpeed() && bUsbConnected == false) {
-                            mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
-                        } else {
-                            mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_BALANCED);
-                        }
-                        if (true) appendToLogView("getConnectionHSpeed() =  " + getConnectionHSpeed());
-                    }
-                }
+                mRfidDevice.mRx000Device.setPwrManagementMode(false);
                 retValue = mRfidDevice.mRx000Device.sendHostRegRequestHST_CMD(Cs108Connector.HostCommands.CMD_18K6CINV);
                 break;
         }
         return retValue;
+    }
+    @Keep public boolean resetSiliconLab() {
+        boolean bRetValue = false;
+        if (mSiliconLabIcDevice != null) {
+            bRetValue = mSiliconLabIcDevice.mSiliconLabIcToWrite.add(SiliconLabIcPayloadEvents.RESET);
+        }
+        inventoring = false;
+        return bRetValue;
     }
     @Keep public boolean abortOperation() {
         boolean bRetValue = false;
@@ -3310,6 +3309,16 @@ public class Cs108Library4A extends Cs108Connector {
         return rx000pkgData;
     }
 
+    @Keep public byte[] onNotificationEvent() {
+        byte[] notificationData = null;
+        if (mNotificationDevice.mNotificationToRead.size() != 0) {
+            Cs108NotificatiionData cs108NotificatiionData = mNotificationDevice.mNotificationToRead.get(0);
+            mNotificationDevice.mNotificationToRead.remove(0);
+            if (cs108NotificatiionData != null) notificationData = cs108NotificatiionData.dataValues;
+        }
+        return notificationData;
+    }
+
     byte[] barcodeDataStore = null; long timeBarcodeData;
     @Keep public byte[] onBarcodeEvent() {
         byte[] barcodeData = null;
@@ -3415,7 +3424,11 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public boolean setAccessCount(int accessCount, int accessCount2) { return mRfidDevice.mRx000Device.mRx000Setting.setAccessCount(accessCount, accessCount2); }
     @Keep public boolean setAccessWriteData(String dataInput) { return mRfidDevice.mRx000Device.mRx000Setting.setAccessWriteData(dataInput); }
     @Keep public boolean setTagRead(int tagRead) { return mRfidDevice.mRx000Device.mRx000Setting.setTagRead(tagRead); }
-    @Keep public boolean sendHostRegRequestHST_CMD(HostCommands hostCommand) { return mRfidDevice.mRx000Device.sendHostRegRequestHST_CMD(hostCommand); }
+    @Keep public boolean sendHostRegRequestHST_CMD(HostCommands hostCommand) {
+        mRfidDevice.mRx000Device.setPwrManagementMode(false);
+        return mRfidDevice.mRx000Device.sendHostRegRequestHST_CMD(hostCommand);
+    }
+    public boolean setPwrManagementMode(boolean bLowPowerStandby) { return mRfidDevice.mRx000Device.setPwrManagementMode(bLowPowerStandby); }
     @Keep public String getSerialNumber() { return mRfidDevice.mRx000Device.mRx000OemSetting.getSerialNumber(); }
     @Keep public boolean setInvBrandId(boolean invBrandId) { return mRfidDevice.mRx000Device.mRx000Setting.setInvBrandId(invBrandId); }
 

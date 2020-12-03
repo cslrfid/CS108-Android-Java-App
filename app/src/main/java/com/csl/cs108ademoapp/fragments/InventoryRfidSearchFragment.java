@@ -1,8 +1,9 @@
 package com.csl.cs108ademoapp.fragments;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -22,21 +23,20 @@ import android.widget.Toast;
 
 import com.csl.cs108ademoapp.CustomMediaPlayer;
 import com.csl.cs108ademoapp.InventoryRfidTask;
+import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
-import static com.csl.cs108ademoapp.MainActivity.tagSelected;
-
 public class InventoryRfidSearchFragment extends CommonFragment {
     final double dBuV_dBm_constant = 106.98;
     final int labelMin = -90;
     final int labelMax = -10;
 
+    SelectTag selectTag;
     private ProgressBar geigerProgress;
-    private EditText editTextGeigerTagID;
     private CheckBox checkBoxGeigerTone;
     private SeekBar seekGeiger;
     private Spinner memoryBankSpinner;
@@ -64,11 +64,12 @@ public class InventoryRfidSearchFragment extends CommonFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        android.support.v7.app.ActionBar actionBar;
+        androidx.appcompat.app.ActionBar actionBar;
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_loc);
         actionBar.setTitle(R.string.title_activity_geiger);
 
+        selectTag = new SelectTag((Activity)getActivity ());
         TableRow tableRowProgressLabel;
         TextView textViewProgressLabelMin = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMin);
         TextView textViewProgressLabelMid = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMid);
@@ -78,13 +79,12 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         textViewProgressLabelMax.setText(String.format("%.0f", MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0 ? labelMax : labelMax + dBuV_dBm_constant));
 
         geigerProgress = (ProgressBar) getActivity().findViewById(R.id.geigerProgress);
-        editTextGeigerTagID = (EditText) getActivity().findViewById(R.id.selectTagID);
         checkBoxGeigerTone = (CheckBox) getActivity().findViewById(R.id.geigerToneCheck);
 
         final ReaderDevice tagSelected = MainActivity.tagSelected;
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
-                editTextGeigerTagID.setText(tagSelected.getAddress());
+                selectTag.editTextTagID.setText(tagSelected.getAddress());
             }
         }
 
@@ -113,15 +113,15 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0: //if EPC
-                        if (tagSelected != null) editTextGeigerTagID.setText(tagSelected.getAddress());
+                        if (tagSelected != null) selectTag.editTextTagID.setText(tagSelected.getAddress());
                         editTextRWSelectOffset.setText("32");
                         break;
                     case 1:
-                        if (tagSelected != null) { if (tagSelected.getTid() != null) editTextGeigerTagID.setText(tagSelected.getTid()); }
+                        if (tagSelected != null) { if (tagSelected.getTid() != null) selectTag.editTextTagID.setText(tagSelected.getTid()); }
                         editTextRWSelectOffset.setText("0");
                         break;
                     case 2:
-                        if (tagSelected != null) { if (tagSelected.getUser() != null) editTextGeigerTagID.setText(tagSelected.getUser()); }
+                        if (tagSelected != null) { if (tagSelected.getUser() != null) selectTag.editTextTagID.setText(tagSelected.getUser()); }
                         editTextRWSelectOffset.setText("0");
                         break;
                     default:
@@ -292,7 +292,7 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         int memorybank = memoryBankSpinner.getSelectedItemPosition();
         int powerLevel = Integer.valueOf(editTextGeigerAntennaPower.getText().toString());
         if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
-        else if (MainActivity.mCs108Library4a.setSelectedTag(editTextGeigerTagID.getText().toString(), memorybank+1, powerLevel) == false) {
+        else if (MainActivity.mCs108Library4a.setSelectedTag(selectTag.editTextTagID.getText().toString(), memorybank+1, powerLevel) == false) {
             invalidRequest = true;
         } else {
             MainActivity.mCs108Library4a.startOperation(Cs108Library4A.OperationTypes.TAG_SEARCHING);

@@ -4,8 +4,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.drawerlayout.widget.DrawerLayout;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -135,6 +135,7 @@ public abstract class CommonFragment extends Fragment {
                     || fragmentName.contains("ColdChainFragment")
                     || fragmentName.contains("AxzonFragment")
                     || fragmentName.contains("MicronFragment")
+                    || fragmentName.contains("FdmicroFragment")
                     || fragmentName.contains("UcodeFragment")
                     || fragmentName.contains("Ucode8Fragment")
                     || fragmentName.contains("ImpinjFragment")

@@ -5,10 +5,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 
-import com.csl.cs108ademoapp.fragments.AccessSecurityLockFragment;
-import com.csl.cs108ademoapp.fragments.AccessSecurityKillFragment;
+import com.csl.cs108ademoapp.fragments.AccessFdmicroFragment;
+import com.csl.cs108ademoapp.fragments.InventoryRfidiMultiFragment;
 
-public class SecurityAdapter extends FragmentStatePagerAdapter {
+public class FdmicroAdapter extends FragmentStatePagerAdapter {
     private final int NO_OF_TABS = 2;
     public Fragment fragment0, fragment1;
 
@@ -17,11 +17,11 @@ public class SecurityAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = null;
         switch (index) {
             case 0:
-                fragment = new AccessSecurityLockFragment();
+                fragment = InventoryRfidiMultiFragment.newInstance(true,"E2827001");
                 fragment0 = fragment;
                 break;
             case 1:
-                fragment = new AccessSecurityKillFragment();
+                fragment = new AccessFdmicroFragment();
                 fragment1 = fragment;
                 break;
             default:
@@ -41,7 +41,7 @@ public class SecurityAdapter extends FragmentStatePagerAdapter {
         return PagerAdapter.POSITION_NONE;
     }
 
-    public SecurityAdapter(FragmentManager fm) {
+    public FdmicroAdapter(FragmentManager fm) {
         super(fm);
     }
 }

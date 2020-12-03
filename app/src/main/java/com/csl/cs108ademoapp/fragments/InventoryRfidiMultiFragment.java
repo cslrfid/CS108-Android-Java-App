@@ -3,7 +3,7 @@ package com.csl.cs108ademoapp.fragments;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -133,7 +133,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
 
         MainActivity.selectFor = -1;
         if (bMultiBankInventory | bBapInventory | bctesiusInventory) {
-            android.support.v7.app.ActionBar actionBar;
+            androidx.appcompat.app.ActionBar actionBar;
             actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             actionBar.setIcon(R.drawable.dl_inv);
             if (bMultiBankInventory) actionBar.setTitle("M"); //"Multibank");
