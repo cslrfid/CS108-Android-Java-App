@@ -14,12 +14,12 @@ android {
     buildTypes {
         debug {
             shrinkResources false
-            minifyEnabled true
+            minifyEnabled false
             debuggable false
         }
         release {
             shrinkResources false
-            minifyEnabled true
+            minifyEnabled false
         }
     }
 }
