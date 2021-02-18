@@ -85,8 +85,8 @@ public class Cs108Library4A extends Cs108Connector {
             for (FeatureInfo f : featuresList) {
                 if (f.name != null) {
                     boolean matched = false;
-                    if (f.name.matches("android.hardware.bluetooth_le")) matched = true;
-                    else if (f.name.matches("android.hardware.usb.host")) matched = true;
+                    if (f.name.contains("bluetooth_le")) matched = true;
+                    else if (f.name.contains("usb.host")) matched = true;
                     if (matched) appendToLogView("feature = " + f.name);
                 }
             }
@@ -228,13 +228,21 @@ public class Cs108Library4A extends Cs108Connector {
                 setBarcodeOn(true);
                 hostProcessorICGetFirmwareVersion();
                 getBluetoothICFirmwareVersion();
+                //barcodeSendCommandLoadUserDefault();
                 getBarcodeSerial();
-                getBarcodePreSuffix(); getBarcodeReadingMode();
+                getBarcodePreSuffix();
+                getBarcodeReadingMode();
+                //getBarcodeNoDuplicateReading();
+                //getBarcodeDelayTimeOfEachReading();
+                //getBarcodeEnable2dBarCodes();
+                //getBarcodePrefixOrder();
+                //getBarcodeVersion();
                 setBatteryAutoReport(true);
                 abortOperation();
                 getMacVer();
                 getHostProcessorICSerialNumber();
                 mRfidDevice.mRx000Device.mRx000Setting.writeMAC(0xC08, 0x100);
+                channelOrderType = -1;
                 mRfidDevice.mRx000Device.mRx000OemSetting.getVersionCode();
                 mRfidDevice.mRx000Device.mRx000OemSetting.getFreqModifyCode();
                 mRfidDevice.mRx000Device.mRx000OemSetting.getSpecialCountryVersion();
@@ -273,14 +281,33 @@ public class Cs108Library4A extends Cs108Connector {
         return result;
     }
     @Keep public void disconnect(boolean tempDisconnect) {
+        appendToLog("tempDisconnect: getBarcodeOnStatus = " + (getBarcodeOnStatus() ? "on" : "off"));
         if (DEBUG) appendToLog("tempDisconnect = " + tempDisconnect);
         mHandler.removeCallbacks(checkVersionRunnable);
         mHandler.removeCallbacks(runnableToggleConnection);
-        if (getBarcodeOnStatus()) setBarcodeOn(false);
-        super.disconnect();
+        if (getBarcodeOnStatus()) {
+            appendToLog("tempDisconnect: setBarcodeOn(false)");
+            if (mBarcodeDevice.mBarcodeToWrite.size() != 0) {
+                appendToLog("going to disconnectRunnable with remaining mBarcodeToWrite.size = " + mBarcodeDevice.mBarcodeToWrite.size() + ", data = " + byteArrayToString(mBarcodeDevice.mBarcodeToWrite.get(0).dataValues));
+            }
+            mBarcodeDevice.mBarcodeToWrite.clear();
+            setBarcodeOn(false);
+        } else appendToLog("tempDisconnect: getBarcodeOnStatus is false");
+        mHandler.postDelayed(disconnectRunnable, 100);
         appendToLog("done with tempDisconnect = " + tempDisconnect);
         if (tempDisconnect == false)    readerDeviceConnect = null;
     }
+
+    void disconnect() { super.disconnect(); }
+    final Runnable disconnectRunnable = new Runnable() {
+        @Override
+        public void run() {
+            appendToLog("disconnectRunnable with mBarcodeToWrite.size = " + mBarcodeDevice.mBarcodeToWrite.size());
+            if (mBarcodeDevice.mBarcodeToWrite.size() != 0) mHandler.postDelayed(disconnectRunnable, 100);
+            else disconnect();
+        }
+    };
+
     @Override
     @Keep public int getRssi() { return super.getRssi(); }
 
@@ -294,14 +321,14 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public boolean isRfidFailure() { return mRfidDevice.rfidFailure; }
 
     @Keep public void setSameCheck(boolean sameCheck1) {
-        sameCheck = sameCheck1;
+        sameCheck = sameCheck1; //sameCheck = false;
     }
 
     @Keep public void setReaderDefault() {
         setPowerLevel(300);
         setTagGroup(0, 0, 2);
         setPopulation(30);
-        setInvAlgo(true);
+        setInvAlgoNoSave(true);
         setCurrentLinkProfile(1);
     }
 
@@ -327,9 +354,9 @@ public class Cs108Library4A extends Cs108Connector {
                 mHandler.postDelayed(checkVersionRunnable, 500);
             } else {
                 setSameCheck(false);
-                if (true) appendToLog("checkVersionRunnable(): END");
+                if (true) appendToLog("BarStreamBar: checkVersionRunnable(): END");
                 if (isBarcodeFailure() == false) {
-                    barcodeSendCommandSetPreSuffix();
+                    if (mBarcodeDevice.checkPreSuffix(prefixRef, suffixRef) == false) barcodeSendCommandSetPreSuffix();
                     if (mBarcodeDevice.bBarcodeTriggerMode != 0x30) barcodeSendCommandTrigger();
                     getAutoRFIDAbort(); getAutoBarStartSTop(); //setAutoRFIDAbort(false); setAutoBarStartSTop(true);
                 }
@@ -390,17 +417,13 @@ public class Cs108Library4A extends Cs108Connector {
                                 if (dataArray[1].matches(getlibraryVersion())) bNeedDefault = false;
                             } else if (bNeedDefault == true) {
                             } else if (dataArray[0].matches("countryInList")) {
-                                if (DEBUG) appendToLog("loaded countryInList = " + Integer.valueOf(dataArray[1]));
                                 getRegionList();
-                                if (regionCode == null) {
-                                    if (DEBUG) appendToLog("NULL RegionCode");
-                                } else {
-                                    if (DEBUG) appendToLog("VALID RegionCode");
-                                }
                                 int countryInListNew = Integer.valueOf(dataArray[1]);
                                 if (countryInList != countryInListNew) setCountryInList(countryInListNew);
                                 channelOrderType = -1;
-
+                            } else if (dataArray[0].matches("channel")) {
+                                int channelNew = Integer.valueOf(dataArray[1]);
+                                if (getChannelHoppingStatus() == false) setChannel(channelNew);
                             } else if (dataArray[0].matches("antennaPower")) {
                                 setPowerLevel(Long.valueOf(dataArray[1]));
                             } else if (dataArray[0].matches("population")) {
@@ -426,10 +449,8 @@ public class Cs108Library4A extends Cs108Connector {
                             } else if (dataArray[0].matches("rssiDisplay")) {
                                 setRssiDisplaySetting(Integer.valueOf(dataArray[1]));
                             } else if (dataArray[0].matches("tagDelay")) {
-                                if (DEBUG) appendToLog("loaded tagDelay = " + tagDelaySetting);
                                 setTagDelay(Byte.valueOf(dataArray[1]));
                             } else if (dataArray[0].matches("cycleDelay")) {
-                                if (DEBUG) appendToLog("loaded cycleDelay = " + cycleDelaySetting);
                                 setCycleDelay(Long.valueOf(dataArray[1]));
 
                             } else if (dataArray[0].matches(("inventoryBeep"))) {
@@ -514,11 +535,13 @@ public class Cs108Library4A extends Cs108Connector {
 
             String outData = "appVersion," + getlibraryVersion() +"\n"; stream.write(outData.getBytes());
             outData = "countryInList," + String.valueOf(getCountryNumberInList() +"\n"); stream.write(outData.getBytes());
+            if (getChannelHoppingStatus() == false)
+                outData = "channel," + String.valueOf(getChannel() +"\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
 
             outData = "antennaPower," + String.valueOf(mRfidDevice.mRx000Device.mRx000Setting.getAntennaPower(0) +"\n"); stream.write(outData.getBytes());
             outData = "population," + String.valueOf(getPopulation() +"\n"); stream.write(outData.getBytes());
             outData = "querySession," + String.valueOf(getQuerySession() +"\n"); stream.write(outData.getBytes());
-            outData = "queryTarget," + String.valueOf(getQueryTarget() +"\n"); stream.write(outData.getBytes()); if (DEBUG) appendToLog(outData);
+            outData = "queryTarget," + String.valueOf(getQueryTarget() +"\n"); stream.write(outData.getBytes());
             outData = "tagFocus," + String.valueOf(getTagFocus() +"\n"); stream.write(outData.getBytes());
             outData = "invAlgo," + String.valueOf(getInvAlgo() +"\n"); stream.write(outData.getBytes());
             outData = "retry," + String.valueOf(getRetryCount() +"\n"); stream.write(outData.getBytes());
@@ -531,12 +554,12 @@ public class Cs108Library4A extends Cs108Connector {
             outData = "tagDelay," + String.valueOf(getTagDelay() +"\n"); stream.write(outData.getBytes());
             outData = "cycleDelay," + String.valueOf(getCycleDelay() +"\n"); stream.write(outData.getBytes());
 
-            outData = "inventoryBeep," + String.valueOf(getInventoryBeep() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-            outData = "inventoryBeepCount," + String.valueOf(getBeepCount() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-            outData = "inventoryVibrate," + String.valueOf(getInventoryVibrate() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-            outData = "inventoryVibrateTime," + String.valueOf(getVibrateTime() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-            outData = "inventoryVibrateMode," + String.valueOf(getVibrateModeSetting() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-            outData = "inventoryVibrateWindow," + String.valueOf(getVibrateWindow() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+            outData = "inventoryBeep," + String.valueOf(getInventoryBeep() + "\n"); stream.write(outData.getBytes());
+            outData = "inventoryBeepCount," + String.valueOf(getBeepCount() + "\n"); stream.write(outData.getBytes());
+            outData = "inventoryVibrate," + String.valueOf(getInventoryVibrate() + "\n"); stream.write(outData.getBytes());
+            outData = "inventoryVibrateTime," + String.valueOf(getVibrateTime() + "\n"); stream.write(outData.getBytes());
+            outData = "inventoryVibrateMode," + String.valueOf(getVibrateModeSetting() + "\n"); stream.write(outData.getBytes());
+            outData = "inventoryVibrateWindow," + String.valueOf(getVibrateWindow() + "\n"); stream.write(outData.getBytes());
 
             outData = "saveFileEnable," + String.valueOf(getSaveFileEnable() + "\n"); stream.write(outData.getBytes());
             outData = "saveCloudEnable," + String.valueOf(getSaveCloudEnable() + "\n"); stream.write(outData.getBytes());
@@ -545,30 +568,26 @@ public class Cs108Library4A extends Cs108Connector {
             outData = "serverLocation," + getServerLocation() + "\n"; stream.write(outData.getBytes());
             outData = "serverTimeout," + String.valueOf(getServerTimeout() +"\n"); stream.write(outData.getBytes());
 
-            outData = "barcode2TriggerMode," + String.valueOf(barcode2TriggerMode +"\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+            outData = "barcode2TriggerMode," + String.valueOf(barcode2TriggerMode +"\n"); stream.write(outData.getBytes());
 
             if (preFilterData != null) {
-                outData = "preFilterData.enable," + String.valueOf(preFilterData.enable + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-                outData = "preFilterData.target," + String.valueOf(preFilterData.target + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-                outData = "preFilterData.action," + String.valueOf(preFilterData.action + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-                outData = "preFilterData.bank," + String.valueOf(preFilterData.bank + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-                outData = "preFilterData.offset," + String.valueOf(preFilterData.offset + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-                outData = "preFilterData.mask," + String.valueOf(preFilterData.mask + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
-                outData = "preFilterData.maskbit," + String.valueOf(preFilterData.maskbit + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+                outData = "preFilterData.enable," + String.valueOf(preFilterData.enable + "\n"); stream.write(outData.getBytes());
+                outData = "preFilterData.target," + String.valueOf(preFilterData.target + "\n"); stream.write(outData.getBytes());
+                outData = "preFilterData.action," + String.valueOf(preFilterData.action + "\n"); stream.write(outData.getBytes());
+                outData = "preFilterData.bank," + String.valueOf(preFilterData.bank + "\n"); stream.write(outData.getBytes());
+                outData = "preFilterData.offset," + String.valueOf(preFilterData.offset + "\n"); stream.write(outData.getBytes());
+                outData = "preFilterData.mask," + String.valueOf(preFilterData.mask + "\n"); stream.write(outData.getBytes());
+                outData = "preFilterData.maskbit," + String.valueOf(preFilterData.maskbit + "\n"); stream.write(outData.getBytes());
             }
 
             stream.write("End of data\n".getBytes());
             stream.close();
-            if (DEBUG) appendToLog("Data is saved to FILE.");
         } catch (Exception ex){
             //
         }
     }
 
     @Keep public String getMacVer() { return mRfidDevice.mRx000Device.mRx000Setting.getMacVer(); }
-
-    //getMacLastCommandDuration -- to be removed
-    @Keep public long getMacLastCommandDuration(boolean request) { return mRfidDevice.mRx000Device.mRx000Setting.getMacLastCommandDuration(request); }
 
     public int getcsModel() { return icsModel; }
 
@@ -611,7 +630,12 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public long getPwrlevel() {
         return mRfidDevice.mRx000Device.mRx000Setting.getAntennaPower(-1);
     }
+    long pwrlevelSetting;
     public boolean setPowerLevel(long pwrlevel) {
+        pwrlevelSetting = pwrlevel;
+        return mRfidDevice.mRx000Device.mRx000Setting.setAntennaPower(pwrlevel);
+    }
+    public boolean setOnlyPowerLevel(long pwrlevel) {
         return mRfidDevice.mRx000Device.mRx000Setting.setAntennaPower(pwrlevel);
     }
 
@@ -634,8 +658,8 @@ public class Cs108Library4A extends Cs108Connector {
 
     int tagFocus = -1;
     public int getTagFocus() {
-        int iValue = mRfidDevice.mRx000Device.mRx000Setting.getImpinjExtension();
-        if (iValue > 0) tagFocus = ((iValue & 0x10) >> 4);
+        tagFocus = mRfidDevice.mRx000Device.mRx000Setting.getImpinjExtension();
+        if (tagFocus > 0) tagFocus = ((tagFocus & 0x10) >> 4);
         return tagFocus;
     }
     public boolean setTagFocus(boolean tagFocusNew) {
@@ -647,6 +671,7 @@ public class Cs108Library4A extends Cs108Connector {
     boolean invAlgoSetting = true;
     @Keep public boolean getInvAlgo() { return invAlgoSetting; }
     @Keep public boolean setInvAlgo(boolean dynamicAlgo) { invAlgoSetting = dynamicAlgo; appendToLog("Hello6: invAlgo = " + dynamicAlgo); return setInvAlgo1(dynamicAlgo); }
+    @Keep public boolean setInvAlgoNoSave(boolean dynamicAlgo) { return setInvAlgo1(dynamicAlgo); }
     boolean getInvAlgo1() {
         int iValue = mRfidDevice.mRx000Device.mRx000Setting.getInvAlgo();
         if (iValue < 0) {
@@ -1474,6 +1499,20 @@ public class Cs108Library4A extends Cs108Connector {
     private final int[] jpn2012FreqSortedIdx = new int[] {
             0, 1, 2, 3 };
 
+    private final int JPN2012A_CHN_CNT = 6;
+    private final double[] JPN2012ATableOfFreq = new double[] {
+            916.80, 918.00, 919.20, 920.40, 920.60, 920.80 };
+    private final int[] jpn2012AFreqTable = new int[] {
+            0x003C23D0, /*916.800MHz   Channel 1*/
+            0x003C23DC, /*918.000MHz   Channel 2*/
+            0x003C23E8, /*919.200MHz   Channel 3*/
+            0x003C23F4, /*920.400MHz   Channel 4*/
+            0x003C23F6, /*920.600MHz   Channel 5*/
+            0x003C23F8, /*920.800MHz   Channel 6*/
+    };
+    private final int[] jpn2012AFreqSortedIdx = new int[] {
+            0, 1, 2, 3, 4, 5 };
+
     private final int ETSIUPPERBAND_CHN_CNT = 4;
     private final double[] ETSIUPPERBANDTableOfFreq = new double[] {
             916.3, 917.5, 918.7, 919.9 };
@@ -1581,6 +1620,8 @@ public class Cs108Library4A extends Cs108Connector {
                 return KR2017RW_CHN_CNT;
             case JP:
                 return JPN2012_CHN_CNT;
+            case JP6:
+                return JPN2012A_CHN_CNT;
             case ETSIUPPERBAND:
                 return ETSIUPPERBAND_CHN_CNT;
 
@@ -1672,6 +1713,8 @@ public class Cs108Library4A extends Cs108Connector {
                 return KR2017RwTableOfFreq;
             case JP:
                 return JPN2012TableOfFreq;
+            case JP6:
+                return JPN2012ATableOfFreq;
             case ETSIUPPERBAND:
                 return ETSIUPPERBANDTableOfFreq;
 
@@ -1773,6 +1816,8 @@ public class Cs108Library4A extends Cs108Connector {
                 return kr2017RwFreqSortedIdx;
             case JP:
                 return jpn2012FreqSortedIdx;
+            case JP6:
+                return jpn2012AFreqSortedIdx;
             case ETSIUPPERBAND:
                 return etsiupperbandFreqSortedIdx;
 
@@ -1891,6 +1936,8 @@ public class Cs108Library4A extends Cs108Connector {
                 return kr2017RwFreqTable;
             case JP:
                 return jpn2012FreqTable;
+            case JP6:
+                return jpn2012AFreqTable;
             case ETSIUPPERBAND:
                 return etsiupperbandFreqTable;
 
@@ -2373,7 +2420,8 @@ public class Cs108Library4A extends Cs108Connector {
         return bRetValue;
     }
     @Keep public void restoreAfterTagSelect() {
-        if (DEBUG) appendToLog("postMatchDataChanged = " + postMatchDataChanged + ",  preMatchDataChanged = " + preMatchDataChanged + ", macVersion = " + getMacVer());
+        if (true) loadSetting1File();
+        else if (DEBUG) appendToLog("postMatchDataChanged = " + postMatchDataChanged + ",  preMatchDataChanged = " + preMatchDataChanged + ", macVersion = " + getMacVer());
         if (checkHostProcessorVersion(getMacVer(), 2, 6, 8)) {
             mRfidDevice.mRx000Device.mRx000Setting.setMatchRep(0);
             mRfidDevice.mRx000Device.mRx000Setting.setTagDelay(tagDelaySetting);
@@ -2398,27 +2446,25 @@ public class Cs108Library4A extends Cs108Connector {
     }
 
     @Keep public boolean setSelectedTagByTID(String strTagId, long pwrlevel) {
-        boolean isValid = false;
-        isValid = setSelectedTag1(strTagId, 2, 0, pwrlevel, 0, 0);
-        return isValid;
+        if (pwrlevel < 0) pwrlevel = pwrlevelSetting;
+        return setSelectedTag1(strTagId, 2, 0, 0, pwrlevel, 0, 0);
     }
     @Keep public boolean setSelectedTag(String strTagId, int selectBank, long pwrlevel) {
         boolean isValid = false;
         if (selectBank < 0 || selectBank > 3) return false;
         int selectOffset = (selectBank == 1 ? 32 : 0);
-        isValid = setSelectedTag1(strTagId, selectBank, selectOffset, pwrlevel, 0, 0);
+        isValid = setSelectedTag1(strTagId, selectBank, selectOffset, 0, pwrlevel, 0, 0);
         return isValid;
     }
     @Keep public boolean setSelectedTag(String selectMask, int selectBank, int selectOffset, long pwrlevel, int qValue, int matchRep) {
         boolean isValid = false;
-        isValid = setSelectedTag1(selectMask, selectBank, selectOffset, pwrlevel, qValue, matchRep);
+        isValid = setSelectedTag1(selectMask, selectBank, selectOffset, 0, pwrlevel, qValue, matchRep);
         return isValid;
     }
     PostMatchData postMatchDataOld; boolean postMatchDataChanged = false;
     PreMatchData preMatchDataOld; boolean preMatchDataChanged = false;
-    long pwrlevelOld;
     final boolean tagSelectByMatching = false;
-    @Keep boolean setSelectedTag1(String selectMask, int selectBank, int selectOffset, long pwrlevel, int qValue, int matchRep) {
+    @Keep boolean setSelectedTag1(String selectMask, int selectBank, int selectOffset, int delay, long pwrlevel, int qValue, int matchRep) {
         boolean setSuccess = true;
         if (selectMask == null)   selectMask = "";
         if (selectMask.length() == 0) return false;
@@ -2442,9 +2488,9 @@ public class Cs108Library4A extends Cs108Connector {
                 }
                 preMatchDataOld = preMatchData;
             }
-            setSuccess = setSelectCriteria(0, true, 4, 0, 0, selectBank, selectOffset, selectMask, selectMask.length() * 4);
+            setSuccess = setSelectCriteria(0, true, 4, 0, delay, selectBank, selectOffset, selectMask, selectMask.length() * 4);
         }
-        if (setSuccess) setSuccess = setPowerLevel(pwrlevel);
+        if (setSuccess) setSuccess = setOnlyPowerLevel(pwrlevel);
         appendToLog("Hello6: going to do setFixedQParms with setSuccess = " + setSuccess);
         if (setSuccess) setSuccess = setFixedQParms(qValue, 5, false);
         mRfidDevice.mRx000Device.mRx000Setting.setAlgoAbFlip(1);
@@ -2466,7 +2512,7 @@ public class Cs108Library4A extends Cs108Connector {
         BR1, BR2, BR3, BR4, BR5,
         IL, IL2019RW, PR, PH, SG, ZA, VZ,
         AU, NZ, HK, MY, VN,
-        CN, TW, KR, KR2017RW, JP, TH, IN, FCC,
+        CN, TW, KR, KR2017RW, JP, JP6, TH, IN, FCC,
         UH1, UH2, LH, LH1, LH2,
         ETSI, ID, ETSIUPPERBAND
     }
@@ -2531,6 +2577,8 @@ public class Cs108Library4A extends Cs108Connector {
             case KR2017RW:
                 return "Korea";
             case JP:
+                return "Japan";
+            case JP6:
                 return "Japan";
             case TH:
                 return "Thailand";
@@ -2645,8 +2693,14 @@ public class Cs108Library4A extends Cs108Connector {
                         RegionCodes.SG, RegionCodes.MY, RegionCodes.ID } ;
                 break;
             case 8:
-                regionCode = RegionCodes.JP;
-                regionList = new RegionCodes[] { RegionCodes.JP } ;
+                String strSpecialCountryVersion = mRfidDevice.mRx000Device.mRx000OemSetting.getSpecialCountryVersion();
+                if (strSpecialCountryVersion.contains("6")) {
+                    regionCode = RegionCodes.JP6;
+                    regionList = new RegionCodes[]{RegionCodes.JP6};
+                } else {
+                    regionCode = RegionCodes.JP;
+                    regionList = new RegionCodes[] { RegionCodes.JP } ;
+                }
                 break;
             case 9:
                 regionCode = RegionCodes.ETSIUPPERBAND;
@@ -2744,6 +2798,7 @@ public class Cs108Library4A extends Cs108Connector {
     }
     public boolean getChannelHoppingDefault() {
         int countryCode = getCountryCode();
+        appendToLog("getChannelHoppingDefault: countryCode (for channelOrderType) = " + countryCode);
         if (countryCode == 1 || countryCode == 8 || countryCode == 9)   return false;
         return true;
     }
@@ -2773,20 +2828,28 @@ public class Cs108Library4A extends Cs108Connector {
             appendToLog(" FrequencyA: end of setting");
 
             this.channelOrderType = (channelOrderHopping ? 0 : 1);
+            appendToLog("setChannelHoppingStatus: channelOrderType = " + channelOrderType);
         }
         return true;
     }
 
     public int getChannel() {
         int channel = -1;
+        appendToLog("loadSetting1File: getChannel");
         if (mRfidDevice.mRx000Device.mRx000Setting.getFreqChannelConfig() != 0) {
             channel = mRfidDevice.mRx000Device.mRx000Setting.getFreqChannelSelect();
+            appendToLog("loadSetting1File: getting channel = " + channel);
         }
-        if (getChannelHoppingStatus()) channel = 0;
+        if (getChannelHoppingStatus()) {
+            appendToLog("loadSetting1File: got hoppingStatus: channel = " + channel);
+            channel = 0;
+        }
+        appendToLog("loadSetting1File: channel = " + channel);
         return channel;
     }
     public boolean setChannel(int channelSelect) {
         boolean result = true;
+        appendToLog("loadSetting1File: channelSelect = " + channelSelect);
         if (result == true)    result = mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelConfig(false);
         if (result == true)    result = mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelSelect(channelSelect);
         if (result == true)    result = mRfidDevice.mRx000Device.mRx000Setting.setFreqChannelConfig(true);
@@ -2869,6 +2932,14 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public void getBarcodeReadingMode() {
         barcodeSendQueryReadingMode();
     }
+    @Keep public void getBarcodeEnable2dBarCodes() { barcodeSendQueryEnable2dBarCodes(); }
+    @Keep public void getBarcodePrefixOrder() { barcodeSendQueryPrefixOrder(); }
+    @Keep public void getBarcodeDelayTimeOfEachReading() { barcodeSendQueryDelayTimeOfEachReading(); }
+    @Keep public void getBarcodeNoDuplicateReading() {
+        barcodeSendQueryNoDuplicateReading();
+    }
+    @Keep public void getBarcodeVersion() { barcodeSendQueryVersion(); }
+
 
     @Keep public boolean setBarcodeOn(boolean on) {
         boolean retValue;
@@ -2916,18 +2987,23 @@ public class Cs108Library4A extends Cs108Connector {
     }
     boolean barcode2TriggerMode = true;
     @Keep public boolean barcodeSendCommandTrigger() {
-        appendToLog("Set trigger mode");
+        boolean retValue = true;
+        appendToLog("BarStream: Set trigger mode");
         barcode2TriggerMode = true; mBarcodeDevice.bBarcodeTriggerMode = 0x30; appendToLog("Reading mode is SET to TRIGGER");
-        return barcodeSendCommand("nls0006010;nls0313000=30000;nls0302000;nls0006000;".getBytes());
+        if (retValue) retValue = barcodeSendCommand("nls0006010;".getBytes());
+        if (retValue) retValue = barcodeSendCommand("nls0302000;".getBytes());
+        if (retValue) retValue = barcodeSendCommand("nls0313000=3000;nls0313010=1000;nls0313040=1000;nls0302000;nls0007010;".getBytes());
+        if (retValue) retValue = barcodeSendCommand("nls0001150;nls0006000;".getBytes());
+        return retValue;
     }
+
+    byte[] prefixRef = { 0x02, 0x00, 0x07, 0x10, 0x17, 0x13 };
+    byte[] suffixRef = { 0x05, 0x01, 0x11, 0x16, 0x03, 0x04 };
     @Keep public boolean barcodeSendCommandSetPreSuffix() {
         boolean retValue = true;
-        byte[] prefixRef = { 0x02, 0x00, 0x07, 0x10, 0x17, 0x13 };
-        byte[] suffixRef = { 0x05, 0x01, 0x11, 0x16, 0x03, 0x04 };
-        if (true && mBarcodeDevice.checkPreSuffix(prefixRef, suffixRef) == false) {
-            appendToLog("BarcodePrefix BarcodeSuffix are SET");
-            if (retValue) barcodeSendCommand("nls0006010;".getBytes());
-            if (retValue) barcodeSendCommand("nls0311010;".getBytes());
+            appendToLog("BarStream: BarcodePrefix BarcodeSuffix are SET");
+            if (retValue) retValue = barcodeSendCommand("nls0006010;".getBytes());
+            if (retValue) retValue = barcodeSendCommand("nls0311010;".getBytes());
             if (retValue) retValue = barcodeSendCommand("nls0317040;".getBytes());
             if (retValue) retValue = barcodeSendCommand("nls0305010;".getBytes());
             String string = "nls0300000=0x" + byteArrayToString(prefixRef) + ";"; appendToLog("Set Prefix string = " + string);
@@ -2937,12 +3013,13 @@ public class Cs108Library4A extends Cs108Connector {
             if (retValue) retValue = barcodeSendCommand(string.getBytes());
             if (retValue) retValue = barcodeSendCommand("nls0308030;".getBytes());
             if (retValue) retValue = barcodeSendCommand("nls0307010;".getBytes());
-            if (retValue) barcodeSendCommand("nls0006000;".getBytes());
+            if (retValue) retValue = barcodeSendCommand("nls0309010;nls0310010;".getBytes());   //enable terminator, set terminator as 0x0D
+            if (retValue) retValue = barcodeSendCommand("nls0502110".getBytes());
+            if (retValue) barcodeSendCommand("nls0001150;nls0006000;".getBytes());
             if (retValue) {
                 mBarcodeDevice.bytesBarcodePrefix = prefixRef;
                 mBarcodeDevice.bytesBarcodeSuffix = suffixRef;
             }
-        }
         return retValue;
     }
     @Keep public boolean barcodeSendCommandResetPreSuffix() {
@@ -2958,6 +3035,12 @@ public class Cs108Library4A extends Cs108Connector {
         }
         return retValue;
     }
+    @Keep public boolean barcodeSendCommandLoadUserDefault() {
+        boolean retValue = barcodeSendCommand("nls0006010;".getBytes());
+        if (retValue) retValue = barcodeSendCommand("nls0001160;".getBytes());
+        if (retValue) retValue = barcodeSendCommand("nls0006000;".getBytes());
+        return retValue;
+    }
     @Keep public boolean barcodeSendCommandConinuous() {
         boolean retValue = barcodeSendCommand("nls0006010;".getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0302020;".getBytes());
@@ -2969,22 +3052,67 @@ public class Cs108Library4A extends Cs108Connector {
                 0x00, 0x05,
                 0x33, 0x48, 0x30, 0x33, 0x30,
                 (byte)0xb2 };
-        return barcodeSendCommand(datat);
+        return barcodeSendQuery(datat);
     }
     boolean barcodeSendQuerySelfPreSuffix() {
-        byte[] datat = new byte[] { 0x7E, 0x00,
+        byte[] data = new byte[] { 0x7E, 0x00,
                 0x00, 0x02,
                 0x33, 0x37,
                 (byte)0xf9 };
-        return barcodeSendCommand(datat);
+        return barcodeSendQuery(data);
     }
     boolean barcodeSendQueryReadingMode() {
-        byte[] datat = new byte[] { 0x7E, 0x00,
+        byte[] data = new byte[] { 0x7E, 0x00,
                 0x00, 0x05,
                 0x33, 0x44, 0x30, 0x30, 0x30,
                 (byte)0xbd };
-        return barcodeSendCommand(datat);
+        return barcodeSendQuery(data);
     }
+    boolean barcodeSendQueryEnable2dBarCodes() {
+        byte[] data = new byte[] { 0x7E, 0x00,
+                0x00, 0x02,
+                0x33, 0x33,
+                0 };
+        return barcodeSendQuery(data);
+    }
+    boolean barcodeSendQueryPrefixOrder() {
+        byte[] data = new byte[] { 0x7E, 0x00,
+                0x00, 0x02,
+                0x33, 0x42,
+                0 };
+        return barcodeSendQuery(data);
+    }
+    boolean barcodeSendQueryDelayTimeOfEachReading() {
+        byte[] data = new byte[] { 0x7E, 0x00,
+                0x00, 0x05,
+                0x33, 0x44, 0x30, 0x33, 0x30,
+                0 };
+        return barcodeSendQuery(data);
+    }
+    boolean barcodeSendQueryNoDuplicateReading() {
+        byte[] data = new byte[] { 0x7E, 0x00,
+                0x00, 0x05,
+                0x33, 0x44, 0x30, 0x33, 0x31,
+                0 };
+        return barcodeSendQuery(data);
+    }
+    boolean barcodeSendQueryVersion() {
+        byte[] data = new byte[] { 0x7E, 0x00,
+                0x00, 0x03,
+                0x33, 0x47,
+                0 };
+        return barcodeSendQuery(data);
+    }
+    boolean barcodeSendQuery(byte[] data) {
+        byte bytelrc = (byte)0xff;
+        for (int i = 2; i < data.length - 1; i++) {
+            bytelrc ^= data[i];
+        }
+        appendToLog(String.format("BarStream: bytelrc = %02X, last = %02X", (byte)bytelrc, data[data.length-1]));
+        data[data.length-1] = bytelrc;
+        return barcodeSendCommand(data);
+    }
+
     private boolean barcodeSendCommand(byte[] barcodeCommandData) {
         Cs108BarcodeData cs108BarcodeData = new Cs108BarcodeData();
         cs108BarcodeData.barcodePayloadEvent = BarcodePayloadEvents.BARCODE_COMMAND;
@@ -3103,20 +3231,13 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public boolean getAutoBarStartSTop() { return mNotificationDevice.getAutoBarStartStopStatus(); }
 
     @Keep public String getBatteryDisplay(boolean voltageDisplay) {
-        return getBatteryDisplay(voltageDisplay, true);
-    }
-    @Keep String getBatteryDisplay(boolean voltageDisplay, boolean settingDisplay) {
         float floatValue = (float) getBatteryLevel() / 1000;
         if (floatValue == 0)    return " ";
-        if (voltageDisplay || (settingDisplay && getBatteryDisplaySetting() == 0)) return String.format("%.3f V", floatValue);
-        else if (true) {
-            return(String.format("%d", getBatteryValue2Percent(floatValue)) + "%" + (true ? ("\r\n" + String.format("%.3f V", floatValue)) : ""));
-        } else if (floatValue >= 4)   return "100%";
-        else if (floatValue < 3.4)  return "0%";
-        else {
-            float result = (float)166.67 * floatValue - (float)566.67;
-            return(String.format("%d", (int)result) + "%");
-        }
+        String retString = null;
+        if (voltageDisplay || (getBatteryDisplaySetting() == 0)) retString = String.format("%.3f V", floatValue);
+        else retString = (String.format("%d", getBatteryValue2Percent(floatValue)) + "%");
+        if (voltageDisplay == false) retString +=  String.format("\r\n P=%d", getPwrlevel());
+        return retString;
     }
 
     String strVersionMBoard = "1.8"; String[] strMBoardVersions = strVersionMBoard.split("\\.");
@@ -3337,7 +3458,7 @@ public class Cs108Library4A extends Cs108Connector {
         byte[] barcodeCombined = null;
         if (false) barcodeCombined = barcodeData;
         else if (barcodeData != null) {
-            appendToLog("barcodeData = " + byteArrayToString(barcodeData));
+            appendToLog("BarStream: barcodeData = " + byteArrayToString(barcodeData) + ", barcodeDataStore = " + byteArrayToString(barcodeDataStore));
             int barcodeDataStoreIndex = 0;
             int length = barcodeData.length;
             if (barcodeDataStore != null) {
@@ -3353,7 +3474,6 @@ public class Cs108Library4A extends Cs108Connector {
             barcodeCombined = new byte[0];
         }
         if (barcodeDataStore != null) {
-            appendToLog("barcodeDataStore = " + byteArrayToString(barcodeDataStore));
             barcodeCombined = new byte[barcodeDataStore.length];
             System.arraycopy(barcodeDataStore, 0, barcodeCombined, 0, barcodeCombined.length);
 
@@ -3366,10 +3486,10 @@ public class Cs108Library4A extends Cs108Connector {
                 byte[] prefixExpected = mBarcodeDevice.getPrefix(); boolean prefixFound = false;
                 byte[] suffixExpected = mBarcodeDevice.getSuffix(); boolean suffixFound = false;
                 int codeTypeLength = 4;
-                appendToLog("barcodeCombined = " + byteArrayToString(barcodeCombined) + ", Expected Prefix = " + byteArrayToString(prefixExpected)  + ", Expected Suffix = " + byteArrayToString(suffixExpected));
+                appendToLog("BarStream: barcodeCombined = " + byteArrayToString(barcodeCombined) + ", Expected Prefix = " + byteArrayToString(prefixExpected)  + ", Expected Suffix = " + byteArrayToString(suffixExpected));
                 if (barcodeCombined.length > prefixExpected.length + suffixExpected.length + codeTypeLength) {
                     int i = 0;
-                    for (; i < barcodeCombined.length - prefixExpected.length - suffixExpected.length; i++) {
+                    for (; i <= barcodeCombined.length - prefixExpected.length - suffixExpected.length; i++) {
                         int j = 0;
                         for (; j < prefixExpected.length; j++) {
                             if (barcodeCombined[i+j] != prefixExpected[j]) break;
@@ -3377,19 +3497,58 @@ public class Cs108Library4A extends Cs108Connector {
                         if (j == prefixExpected.length) { prefixFound = true; break; }
                     }
                     int k = i + prefixExpected.length;
-                    for (; k < barcodeCombined.length - suffixExpected.length; k++) {
+                    for (; k <= barcodeCombined.length - suffixExpected.length; k++) {
                         int j = 0;
                         for (; j < suffixExpected.length; j++) {
                             if (barcodeCombined[k+j] != suffixExpected[j]) break;
                         }
                         if (j == suffixExpected.length) { suffixFound = true; break; }
                     }
-                    appendToLog("iPrefix = " + i + ", iSuffix = " + k);
+                    appendToLog("BarStream: iPrefix = " + i + ", iSuffix = " + k + ", with prefixFound = " + prefixFound + ", suffixFound = " + suffixFound);
                     if (prefixFound && suffixFound) {
                         byte[] barcodeCombinedNew = new byte[k - i - prefixExpected.length - codeTypeLength];
                         System.arraycopy(barcodeCombined, i + prefixExpected.length + codeTypeLength, barcodeCombinedNew, 0, barcodeCombinedNew.length);
                         barcodeCombined = barcodeCombinedNew;
-                        appendToLog("barcodeCombinedNew = " + byteArrayToString(barcodeCombinedNew));
+                        appendToLog("BarStream: barcodeCombinedNew = " + byteArrayToString(barcodeCombinedNew));
+
+                        if (true) {
+                            byte[] prefixExpected1 = {0x5B, 0x29, 0x3E, 0x1E};
+                            prefixFound = false;
+                            byte[] suffixExpected1 = {0x1E, 0x04};
+                            suffixFound = false;
+                            appendToLog("BarStream: barcodeCombined = " + byteArrayToString(barcodeCombined) + ", Expected Prefix = " + byteArrayToString(prefixExpected1) + ", Expected Suffix = " + byteArrayToString(suffixExpected1));
+                            if (barcodeCombined.length > prefixExpected1.length + suffixExpected1.length) {
+                                i = 0;
+                                for (; i <= barcodeCombined.length - prefixExpected1.length - suffixExpected1.length; i++) {
+                                    int j = 0;
+                                    for (; j < prefixExpected1.length; j++) {
+                                        if (barcodeCombined[i + j] != prefixExpected1[j]) break;
+                                    }
+                                    if (j == prefixExpected1.length) {
+                                        prefixFound = true;
+                                        break;
+                                    }
+                                }
+                                k = i + prefixExpected1.length;
+                                for (; k <= barcodeCombined.length - suffixExpected1.length; k++) {
+                                    int j = 0;
+                                    for (; j < suffixExpected1.length; j++) {
+                                        if (barcodeCombined[k + j] != suffixExpected1[j]) break;
+                                    }
+                                    if (j == suffixExpected1.length) {
+                                        suffixFound = true;
+                                        break;
+                                    }
+                                }
+                                appendToLog("BarStream: iPrefix = " + i + ", iSuffix = " + k + ", with prefixFound = " + prefixFound + ", suffixFound = " + suffixFound);
+                                if (prefixFound && suffixFound) {
+                                    barcodeCombinedNew = new byte[k - i - prefixExpected1.length];
+                                    System.arraycopy(barcodeCombined, i + prefixExpected1.length, barcodeCombinedNew, 0, barcodeCombinedNew.length);
+                                    barcodeCombined = barcodeCombinedNew;
+                                    appendToLog("BarStream: barcodeCombinedNew = " + byteArrayToString(barcodeCombinedNew));
+                                }
+                            }
+                        }
                     }
                 } else barcodeCombined = null;
             }

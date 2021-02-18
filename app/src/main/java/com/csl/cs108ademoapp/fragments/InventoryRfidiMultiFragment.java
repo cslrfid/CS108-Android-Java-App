@@ -38,7 +38,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     private String mDid = null;
     int vibrateTimeBackup = 0;
 
-    private CheckBox checkBoxDupElim;
+    private CheckBox checkBoxDupElim, checkBoxFilterFdTag;
     private Spinner spinnerBank1, spinnerBank2;
     private ListView rfidListView;
     private TextView rfidEmptyView;
@@ -151,6 +151,13 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     else readerListAdapter.setSelectDupElim(false);
                 }
             });
+        }
+
+        checkBoxFilterFdTag = (CheckBox) getActivity().findViewById(R.id.accessInventoryFilterFdTag);
+        if (mDid != null) {
+            if (mDid.indexOf("E2827001") == 0) {
+                checkBoxFilterFdTag.setVisibility(View.VISIBLE);
+            }
         }
 
         ArrayAdapter<CharSequence> lockAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.memoryBank_options, R.layout.custom_spinner_layout);
@@ -379,7 +386,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 extra2Bank = 3;
                 extra2Offset = 8;
                 extra2Count = 2;
-            } else if (mDid.matches("E280B12")) {
+            } else if (mDid.indexOf("E280B12") == 0) {
                 extra1Bank = 2;
                 extra1Offset = 0;
                 extra1Count = 2;
@@ -408,7 +415,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 extra2Offset = 0x12;
                 extra2Count = 4;
             }
-            if (mDid.matches("E280B12")) {
+            if (mDid.indexOf("E280B12") == 0) {
                 if (MainActivity.mDid.matches("E280B12B")) {
                     MainActivity.mCs108Library4a.setSelectCriteria(1, true, 4, 0, 5, 1, 0x220, "8321");
                     MainActivity.mCs108Library4a.appendToLog("Hello123: Set Sense at Select !!!");
@@ -469,7 +476,13 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 }
             } else if (mDid.indexOf("E28011") == 0) bNeedSelectedTagByTID = false;
             Log.i(TAG, "HelloK: going to setSelectedTagByTID with mDid = " + mDid + " with extra1Bank = " + extra1Bank + ", extra2Bank = " + extra2Bank + ", bNeedSelectedTagByTID = " + bNeedSelectedTagByTID + ", bMultiBank = " + bMultiBank);
-            if (bNeedSelectedTagByTID) MainActivity.mCs108Library4a.setSelectedTagByTID(mDid, 300);
+            if (bNeedSelectedTagByTID) {
+                if (checkBoxFilterFdTag.isChecked()) MainActivity.mCs108Library4a.setSelectedTagByTID(mDid, -1);
+                else {
+                    MainActivity.mCs108Library4a.setSelectCriteriaDisable(0);
+                    MainActivity.mCs108Library4a.setInvAlgo(MainActivity.mCs108Library4a.getInvAlgo());
+                }
+            }
         } else if (bMultiBankInventory) {
             CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessInventoryBankTitle1);
             if (checkBox.isChecked()) {

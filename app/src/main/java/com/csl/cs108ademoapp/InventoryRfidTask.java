@@ -51,7 +51,6 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     long firstTime;
     long lastTime;
     boolean continousRequest = false;
-    boolean finishingRequest = false; boolean debugEndRequest = false;
     int batteryCountInventory_old;
 
     boolean requestSound = false; boolean requestNewSound = false; boolean requestNewVibrate = false; long timeMillisNewVibrate;
@@ -63,8 +62,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     boolean serverConnectValid = false;
     Handler handler = new Handler(); boolean bValidVibrateNewAll = false; boolean bUseVibrateMode0 = false;
 
-    @Override
-    protected void onPreExecute() {
+    void inventoryHandler_setup() {
         MainActivity.sharedObjects.runningInventoryRfidTask = true;
         total = 0; allTotal = 0; yield = 0;
         if (tagsList != null) {
@@ -110,6 +108,11 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
 
         if (MainActivity.mCs108Library4a.getInventoryVibrate() && bUseVibrateMode0 == false && MainActivity.mCs108Library4a.getVibrateModeSetting() == 1 && MainActivity.mCs108Library4a.getAntennaDwell() == 0) bValidVibrateNewAll = true;
         if (bValidVibrateNewAll) MainActivity.mCs108Library4a.setVibrateOn(2);
+    }
+
+    @Override
+    protected void onPreExecute() {
+        inventoryHandler_setup();
     }
 
     @Override
@@ -174,83 +177,69 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     timeMillis = System.currentTimeMillis();
                 }
             }
-/*                if (System.currentTimeMillis() - timeMillis > 10000) {
-                    if (debugEndRequest)    MainActivity.mCs108Library4a.getMacLastCommandDuration(true);
-                    taskCancelReason = TaskCancelRReason.TIMEOUT; taskCancelling = true;
-                }*/
-/*                if (System.currentTimeMillis() - timeMillisSound > 1000) {
+            if (System.currentTimeMillis() - timeMillis > 10000 && false) { //no tag timeout handling during inventory
+                if (true) taskCancelReason = TaskCancelRReason.TIMEOUT;
+                else {
                     timeMillisSound = System.currentTimeMillis();
                     requestSound = true;
-                }*/
+                }
+            }
             if (taskCancelReason != TaskCancelRReason.NULL) {
                 MainActivity.mCs108Library4a.abortOperation();
                 publishProgress("XX");
-                if(popRequest)  { popStatus = true; publishProgress("P"); }
-                timeMillis = 0; boolean endStatus = true; if (finishingRequest) publishProgress("EEE");
-                while (MainActivity.mCs108Library4a.isBleConnected() && ((popRequest && popStatus) || endStatus) && finishingRequest) {
-                    if (System.currentTimeMillis() - timeMillis > 2000) {
-                        timeMillis = System.currentTimeMillis();
-                        //publishProgress("EEE");
-                    }
-                    rx000pkgData = MainActivity.mCs108Library4a.onRFIDEvent();
-                    if (rx000pkgData != null) {
-                        if (MainActivity.mCs108Library4a.mrfidToWriteSize() == 0) {
-                            MainActivity.mCs108Library4a.abortOperation();
-                        }
-                    } else if (MainActivity.mCs108Library4a.mrfidToWriteSize() == 0) {
-                        endStatus = false;
-                    }
-                }
-                if (taskCancelReason == TaskCancelRReason.TIMEOUT && debugEndRequest) {
-                    if (MainActivity.mCs108Library4a.getMacLastCommandDuration(false) == 0)
-                        taskCancelReason = TaskCancelRReason.RFID_RESET;
-                }
+                if(popRequest) publishProgress("P");
+                timeMillis = 0; boolean endStatus = true;
                 cancel(true);
             }
         }
         return "End of Asynctask()";
     }
 
-    boolean debugged = false;
-    long firstTimeOld = 0; int totalResetCount = 0; int totalOld = 0;
+    long firstTimeOld = 0, timeMillisSound = 0; int totalOld = 0;
     @Override
     protected void onProgressUpdate(String... output) {
         if (output[0] != null) {
-            if (output[0].length() == 1) {
-                String message;
-                switch (taskCancelReason) {
-                    case STOP:
-                        message = "Stop button pressed";
-                        break;
-                    case BUTTON_RELEASE:
-                        message = "Trigger Released";
-                        break;
-                    case TIMEOUT:
-                        message = "Time Out";
-                        break;
-                    default:
-                        message = taskCancelReason.name();
-                        break;
-                }
-                CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
-                customPopupWindow.popupStart(message, false);
-            } else if (output[0].length() == 2) {
+            if (output[0].length() == 1) inventoryHandler_endReason();
+            else if (output[0].length() == 2) {
                 if (output[0].contains("XX")) MainActivity.mCs108Library4a.appendToLogView("CANCELLING. sent abortOperation");
-                else if (output[0].contains("WW")) {
-                    long timePeriod = (System.currentTimeMillis() - startTimeMillis) / 1000;
-                    if (timePeriod > 0) {
-                        if (rfidRunTime != null) rfidRunTime.setText(String.format("Run time: %d sec", timePeriod));
-                        yieldRate = yield4RateCount; yield4RateCount = 0;
-                    }
-                } else if (taskCancelReason == TaskCancelRReason.NULL) {
-                    if (rfidVoltageLevel != null) rfidVoltageLevel.setText(MainActivity.mCs108Library4a.getBatteryDisplay(true));
-                }
-            } else if (output[0].length() == 3) {
-                mytoast = Toast.makeText(MainActivity.mContext, R.string.toast_finishing_tag_data_upload, Toast.LENGTH_LONG);
-                mytoast.show();
+                else if (output[0].contains("WW")) inventoryHandler_runtime();
+                else if (output[0].contains("VV")) inventoryHandler_voltage();
             } else
                 if (DEBUG) MainActivity.mCs108Library4a.appendToLog("InventoryRfidTask.InventoryRfidTask.onProgressUpdate(): " + output[0]);
-        } else {
+        } else inventoryHandler_tag();
+    }
+
+    void inventoryHandler_endReason() {
+        String message;
+        switch (taskCancelReason) {
+            case STOP:
+                message = "Stop button pressed";
+                break;
+            case BUTTON_RELEASE:
+                message = "Trigger Released";
+                break;
+            case TIMEOUT:
+                message = "Time Out";
+                break;
+            default:
+                message = taskCancelReason.name();
+                break;
+        }
+        CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+        customPopupWindow.popupStart(message, false);
+    }
+    void inventoryHandler_runtime() {
+        long timePeriod = (System.currentTimeMillis() - startTimeMillis) / 1000;
+        if (timePeriod > 0) {
+            if (rfidRunTime != null) rfidRunTime.setText(String.format("Run time: %d sec", timePeriod));
+            yieldRate = yield4RateCount; yield4RateCount = 0;
+        }
+    }
+    void inventoryHandler_voltage() {
+        if (rfidVoltageLevel != null) rfidVoltageLevel.setText(MainActivity.mCs108Library4a.getBatteryDisplay(true));
+    }
+    void inventoryHandler_tag() {
+        {
             long currentTime = 0;
             {
                 while (rx000pkgDataArrary.size() != 0) {
@@ -288,7 +277,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     }
                     String strExtra1 = null; if (rx000pkgData.decodedData1 != null) {
                         strExtra1 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedData1);
-                        if (strMdid != null && strExtra1 != null && strExtra2 != null)  {
+                        if (strMdid != null && strExtra1 != null && strExtra2 != null) {
                             decodeMicronData(strExtra1, strExtra2);
                         }
                     }
@@ -319,13 +308,13 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
 
                     int iPc = Integer.parseInt(strPc, 16);
                     String strXpc = null; int iSensorData = ReaderDevice.INVALID_SENSORDATA; if ((iPc & 0x0200) != 0) {
-                        int iXpcw1 = Integer.parseInt(strEpc.substring(0,4), 16);
+                        int iXpcw1 = Integer.parseInt(strEpc.substring(0, 4), 16);
                         if ((iXpcw1 & 0x8000) != 0) {
-                            strXpc = strEpc.substring(0,8);
+                            strXpc = strEpc.substring(0, 8);
                             strEpc = strEpc.substring(8); strAddresss = strEpc;
                             if (strMdid != null) {
                                 if (strMdid.indexOf("E280B12") == 0) {
-                                    int iXpcw2 = Integer.parseInt(strXpc.substring(4,8), 16);
+                                    int iXpcw2 = Integer.parseInt(strXpc.substring(4, 8), 16);
                                     if ((iXpcw1 & 0x8100) != 0 && (iXpcw2 & 0xF000) == 0) {
                                         if ((iXpcw2 & 0x0C00) == 0x0C00) {
                                             //iXpcw2 |= 0x200;
@@ -339,7 +328,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                                 }
                             }
                         } else {
-                            strXpc = strEpc.substring(0,4);
+                            strXpc = strEpc.substring(0, 4);
                             strEpc = strEpc.substring(4); strAddresss = strEpc;
                         }
                     }
@@ -466,7 +455,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             }
                             if (bAdd2End) tagsList.add(readerDevice);
                             else tagsList.add(0, readerDevice);
-                            SharedObjects.TagsIndex tagsIndex = new SharedObjects.TagsIndex(strAddresss, tagsList.size()-1); MainActivity.sharedObjects.tagsIndexList.add(tagsIndex); Collections.sort(MainActivity.sharedObjects.tagsIndexList);
+                            SharedObjects.TagsIndex tagsIndex = new SharedObjects.TagsIndex(strAddresss, tagsList.size() - 1); MainActivity.sharedObjects.tagsIndexList.add(tagsIndex); Collections.sort(MainActivity.sharedObjects.tagsIndexList);
                             if (serverConnectValid && ALLOW_RTSAVE && true) {
                                 try {
 //                                    saveExternalTask = new SaveList2ExternalTask();
@@ -474,7 +463,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                                     String msgOutput = saveExternalTask.createJSON(null, readerDevice).toString(); MainActivity.mCs108Library4a.appendToLog("Json = " + msgOutput);
                                     saveExternalTask.write2Server(msgOutput);
 
- //                                   saveExternalTask.closeServer();
+                                    //                                   saveExternalTask.closeServer();
                                     MainActivity.mCs108Library4a.appendToLog("write2Server is done");
                                 } catch (Exception ex) {
                                     MainActivity.mCs108Library4a.appendToLog("write2Server has Exception");
@@ -504,8 +493,8 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
             } else {
                 String stringTemp = "Unique:" + String.valueOf(yield);
                 if (true) {
-                    float fErrorRate = (float) MainActivity.mCs108Library4a.invalidata / ( (float) MainActivity.mCs108Library4a.validata + (float) MainActivity.mCs108Library4a.invalidata ) * 100;
-                    stringTemp += "\nE" + String.valueOf(MainActivity.mCs108Library4a.invalidata) + "/" + String.valueOf(MainActivity.mCs108Library4a.validata) + "/" + String.valueOf((int)fErrorRate);
+                    float fErrorRate = (float) MainActivity.mCs108Library4a.invalidata / ((float) MainActivity.mCs108Library4a.validata + (float) MainActivity.mCs108Library4a.invalidata) * 100;
+                    stringTemp += "\nE" + String.valueOf(MainActivity.mCs108Library4a.invalidata) + "/" + String.valueOf(MainActivity.mCs108Library4a.validata) + "/" + String.valueOf((int) fErrorRate);
                 } else if (true) {
                     stringTemp += "\nE" + String.valueOf(MainActivity.mCs108Library4a.invalidata) + "," + String.valueOf(MainActivity.mCs108Library4a.invalidUpdata) + "/" + String.valueOf(MainActivity.mCs108Library4a.validata);
                 }
@@ -525,7 +514,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     //}
                 }
             }
-            if (false) MainActivity.mCs108Library4a.appendToLogView("playerN = " + (playerN == null ? "Null" : "Valid") + ", playerO = " + (playerO == null ? "Null" : "Valid") );
+            if (false) MainActivity.mCs108Library4a.appendToLogView("playerN = " + (playerN == null ? "Null" : "Valid") + ", playerO = " + (playerO == null ? "Null" : "Valid"));
             if (playerN != null && playerO != null) {
                 if (false) MainActivity.mCs108Library4a.appendToLogView("requestSound = " + requestSound + ", bStartBeepWaiting = " + bStartBeepWaiting + ", Op=" + playerO.isPlaying() + ", Np=" + playerN.isPlaying());
                 if (requestSound && playerO.isPlaying() == false && playerN.isPlaying() == false) {
@@ -651,7 +640,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         }
     }
 
-    boolean popStatus = false; boolean popRequest = false; Toast mytoast;
+    boolean popRequest = false; Toast mytoast;
     void DeviceConnectTask4InventoryEnding(TaskCancelRReason taskCancelRReason) {
         MainActivity.mCs108Library4a.appendToLog("serverConnectValid = " + serverConnectValid);
         if (serverConnectValid && ALLOW_RTSAVE) {

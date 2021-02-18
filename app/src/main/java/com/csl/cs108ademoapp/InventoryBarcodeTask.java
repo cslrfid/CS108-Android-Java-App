@@ -70,8 +70,9 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
             }
             byte[] onBarcodeEvent = MainActivity.mCs108Library4a.onBarcodeEvent();
             if (onBarcodeEvent != null) {
+                MainActivity.mCs108Library4a.appendToLog("BarStream: onBarcodeEvent= " + MainActivity.mCs108Library4a.byteArrayToString(onBarcodeEvent));
                 String stringBar = null;
-                if (false) stringBar = new String(onBarcodeEvent);
+                if (true) stringBar = new String(onBarcodeEvent);
                 else if (onBarcodeEvent.length != 0) {
                     for (int i = 0; i < onBarcodeEvent.length; i++) {
                         String stringLetter = "";
@@ -87,7 +88,8 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
                         else stringBar += stringLetter;
                     }
                 }
-                if (stringBar != null) { if (stringBar.length() != 0) publishProgress(null, stringBar.trim()); }
+                MainActivity.mCs108Library4a.appendToLog("BarStream: onBarcodeEvent, stringBar= " + stringBar);
+                if (stringBar != null) { if (stringBar.length() != 0) { publishProgress(null, stringBar.trim()); } }
                 timeMillis = System.currentTimeMillis();
             } else if (System.currentTimeMillis() - timeMillis > 300) { if (taskCancelReason != TaskCancelRReason.NULL) cancel(true); }
             if (MainActivity.mCs108Library4a.isBleConnected() == false) taskCancelReason = TaskCancelRReason.DESTORY;
@@ -113,8 +115,11 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
             if (registerBarValue != null) registerBarValue.setText(output[1]);
             boolean match = false;
             if (false || tagsList != null) {
+                MainActivity.mCs108Library4a.appendToLog("BarMatch: Matching bdata = " + output[1]);
                 for (int i = 0; i < tagsList.size(); i++) {
-                    if (output[1].matches(tagsList.get(i).getAddress())) {
+                    String strInList = tagsList.get(i).getAddress();
+                    if (output[1].length() == strInList.length() && output[1].indexOf(strInList) == 0) {
+                        MainActivity.mCs108Library4a.appendToLog("BarMatch: Matched stored bdata" + i + "= " + tagsList.get(i).getAddress());
                         ReaderDevice readerDevice = tagsList.get(i);
                         int count = readerDevice.getCount();
                         count++;
@@ -122,7 +127,7 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
                         tagsList.set(i, readerDevice);
                         match = true;
                         break;
-                    }
+                    } else MainActivity.mCs108Library4a.appendToLog("BarMatch: NOT Matched stored bdata" + i + "= " + tagsList.get(i).getAddress());
                 }
             }
             if (match == false) {
