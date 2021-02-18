@@ -13,13 +13,11 @@
 
         <Spinner
             android:id="@+id/filterPreMaskDataType"
-            android:layout_margin="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
             style="@style/style_default_spinner" />
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
             android:layout_marginTop="5dp"
             android:gravity="left"
             style="@style/style_normal_font"

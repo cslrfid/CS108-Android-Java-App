@@ -274,8 +274,10 @@ public class Cs108Connector extends BleConnector {
                                     validata++;
                                     break;
                                 case (byte) 0x6A:
-                                    if (DEBUG)
-                                        appendToLog("BarData = " + byteArrayToString(cs108ReadData.dataValues));
+                                    if (true) {
+                                        appendToLog("BarStreamIn: " + byteArrayToString(cs108ReadData.dataValues));
+                                        appendToLogView("BIn: " + byteArrayToString(cs108ReadData.dataValues));
+                                    }
                                     cs108ReadData.cs108ConnectedDevices = Cs108ConnectedDevices.BARCODE;
                                     break;
                                 case (byte) 0xD9:
@@ -809,7 +811,10 @@ public class Cs108Connector extends BleConnector {
             }
             System.arraycopy(dataOutRef, 0, dataOut, 0, dataOutRef.length);
             if (arrayTypeSet(dataOut, 9, data.barcodePayloadEvent)) {
-                if (DEBUG) appendToLog(byteArrayToString(dataOut));
+                if (true) {
+                    appendToLog("BarStreamOut: " + byteArrayToString(dataOut));
+                    appendToLogView("BOut: " + byteArrayToString(dataOut));
+                }
                 return writeData(dataOut, (data.waitUplinkResponse ? 500 : 0));
             }
             return false;
@@ -818,17 +823,21 @@ public class Cs108Connector extends BleConnector {
         private boolean isMatchBarcodeToWrite(Cs108ReadData cs108ReadData) {
             boolean match = false;
             if (mBarcodeToWrite.size() != 0) {
+                appendToLog("tempDisconnect: icsModel = " + icsModel + ", mBarcodeToWrite.size = " + mBarcodeToWrite.size());
                 byte[] dataInCompare = new byte[]{(byte) 0x90, 0};
                 if (arrayTypeSet(dataInCompare, 1, mBarcodeToWrite.get(0).barcodePayloadEvent) && (cs108ReadData.dataValues.length == dataInCompare.length + 1)) {
                     if (match = compareArray(cs108ReadData.dataValues, dataInCompare, dataInCompare.length)) {
                         if (DEBUG_BTDATA) appendToLog("found Barcode.read data = " + byteArrayToString(cs108ReadData.dataValues));
+                        appendToLog("tempDisconnect: icsModel = " + icsModel + ", isMatchBarcodeToWrite with cs108ReadData = " + byteArrayToString(cs108ReadData.dataValues));
                         if (cs108ReadData.dataValues[2] != 0) {
                             if (DEBUG) appendToLog("Barcode.reply data is found with error");
                         } else if (icsModel == 108) {
                             if (mBarcodeToWrite.get(0).barcodePayloadEvent == BarcodePayloadEvents.BARCODE_POWER_ON) {
                                 barcodePowerOnTimeOut = 1000;
+                                appendToLog("tempDisconnect: BARCODE_POWER_ON");
                                 onStatus = true;
                             } else if (mBarcodeToWrite.get(0).barcodePayloadEvent == BarcodePayloadEvents.BARCODE_POWER_OFF) {
+                                appendToLog("tempDisconnect: BARCODE_POWER_OFF");
                                 onStatus = false;
                             } else if (mBarcodeToWrite.get(0).barcodePayloadEvent == BarcodePayloadEvents.BARCODE_VIBRATE_ON) {
                                 vibrateStatus = true;
@@ -895,17 +904,17 @@ public class Cs108Connector extends BleConnector {
 
         byte bBarcodeTriggerMode = (byte)0xff;
         private boolean isBarcodeToRead(Cs108ReadData cs108ReadData) {
-            boolean found = false;
+            boolean found = false, DEBUG = false;
 
             if (cs108ReadData.dataValues[0] == (byte) 0x91) {
-                if (DEBUG) appendToLog("dataValues = " + byteArrayToString(cs108ReadData.dataValues));
+                if (true) appendToLog("BarStream: isBarcodeToRead(): dataValues = " + byteArrayToString(cs108ReadData.dataValues));
                 Cs108BarcodeData cs108BarcodeData = new Cs108BarcodeData();
                 switch (cs108ReadData.dataValues[1]) {
                     case 0:
                         cs108BarcodeData.barcodePayloadEvent = BarcodePayloadEvents.BARCODE_DATA_READ;
                         byte[] dataValues = new byte[cs108ReadData.dataValues.length - 2];
                         System.arraycopy(cs108ReadData.dataValues, 2, dataValues, 0, dataValues.length);
-                        if (DEBUG) appendToLog("matched Barcode.read data is found with dataValues = " + byteArrayToString(dataValues) + ", mBarcodeToWrite.size() = " + mBarcodeToWrite.size());
+                        if (true) appendToLog("BarStream: matched Barcode.read data is found with dataValues = " + byteArrayToString(dataValues) + ", mBarcodeToWrite.size() = " + mBarcodeToWrite.size());
 
                         BarcodeCommendTypes commandType = null;
                         if (mBarcodeToWrite.size() > 0) {
@@ -914,69 +923,83 @@ public class Cs108Connector extends BleConnector {
                                 if (mBarcodeToWrite.get(0).dataValues[0] == 0x1b) {
                                     commandType = BarcodeCommendTypes.COMMAND_COMMON;
                                     count = 1;
-                                    if (DEBUG) appendToLog("Common response with  count = " + count);
+                                    if (true) appendToLog("BarStream: 0x1b, Common response with  count = " + count);
                                 } else if (mBarcodeToWrite.get(0).dataValues[0] == 0x7E) {
-                                    if (DEBUG) appendToLog("Barcode response with 0x7E mBarcodeToWrite.get(0).dataValues[0] and response data = " + byteArrayToString(dataValues));
-                                    matched = false;
+                                    if (true) appendToLog("BarStream: 0x7E, Barcode response with 0x7E mBarcodeToWrite.get(0).dataValues[0] and response data = " + byteArrayToString(dataValues));
+                                    matched = true;
                                     commandType = BarcodeCommendTypes.COMMAND_QUERY;
-                                    if (dataValues.length >= 5 + 1) {
-                                        if (dataValues[0] == 2 && dataValues[1] == 0 && dataValues[4] == 0x34) {
-                                            int length = dataValues[2] * 256 + dataValues[3];
-                                            if (dataValues.length >= length + 5) {
+                                    int index = 0;
+                                    while (dataValues.length - index >= 5 + 1) {
+                                        if (dataValues[index+0] == 2 && dataValues[index+1] == 0 && dataValues[index+4] == 0x34) {
+                                            int length = dataValues[index+2] * 256 + dataValues[index+3];
+                                            if (dataValues.length - index >= length + 4 + 1) {
+                                                matched = true;
                                                 if (mBarcodeToWrite.get(0).dataValues[5] == 0x37 && length >= 5) {
                                                     matched = true;
-                                                    int prefixLength = dataValues[6];
+                                                    int prefixLength = dataValues[index+6];
                                                     int suffixLength = 0;
-                                                    if (dataValues.length >= 5 + 5 + prefixLength) {
-                                                        suffixLength = dataValues[6 + prefixLength + 2];
+                                                    if (dataValues.length - index >= 5 + 2 + prefixLength + 2 + 1) {
+                                                        suffixLength = dataValues[index + 6 + prefixLength + 2];
                                                     }
-                                                    if (dataValues.length >= 5 + 5 + prefixLength + suffixLength) {
+                                                    if (dataValues.length - index >= 5 + 2 + prefixLength + 2 + suffixLength + 1) {
                                                         bytesBarcodePrefix = null;
                                                         bytesBarcodeSuffix = null;
-                                                        if (dataValues[5] == 1) {
+                                                        if (dataValues[index+5] == 1) {
                                                             bytesBarcodePrefix = new byte[prefixLength];
-                                                            System.arraycopy(dataValues, 7, bytesBarcodePrefix, 0, bytesBarcodePrefix.length);
+                                                            System.arraycopy(dataValues, index + 7, bytesBarcodePrefix, 0, bytesBarcodePrefix.length);
                                                         }
-                                                        if (dataValues[6 + prefixLength + 1] == 1) {
+                                                        if (dataValues[index + 6 + prefixLength + 1] == 1) {
                                                             bytesBarcodeSuffix = new byte[suffixLength];
-                                                            System.arraycopy(dataValues, 7 + prefixLength + 2, bytesBarcodeSuffix, 0, bytesBarcodeSuffix.length);
+                                                            System.arraycopy(dataValues, index + 7 + prefixLength + 2, bytesBarcodeSuffix, 0, bytesBarcodeSuffix.length);
                                                         }
-                                                        if (DEBUG) appendToLog("BarcodePrefix = " + byteArrayToString(bytesBarcodePrefix) + ", BarcodeSuffix = " + byteArrayToString(bytesBarcodeSuffix));
+                                                        if (true) appendToLog("BarStream: BarcodePrefix = " + byteArrayToString(bytesBarcodePrefix) + ", BarcodeSuffix = " + byteArrayToString(bytesBarcodeSuffix));
                                                     }
-                                                    if (DEBUG) appendToLog("prefixLength = " + prefixLength + ", suffixLength = " + suffixLength);
+                                                    if (true) appendToLog("BarStream: prefixLength = " + prefixLength + ", suffixLength = " + suffixLength);
                                                 } else if (mBarcodeToWrite.get(0).dataValues[5] == 0x48 && length >= 5) {
-                                                    if (dataValues[5] == mBarcodeToWrite.get(0).dataValues[6] && dataValues[6] == mBarcodeToWrite.get(0).dataValues[7]) {
-                                                        matched = true;
+                                                    if (dataValues[index+5] == mBarcodeToWrite.get(0).dataValues[6] && dataValues[index+6] == mBarcodeToWrite.get(0).dataValues[7]) {
+                                                        matched = true; //for ESN, S/N or Date
                                                         byte[] byteSN = new byte[length - 3];
-                                                        System.arraycopy(dataValues, 7, byteSN, 0, byteSN.length);
+                                                        System.arraycopy(dataValues, index + 7, byteSN, 0, byteSN.length);
                                                         try {
                                                             serialNumber = new String(byteSN, "UTF-8");
                                                             int snLength = Integer.parseInt(serialNumber.substring(0, 2));
-                                                            if (DEBUG) appendToLog("serialNumber = " + serialNumber + ", snLength = " + snLength + ", serialNumber.length = " + serialNumber.length());
+                                                            if (true)
+                                                                appendToLog("BarStream: serialNumber = " + serialNumber + ", snLength = " + snLength + ", serialNumber.length = " + serialNumber.length());
                                                             if (snLength + 2 == serialNumber.length()) {
                                                                 serialNumber = serialNumber.substring(2);
                                                             } else serialNumber = null;
                                                         } catch (Exception e) {
                                                             serialNumber = null;
                                                         }
-                                                        if (DEBUG) appendToLog("serialNumber = " + serialNumber);
+                                                        if (true) appendToLog("BarStream: serialNumber = " + serialNumber);
                                                     }
                                                 } else if (mBarcodeToWrite.get(0).dataValues[5] == 0x44 && length >= 3) {
-                                                    if (dataValues[5] == mBarcodeToWrite.get(0).dataValues[6] && dataValues[6] == mBarcodeToWrite.get(0).dataValues[7]) {
+                                                    if (DEBUG) appendToLog("BarStream: dataValue = " + byteArrayToString(dataValues) + ", writeDataValue = " + byteArrayToString(mBarcodeToWrite.get(0).dataValues));
+                                                    if (dataValues[index+5] == mBarcodeToWrite.get(0).dataValues[6] && dataValues[index+6] == mBarcodeToWrite.get(0).dataValues[7]) {
                                                         matched = true;
-                                                        bBarcodeTriggerMode = dataValues[7];
-                                                        if (dataValues[7] == 0x30) { if (DEBUG) appendToLog("Reading mode is TRIGGER"); }
-                                                        else if (DEBUG) appendToLog("Reading mode = " + String.valueOf(dataValues[7]));
+                                                        if (mBarcodeToWrite.get(0).dataValues[6] == 0x30 && mBarcodeToWrite.get(0).dataValues[7] == 0x30  && mBarcodeToWrite.get(0).dataValues[8] == 0x30) {
+                                                            bBarcodeTriggerMode = dataValues[7];
+                                                            if (dataValues[index + 7] == 0x30) {
+                                                                appendToLog("BarStream: Reading mode is TRIGGER");
+                                                            } else if (DEBUG)
+                                                                appendToLog("BarStream: Reading mode = " + String.valueOf(dataValues[7]));
+                                                            appendToLogView("BIn: Correct readingMode query response !!!");
+                                                        }
+                                                    } else if (DEBUG) {
+                                                        matched = true;   //for debugging to skip any wrong response
+                                                        appendToLog("BarStream: incorrect response !!!");
+                                                        appendToLogView("BIn: incorrect readingMode query response !!!");
                                                     }
                                                    if (DEBUG) appendToLog("matched = " + matched);
                                                 }
-                                            }
-                                        }
+                                                index += (length + 5);
+                                            } else break;
+                                        } else index++;
                                     }
                                     if (matched) { if (DEBUG) appendToLog("Matched Query response"); }
                                     else { if (DEBUG) appendToLog("Mis-matched Query response"); }
                                 } else {
-                                    if (DEBUG) appendToLog("Barcode response with mBarcodeToWrite.get(0).dataValues[0] =  Others");
+                                    if (true) appendToLog("BarStream: Barcode response with mBarcodeToWrite.get(0).dataValues[0] =  Others");
                                     String strData = null;
                                     try {
                                         strData = new String(mBarcodeToWrite.get(0).dataValues, "UTF-8");
@@ -995,24 +1018,26 @@ public class Cs108Connector extends BleConnector {
                                     if (DEBUG) appendToLog("Setting strData = " + strData + ", count = " + count);
                                 }
                                 if (count != 0) {
+                                    if (true) appendToLog("BarStream: count = " + count + ", data = " + byteArrayToString(dataValues));
                                     byte[] dataValuesNew = new byte[dataValues.length - count]; matched = false;
                                     int iCount = 0; int iNewIndex = 0;
                                     for (int k = 0; k < dataValues.length; k++) {
                                         boolean match06 = false;
                                         if (matched == false) {
-                                            if (dataValues[k] == 0x06 || dataValues[k] == 0x15) { match06 = true; if (++iCount == count) matched = true; if (DEBUG) appendToLog("WRONG PREFIX: matched with k = " + k); }
+                                            if (dataValues[k] == 0x06 || dataValues[k] == 0x15) { match06 = true; if (++iCount == count) matched = true; if (DEBUG) appendToLog("BarStream: WRONG PREFIX: matched with k = " + k); }
                                         }
                                         if (match06 == false && iNewIndex < dataValuesNew.length) {
                                             dataValuesNew[iNewIndex++] = dataValues[k]; // java.lang.ArrayIndexOutOfBoundsException: length=0; index=0
                                         }
                                     }
+                                    if (true) appendToLog("BarStream: matched = " + matched + ", new data = " + byteArrayToString(dataValuesNew));
                                     if (DEBUG) appendToLog("WRONG PREFIX: matched " + matched + ", iNewIndex = " + iNewIndex + ", dataValuesNew = " + byteArrayToString(dataValuesNew));
                                     if (matched == false) cs108BarcodeData.dataValues = dataValues;
                                     else if (iNewIndex != 0) cs108BarcodeData.dataValues = dataValuesNew;
                                     else cs108BarcodeData.dataValues = null;
                                     if (cs108BarcodeData.dataValues != null) {
                                         mBarcodeDevice.mBarcodeToRead.add(cs108BarcodeData);
-                                        if (DEBUG) appendToLog("mBarcodeToRead is added with mBarcodeToWrite.size() = " + mBarcodeToWrite.size() + ", dataValues = " + byteArrayToString(dataValues));
+                                        if (true) appendToLog("BarStream: mBarcodeToRead is added with mBarcodeToWrite.size() = " + mBarcodeToWrite.size() + ", dataValues = " + byteArrayToString(dataValues));
                                     }
                                 }
                                 if (matched) {
@@ -1020,7 +1045,7 @@ public class Cs108Connector extends BleConnector {
                                     mBarcodeToWrite.remove(0);
                                     sendDataToWriteSent = 0;
                                     mDataToWriteRemoved = true;
-                                    if (DEBUG) appendToLog("matched response command");
+                                    if (true) appendToLog("BarStream: matched response command");
                                 }
                                 break;
                             }
@@ -1033,11 +1058,11 @@ public class Cs108Connector extends BleConnector {
                         }
                         cs108BarcodeData.dataValues = dataValues;
                         mBarcodeDevice.mBarcodeToRead.add(cs108BarcodeData);
-                        if (DEBUG) appendToLog("mBarcodeToRead is added with dataValues = " + byteArrayToString(dataValues));
+                        if (true) appendToLog("BarStream: mBarcodeToRead is added with dataValues = " + byteArrayToString(dataValues));
                         found = true;
                         break;
                     case 1:
-                        if (DEBUG) appendToLog("matched Barcode.good data is found");
+                        if (true) appendToLog("BarStream: matched Barcode.good data is found");
                         cs108BarcodeData.barcodePayloadEvent = BarcodePayloadEvents.BARCODE_GOOD_READ;
                         cs108BarcodeData.dataValues = null;
                         mBarcodeDevice.mBarcodeToRead.add(cs108BarcodeData);
@@ -2290,9 +2315,6 @@ public class Cs108Connector extends BleConnector {
             if (invSelectIndex < INVSELECT_MIN || invSelectIndex > INVSELECT_MAX) invSelectIndex = mDefault.invSelectIndex;
             return invSelectData[invSelectIndex].getSelectEnable();
         }
-        boolean setSelectEnable(int enable) {
-            return invSelectData[invSelectIndex].setSelectEnable(enable);
-        }
         boolean setSelectEnable(int enable, int selectTarget, int selectAction, int selectDelay) {
             if (invSelectIndex < INVSELECT_MIN || invSelectIndex > INVSELECT_MAX) invSelectIndex = mDefault.invSelectIndex;
             return invSelectData[invSelectIndex].setRx000HostReg_HST_TAGMSK_DESC_CFG(enable, selectTarget, selectAction, selectDelay);
@@ -3044,9 +3066,9 @@ public class Cs108Connector extends BleConnector {
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 2, 0x0A, 0, 0, 0, 0};
             if (accessBank < ACCBANK_MIN || accessBank > ACCBANK_MAX)
                 accessBank = mDefault.accessBank;
-            if (this.accessBank == accessBank && sameCheck) return true;
+            if (this.accessBank == accessBank && this.accessBank2 == 0 && sameCheck) return true;
             msgBuffer[4] = (byte) (accessBank & 0x03);
-            this.accessBank = accessBank;
+            this.accessBank = accessBank; this.accessBank2 = 0;
             return mRfidDevice.mRx000Device.sendHostRegRequest(HostRegRequests.HST_TAGACC_BANK, true, msgBuffer);
         }
         boolean setAccessBank(int accessBank, int accessBank2) {
@@ -3077,10 +3099,12 @@ public class Cs108Connector extends BleConnector {
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 3, 0x0A, 0, 0, 0, 0};
             if (accessOffset < ACCOFFSET_MIN || accessOffset > ACCOFFSET_MAX)
                 accessOffset = mDefault.accessOffset;
-            if (this.accessOffset == accessOffset && sameCheck) return true;
+            if (this.accessOffset == accessOffset && this.accessOffset2 == 0 && sameCheck) return true;
             msgBuffer[4] = (byte) (accessOffset & 0xFF);
             msgBuffer[5] = (byte) ((accessOffset >> 8) & 0xFF);
-            this.accessOffset = accessOffset;
+			msgBuffer[6] = (byte) ((accessOffset >> 16) & 0xFF);
+			msgBuffer[7] = (byte) ((accessOffset >> 24) & 0xFF);
+            this.accessOffset = accessOffset; this.accessOffset2 = 0;
             return mRfidDevice.mRx000Device.sendHostRegRequest(HostRegRequests.HST_TAGACC_PTR, true, msgBuffer);
         }
         boolean setAccessOffset(int accessOffset, int accessOffset2) {
@@ -3112,9 +3136,9 @@ public class Cs108Connector extends BleConnector {
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 4, 0x0A, 0, 0, 0, 0};
             if (accessCount < ACCCOUNT_MIN || accessCount > ACCCOUNT_MAX)
                 accessCount = mDefault.accessCount;
-            if (this.accessCount == accessCount && sameCheck) return true;
+            if (this.accessCount == accessCount && this.accessCount2 == 0 && sameCheck) return true;
             msgBuffer[4] = (byte) (accessCount & 0xFF);
-            this.accessCount = accessCount;
+            this.accessCount = accessCount; this.accessCount2 = 0;
             return mRfidDevice.mRx000Device.sendHostRegRequest(HostRegRequests.HST_TAGACC_CNT, true, msgBuffer);
         }
         boolean setAccessCount(int accessCount, int accessCount2) {
@@ -3362,10 +3386,9 @@ public class Cs108Connector extends BleConnector {
         }
         boolean setFreqChannelSelect(int freqChannelSelect) {
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 1, 0x0C, 0, 0, 0, 0};
-            appendToLog("Frequency0: freqChannelSelect = " + freqChannelSelect + ", this.freqChannelSelect = " + this.freqChannelSelect);
             if (freqChannelSelect < FREQCHANSEL_MIN || freqChannelSelect > FREQCHANSEL_MAX)   freqChannelSelect = mDefault.freqChannelSelect;
             //if (this.freqChannelSelect == freqChannelSelect && sameCheck)  return true;
-            appendToLog("FrequencyA: freqChannelSelect = " + freqChannelSelect);
+            appendToLog("freqChannelSelect = " + freqChannelSelect);
             msgBuffer[4] = (byte) (freqChannelSelect);
             this.freqChannelSelect = freqChannelSelect;
             freqChannelSelect = FREQCHANCONFIG_INVALID; freqPllMultiplier = FREQPLLMULTIPLIER_INVALID;
@@ -4867,7 +4890,7 @@ public class Cs108Connector extends BleConnector {
                                                 break;
                                             case 0x0c01:
                                                 mRx000Setting.freqChannelSelect = dataIn[startIndex + 4];
-                                                if (true) appendToLog("setFreqChannelSelect: found frequency channel select: " + byteArrayToString(dataInPayload) + ", channelSelect=" + mRx000Setting.freqChannelSelect);
+                                                if (true) appendToLog("setFreqChannelSelect: found frequency channel select: " + byteArrayToString(dataInPayload) + ", freqChannelSelect=" + mRx000Setting.freqChannelSelect);
                                                 break;
                                             case 0x0c02:
                                                 mRx000Setting.freqChannelConfig = dataIn[startIndex + 4] & 0x01;
@@ -5644,38 +5667,34 @@ public class Cs108Connector extends BleConnector {
         }
 
         ArrayList<byte[]> macAccessHistory = new ArrayList<>();
+        boolean bifMacAccessHistoryData(byte[] msgBuffer) {
+            if (sameCheck == false) return false;
+            if (msgBuffer.length != 8) return false;
+            if (msgBuffer[0] != (byte)0x70 || msgBuffer[1] != 1) return false;
+            if (msgBuffer[2] == 0 && msgBuffer[3] == (byte)0xF0) return false;
+            return true;
+        }
         int findMacAccessHistory(byte[] msgBuffer) {
-            if (sameCheck == false) return -1;
-            if (msgBuffer.length != 8) return -1;
-            if (msgBuffer[0] != (byte)0x70 || msgBuffer[1] != 1) return -1;
-            if (msgBuffer[2] == 0 && msgBuffer[3] == (byte)0xF0) return -1;
-
             int i = -1;
-            appendToLog("msgbuffer=" + byteArrayToString(msgBuffer));
             for (i = 0; i < macAccessHistory.size(); i++) {
 //                appendToLog("macAccessHistory(" + i + ")=" + byteArrayToString(macAccessHistory.get(i)));
                 if (Arrays.equals(macAccessHistory.get(i), msgBuffer)) break;
             }
             if (i == macAccessHistory.size()) i = -1;
-            appendToLog("returnValue=" + i);
+            if (i >= 0) appendToLog("macAccessHistory: returnValue = " + i + ", msgBuffer=" + byteArrayToString(msgBuffer));
             return i;
         }
         void addMacAccessHistory(byte[] msgBuffer) {
-            if (sameCheck == false) return;
-            if (msgBuffer.length != 8) return;
-            if (msgBuffer[0] != (byte)0x70 || msgBuffer[1] != 1) return;
-            if (msgBuffer[2] == 0 && msgBuffer[3] == (byte)0xF0) return;
-
             byte[] msgBuffer4 = Arrays.copyOf(msgBuffer, 4);
             for (int i = 0; i < macAccessHistory.size(); i++) {
                 byte[] macAccessHistory4 = Arrays.copyOf(macAccessHistory.get(i), 4);
                 if (Arrays.equals(msgBuffer4, macAccessHistory4)) {
-                    appendToLog("deleted old record=" + byteArrayToString(macAccessHistory4));
+                    appendToLog("macAccessHistory: deleted old record=" + byteArrayToString(macAccessHistory4));
                     macAccessHistory.remove(i);
                     break;
                 }
             }
-            appendToLog("added msgbuffer=" + byteArrayToString(msgBuffer));
+            appendToLog("macAccessHistory: added msgbuffer=" + byteArrayToString(msgBuffer));
             macAccessHistory.add(msgBuffer);
         }
 
@@ -5684,9 +5703,10 @@ public class Cs108Connector extends BleConnector {
             boolean validRequest = false;
 
             if (isBleConnected() == false) return false;
-            if (findMacAccessHistory(msgBuffer) >= 0) return true;
+            if (bifMacAccessHistoryData(msgBuffer)) {
+                if (findMacAccessHistory(msgBuffer) >= 0) return true;
+            }
             addMacAccessHistory(msgBuffer);
-
             switch (hostRegRequests) {
                 case MAC_OPERATION:
 //                case MAC_VER:

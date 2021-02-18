@@ -134,6 +134,14 @@
         android:gravity="center|bottom"
         android:orientation="vertical" >
 
+        <CheckBox
+            android:id="@+id/accessInventoryFilterFdTag"
+            android:layout_width="wrap_content"
+            style="@style/style_normal_font"
+            android:checked="true"
+            android:visibility="gone"
+            android:text="filter FM13DT160 only"/>
+
         <ListView
             android:id="@+id/inventoryRfidList1"
             android:layout_width="match_parent"

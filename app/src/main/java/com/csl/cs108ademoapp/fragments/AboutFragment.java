@@ -14,10 +14,6 @@ import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 
 public class AboutFragment extends CommonFragment {
-    TextView tv_radioVersion;
-    TextView tv_moduleVersion;
-    TextView tv_periodicReport;
-
     Handler mHandler = new Handler();
     long timeMillis = 0;
 

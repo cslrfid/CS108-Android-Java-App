@@ -396,9 +396,9 @@ public class SettingOperateFragment extends CommonFragment {
                         else spinnerRegulatoryRegion.setEnabled(true);
 
                         ArrayAdapter<CharSequence> targetAdapter;
-                        if (MainActivity.mCs108Library4a.getChannelHoppingDefault())
+                        //if (MainActivity.mCs108Library4a.getChannelHoppingDefault())
                             targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.frequencyOrder_options, R.layout.custom_spinner_layout);
-                        else targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.frequencyAgile_options, R.layout.custom_spinner_layout);
+                        //else targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.frequencyAgile_options, R.layout.custom_spinner_layout);
                         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinnerFrequencyOrder.setAdapter(targetAdapter);
                         spinnerFrequencyOrder.setSelection(MainActivity.mCs108Library4a.getChannelHoppingStatus() ? 0 : 1);
