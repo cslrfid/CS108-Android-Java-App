@@ -262,17 +262,17 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     int extraLength = 0;
                     if (extra1Bank != -1 && rx000pkgData.decodedData1 != null) extraLength += rx000pkgData.decodedData1.length;
                     if (extra2Bank != -1 && rx000pkgData.decodedData2 != null) extraLength += rx000pkgData.decodedData2.length;
-                    if (extraLength != 0) {
+                    if (extraLength != 0 && MainActivity.mCs108Library4a.getcsModel() != 710) {
                         byte[] decodedEpcNew = new byte[rx000pkgData.decodedEpc.length - extraLength];
                         System.arraycopy(rx000pkgData.decodedEpc, 0, decodedEpcNew, 0, decodedEpcNew.length);
                         rx000pkgData.decodedEpc = decodedEpcNew;
                     }
                     String strEpc = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedEpc);
-                    MainActivity.mCs108Library4a.appendToLog("HelloC: decodePc = " + strPc + ", decodedEpc = " + strEpc + ", iFlags = " + String.format("%2X", iFlag));
+                    if (false) MainActivity.mCs108Library4a.appendToLog("HelloC: decodePc = " + strPc + ", decodedEpc = " + strEpc + ", iFlags = " + String.format("%2X", iFlag));
                     portstatus = INVALID_CODEVALUE; backport1 = INVALID_CODEVALUE; backport2 = INVALID_CODEVALUE; codeSensor = INVALID_CODEVALUE; codeRssi = INVALID_CODEVALUE; codeTempC = INVALID_CODEVALUE; brand = null;
                     String strExtra2 = null; if (rx000pkgData.decodedData2 != null) strExtra2 = MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedData2);
                     if (strExtra2 != null && strMdid != null) {
-                        MainActivity.mCs108Library4a.appendToLog("HelloK: strExtra2 = " + strExtra2 + ", strMdid = " + strMdid);
+                        if (false) MainActivity.mCs108Library4a.appendToLog("HelloK: strExtra2 = " + strExtra2 + ", strMdid = " + strMdid);
                         if (strMdid.contains("E200B0")) portstatus = Integer.parseInt(strExtra2.substring(3, 4), 16);
                     }
                     String strExtra1 = null; if (rx000pkgData.decodedData1 != null) {
@@ -499,13 +499,21 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     stringTemp += "\nE" + String.valueOf(MainActivity.mCs108Library4a.invalidata) + "," + String.valueOf(MainActivity.mCs108Library4a.invalidUpdata) + "/" + String.valueOf(MainActivity.mCs108Library4a.validata);
                 }
                 if (rfidYieldView != null) rfidYieldView.setText(stringTemp);
-                if (total != 0) {
+                if (total != 0 && currentTime - firstTimeOld > 500) {
                     if (firstTimeOld == 0) firstTimeOld = firstTime;
                     if (totalOld == 0) totalOld = total;
                     String strRate = "Total:" + String.valueOf(allTotal) + "\n";
-                    if (lastTime == 0) {
-                        strRate += "Rate:" + String.valueOf(yieldRate) + "/" + String.valueOf(MainActivity.mCs108Library4a.getStreamInRate() / 17);
-                    } else if (currentTime > firstTimeOld) strRate += "Rate:" + String.valueOf(yieldRate) + "/" + String.valueOf(totalOld * 1000 / (currentTime - firstTimeOld));
+                    long tagRate = MainActivity.mCs108Library4a.getTagRate();
+                    if (tagRate >= 0) {
+                        strRate += "raTe";
+                    } else if (lastTime == 0) {
+                        tagRate = MainActivity.mCs108Library4a.getStreamInRate() / 17;
+                        strRate += "rAte";
+                    } else if (currentTime > firstTimeOld) {
+                        tagRate = totalOld * 1000 / (currentTime - firstTimeOld);
+                        strRate += "Rate";
+                    }
+                    strRate += ":" + String.valueOf(yieldRate) + "/" + String.valueOf(tagRate);
                     if (rfidRateView != null) rfidRateView.setText(strRate);
                     //if (lastTime - firstTime > 1000) {
                     firstTimeOld = currentTime;

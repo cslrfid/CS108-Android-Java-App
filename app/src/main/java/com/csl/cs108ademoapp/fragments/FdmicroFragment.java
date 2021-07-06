@@ -51,7 +51,7 @@ public class FdmicroFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("C");
+        actionBar.setTitle(R.string.title_activity_fdMicro);
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
         for (String tab_name : tabs) {

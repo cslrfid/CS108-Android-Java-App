@@ -66,11 +66,13 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         messageStr = createJSON(tagsList, null).toString();
         resultDisplay = save2File(messageStr, true);
         customPopupWindow = new CustomPopupWindow(mContext);
+        mCs108Library4a.appendToLog("SaveList2ExternalTask: resultDisplay = " + resultDisplay);
         if (resultDisplay == null) resultDisplay = "";
         else {
             resultDisplay += "\n";
             savedFile = true;
             customPopupWindow.popupStart(resultDisplay + "Connecting server. Please wait.", true);
+            mCs108Library4a.appendToLog("SaveList2ExternalTask: popupStart is done");
         }
     }
 
@@ -123,8 +125,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
     protected void onCancelled() { }
     protected void onPostExecute(String output) {
         if (savedFile == false) resultDisplay += "\n" + save2File(messageStr, false);
-        else customPopupWindow.popupWindow.dismiss();
-        customPopupWindow.popupStart(resultDisplay, false);
+        customPopupWindow.popupWindow.dismiss(); customPopupWindow.popupStart(resultDisplay, false);
     }
 
     public String createStrEpcList() {
@@ -219,7 +220,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         return object;
     }
 
-    String save2File(String messageStr, boolean requestPermission) {
+    public String save2File(String messageStr, boolean requestPermission) {
         String resultDisplay = "";
         if (MainActivity.mCs108Library4a.getSaveFileEnable() == false) return "No saving file as it is disabled";
         boolean writeExtPermission = true;
@@ -254,6 +255,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
                         resultDisplay = "Success in saving data to Download/cs108Java/" + fileName;
                         errorDisplay = null;
                     } catch (Exception ex) {
+                        errorDisplay += ex.getMessage();
                     }
                 }
             }

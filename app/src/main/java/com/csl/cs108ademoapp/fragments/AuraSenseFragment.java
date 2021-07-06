@@ -54,7 +54,7 @@ public class AuraSenseFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("au");
+        actionBar.setTitle(R.string.title_activity_auraSense);
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 

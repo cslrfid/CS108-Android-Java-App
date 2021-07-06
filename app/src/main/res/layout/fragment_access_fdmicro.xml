@@ -291,6 +291,23 @@
             layout="@layout/custom_edittext" />
     </TableRow>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Logging Program:" />
+            </TableRow>
+
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -351,33 +368,45 @@
                     android:text="20"/>
             </TableRow>
 
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="10dp">
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp">
 
-        <Button
-            android:id="@+id/accessFDSetLogging"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="Start Logging" />
+                <Button
+                    android:id="@+id/accessFDSetLogging"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Start Logging" />
 
-        <TextView
-            android:id="@+id/accessFDloggingValue"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            layout="@layout/custom_edittext" />
+                <TextView
+                    android:id="@+id/accessFDloggingValue"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
 
-        <Button
-            android:id="@+id/accessFDCheckLogging"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            style="@style/style_normal_font"
-            android:text="Check Logging"
-            android:visibility="gone" />
-    </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp">
+
+                <Button
+                    android:id="@+id/accessFDCheckLogging"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Check Logging" />
+
+                <Button
+                    android:id="@+id/accessFDStopLogging"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Stop Logging" />
+            </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
@@ -397,6 +426,19 @@
                     android:layout_weight="1"
                     android:textAlignment="center"
                     layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp">
+
+                <Button
+                    android:id="@+id/accessFDSaveLogging"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Save Logging result" />
             </TableRow>
         </LinearLayout>
     </ScrollView>

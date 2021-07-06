@@ -51,7 +51,7 @@ public class Ucode8Fragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("u8"); //"UCODE 8")
+        actionBar.setTitle(R.string.title_activity_ucode8);
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 

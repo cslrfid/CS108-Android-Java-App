@@ -1,7 +1,5 @@
 package com.csl.cs108library4a;
 
-import android.bluetooth.BluetoothDevice;
-
 public class ReaderDevice implements Comparable<ReaderDevice>  {
     private String name;
     private String address;
@@ -11,6 +9,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     String strPc, strXpc, strCrc16, strMdid, strExtra1, strExtra2;
     private int count;
     private double rssi;
+    private int serviceUUID2p1;
     private int phase, channel, port;
     public final int INVALID_STATUS = -1;
     private int status = INVALID_STATUS;
@@ -62,6 +61,16 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.codeTempC = codeTempC;
         this.brand = brand;
         this.sensorData = sensorData;
+    }
+
+    public ReaderDevice(String name, String address, boolean selected, String details, int count, double rssi, int serviceUUID2p1) {
+        this.name = name;
+        this.address = address;
+        this.selected = selected;
+        this.details = details;
+        this.count = count;
+        this.rssi = rssi;
+        this.serviceUUID2p1 = serviceUUID2p1;
     }
 
     public ReaderDevice(String name, String address, boolean selected, String details, int count, double rssi) {
@@ -200,6 +209,9 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     public void setRssi(double rssi) {
         this.rssi = rssi;
     }
+
+    public int getServiceUUID2p1() { return serviceUUID2p1; }
+    public void setServiceUUID2p1(int serviceUUID2p1) { this.serviceUUID2p1 = serviceUUID2p1; }
 
     public int getPhase() { return phase; }
     public void setPhase(int phase) { this.phase = phase; }

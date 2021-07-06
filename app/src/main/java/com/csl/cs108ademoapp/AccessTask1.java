@@ -2,7 +2,6 @@ package com.csl.cs108ademoapp;
 
 import android.os.AsyncTask;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108library4a.Cs108Connector;

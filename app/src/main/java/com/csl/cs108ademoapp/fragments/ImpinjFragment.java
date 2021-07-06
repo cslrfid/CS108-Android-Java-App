@@ -1,8 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
-import androidx.lifecycle.Lifecycle;
 import android.os.Bundle;
-import androidx.annotation.Keep;
+
 import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
@@ -54,7 +53,7 @@ public class ImpinjFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("Im"); //"UCODE 8")
+        actionBar.setTitle(R.string.title_activity_impinj);
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 

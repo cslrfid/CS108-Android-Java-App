@@ -1,7 +1,6 @@
 package com.csl.cs108ademoapp;
 
 import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;

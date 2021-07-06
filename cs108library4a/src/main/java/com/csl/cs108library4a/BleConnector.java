@@ -17,9 +17,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.media.MediaScannerConnection;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
 import androidx.core.app.ActivityCompat;
@@ -32,58 +30,51 @@ import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
+//import com.google.android.things.bluetooth.BluetoothConfigManager;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
+import static android.bluetooth.BluetoothDevice.BOND_NONE;
+import static android.bluetooth.BluetoothDevice.PHY_LE_2M;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
 import static androidx.core.app.ActivityCompat.requestPermissions;
 
 class BleConnector extends BluetoothGattCallback {
-    final boolean appendToLogDisable = false;
-    final boolean DEBUG = true; boolean DEBUG_BTDATA = false; boolean DEBUG_BTDATA1 = false; boolean DEBUG_BTDATA0 = true;
-    final boolean DEBUGlowLevel = true;
-
-    private Context mContext;
-    private Activity activity;
-    private TextView mLogView;
+    final boolean DEBUG = true; boolean DEBUG_BTDATA = true; boolean DEBUG_BTDATA0 = true;
 
     private Handler mHandler = new Handler();
-    private ReaderDevice mBluetoothDevice;
 
+    private ReaderDevice mBluetoothDevice;
     ReaderDevice getmBluetoothDevice() {
         return mBluetoothDevice;
     }
 
     private BluetoothAdapter mBluetoothAdapter;
-
     private BluetoothGatt mBluetoothGatt;
     private BluetoothLeScanner mleScanner;
 
-    private int mBluetoothProfile; boolean isBleConnected() { return mBluetoothProfile == BluetoothProfile.STATE_CONNECTED && mReaderStreamOutCharacteristic != null; }
+    private int mBluetoothProfile;
+    boolean isBleConnected() { return mBluetoothProfile == BluetoothProfile.STATE_CONNECTED && mReaderStreamOutCharacteristic != null; }
 
-    private long mConnectedTimeMillis;
+    private boolean mScanning = false;
+    boolean isBleScanning() { return mScanning; }
 
-    private boolean mScanning = false; boolean isBleScanning() { return mScanning; }
-
-    private final UUID UUID_GATT_DESCRIPTOR_CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-    private final UUID UUID_READER_SERVICE = UUID.fromString("00009800-0000-1000-8000-00805f9b34fb");
+    int serviceUUID2p1 = 0;
+    void setServiceUUIDType(int serviceUUID2p1) { this.serviceUUID2p1 = serviceUUID2p1; }
+    int getServiceUUIDType() { return serviceUUID2p1; }
+    boolean isCs710ServiceUUID() { return serviceUUID2p1 == 3; }
     private final UUID UUID_READER_STREAM_OUT_CHARACTERISTIC = UUID.fromString("00009900-0000-1000-8000-00805f9b34fb");
     private final UUID UUID_READER_STREAM_IN_CHARACTERISTIC = UUID.fromString("00009901-0000-1000-8000-00805f9b34fb");
 
     private int mRssi; int getRssi() { return mRssi; }
 
-    boolean characteristicListRead = false;
+    private boolean characteristicListRead = false;
+    boolean isCharacteristicListRead() { return characteristicListRead; }
+
     private BluetoothGattCharacteristic mReaderStreamOutCharacteristic;
     private BluetoothGattCharacteristic mReaderStreamInCharacteristic;
     private long mStreamWriteCount, mStreamWriteCountOld;
@@ -93,16 +84,16 @@ class BleConnector extends BluetoothGattCallback {
 
     private final int STREAM_IN_BUFFER_MAX = 0x100000; //0xC00;  //0x800;  //0x400;
     private byte[] streamInBuffer = new byte[STREAM_IN_BUFFER_MAX];
-    int streamInBufferHead, streamInBufferTail, streamInBufferSize = 0;
+    private int streamInBufferHead, streamInBufferTail;
+    private int streamInBufferSize = 0;
+    int getStreamInBufferSize() { return streamInBufferSize; }
 
     private long streamInOverflowTime = 0;
-
     long getStreamInOverflowTime() {
         return streamInOverflowTime;
     }
 
     private int streamInBytesMissing = 0;
-
     int getStreamInBytesMissing() {
         int missingByte = streamInBytesMissing;
         streamInBytesMissing = 0;
@@ -110,19 +101,16 @@ class BleConnector extends BluetoothGattCallback {
     }
 
     private int streamInTotalCounter = 0;
-
     int getStreamInTotalCounter() {
         return streamInTotalCounter;
     }
 
     private int streamInAddCounter = 0;
-
     int getStreamInAddCounter() {
         return streamInAddCounter;
     }
 
     private long streamInAddTime = 0;
-
     long getStreamInAddTime() {
         return streamInAddTime;
     }
@@ -156,7 +144,7 @@ class BleConnector extends BluetoothGattCallback {
                     } else {
                         if (DEBUG) appendToLog("state=Connected. discoverServices FAIL");
                     }
-                    mConnectedTimeMillis = System.currentTimeMillis();
+                    utility.setReferenceTimeMs();
                     mHandler.removeCallbacks(mReadRssiRunnable);
                     mHandler.post(mReadRssiRunnable);
                     break;
@@ -175,6 +163,9 @@ class BleConnector extends BluetoothGattCallback {
         } else if (status != BluetoothGatt.GATT_SUCCESS) {
             if (true) appendToLog("status=" + status + ". restart discoverServices"); mBluetoothGatt.discoverServices();
         } else {
+            UUID UUID_READER_SERVICE = UUID.fromString("00009800-0000-1000-8000-00805f9b34fb");
+            if (serviceUUID2p1 != 1) UUID_READER_SERVICE = UUID.fromString("00009802-0000-1000-8000-00805f9b34fb");
+            appendToLog("serviceUD1D2p1 = " + serviceUUID2p1);
             mReaderStreamOutCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_OUT_CHARACTERISTIC);
             mReaderStreamInCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_IN_CHARACTERISTIC);
             appendToLog("mReaderStreamOutCharacteristic flag = " + mReaderStreamOutCharacteristic.getProperties());
@@ -182,7 +173,6 @@ class BleConnector extends BluetoothGattCallback {
             if (mReaderStreamInCharacteristic == null || mReaderStreamOutCharacteristic == null) {
                 if (true) appendToLog("restart discoverServices");mBluetoothGatt.discoverServices(); return;
             }
-            BluetoothGattDescriptor mReaderStreamInDescriptor = mReaderStreamInCharacteristic.getDescriptor(UUID_GATT_DESCRIPTOR_CLIENT_CHARACTERISTIC_CONFIG); //MUST BE AFTER getCharacteristic()
 
             if (!mBluetoothGatt.setCharacteristicNotification(mReaderStreamInCharacteristic, true)) {
                 if (DEBUG) appendToLog("setCharacteristicNotification() FAIL");
@@ -219,8 +209,14 @@ class BleConnector extends BluetoothGattCallback {
                             }
                             if (true) mBluetoothGattCharacteristicToRead.clear();
                             mHandler.removeCallbacks(mReadCharacteristicRunnable);
-                    if (DEBUG) appendToLog("starts in onServicesDiscovered");
+                            if (DEBUG) appendToLog("starts in onServicesDiscovered");
                             mHandler.postDelayed(mReadCharacteristicRunnable, 500);
+
+                            if (true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                boolean bValue = gatt.requestMtu(255);
+                                appendToLog("requestMtu returns " + bValue);
+                                //Log.i(TAG, "getMTU = " + getMTU());
+                            }
                 }
             }
         }
@@ -230,11 +226,11 @@ class BleConnector extends BluetoothGattCallback {
     public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
         super.onReadRemoteRssi(gatt, rssi, status);
         if (gatt != mBluetoothGatt) {
-            if (DEBUG) appendToLogRunnable("onReadRemoteRssi(): INVALID mBluetoothGatt");
+            if (DEBUG) utility.appendToLogRunnable("onReadRemoteRssi(): INVALID mBluetoothGatt");
         } else if (status != BluetoothGatt.GATT_SUCCESS) {
-            if (DEBUG) appendToLogRunnable("onReadRemoteRssi(): NOT GATT_SUCCESS");
+            if (DEBUG) utility.appendToLogRunnable("onReadRemoteRssi(): NOT GATT_SUCCESS");
         } else {
-            if (DEBUG) appendToLogRunnable("onReadRemoteRssi(): rssi=" + rssi);
+            if (DEBUG) utility.appendToLogRunnable("onReadRemoteRssi(): rssi=" + rssi);
             mRssi = rssi;
         }
     }
@@ -274,11 +270,11 @@ class BleConnector extends BluetoothGattCallback {
     public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
         super.onDescriptorRead(gatt, descriptor, status);
         if (gatt != mBluetoothGatt) {
-            if (DEBUG) appendToLogRunnable("onDescriptorRead(): INVALID mBluetoothGatt");
+            if (DEBUG) utility.appendToLogRunnable("onDescriptorRead(): INVALID mBluetoothGatt");
         } else if (status != BluetoothGatt.GATT_SUCCESS) {
-            if (DEBUG) appendToLogRunnable("onDescriptorRead(): status=" + status);
+            if (DEBUG) utility.appendToLogRunnable("onDescriptorRead(): status=" + status);
         } else {
-            if (DEBUG) appendToLogRunnable("onDescriptorRead(): descriptor=" + descriptor.getUuid().toString().substring(4, 8));
+            if (DEBUG) utility.appendToLogRunnable("onDescriptorRead(): descriptor=" + descriptor.getUuid().toString().substring(4, 8));
         }
     }
 
@@ -295,7 +291,7 @@ class BleConnector extends BluetoothGattCallback {
             final String serviceUuidd = characteristic.getService().getUuid().toString().substring(4, 8);
             final String characteristicUuid = characteristic.getUuid().toString().substring(4, 8);
             final byte[] v = characteristic.getValue();
-            final long t = currentBleConnectTimeMillis();
+            final long t = utility.getReferencedCurrentTimeMs();
             mHandler.removeCallbacks(mReadCharacteristicRunnable);
             StringBuilder stringBuilder = new StringBuilder();
             if (v != null && v.length > 0) {
@@ -346,21 +342,24 @@ class BleConnector extends BluetoothGattCallback {
             onCharacteristicWriteFailue++;
             if (DEBUG) appendToLog("status=" + status);
         } else {
+            if (mBluetoothGatt.executeReliableWrite()) appendToLog("Sucess in executeReliableWrite");
+            else appendToLog("failed to executedReliableWrite");
             if (DEBUG_BTDATA) appendToLog("characteristic=" + characteristic.getUuid().toString().substring(4, 8) + ", sent " + (mStreamWriteCount - mStreamWriteCountOld) + " bytes");
             _writeCharacteristic_in_progress = false;
         }
     }
 
-    int writeBleCounter = 0;
-    int writeBleFailure = 0;
-    int onCharacteristicWriteFailue = 0;
+    private int writeBleCounter = 0;
+    private int writeBleFailure = 0;
+    private int onCharacteristicWriteFailue = 0;
     boolean writeBleStreamOut(byte[] value) {
+        //appendToLog("Start");
         if (mBluetoothGatt == null) {
             if (DEBUG) appendToLog("ERROR with NULL mBluetoothGatt");
         } else if (mReaderStreamOutCharacteristic == null) {
             if (DEBUG) appendToLog("ERROR with NULL mReaderStreamOutCharacteristic");
         } else if (isBleBusy() || characteristicListRead == false) {
-            if (DEBUG) appendToLog("isBleBusy()  = " + isBleBusy() + ", characteristicListRead = " + characteristicListRead);
+            if (true) appendToLog("isBleBusy()  = " + isBleBusy() + ", characteristicListRead = " + characteristicListRead);
         } else {
             mReaderStreamOutCharacteristic.setValue(value);
             if (((writeBleCounter / 100) * 100) == writeBleCounter) {
@@ -372,7 +371,15 @@ class BleConnector extends BluetoothGattCallback {
                 }
             }
             writeBleCounter++;
-            if (mBluetoothGatt.writeCharacteristic(mReaderStreamOutCharacteristic) == false) {
+            boolean bValue = false;
+            for (int i = 0; i < 3; i++) {
+                bValue = mBluetoothGatt.writeCharacteristic(mReaderStreamOutCharacteristic);
+                if (bValue) break;
+                if (true) appendToLog("writeCharacteristic(): Retry " + i + " due to ERROR for " + byteArrayToString(value));
+                long ltime = System.currentTimeMillis();
+                while (System.currentTimeMillis() - ltime < 100) { }
+            }
+            if (bValue == false) {
                 writeBleFailure++;
                 if (true) appendToLog("writeCharacteristic(): ERROR for " + byteArrayToString(value));
             } else {
@@ -386,43 +393,43 @@ class BleConnector extends BluetoothGattCallback {
         return false;
     }
 
-    boolean streamInRequest = false;
+    private boolean streamInRequest = false;
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
         if (gatt != mBluetoothGatt) {
             if (DEBUG) {
                 byte[] v = characteristic.getValue();
-                appendToLogRunnable("onCharacteristicChanged(): INVALID mBluetoothGatt, with address = " + gatt.getDevice().getAddress() + ", values =" + byteArrayToString(v));
+                utility.appendToLogRunnable("onCharacteristicChanged(): INVALID mBluetoothGatt, with address = " + gatt.getDevice().getAddress() + ", values =" + byteArrayToString(v));
             }
         } else if (!characteristic.equals(mReaderStreamInCharacteristic)) {
-            if (DEBUG) appendToLogRunnable("onCharacteristicChanged(): characteristic is not ReaderSteamIn");
+            if (DEBUG) utility.appendToLogRunnable("onCharacteristicChanged(): characteristic is not ReaderSteamIn");
         } else if (mBluetoothProfile == BluetoothProfile.STATE_DISCONNECTED) {
                 streamInBufferHead = 0;
                 streamInBufferTail = 0;
                 streamInBufferSize = 0;
         } else {
             byte[] v = characteristic.getValue();
-            if (false) appendToLogRunnable("onCharacteristicChanged(): VALID mBluetoothGatt, values =" + byteArrayToString(v));
+            if (false) utility.appendToLogRunnable("onCharacteristicChanged(): VALID mBluetoothGatt, values =" + byteArrayToString(v));
             synchronized (arrayListStreamIn) {
                 if (v.length != 0) {
                     streamInTotalCounter++;
                 }
                 if (streamInBufferReseting) {
-                    if (DEBUG) appendToLogRunnable("onCharacteristicChanged(): RESET.");
+                    if (DEBUG) utility.appendToLogRunnable("onCharacteristicChanged(): RESET.");
                     streamInBufferReseting = false;
                     streamInBufferSize = 0;
                     streamInBytesMissing = 0;
                 }
                 if (streamInBufferSize + v.length > streamInBuffer.length) {
-                    writeDebug2File("A, " + System.currentTimeMillis() + ", Overflow");
+                    utility.writeDebug2File("A, " + System.currentTimeMillis() + ", Overflow");
                     Log.i(TAG, ".Hello: missing data  = " + byteArrayToString(v));
                     if (streamInBytesMissing == 0) {
-                        streamInOverflowTime = currentBleConnectTimeMillis();
+                        streamInOverflowTime = utility.getReferencedCurrentTimeMs();
                     }
                     streamInBytesMissing += v.length;
                 } else {
-                    writeDebug2File("A, " + System.currentTimeMillis());
+                    utility.writeDebug2File("A, " + System.currentTimeMillis());
                     if (DEBUG_BTDATA0) Log.i(TAG, ".Hello: StreamIn = " + byteArrayToString(v));
                     if (isStreamInBufferRing) {
                         streamInBufferPush(v, 0, v.length);
@@ -431,40 +438,43 @@ class BleConnector extends BluetoothGattCallback {
                     }
                     streamInBufferSize += v.length;
                     streamInAddCounter++;
-                    streamInAddTime = currentBleConnectTimeMillis();
+                    streamInAddTime = utility.getReferencedCurrentTimeMs();
                     if (streamInRequest == false) {
                         streamInRequest = true;
-                        mHandler.removeCallbacks(runnableProcessCs108DataIn); mHandler.post(runnableProcessCs108DataIn);
+                        mHandler.removeCallbacks(runnableProcessBleStreamInData); mHandler.post(runnableProcessBleStreamInData);
                     }
                 }
             }
         }
     }
 
-    boolean streamInBufferReseting = false;
+    private boolean streamInBufferReseting = false;
+    void setStreamInBufferReseting() { streamInBufferReseting = true; }
 
-    void processCs108DataIn() {
+    void processBleStreamInData() {
     }
 
-    int intervalProcessCs108Data = 50;
-    public final Runnable runnableProcessCs108DataIn = new Runnable() {
+    private int intervalProcessBleStreamInData = 50;
+    int getIntervalProcessBleStreamInData() { return intervalProcessBleStreamInData; }
+    final Runnable runnableProcessBleStreamInData = new Runnable() {
         @Override
         public void run() {
             streamInRequest = false;
-            processCs108DataIn();
-            mHandler.postDelayed(runnableProcessCs108DataIn, intervalProcessCs108Data);
+            processBleStreamInData();
+            mHandler.postDelayed(runnableProcessBleStreamInData, intervalProcessBleStreamInData);
         }
     };
 
     @Override
     public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
         super.onMtuChanged(gatt, mtu, status);
+        Log.i(TAG, "onMtuChanged starts");
         if (gatt != mBluetoothGatt) {
-            if (DEBUG) appendToLogRunnable("onMtuChanged(): INVALID mBluetoothGatt");
+            if (DEBUG) utility.appendToLogRunnable("onMtuChanged(): INVALID mBluetoothGatt");
         } else if (status != BluetoothGatt.GATT_SUCCESS) {
-            if (DEBUG) appendToLogRunnable("onMtuChanged(): status=" + status);
+            if (DEBUG) utility.appendToLogRunnable("onMtuChanged(): status=" + status);
         } else {
-            if (DEBUG) appendToLogRunnable("onMtuChanged(): mtu=" + mtu);
+            if (DEBUG) utility.appendToLogRunnable("onMtuChanged(): mtu=" + mtu);
         }
     }
 
@@ -472,18 +482,21 @@ class BleConnector extends BluetoothGattCallback {
     public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
         super.onReliableWriteCompleted(gatt, status);
         if (gatt != mBluetoothGatt) {
-            if (DEBUG) appendToLogRunnable("onMtuChanged(): INVALID mBluetoothGatt");
+            if (true) utility.appendToLogRunnable("INVALID mBluetoothGatt");
         } else {
-            if (DEBUG) appendToLogRunnable("onReliableWriteCompleted(): status=" + status);
+            if (true) utility.appendToLogRunnable("onReliableWriteCompleted(): status=" + status);
+            //mBluetoothGatt.abortReliableWrite();
         }
     }
 
+    private Context mContext; private Activity activity;
     BleConnector(Context context, TextView mLogView) {
         mContext = context; activity = (Activity) mContext;
-//        this.mLogView = mLogView;
+        utility = new Utility(context, mLogView);
 
-//        final ScrollView mScrollView = (ScrollView) activity.findViewById(R.id.log_scroll);
-//        mLogView = (TextView) activity.findViewById(R.id.log_view);
+//        BluetoothConfigManager mConfigManager;
+//        mConfigManager = BluetoothConfigManager.getInstance();
+//        appendToLog("BluetoothConfigManager.getIoCapability = " + mConfigManager.getIoCapability());
 
         PackageManager mPackageManager = mContext.getPackageManager();
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -502,11 +515,9 @@ class BleConnector extends BluetoothGattCallback {
         LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             appendToLog("permitted ACCESS_FINE_LOCATION");
-            if (mLogView != null)   mLogView.append("permitted ACCESS_FINE_LOCATION\n");
         }
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             appendToLog("permitted ACCESS_COARSE_LOCATION");
-            if (mLogView != null)   mLogView.append("permitted ACCESS_COARSE_LOCATION\n");
         }
         List<String> stringProviderList = locationManager.getAllProviders();
         for (String stringProvider: stringProviderList) appendToLog("Provider = " + stringProvider);
@@ -515,18 +526,37 @@ class BleConnector extends BluetoothGattCallback {
         if (locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) appendToLog("ProviderEnabled PASSIVE_PROVIDER");
     }
 
-    PopupWindow popupWindow; boolean popupWindowShown = false;
-    boolean bleEnableRequestShown = false;
-    boolean scanLeDevice(final boolean enable, BluetoothAdapter.LeScanCallback mLeScanCallback, ScanCallback mScanCallBack) {
+    private PopupWindow popupWindow;
+    private boolean bleEnableRequestShown0 = false, bleEnableRequestShown = false;
+    private boolean isLocationAccepted = false;
+    CustomAlertDialog appdialog; boolean bAlerting = false;
+    boolean scanLeDevice(boolean enable, BluetoothAdapter.LeScanCallback mLeScanCallback, ScanCallback mScanCallBack) {
+        appendToLog("StreamOut: enable = " + enable);
         boolean result = false;
         boolean locationReady = true;
         if (enable && isBleConnected()) return true;
         if (enable == false && isBleScanning() == false) return true;
 
+        if (enable) {
+            LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false)
+                isLocationAccepted = false;
+        }
+        appendToLog("StreamOut: Start " + enable + ", with isLocationAccepted = " + isLocationAccepted + ", bAlerting = " + bAlerting);
+        if (false && isLocationAccepted == false) {
+            if (bAlerting == false && bleEnableRequestShown0 == false) {
+                bAlerting = true;
+                appendToLog("StreamOut: new AlertDialog");
+                popupAlert();
+            }
+            return false;
+        }
+
+        appendToLog("StreamOut: Passed AlertDialog");
         if (enable && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             appendToLog("Checking permission and grant !!!");
             LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) {
+            if (false && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) {
                 boolean isShowing = false;
                 if (popupWindow != null) isShowing = popupWindow.isShowing();
                 if (isShowing == false) {
@@ -534,7 +564,7 @@ class BleConnector extends BluetoothGattCallback {
                     View popupView = layoutInflater.inflate(R.layout.popup, null);
                     popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
-                    TextView textViewDismiss = (TextView)popupView.findViewById(R.id.dismissMessage);
+                    TextView textViewDismiss = (TextView) popupView.findViewById(R.id.dismissMessage);
                     textViewDismiss.setText("Android OS 6.0+ requires to enable location service to find the nearby BLE devices");
                     Button btnDismiss = (Button) popupView.findViewById(R.id.dismiss);
                     appendToLog("Setting grant");
@@ -549,8 +579,16 @@ class BleConnector extends BluetoothGattCallback {
                     });
                 }
                 return false;
-            } else if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 123);
+            } else if (
+                    (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) ||
+                            (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                if (true) {
+                    if (bAlerting || bleEnableRequestShown0) return false;
+                    bAlerting = true;
+                    popupAlert();
+                    return false;
+                } else
+                requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
             }
         }
 
@@ -559,14 +597,16 @@ class BleConnector extends BluetoothGattCallback {
         } else if (mBluetoothAdapter == null) {
             if (DEBUG) appendToLog("scanLeDevice(" + enable + ") with NULL mBluetoothAdapter");
         } else if (!mBluetoothAdapter.isEnabled()) {
+            appendToLog("StreamOut: bleEnableRequestShown = " + bleEnableRequestShown);
             if (bleEnableRequestShown == false) {
-                if (DEBUG)
-                    appendToLog("scanLeDevice(" + enable + ") with DISABLED mBluetoothAdapter");
+                if (DEBUG) appendToLog("scanLeDevice(" + enable + ") with DISABLED mBluetoothAdapter");
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 activity.startActivityForResult(enableBtIntent, 1);
-                bleEnableRequestShown = true;
+                appendToLog("StreamOut: bleEnableRequestShown is set");
+                bleEnableRequestShown = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
             }
         } else {
+            bleEnableRequestShown = false;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mleScanner = mBluetoothAdapter.getBluetoothLeScanner();
                 if (mleScanner == null) {
@@ -596,6 +636,67 @@ class BleConnector extends BluetoothGattCallback {
         return result;
     }
 
+    private final Runnable mRquestAllowRunnable = new Runnable() {
+        @Override
+        public void run() {
+            bleEnableRequestShown0 = false;
+            bleEnableRequestShown = false;
+        }
+    };
+    void popupAlert() {
+        appdialog = new CustomAlertDialog();
+        appdialog.Confirm((Activity) mContext, "Use your location",
+                "This app collects location data in the background.  In terms of the features using this location data in the background, this App collects location data when it is reading RFID tag in all inventory pages.  The purpose of this is to correlate the RFID tag with the actual GNSS(GPS) location of the tag.  In other words, this is to track the physical location of the logistics item tagged with the RFID tag.",
+                "No thanks", "Turn on",
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        isLocationAccepted = true;
+                        appendToLog("StreamOut: This from FALSE proc");
+                        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            appendToLog("StreamOut: request ACCESS_FINE_LOCATION");
+                            requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
+                        }
+                        {
+                            LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
+                            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) {
+                                appendToLog("StreamOut: start activity ACTION_LOCATION_SOURCE_SETTINGS");
+                                Intent intent1 = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                mContext.startActivity(intent1);
+                            }
+                        }
+                        bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
+                        bAlerting = false;
+                    }
+                },
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        appendToLog("StreamOut: This from FALSE proc");
+                        bAlerting = false;
+                        bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
+                    }
+                });
+    }
+
+    /*
+    BroadcastReceiver myReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            appendToLog("action = " + action);
+            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                    // CONNECT
+                }
+            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                // Discover new device
+            }
+        }
+    };
+*/
     boolean connectBle(ReaderDevice readerDevice) {
         if (readerDevice == null) {
             if (DEBUG) appendToLog("with NULL readerDevice");
@@ -606,18 +707,39 @@ class BleConnector extends BluetoothGattCallback {
             } else if (!mBluetoothAdapter.isEnabled()) {
                 if (DEBUG) appendToLog("connectBle(" + address + ") with DISABLED mBluetoothAdapter");
             } else {
-                debugFileSetup();
+                utility.debugFileSetup();
                 mHandler.removeCallbacks(mDisconnectRunnable);
-                mConnectedTimeMillis = System.currentTimeMillis();
+                utility.setReferenceTimeMs();
                 if (DEBUG) appendToLog("connectBle(" + address + "): connectGatt starts");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    mBluetoothGatt = mBluetoothAdapter.getRemoteDevice(address).connectGatt(mContext, false, this, BluetoothDevice.TRANSPORT_LE);
+/*
+                IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+                intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+                mContext.registerReceiver(myReceiver, intentFilter);
+*/
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    BluetoothDevice mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(address);
+                    appendToLog("mBluetoothDevice.getBondState() = " + mBluetoothDevice.getBondState());
+                    boolean bOkBond = true;
+                    if (false && mBluetoothDevice.getBondState() == BOND_NONE) {
+                        bOkBond = mBluetoothDevice.createBond();
+                        if (bOkBond) appendToLog("sucess to creatBond");
+                        else appendToLog("failed to createBond");
+                    }
+                    if (bOkBond) mBluetoothGatt = mBluetoothDevice.connectGatt(mContext, false, this, BluetoothDevice.TRANSPORT_LE, PHY_LE_2M);
+                    else return  false;
                 } else {
-                    mBluetoothGatt = mBluetoothAdapter.getRemoteDevice(address).connectGatt(mContext, false, this);
+                    //mBluetoothGatt = mBluetoothAdapter.getRemoteDevice(address).connectGatt(mContext, false, this);
+                    return false;
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    if (true) mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
-                    else mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_BALANCED);
+                    if (true) {
+                        mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+                        appendToLog("Stream Set to HIGH");
+                    }
+                    else {
+                        mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_BALANCED);
+                        appendToLog("Stream Set to BALANCED");
+                    }
                 }
                 mBluetoothDevice = readerDevice;
                 characteristicListRead = false;
@@ -635,7 +757,8 @@ class BleConnector extends BluetoothGattCallback {
         } else if (mBluetoothGatt == null) {
             if (DEBUG) appendToLog("NULL mBluetoothGatt");
         } else {
-            debugFileClose();
+            utility.debugFileClose();
+            mReaderStreamOutCharacteristic = null;
             mBluetoothGatt.disconnect();
             mHandler.removeCallbacks(mDisconnectRunnable);
             mHandler.postDelayed(mDisconnectRunnable, 200); disconnectRunning = true;
@@ -652,7 +775,7 @@ class BleConnector extends BluetoothGattCallback {
         mBluetoothProfile = BluetoothProfile.STATE_DISCONNECTED;
     }
 
-    boolean disconnectRunning = false;
+    private boolean disconnectRunning = false;
     private final Runnable mDisconnectRunnable = new Runnable() {
         @Override
         public void run() {
@@ -672,10 +795,6 @@ class BleConnector extends BluetoothGattCallback {
         return mBluetoothProfile != BluetoothProfile.STATE_CONNECTED || _readCharacteristic_in_progress /*|| _writeCharacteristic_in_progress*/;
     }
 
-    private long currentBleConnectTimeMillis() {
-        return System.currentTimeMillis() - mConnectedTimeMillis;
-    }
-
     private BluetoothGattCharacteristic getCharacteristic(UUID service, UUID characteristic) {
         BluetoothGattService s = mBluetoothGatt.getService(service);
         if (s == null)
@@ -684,55 +803,17 @@ class BleConnector extends BluetoothGattCallback {
         return c;
     }
 
-    String byteArrayToString(byte[] packet) {
-        if (packet == null) return "";
-        StringBuilder sb = new StringBuilder(packet.length * 2);
-        for (byte b : packet) {
-            sb.append(String.format("%02X", b));
-        }
-        return sb.toString();
-    }
-
-    void appendToLog(String s) {
-        if (appendToLogDisable) return;
-        String TAG = "";
-        StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
-        boolean logged = false;
-        boolean foundMe = false;
-        for(int i=0; i<stacktrace.length; i++) {
-            StackTraceElement e = stacktrace[i];
-            String methodName = e.getMethodName();
-            if (methodName.equals("appendToLog")) {
-                foundMe = true;
-            } else if (foundMe) {
-                if (!methodName.startsWith("access$")) {
-                    TAG = String.format(Locale.US, "%s.%s", e.getClassName(), methodName);
-                    logged = true;
-                    break;
-                }
-            }
-        }
-        if (mLogView != null)   mLogView.append("\n" + currentBleConnectTimeMillis() + "." + TAG + "." + s);
-        Log.i(TAG + ".Hello", s);
-    }
-    void appendToLogRunnable(final String s) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                appendToLog(s);
-            }
-        });
-    }
-
+    private long streamInDataMilliSecond;
+    long getStreamInDataMilliSecond() { return streamInDataMilliSecond; }
     int readBleSteamIn(byte[] buffer, int byteOffset, int byteCount) {
         synchronized (arrayListStreamIn) {
             if (0 == streamInBufferSize) return 0;
             if (isArrayListStreamInBuffering) {
                 int byteGot = 0;
-                while (arrayListStreamIn.size() != 0) {
-                    int length1 = arrayListStreamIn.get(0).length;
-                    if (buffer.length - byteOffset < length1) break;
-                    System.arraycopy(arrayListStreamIn.get(0), 0, buffer, byteOffset, length1);
+                int length1 = arrayListStreamIn.get(0).data.length;
+                if (arrayListStreamIn.size() != 0 && buffer.length - byteOffset > length1) {
+                    System.arraycopy(arrayListStreamIn.get(0).data, 0, buffer, byteOffset, length1);
+                    streamInDataMilliSecond = arrayListStreamIn.get(0).milliseconds;
                     arrayListStreamIn.remove(0);
                     byteOffset += length1;
                     byteGot += length1;
@@ -763,13 +844,20 @@ class BleConnector extends BluetoothGattCallback {
         return totalReceived * 1000 / totalTime;
     }
 
-    ArrayList<byte[]> arrayListStreamIn = new ArrayList<byte[]>(); private boolean isArrayListStreamInBuffering = true;
+    private class StreamInData {
+        byte[] data;
+        long milliseconds;
+    }
+    private ArrayList<StreamInData> arrayListStreamIn = new ArrayList<StreamInData>(); private boolean isArrayListStreamInBuffering = true;
     private boolean isStreamInBufferRing = true;
     private void streamInBufferPush(byte[] inData, int inDataOffset, int length) {
         int length1 = streamInBuffer.length - streamInBufferTail;
         int totalCopy = 0;
         if (isArrayListStreamInBuffering) {
-            arrayListStreamIn.add(inData);
+            StreamInData streamInData = new StreamInData();
+            streamInData.data = inData;
+            streamInData.milliseconds = System.currentTimeMillis();
+            arrayListStreamIn.add(streamInData);
             totalCopy = length;
         } else {
         if (length > length1) {
@@ -811,51 +899,11 @@ class BleConnector extends BluetoothGattCallback {
         }}
     }
 
-    File fileDebug; boolean inventoring = false;
-    void debugFileSetup() {
-        boolean writeExtPermission = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                writeExtPermission = false;
-                requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                    return;
-            }
-        }
-        String errorDisplay = null;
-        if (writeExtPermission == false) {
-            errorDisplay = "denied WRITE_EXTERNAL_STORAGE Permission !!!";
-        } else if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) == false) errorDisplay = "Error in mouting external storage !!!";
-        else {
-            File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + Environment.DIRECTORY_DOWNLOADS + "/cs108Java");
-            if (path.exists() == false) path.mkdirs();
-            if (path.exists() == false) errorDisplay = "Error in making directory !!!";
-            else {
-                String dateTime = new SimpleDateFormat("yyMMdd_HHmmss").format(new Date());
-                String fileName = "cs108JavaDebug_" + dateTime + ".txt";
-                fileDebug = new File(path, fileName);
-                if (fileDebug == null) errorDisplay = "Error in making directory !!!";
-            }
-        }
-        if (errorDisplay != null) appendToLog("Error in saving file with " + errorDisplay);
-    }
-    void debugFileClose() {
-        if (fileDebug != null) {
-            try {
-                MediaScannerConnection.scanFile(mContext, new String[]{fileDebug.getAbsolutePath()}, null, null);
-            } catch (Exception ex) {
-            }
-        }
-    }
-    void writeDebug2File(String stringDebug) {
-        if (fileDebug != null && inventoring) {
-            try {
-                FileOutputStream outputStreamDebug = new FileOutputStream(fileDebug, true);
-                PrintWriter printWriterDebug = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(outputStreamDebug), "UTF-8"));
-                printWriterDebug.println(stringDebug);
-                printWriterDebug.flush(); printWriterDebug.close();
-                outputStreamDebug.close();
-            } catch (Exception ex) {
-            }
-        }
-    }
+    private Utility utility;
+    String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
+    void appendToLog(String s) { utility.appendToLog(s); }
+    void appendToLogView(String s) { utility.appendToLogView(s); }
+    void writeDebug2File(String stringDebug) { utility.writeDebug2File(stringDebug); }
+    boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
+    void debugFileEnable(boolean enable) { utility.debugFileEnable(enable); }
 }

@@ -7,6 +7,10 @@
 
     <!-- Strings for Fragment actionBar title -->
     <string name="title_activity_home">Convergence Systems</string>
+    <string name="title_activity_inventory">Inventory</string>
+    <string name="title_activity_inventoryRfidMulti">Multibank</string>
+    <string name="title_activity_bap">BAP</string>
+    <string name="title_activity_ctesisu">CTESIUS</string>
     <string name="title_activity_connection">Connect</string>
     <string name="title_activity_filters">Filters</string>
     <string name="title_activity_about">About</string>
@@ -16,6 +20,17 @@
     <string name="title_activity_geiger">Geiger search</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_security">Security</string>
+    <string name="title_activity_coldChain">Cold Chain</string>
+    <string name="title_activity_axzonSelector">Select Tag Type</string>
+    <string name="title_activity_axzonConfig">Configuration</string>
+    <string name="title_activity_axzon">Axzon</string>
+    <string name="title_activity_emMicro">Magnus</string>
+    <string name="title_activity_fdMicro">FM13DT160</string>
+    <string name="title_activity_ucodeDNA">UCODE DNA</string>
+    <string name="title_activity_ucode8">UCODE 8</string>
+    <string name="title_activity_impinj">ImpinJ</string>
+    <string name="title_activity_auraSense">Aura-sense</string>
+    <string name="title_activity_readWriteUser">Long Read / Write</string>
 
     <!-- Items for lock privilege state -->
     <string-array name="access_lock_privilege_array">
@@ -162,13 +177,6 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
-    </string-array>
-
-    <string-array name="profile1_options">
-        <item>0: Multipath Interference Resistance</item>
-        <item>1: Range/Dense reader</item>
-        <item>2: Range/Throughput/Dense reader</item>
-        <item>3: Maximum throughput</item>
     </string-array>
 
     <string-array name="rflnagain_options">
