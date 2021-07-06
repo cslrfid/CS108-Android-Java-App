@@ -1,6 +1,8 @@
 package com.csl.cs108ademoapp.fragments;
 
 import android.os.Bundle;
+
+import com.csl.cs108ademoapp.MainActivity;
 import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
@@ -30,10 +32,12 @@ public class InventoryFragment extends CommonFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        MainActivity.mCs108Library4a.appendToLog("InventoryFragment: onOptionsItemSelected");
         InventoryRfidiMultiFragment fragment0 = (InventoryRfidiMultiFragment) mAdapter.fragment0;
         InventoryBarcodeFragment fragment1 = (InventoryBarcodeFragment) mAdapter.fragment1;
         switch (item.getItemId()) {
             case R.id.menuAction_1:
+                MainActivity.mCs108Library4a.appendToLog("InventoryFragment: onOptionsItemSelected: clearTagsList");
                 switch (viewPager.getCurrentItem()) {
                     case 0:
                         fragment0.clearTagsList();
@@ -92,7 +96,7 @@ public class InventoryFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("I"); //Inventory");
+        actionBar.setTitle(R.string.title_activity_inventory);
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 

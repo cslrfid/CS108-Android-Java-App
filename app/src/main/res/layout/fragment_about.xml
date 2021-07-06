@@ -580,4 +580,18 @@
             android:gravity="center"
             style="@style/style_normal_font" />
     </TableRow>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="Read Privacy policy"
+            android:onClick="privacyClicked" />
+    </LinearLayout>
 </LinearLayout>

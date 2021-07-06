@@ -52,6 +52,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     private InventoryRfidTask inventoryRfidTask;
 
     void clearTagsList() {
+        MainActivity.mCs108Library4a.appendToLog("InventoryRfidMultiFragment: NOT onOptionsItemSelected: clearTagsList");
         MainActivity.mCs108Library4a.appendToLog("runningInventoryRfidTask = " + MainActivity.sharedObjects.runningInventoryRfidTask + ", readerListAdapter" + (readerListAdapter != null ? " tagCount = " + String.valueOf(readerListAdapter.getCount()) : " = NULL"));
         if (MainActivity.sharedObjects.runningInventoryRfidTask) return;
         rfidYieldView.setText("");
@@ -91,6 +92,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        MainActivity.mCs108Library4a.appendToLog("InventoryRfidMultiFragment: onOptionsItemSelected");
         switch (item.getItemId()) {
             case R.id.menuAction_1:
                 clearTagsList();
@@ -136,9 +138,9 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             androidx.appcompat.app.ActionBar actionBar;
             actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             actionBar.setIcon(R.drawable.dl_inv);
-            if (bMultiBankInventory) actionBar.setTitle("M"); //"Multibank");
-            else if (bBapInventory) actionBar.setTitle("B"); //"BAP Inventory");
-            else if (bctesiusInventory) actionBar.setTitle("C"); //"CTESIUS Inventory");
+            if (bMultiBankInventory) actionBar.setTitle(R.string.title_activity_inventoryRfidMulti);
+            else if (bBapInventory) actionBar.setTitle(R.string.title_activity_bap);
+            else if (bctesiusInventory) actionBar.setTitle(R.string.title_activity_ctesisu);
         }
         if (bMultiBankInventory) {
             LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.inventoryMultibankSetting);
@@ -326,6 +328,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             MainActivity.mCs108Library4a.setAccessCount(0);
             needResetData = false;
         }
+        if (mDid != null && mDid.matches("E203510")) MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
     }
     void startStopHandler(boolean buttonTrigger) {
         if (buttonTrigger) MainActivity.mCs108Library4a.appendToLog("BARTRIGGER: getTriggerButtonStatus = " + MainActivity.mCs108Library4a.getTriggerButtonStatus());
@@ -362,6 +365,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     }
 
     void startInventoryTask() {
+        MainActivity.mCs108Library4a.appendToLog("startInventoryTask");
         int extra1Bank = -1, extra2Bank = -1;
         int extra1Count = 0, extra2Count = 0;
         int extra1Offset = 0, extra2Offset = 0;
@@ -424,7 +428,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     MainActivity.mCs108Library4a.appendToLog("Hello123: Set Sense at BOOT !!!");
                 }
             } else if (mDid.matches("E203510")) {
-                MainActivity.mCs108Library4a.setSelectCriteria(1, true, 7, 4, 0, 1, 32, mDid);
+                MainActivity.mCs108Library4a.setSelectCriteria(1, true, 7, 4, 0, 2, 0, mDid);
             } else if (mDid.matches("E28240")) {
                 if (MainActivity.selectFor != 0) {
                     MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
@@ -520,12 +524,18 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 }
                 if (extra1Bank == 1) extra1Offset += 2;
                 if (extra2Bank == 1) extra2Offset += 2;
-                MainActivity.mCs108Library4a.setTagRead(extra2Count != 0 && extra2Count != 0 ? 2 : 1);
-                MainActivity.mCs108Library4a.setAccessBank(extra1Bank, extra2Bank);
-                MainActivity.mCs108Library4a.setAccessOffset(extra1Offset, extra2Offset);
-                MainActivity.mCs108Library4a.setAccessCount(extra1Count, extra2Count);
+                if (MainActivity.mCs108Library4a.getcsModel() == 710) {
+                    MainActivity.mCs108Library4a.enableMultibankReadConfig(0, extra1Bank, extra1Offset, extra1Count);
+                    MainActivity.mCs108Library4a.enableMultibankReadConfig(1, extra2Bank, extra2Offset, extra2Count);
+                } else {
+                    MainActivity.mCs108Library4a.setTagRead(extra2Count != 0 && extra2Count != 0 ? 2 : 1);
+                    MainActivity.mCs108Library4a.setAccessBank(extra1Bank, extra2Bank);
+                    MainActivity.mCs108Library4a.setAccessOffset(extra1Offset, extra2Offset);
+                    MainActivity.mCs108Library4a.setAccessCount(extra1Count, extra2Count);
+                }
                 needResetData = true;
             } else resetSelectData();
+            MainActivity.mCs108Library4a.appendToLog("startInventoryTask: going to startOperation");
             MainActivity.mCs108Library4a.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY);
             inventoryRfidTask = new InventoryRfidTask(getContext(), extra1Bank, extra2Bank, extra1Count, extra2Count, extra1Offset, extra2Offset,
                     false, MainActivity.mCs108Library4a.getInventoryBeep(),

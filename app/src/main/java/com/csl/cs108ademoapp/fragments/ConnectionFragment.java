@@ -12,7 +12,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -141,23 +140,6 @@ public class ConnectionFragment extends CommonFragment {
         super.onStop();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_0:
-                return true;
-
-            case R.id.action_1:
-                return true;
-
-            case R.id.action_2:
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
     public ConnectionFragment() {
         super("ConnectionFragment");
     }
@@ -228,7 +210,7 @@ public class ConnectionFragment extends CommonFragment {
                         }
                     }
                     if (match == false) {
-                        ReaderDevice readerDevice = new ReaderDevice(scanResultA.device.getName(), scanResultA.device.getAddress(), false, "", 1, scanResultA.rssi);
+                        ReaderDevice readerDevice = new ReaderDevice(scanResultA.device.getName(), scanResultA.device.getAddress(), false, "", 1, scanResultA.rssi, scanResultA.serviceUUID2p2);
                         String strInfo = "";
                         if (scanResultA.device.getBondState() == 12) {
                             strInfo += "BOND_BONDED\n";
@@ -374,6 +356,8 @@ public class ConnectionFragment extends CommonFragment {
 
             connectTimeMillis = System.currentTimeMillis();
             super.onPostExecute(result);
+
+            MainActivity.mCs108Library4a.appendToLog("ConnectionFragment: onPostExecute: getActivity().onBackPressed");
             getActivity().onBackPressed();
             bConnecting = false;
             MainActivity.mCs108Library4a.appendToLog("end of Connection with mrfidToWriteSize = " + mCs108Library4a.mrfidToWriteSize());

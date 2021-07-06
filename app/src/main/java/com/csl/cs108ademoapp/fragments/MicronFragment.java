@@ -51,7 +51,7 @@ public class MicronFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("E"); //"EM Micron");
+        actionBar.setTitle(R.string.title_activity_emMicro);
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 

@@ -141,7 +141,7 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
             } else if (reader.getSensorData() < reader.INVALID_SENSORDATA) {
                 strExtra = "SD=" + String.valueOf(reader.getSensorData());
             }
-            if (strExtra.length() != 0) portTextView.setText(Html.fromHtml(strExtra));
+            portTextView.setText(Html.fromHtml(strExtra));
         }
 
         TextView readerDetailA = (TextView) convertView.findViewById(R.id.reader_detailA);
@@ -156,8 +156,8 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
                 int phase = reader.getPhase();
                 String stringDetailB = null;
                 if (channel != 0 || phase != 0) {
-                    double dChannel = MainActivity.mCs108Library4a.getLogicalChannel2PhysicalFreq(reader.getChannel());
-                    stringDetailB = "Phase=" + phase + "\n" + dChannel + "MHz";
+                    //double dChannel = MainActivity.mCs108Library4a.getLogicalChannel2PhysicalFreq(reader.getChannel());
+                    //stringDetailB = "Phase=" + phase + "\n" + dChannel + "MHz";
                 }
                 if (stringDetailB != null) readerDetailB.setText(stringDetailB);
             }

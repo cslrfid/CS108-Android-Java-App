@@ -19,7 +19,7 @@ public class AxzonSelectorFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState, true);
         return inflater.inflate(R.layout.fragment_select_axzon, container, false);
     }
 
@@ -29,7 +29,7 @@ public class AxzonSelectorFragment extends CommonFragment {
 
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-            actionBar.setTitle("Select Tag Type");
+            actionBar.setTitle(R.string.title_activity_axzonSelector);
         }
 
         Button button_s2 = (Button) getActivity().findViewById(R.id.select_axzon_s2);

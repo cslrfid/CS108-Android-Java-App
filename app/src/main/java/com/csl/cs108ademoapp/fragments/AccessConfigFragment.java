@@ -32,7 +32,7 @@ public class AccessConfigFragment extends CommonFragment {
 
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-            actionBar.setTitle("Configuration");
+            actionBar.setTitle(R.string.title_activity_axzonConfig);
         }
 
         editTextPassWord = (EditText) getActivity().findViewById(R.id.accessConfigPasswordValue);

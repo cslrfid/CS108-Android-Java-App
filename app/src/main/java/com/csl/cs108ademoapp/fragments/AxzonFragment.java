@@ -53,7 +53,7 @@ public class AxzonFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("A"); //"Axzon");
+        actionBar.setTitle(R.string.title_activity_axzon);
 
         boolean bXervesTag = false;
         if (MainActivity.mDid != null) if (MainActivity.mDid.matches("E282405")) bXervesTag = true;

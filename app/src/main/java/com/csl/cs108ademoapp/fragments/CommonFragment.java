@@ -4,12 +4,14 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.drawerlayout.widget.DrawerLayout;
+
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -48,6 +50,13 @@ public abstract class CommonFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, boolean menuFragment) {
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog(fragmentName);
         this.menuFragment = menuFragment;
+
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        boolean bHomeAsUpEnabled = true;
+        if (fragmentName.matches("HomeFragment")) bHomeAsUpEnabled = false;
+        actionBar.setDisplayHomeAsUpEnabled(bHomeAsUpEnabled);
+        MainActivity.mCs108Library4a.appendToLog("CommonFragment: onCreateView with fragmentName = " + fragmentName + " , onOptionsItemSelected = " + menuFragment + ", DisplayHomeAsUpEnabled = " + bHomeAsUpEnabled);
+
         if (menuFragment)   setHasOptionsMenu(true);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
@@ -130,6 +139,7 @@ public abstract class CommonFragment extends Fragment {
         } else {
             inflater.inflate(R.menu.menu_home, menu);
             menuBatteryVoltageItem = menu.findItem(R.id.home_voltage);
+            menu.removeItem(R.id.home_menu);
             if (fragmentName.matches("InventoryFragment")
                     || fragmentName.contains("InventoryRfidiMultiFragment")
                     || fragmentName.contains("ColdChainFragment")
@@ -144,6 +154,7 @@ public abstract class CommonFragment extends Fragment {
                 menu.findItem(R.id.menuAction_1).setTitle("Clear");
                 menu.findItem(R.id.menuAction_2).setTitle("Sort");
                 menu.findItem(R.id.menuAction_3).setTitle("Save");
+                menu.findItem(R.id.menuAction_4).setTitle("Share");
                 menu.findItem(R.id.menuAction_4).setIcon(android.R.drawable.ic_menu_share);
             } else {
                 menu.removeItem(R.id.menuAction_1);
@@ -156,12 +167,13 @@ public abstract class CommonFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        MainActivity.mCs108Library4a.appendToLog("CommonFragment: onOptionsItemSelected");
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog(fragmentName + " with fragmentActive = " + fragmentActive);
         if (fragmentActive == false) return false;
         switch (item.getItemId()) {
-            case R.id.home_menu:
-                DrawerLayout mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-                mDrawerLayout.openDrawer(Gravity.LEFT);
+            case android.R.id.home:
+                MainActivity.mCs108Library4a.appendToLog("CommonFragment: onOptionsItemSelected: getActivity().onBackPressed");
+                getActivity().onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

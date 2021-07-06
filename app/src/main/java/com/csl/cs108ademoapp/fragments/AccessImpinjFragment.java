@@ -74,7 +74,7 @@ public class AccessImpinjFragment extends CommonFragment {
                 if (checkBoxFastId.isChecked()) iValue |= 0x20;
                 MainActivity.mCs108Library4a.appendToLog("HelloK: iValue = " + String.format("%20X", iValue));
                 MainActivity.mDid = "E28011" + String.format("%02X", iValue);
-                MainActivity.mCs108Library4a.macWrite(0x203, iValue);
+                MainActivity.mCs108Library4a.setImpinJExtension(checkBoxTagFocus.isChecked(), checkBoxFastId.isChecked());
             }
             userVisibleHint = false;
             MainActivity.mCs108Library4a.appendToLog("AccessImpinjFragment is now INVISIBLE" + (checkBoxFastId != null ? (" with Value = " + iValue) : ""));

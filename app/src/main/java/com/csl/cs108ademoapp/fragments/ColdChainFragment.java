@@ -50,7 +50,7 @@ public class ColdChainFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("C"); //"Cold Chain");
+        actionBar.setTitle(R.string.title_activity_coldChain);
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 

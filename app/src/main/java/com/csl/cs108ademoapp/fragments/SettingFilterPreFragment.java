@@ -157,6 +157,7 @@ public class SettingFilterPreFragment extends CommonFragment {
             else {
                 if (updating == false && editTextFilterPreSelectIndex.getText().length() == 0) {
                     lValue = MainActivity.mCs108Library4a.getInvSelectIndex();
+                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getInvSelectIndex = " + lValue);
                     if (lValue < 0) {
                         updating = true;
                     } else {
@@ -164,10 +165,13 @@ public class SettingFilterPreFragment extends CommonFragment {
                     }
                 }
                 if (updating == false) {
-                    checkBoxEnable.setChecked(MainActivity.mCs108Library4a.getSelectEnable());
+                    boolean bValue = MainActivity.mCs108Library4a.getSelectEnable();
+                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectEnable = " + bValue);
+                    checkBoxEnable.setChecked(bValue);
                 }
                 if (updating == false) {
                     int iValue1 = MainActivity.mCs108Library4a.getSelectTarget();
+                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectTarget = " + iValue1);
                     if (iValue1 < 0) {
                         updating = true;
                     } else {
@@ -178,6 +182,7 @@ public class SettingFilterPreFragment extends CommonFragment {
                 }
                 if (updating == false) {
                     int iValue1 = MainActivity.mCs108Library4a.getSelectAction();
+                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectAction = " + iValue1);
                     if (iValue1 < 0) {
                         updating = true;
                     } else {
@@ -186,6 +191,7 @@ public class SettingFilterPreFragment extends CommonFragment {
                 }
                 if (updating == false) {
                     int iValue1 = MainActivity.mCs108Library4a.getSelectMaskBank();
+                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectMaskBank = " + iValue1);
                     if (iValue1 < 0) {
                         updating = true;
                     } else {
@@ -196,6 +202,7 @@ public class SettingFilterPreFragment extends CommonFragment {
                 }
                 if (updating == false) {
                     int iValue1 = MainActivity.mCs108Library4a.getSelectMaskOffset();
+                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectMaskOffset = " + iValue1);
                     if (iValue1 < 0) {
                         updating = true;
                     } else {
@@ -206,6 +213,7 @@ public class SettingFilterPreFragment extends CommonFragment {
                 }
                 if (updating == false) {
                     String strValue = MainActivity.mCs108Library4a.getSelectMaskData();
+                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectMaskData = " + strValue);
                     if (strValue == null) {
                         updating = true;
                     } else {
@@ -234,13 +242,14 @@ public class SettingFilterPreFragment extends CommonFragment {
             }
         }
         if (sameSetting == true && invalidRequest == false) {
+            if (true)
             {
                 boolean dataMatched = false;
                 boolean maskbit = (spinnerMaskDataType.getSelectedItemPosition() == 0 ? false : true);
                 if (maskbit) invSelectMaskData = filterPreMaskDataBit.getText().toString();
                 else invSelectMaskData = filterPreMaskDataHex.getText().toString();
                 String strValue = MainActivity.mCs108Library4a.getSelectMaskData();
-                if (invSelectMaskData.length() != strValue.length()) { dataMatched = false; }
+                if (invSelectMaskData.length() != strValue.length()) { }
                 else if (invSelectMaskData.length() == 0 && strValue.length() == 0) { dataMatched = true; }
                 else dataMatched = invSelectMaskData.matches(strValue);
                 if (MainActivity.mCs108Library4a.getSelectEnable() !=  invSelectEnable
@@ -258,7 +267,7 @@ public class SettingFilterPreFragment extends CommonFragment {
 
         settingTask = new SettingTask(button, sameSetting, invalidRequest);
         settingTask.execute();
-        MainActivity.mCs108Library4a.saveSetting2File();
+        //MainActivity.mCs108Library4a.saveSetting2File();
     }
 }
 

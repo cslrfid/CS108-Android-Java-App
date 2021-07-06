@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.Handler;
@@ -277,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             //Pop the back stack since we want to maintain only one level of the back stack
             //Add the transaction to the back stack since we want the state to be preserved in the back stack
-            fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            //fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, TAG_CONTENT_FRAGMENT).addToBackStack(null).commit();
         }
         mDrawerLayout.closeDrawer(mDrawerList);
@@ -293,6 +294,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         mDrawerList.setItemChecked(0, true);
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_CONTENT_FRAGMENT);
+        MainActivity.mCs108Library4a.appendToLog("MainActivity super.onBackPressed");
         super.onBackPressed();
     }
 
@@ -309,7 +311,41 @@ public class MainActivity extends AppCompatActivity {
         selectItem(DrawerPositions.SPECIAL);
     }
 
+    public void privacyClicked(View view) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+        intent.setData(Uri.parse("https://www.convergence.com.hk/apps-privacy-policy"));
+        startActivity(intent);
+    }
     public void aboutClicked(View view) {
+//        MainActivity.mCs108Library4a.macRead(8);
+
+//        MainActivity.mCs108Library4a.setRfidOn(false);
+
+//        MainActivity.mCs108Library4a.barcodeSendCommandTrigger();
+//        MainActivity.mCs108Library4a.setVibrateOn(1);
+//        MainActivity.mCs108Library4a.barcodeReadTriggerStart();
+//        MainActivity.mCs108Library4a.setBarcodeOn(false);
+
+//        MainActivity.mCs108Library4a.getAutoBarStartSTop();
+//        MainActivity.mCs108Library4a.setAutoBarStartSTop(false);
+//        MainActivity.mCs108Library4a.getAutoRFIDAbort();
+//        MainActivity.mCs108Library4a.setAutoRFIDAbort(false);
+//        MainActivity.mCs108Library4a.setBatteryAutoReport(true);
+//        MainActivity.mCs108Library4a.triggerButtoneStatusRequest();
+//        MainActivity.mCs108Library4a.batteryLevelRequest();
+
+//        MainActivity.mCs108Library4a.resetSiliconLab();
+//        MainActivity.mCs108Library4a.getModelName();
+//        MainActivity.mCs108Library4a.getHostProcessorICSerialNumber();
+//        MainActivity.mCs108Library4a.hostProcessorICGetFirmwareVersion();
+
+//        MainActivity.mCs108Library4a.forceBTdisconnect();
+//        MainActivity.mCs108Library4a.getBluetoothICFirmwareName();
+//        MainActivity.mCs108Library4a.setBluetoothICFirmwareName("CS109 Reader TT");
+//        MainActivity.mCs108Library4a.getBluetoothICFirmwareVersion();
+
         selectItem(DrawerPositions.ABOUT);
     }
     public void connectClicked(View view) {

@@ -50,7 +50,7 @@ public class UcodeFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        actionBar.setTitle("ud"); //"UCODE DNA");
+        actionBar.setTitle(R.string.title_activity_ucodeDNA);
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
