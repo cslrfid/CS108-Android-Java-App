@@ -111,7 +111,7 @@ public class Utility {
             errorDisplay = "denied WRITE_EXTERNAL_STORAGE Permission !!!";
         } else if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) == false) errorDisplay = "Error in mouting external storage !!!";
         else {
-            File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + Environment.DIRECTORY_DOWNLOADS + "/cs108Java");
+            File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Environment.DIRECTORY_DOWNLOADS + File.separator + "cs108Java");
             if (path.exists() == false) path.mkdirs();
             if (path.exists() == false) errorDisplay = "Error in making directory !!!";
             else {
