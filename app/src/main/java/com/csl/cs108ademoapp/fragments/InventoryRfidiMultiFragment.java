@@ -524,10 +524,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 }
                 if (extra1Bank == 1) extra1Offset += 2;
                 if (extra2Bank == 1) extra2Offset += 2;
-                if (MainActivity.mCs108Library4a.getcsModel() == 710) {
-                    MainActivity.mCs108Library4a.enableMultibankReadConfig(0, extra1Bank, extra1Offset, extra1Count);
-                    MainActivity.mCs108Library4a.enableMultibankReadConfig(1, extra2Bank, extra2Offset, extra2Count);
-                } else {
+                if (true) {
                     MainActivity.mCs108Library4a.setTagRead(extra2Count != 0 && extra2Count != 0 ? 2 : 1);
                     MainActivity.mCs108Library4a.setAccessBank(extra1Bank, extra2Bank);
                     MainActivity.mCs108Library4a.setAccessOffset(extra1Offset, extra2Offset);

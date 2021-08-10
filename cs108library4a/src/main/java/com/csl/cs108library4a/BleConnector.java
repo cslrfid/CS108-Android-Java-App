@@ -212,9 +212,9 @@ class BleConnector extends BluetoothGattCallback {
                             if (DEBUG) appendToLog("starts in onServicesDiscovered");
                             mHandler.postDelayed(mReadCharacteristicRunnable, 500);
 
-                            if (true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                boolean bValue = gatt.requestMtu(255);
-                                appendToLog("requestMtu returns " + bValue);
+                            if (true && isCs710ServiceUUID() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                boolean bValue = gatt.requestMtu(255); //255);
+                                appendToLog("writeBleStreamOut: android 5 or above requests higher mtu returns " + bValue);
                                 //Log.i(TAG, "getMTU = " + getMTU());
                             }
                 }
@@ -342,8 +342,6 @@ class BleConnector extends BluetoothGattCallback {
             onCharacteristicWriteFailue++;
             if (DEBUG) appendToLog("status=" + status);
         } else {
-            if (mBluetoothGatt.executeReliableWrite()) appendToLog("Sucess in executeReliableWrite");
-            else appendToLog("failed to executedReliableWrite");
             if (DEBUG_BTDATA) appendToLog("characteristic=" + characteristic.getUuid().toString().substring(4, 8) + ", sent " + (mStreamWriteCount - mStreamWriteCountOld) + " bytes");
             _writeCharacteristic_in_progress = false;
         }
@@ -371,14 +369,7 @@ class BleConnector extends BluetoothGattCallback {
                 }
             }
             writeBleCounter++;
-            boolean bValue = false;
-            for (int i = 0; i < 3; i++) {
-                bValue = mBluetoothGatt.writeCharacteristic(mReaderStreamOutCharacteristic);
-                if (bValue) break;
-                if (true) appendToLog("writeCharacteristic(): Retry " + i + " due to ERROR for " + byteArrayToString(value));
-                long ltime = System.currentTimeMillis();
-                while (System.currentTimeMillis() - ltime < 100) { }
-            }
+            boolean bValue = mBluetoothGatt.writeCharacteristic(mReaderStreamOutCharacteristic);
             if (bValue == false) {
                 writeBleFailure++;
                 if (true) appendToLog("writeCharacteristic(): ERROR for " + byteArrayToString(value));
@@ -716,7 +707,7 @@ class BleConnector extends BluetoothGattCallback {
                 intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
                 mContext.registerReceiver(myReceiver, intentFilter);
 */
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { //android 8 = api level 26
                     BluetoothDevice mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(address);
                     appendToLog("mBluetoothDevice.getBondState() = " + mBluetoothDevice.getBondState());
                     boolean bOkBond = true;
@@ -725,11 +716,11 @@ class BleConnector extends BluetoothGattCallback {
                         if (bOkBond) appendToLog("sucess to creatBond");
                         else appendToLog("failed to createBond");
                     }
+                    appendToLog("writeBleStreamOut: android 8 or above sets PHY_LE_2M");
                     if (bOkBond) mBluetoothGatt = mBluetoothDevice.connectGatt(mContext, false, this, BluetoothDevice.TRANSPORT_LE, PHY_LE_2M);
                     else return  false;
                 } else {
-                    //mBluetoothGatt = mBluetoothAdapter.getRemoteDevice(address).connectGatt(mContext, false, this);
-                    return false;
+                    mBluetoothGatt = mBluetoothAdapter.getRemoteDevice(address).connectGatt(mContext, false, this);
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     if (true) {

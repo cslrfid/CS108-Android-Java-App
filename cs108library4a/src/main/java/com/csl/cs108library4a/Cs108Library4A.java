@@ -731,7 +731,7 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public long getPwrlevel() {
         long lValue = 0;
         if (isCs710ServiceUUID()) lValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getAntennaPower(-1);
-        else mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaPower(-1);
+        else lValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaPower(-1);
         appendToLog("AntennaPower = " + lValue);
         return lValue;
     }

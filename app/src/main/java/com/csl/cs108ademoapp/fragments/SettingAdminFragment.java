@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,7 +20,7 @@ import com.csl.cs108ademoapp.SettingTask;
 
 public class SettingAdminFragment extends CommonFragment {
     private CheckBox checkBoxInventoryBeep, checkBoxInventoryVibrate, checkBoxSaveFileEnable, checkBoxSaveCloudEnable, checkBoxSaveNewCloudEnable, checkBoxSaveAllCloudEnable;
-    private EditText editTextDeviceName, editTextIntraPkgDelay, editTextDeTime, editTextCycleDelay, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout;
+    private EditText editTextDeviceName, editTextCycleDelay, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout;
     private TextView textViewReaderModel;
     private Spinner spinnerQueryBattery, spinnerQueryRssi, spinnerQueryVibrateMode;
     private Button buttonCSLServer, button;
@@ -33,8 +32,6 @@ public class SettingAdminFragment extends CommonFragment {
     int rssiDisplaySelect = -1;
     int vibrateModeSelect = -1;
     String deviceName = "";
-    int intraPkgDelay = -1; int intraPkgDelayMin = 0; int intraPkgDelayMax = 100;
-    int deTime = -1; int deTimeMin = 0; int deTimeMax = 100;
     long cycleDelay = -1; long cycleDelayMin = 0; long cycleDelayMax = 2000;
     int iBeepCount = -1; int iBeepCountMin = 1; int iBeepCountMax = 100;
     int iVibrateTime = -1; int iVibrateTimeMin = 1; int iVibrateTimeMax = 999;
@@ -82,15 +79,6 @@ public class SettingAdminFragment extends CommonFragment {
             ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.admin_vibratemode_options, R.layout.custom_spinner_layout);
             targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerQueryVibrateMode.setAdapter(targetAdapter);
-        }
-
-        if (MainActivity.mCs108Library4a.getcsModel() == 710) {
-            TableRow tableRow = (TableRow) getActivity().findViewById(R.id.settingAdminIntraPackageDelayRow);
-            tableRow.setVisibility(View.VISIBLE);
-            editTextIntraPkgDelay = (EditText) getActivity().findViewById(R.id.settingAdminIntraPackageDelay);
-            tableRow = (TableRow) getActivity().findViewById(R.id.settingAdminDeTimeRow);
-            tableRow.setVisibility(View.VISIBLE);
-            editTextDeTime = (EditText) getActivity().findViewById(R.id.settingAdminDeTime);
         }
 
         TextView textViewAdminCycleDelayLabel = (TextView) getActivity().findViewById(R.id.settingAdminCycleDelayLabel);
@@ -256,8 +244,6 @@ public class SettingAdminFragment extends CommonFragment {
                         batteryDisplaySelect = spinnerQueryBattery.getSelectedItemPosition();
                         rssiDisplaySelect = spinnerQueryRssi.getSelectedItemPosition();
                         vibrateModeSelect = spinnerQueryVibrateMode.getSelectedItemPosition();
-                        if (editTextIntraPkgDelay != null)   intraPkgDelay = Integer.parseInt(editTextIntraPkgDelay.getText().toString());
-                        if (editTextDeTime != null)   deTime = Integer.parseInt(editTextDeTime.getText().toString());
                         if (editTextCycleDelay != null)   cycleDelay = Long.parseLong(editTextCycleDelay.getText().toString());
                         if (editTextBeepCount != null)   iBeepCount = Integer.parseInt(editTextBeepCount.getText().toString());
                         if (editTextVibrateTime != null)    iVibrateTime = Integer.parseInt(editTextVibrateTime.getText().toString());
@@ -319,8 +305,6 @@ public class SettingAdminFragment extends CommonFragment {
             spinnerQueryBattery.setSelection(MainActivity.mCs108Library4a.getBatteryDisplaySetting());
             spinnerQueryRssi.setSelection(MainActivity.mCs108Library4a.getRssiDisplaySetting());
             spinnerQueryVibrateMode.setSelection(MainActivity.mCs108Library4a.getVibrateModeSetting());
-            if (editTextIntraPkgDelay != null)   editTextIntraPkgDelay.setText(String.valueOf(MainActivity.mCs108Library4a.getIntraPkgDelay()));
-            if (editTextDeTime != null)   editTextDeTime.setText(String.valueOf(MainActivity.mCs108Library4a.getDeTime()));
             if (editTextCycleDelay != null)   editTextCycleDelay.setText(String.valueOf(MainActivity.mCs108Library4a.getCycleDelay()));
             if (editTextBeepCount != null)   editTextBeepCount.setText(String.valueOf(MainActivity.mCs108Library4a.getBeepCount()));
             if (editTextVibrateTime != null)   editTextVibrateTime.setText(String.valueOf(MainActivity.mCs108Library4a.getVibrateTime()));
@@ -368,23 +352,6 @@ public class SettingAdminFragment extends CommonFragment {
             sameSetting = false;
             if (MainActivity.mCs108Library4a.setVibrateModeSetting(vibrateModeSelect) == false)
                 invalidRequest = true;
-        }
-        if (invalidRequest == false && editTextIntraPkgDelay != null) {
-            if (MainActivity.mCs108Library4a.getIntraPkgDelay() != intraPkgDelay || sameCheck == false) {
-                sameSetting = false;
-                if (intraPkgDelay < intraPkgDelayMin || intraPkgDelay > intraPkgDelayMax) invalidRequest = true;
-                else if (MainActivity.mCs108Library4a.setIntraPkgDelay(intraPkgDelay) == false)
-                    invalidRequest = true;
-            }
-        }
-        if (invalidRequest == false && editTextDeTime != null) {
-            MainActivity.mCs108Library4a.appendToLog("deTime = " + deTime + ", " + MainActivity.mCs108Library4a.getDeTime());
-            if (MainActivity.mCs108Library4a.getDeTime() != deTime || sameCheck == false) {
-                sameSetting = false;
-                if (deTime < deTimeMin || deTime > deTimeMax) invalidRequest = true;
-                else if (MainActivity.mCs108Library4a.setDeTime(deTime) == false)
-                    invalidRequest = true;
-            }
         }
         if (invalidRequest == false && editTextCycleDelay != null) {
             if (MainActivity.mCs108Library4a.getCycleDelay() != cycleDelay || sameCheck == false) {
