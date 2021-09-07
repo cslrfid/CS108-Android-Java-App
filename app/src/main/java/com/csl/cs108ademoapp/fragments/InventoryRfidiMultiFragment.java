@@ -451,6 +451,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 if (MainActivity.selectFor != 5) {
                     MainActivity.mCs108Library4a.setSelectCriteria(1, true, 4, 5, MainActivity.selectHold, 3, 0x3B0, "00");
                     MainActivity.mCs108Library4a.setSelectCriteriaDisable(2);
+                    if (MainActivity.mCs108Library4a.getRetryCount() < 2) MainActivity.mCs108Library4a.setRetryCount(2);
                     MainActivity.selectFor = 5;
                 }
             } else {
@@ -470,13 +471,13 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 } else if (MainActivity.mDid.matches("E2806894B")) {
                     Log.i(TAG, "HelloK: Find E2806894B");
                     MainActivity.mCs108Library4a.setInvBrandId(false);
-                    MainActivity.mCs108Library4a.setSelectCriteria(1, true, 4, 0, 1, 0x203, "1", true);
-                    bNeedSelectedTagByTID = false;
+                    MainActivity.mCs108Library4a.setSelectCriteria(1, true, 4, 2, 1, 0x203, "1", true);
+                    if (false) bNeedSelectedTagByTID = false;
                 } else if (MainActivity.mDid.matches("E2806894C")) {
                     Log.i(TAG, "HelloK: Find E2806894C");
                     MainActivity.mCs108Library4a.setInvBrandId(true);
-                    MainActivity.mCs108Library4a.setSelectCriteria(1, true, 4, 0, 1, 0x204, "1", true);
-                    bNeedSelectedTagByTID = false;
+                    MainActivity.mCs108Library4a.setSelectCriteria(1, true, 4, 2, 1, 0x204, "1", true);
+                    if (false) bNeedSelectedTagByTID = false;
                 }
             } else if (mDid.indexOf("E28011") == 0) bNeedSelectedTagByTID = false;
             Log.i(TAG, "HelloK: going to setSelectedTagByTID with mDid = " + mDid + " with extra1Bank = " + extra1Bank + ", extra2Bank = " + extra2Bank + ", bNeedSelectedTagByTID = " + bNeedSelectedTagByTID + ", bMultiBank = " + bMultiBank);

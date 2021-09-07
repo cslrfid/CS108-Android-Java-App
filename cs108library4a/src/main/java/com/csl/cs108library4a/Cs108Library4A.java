@@ -227,16 +227,13 @@ public class Cs108Library4A extends Cs108Connector {
         if (bleConnectionNew) {
             if (bleConnection == false) {
                 bleConnection = bleConnectionNew;
-                if (true) appendToLog("Newly connected with serviceUUID2p1 = " + serviceUUID2p1);
                 cs108ConnectorDataInit();
                 setRfidOn(true);
-                if (serviceUUID2p1 == 1) setBarcodeOn(true);
+                setBarcodeOn(true);
                 hostProcessorICGetFirmwareVersion();
                 getBluetoothICFirmwareVersion();
                 channelOrderType = -1;
-                if (serviceUUID2p1 == 1) {
-                    //barcodeSendCommandLoadUserDefault();
-                    getBarcodeSerial(); //0x9003
+                {
                     getBarcodePreSuffix();
                     getBarcodeReadingMode();
                     //getBarcodeNoDuplicateReading();
@@ -244,30 +241,23 @@ public class Cs108Library4A extends Cs108Connector {
                     //getBarcodeEnable2dBarCodes();
                     //getBarcodePrefixOrder();
                     //getBarcodeVersion();
+                    //barcodeSendCommandLoadUserDefault();
+                    //barcodeSendQuerySystem();
 
                     setBatteryAutoReport(true); //0xA003
                     getHostProcessorICSerialNumber(); //0xb004
                 }
                 abortOperation();
                 getMacVer();
-                if (isCs710ServiceUUID() == false) { //following two instructions seems not used
+                { //following two instructions seems not used
                     mRfidDevice.mRfidReaderChip.mRx000Setting.writeMAC(0xC08, 0x100);
                     mRfidDevice.mRfidReaderChip.mRx000OemSetting.getVersionCode();
                 }
                 regionCode = null;
                 getCountryCode();
-                if (isCs710ServiceUUID() == false) {
+                {
                     mRfidDevice.mRfidReaderChip.mRx000OemSetting.getFreqModifyCode();
                     mRfidDevice.mRfidReaderChip.mRx000OemSetting.getSpecialCountryVersion();
-                }
-                if (isCs710ServiceUUID()) {
-                    getStartQValue();
-                    setSelectConfiguraton(0, null); getSelectConfiguraton(0);
-                    /*setMultibankReadConfig(0, null); */ getMultibankReadConfig(0);
-                    /*setMultibankReadConfig(1, null); */ getMultibankReadConfig(1);
-                    getDeTime();
-                    setEventPackageUplinkEnable((byte)9); getEventPackageUplinkEnable();
-                    getIntraPkgDelay();
                 }
                 getSerialNumber();
                 mHandler.postDelayed(checkVersionRunnable, 500);
@@ -297,7 +287,7 @@ public class Cs108Library4A extends Cs108Connector {
         if (readerDevice == null && readerDeviceConnect != null)    readerDevice = readerDeviceConnect;
         boolean result = false;
         if (readerDevice != null) {
-            setServiceUUIDType(readerDevice.getServiceUUID2p1()); appendToLog("connect1 with serviceUUID2p1 = " + serviceUUID2p1);
+            setServiceUUIDType(readerDevice.getServiceUUID2p1());
             result = super.connectBle(readerDevice);
             if (DEBUG) appendToLog("Result = " + result);
         }
@@ -332,11 +322,6 @@ public class Cs108Library4A extends Cs108Connector {
     };
 
     public String checkVersion() {
-        if (serviceUUID2p1 != 1) {
-            appendToLog("Skipped with null return");
-            return null;
-        }
-
         String macVersion = getMacVer();
         String hostVersion = hostProcessorICGetFirmwareVersion();
         String bluetoothVersion = getBluetoothICFirmwareVersion();
@@ -360,7 +345,6 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep
     public long getStreamInRate() { return super.getStreamInRate(); }
     public long getTagRate() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getTagRate();
         return -1;
     }
 
@@ -376,7 +360,6 @@ public class Cs108Library4A extends Cs108Connector {
 
     @Keep public void setReaderDefault() {
         appendToLog("PowerLevel");
-        if (serviceUUID2p1 != 1) return;
         setPowerLevel(300);
         setTagGroup(0, 0, 2);
         setPopulation(30);
@@ -401,7 +384,7 @@ public class Cs108Library4A extends Cs108Connector {
         @Override
         public void run() {
             appendToLog("Checkpoint -1");
-            if ((isCs710ServiceUUID() == false) && (mRfidDevice.mRfidReaderChip.mRx000Setting.getFreqChannelConfig() < 0 || (isBarcodeFailure() == false && mBarcodeDevice.bBarcodeTriggerMode == (byte)0xFF))) {
+            if (mRfidDevice.mRfidReaderChip.mRx000Setting.getFreqChannelConfig() < 0 || (isBarcodeFailure() == false && mBarcodeDevice.bBarcodeTriggerMode == (byte)0xFF)) {
                 appendToLog("Checkpoint 0");
                 if (DEBUG) appendToLog("checkVersionRunnable(): RESTART with FreqChannelConfig = " + mRfidDevice.mRfidReaderChip.mRx000Setting.getFreqChannelConfig() + ", bBarcodeTriggerMode = " + mBarcodeDevice.bBarcodeTriggerMode);
                 mHandler.removeCallbacks(checkVersionRunnable);
@@ -409,7 +392,7 @@ public class Cs108Library4A extends Cs108Connector {
             } else {
                 setSameCheck(false);
                 appendToLog("Checkpoint 1 with BarcodeFailure = " + isBarcodeFailure());
-                if (serviceUUID2p1 == 1 && isBarcodeFailure() == false) {
+                if (isBarcodeFailure() == false) {
                     appendToLog("Checkpoint 2");
                     if (mBarcodeDevice.checkPreSuffix(prefixRef, suffixRef) == false) barcodeSendCommandSetPreSuffix();
                     if (mBarcodeDevice.bBarcodeTriggerMode != 0x30) barcodeSendCommandTrigger();
@@ -427,17 +410,17 @@ public class Cs108Library4A extends Cs108Connector {
                     setAntennaInvCount(0xfffffffeL);
                 }
                 appendToLog("Checkpoint 6");
-                mRfidDevice.mRfidReaderChip.mRx000Setting.setDiagnosticConfiguration(false);
+                //mRfidDevice.mRfidReaderChip.mRx000Setting.setDiagnosticConfiguration(false);
                 loadSetting1File();
                 appendToLog("Checkpoint 7");
                 if (DEBUG) appendToLog("macVersion  = " + getMacVer());
-                if (serviceUUID2p1 == 1 && checkHostProcessorVersion(getMacVer(), 2, 6, 8)) {
+                if (checkHostProcessorVersion(getMacVer(), 2, 6, 8)) {
                     appendToLog("Checkpoint 8");
                     if (true) appendToLog("macVersion >= 2.6.8");
                     mRfidDevice.mRfidReaderChip.mRx000Setting.setTagDelay(tagDelaySetting);
                     mRfidDevice.mRfidReaderChip.mRx000Setting.setCycleDelay(cycleDelaySetting);
                     mRfidDevice.mRfidReaderChip.mRx000Setting.setInvModeCompact(true);
-                } else if (serviceUUID2p1 == 1) {
+                } else {
                     appendToLog("Checkpoint 9");
                     if (true) appendToLog("macVersion < 2.6.8");
                     mRfidDevice.mRfidReaderChip.mRx000Setting.setTagDelay(tagDelayDefaultNormalSetting);
@@ -523,6 +506,11 @@ public class Cs108Library4A extends Cs108Connector {
                             } else if (dataArray[0].matches("cycleDelay")) {
                                 setCycleDelay(Long.valueOf(dataArray[1]));
 
+                            } else if (dataArray[0].matches(("triggerReporting"))) {
+                                appendToLogView("triggerReporting = " + dataArray[1]);
+                                setTriggerReporting(dataArray[1].matches("true") ? true : false);
+                            } else if (dataArray[0].matches(("triggerReportingCount"))) {
+                                setTriggerReportingCount(Short.valueOf(dataArray[1]));
                             } else if (dataArray[0].matches(("inventoryBeep"))) {
                                 appendToLogView("inventoryBeep = " + dataArray[1]);
                                 setInventoryBeep(dataArray[1].matches("true") ? true : false);
@@ -580,9 +568,7 @@ public class Cs108Library4A extends Cs108Connector {
                             }
                         }
                     }
-                    setInvAlgo(invAlgo); setRetryCount(retry);
-                    setTagGroup(querySelect, querySession, queryTarget); setTagFocus(tagFocus > 0 ? true : false);
-                    setPopulation(population);
+                    setInvAlgo(invAlgo); setPopulation(population); setRetryCount(retry); setTagGroup(querySelect, querySession, queryTarget); setTagFocus(tagFocus > 0 ? true : false);
                     if (preFilterData != null && preFilterData.enable) setSelectCriteria(0, preFilterData.enable, preFilterData.target, preFilterData.action, preFilterData.bank, preFilterData.offset, preFilterData.mask, preFilterData.maskbit);
                 }
                 instream.close();
@@ -626,6 +612,8 @@ public class Cs108Library4A extends Cs108Connector {
             outData = "tagDelay," + String.valueOf(getTagDelay() +"\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
             outData = "cycleDelay," + String.valueOf(getCycleDelay() +"\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
 
+            outData = "triggerReporting," + String.valueOf(getTriggerReporting() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
+            outData = "triggerReportingCount," + String.valueOf(getTriggerReportingCount() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
             outData = "inventoryBeep," + String.valueOf(getInventoryBeep() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
             outData = "inventoryBeepCount," + String.valueOf(getBeepCount() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
             outData = "inventoryVibrate," + String.valueOf(getInventoryVibrate() + "\n"); stream.write(outData.getBytes()); appendToLog("outData = " + outData);
@@ -660,7 +648,6 @@ public class Cs108Library4A extends Cs108Connector {
     }
 
     public String getMacVer() {
-        if (isCs710ServiceUUID()) mRfidDevice.mRfidReaderChip.mCs710Setting.getMacVer();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getMacVer();
     }
 
@@ -668,15 +655,12 @@ public class Cs108Library4A extends Cs108Connector {
 
     //Configuration Calls: RFID
     public int getAntennaCycle() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getAntennaCycle();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaCycle();
     }
     public boolean setAntennaCycle(int antennaCycle) {
-        if (isCs710ServiceUUID()) mRfidDevice.mRfidReaderChip.mCs710Setting.setAntennaCycle(antennaCycle);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaCycle(antennaCycle);
     }
     public boolean setAntennaInvCount(long antennaInvCount) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setAntennaInvCount(antennaInvCount);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaInvCount(antennaInvCount);
     }
     public int getPortNumber() {
@@ -685,22 +669,19 @@ public class Cs108Library4A extends Cs108Connector {
     }
     public int getAntennaSelect() {
         int iValue = 0;
-        if (isCs710ServiceUUID()) iValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getAntennaSelect();
-        else iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaSelect();
+        iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaSelect();
         appendToLog("AntennaSelect = " + iValue);
         return iValue;
     }
     public boolean setAntennaSelect(int number) {
         boolean bValue = false;
-        if (isCs710ServiceUUID()) bValue = mRfidDevice.mRfidReaderChip.mCs710Setting.setAntennaSelect(number);
-        else bValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaSelect(number);
+        bValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaSelect(number);
         appendToLog("AntennaSelect = " + number + " returning " + bValue);
         return bValue;
     }
     public boolean getAntennaEnable() {
         int iValue;
-        if (isCs710ServiceUUID()) iValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getAntennaEnable();
-        else iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaEnable();
+        iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaEnable();
         appendToLog("AntennaEnable = " + iValue);
         if (iValue > 0) return true;
         else return false;
@@ -709,29 +690,25 @@ public class Cs108Library4A extends Cs108Connector {
         int iEnable = 0;
         if (enable) iEnable = 1;
         boolean bValue = false;
-        if (isCs710ServiceUUID()) bValue = mRfidDevice.mRfidReaderChip.mCs710Setting.setAntennaEnable(iEnable);
-        else bValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaEnable(iEnable);
+        bValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaEnable(iEnable);
         appendToLog("AntennaEnable = " + iEnable + " returning " + bValue);
         return bValue;
     }
     public long getAntennaDwell() {
         long lValue = 0;
-        if (isCs710ServiceUUID()) lValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getAntennaDwell();
-        else lValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaDwell();
+        lValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaDwell();
         appendToLog("AntennaDwell = " + lValue);
         return lValue;
     }
     public boolean setAntennaDwell(long antennaDwell) {
         boolean bValue = false;
-        if (isCs710ServiceUUID()) bValue = mRfidDevice.mRfidReaderChip.mCs710Setting.setAntennaDwell(antennaDwell);
-        else bValue =  mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaDwell(antennaDwell);
+        bValue =  mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaDwell(antennaDwell);
         appendToLog("AntennaDwell = " + antennaDwell + " returning " + bValue);
         return bValue;
     }
     @Keep public long getPwrlevel() {
         long lValue = 0;
-        if (isCs710ServiceUUID()) lValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getAntennaPower(-1);
-        else lValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaPower(-1);
+        lValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaPower(-1);
         appendToLog("AntennaPower = " + lValue);
         return lValue;
     }
@@ -739,60 +716,47 @@ public class Cs108Library4A extends Cs108Connector {
     public boolean setPowerLevel(long pwrlevel) {
         pwrlevelSetting = pwrlevel;
         boolean bValue = false;
-        if (isCs710ServiceUUID()) bValue = mRfidDevice.mRfidReaderChip.mCs710Setting.setAntennaPower(pwrlevel);
-        else bValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaPower(pwrlevel);
+        bValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaPower(pwrlevel);
         appendToLog("PowerLevel = " + pwrlevel + " returning " + bValue);
         return bValue;
     }
     public boolean setOnlyPowerLevel(long pwrlevel) {
         appendToLog("start");
-        if (isCs710ServiceUUID()) mRfidDevice.mRfidReaderChip.mCs710Setting.setAntennaPower(pwrlevel);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setAntennaPower(pwrlevel);
     }
 
     @Keep public int getQueryTarget() {
         int iValue;
-        if (isCs710ServiceUUID()) iValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoAbFlip();
-        else iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoAbFlip();
+        iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoAbFlip();
         if (iValue > 0) return 2;
         else {
-            if (isCs710ServiceUUID()) iValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getQueryTarget();
-            else iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getQueryTarget();
+            iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getQueryTarget();
             if (iValue > 0) return 1;
             return 0;
         }
     }
     @Keep public int getQuerySession() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getQuerySession();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getQuerySession();
     }
     @Keep public int getQuerySelect() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getQuerySelect();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getQuerySelect();
     }
     @Keep public boolean setTagGroup(int sL, int session, int target1) {
-        if (isCs710ServiceUUID()) {
-            appendToLog("Hello6: invAlgo = " + mRfidDevice.mRfidReaderChip.mCs710Setting.getInvAlgo());
-            mRfidDevice.mRfidReaderChip.mCs710Setting.setAlgoSelect(mRfidDevice.mRfidReaderChip.mCs710Setting.getInvAlgo());
-        }
+        appendToLog("Hello6: invAlgo = " + mRfidDevice.mRfidReaderChip.mRx000Setting.getInvAlgo());
+        appendToLog("setTagGroup: going to setAlgoSelect with invAlgo = " + mRfidDevice.mRfidReaderChip.mRx000Setting.getInvAlgo());
+        mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoSelect(mRfidDevice.mRfidReaderChip.mRx000Setting.getInvAlgo()); //Must not delete this line
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setQueryTarget(target1, session, sL);
     }
 
     int tagFocus = -1;
     public int getTagFocus() {
-        if (isCs710ServiceUUID()) tagFocus = mRfidDevice.mRfidReaderChip.mCs710Setting.getImpinjExtension();
-        else tagFocus = mRfidDevice.mRfidReaderChip.mRx000Setting.getImpinjExtension();
-        if (serviceUUID2p1 != 1) {
-            int tagFocus1 = tagFocus;
-            if (tagFocus > 0) tagFocus = ((tagFocus & 0x4) >> 2);
-            return tagFocus;
-        } else if (tagFocus > 0) tagFocus = ((tagFocus & 0x10) >> 4);
+        tagFocus = mRfidDevice.mRfidReaderChip.mRx000Setting.getImpinjExtension();
+        if (tagFocus > 0) tagFocus = ((tagFocus & 0x10) >> 4);
         return tagFocus;
     }
     public boolean setTagFocus(boolean tagFocusNew) {
         boolean bRetValue;
-        if (isCs710ServiceUUID()) bRetValue = mRfidDevice.mRfidReaderChip.mCs710Setting.setImpinjExtension(tagFocusNew);
-        else bRetValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setImpinjExtension(tagFocusNew);
+        bRetValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setImpinjExtension(tagFocusNew);
         if (bRetValue) tagFocus = (tagFocusNew ? 1 : 0);
         return bRetValue;
     }
@@ -800,15 +764,20 @@ public class Cs108Library4A extends Cs108Connector {
     boolean invAlgoSetting = true;
     @Keep public boolean getInvAlgo() {
         appendToLog("invAlgoSetting = " + invAlgoSetting);
-        if (serviceUUID2p1 != 1) invAlgoSetting = getInvAlgo1();
         return invAlgoSetting;
     }
-    @Keep public boolean setInvAlgo(boolean dynamicAlgo) { invAlgoSetting = dynamicAlgo; appendToLog("Hello6: invAlgo = " + dynamicAlgo); return setInvAlgo1(dynamicAlgo); }
-    @Keep public boolean setInvAlgoNoSave(boolean dynamicAlgo) { return setInvAlgo1(dynamicAlgo); }
+    @Keep public boolean setInvAlgo(boolean dynamicAlgo) {
+        invAlgoSetting = dynamicAlgo;
+        appendToLog("writeBleStreamOut: going to setInvAlgo with dynamicAlgo = " + dynamicAlgo);
+        return setInvAlgo1(dynamicAlgo);
+    }
+    @Keep public boolean setInvAlgoNoSave(boolean dynamicAlgo) {
+        appendToLog("writeBleStreamOut: going to setInvAlgo with dynamicAlgo = " + dynamicAlgo);
+        return setInvAlgo1(dynamicAlgo);
+    }
     boolean getInvAlgo1() {
         int iValue;
-        if (isCs710ServiceUUID()) iValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getInvAlgo();
-        else iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getInvAlgo();
+        iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getInvAlgo();
         if (iValue < 0) {
             return true;
         } else {
@@ -816,57 +785,49 @@ public class Cs108Library4A extends Cs108Connector {
         }
     }
     boolean setInvAlgo1(boolean dynamicAlgo) {
-        if (DEBUG) appendToLog("setInvAlgo(" + dynamicAlgo + ")");
-        appendToLog("Hello6: invAlgo = " + dynamicAlgo);
-        if (isCs710ServiceUUID()) mRfidDevice.mRfidReaderChip.mCs710Setting.setInvAlgo(dynamicAlgo ? 3 : 0);
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.setInvAlgo(dynamicAlgo ? 3 : 0);
+        boolean bValue = true;
+        int iAlgo = mRfidDevice.mRfidReaderChip.mRx000Setting.getInvAlgo();
+        int iRetry = getRetryCount();
+        int iAbFlip = mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoAbFlip();
+        appendToLog("writeBleStreamOut: going to setInvAlgo with dynamicAlgo = " + dynamicAlgo + ", iAlgo = " + iAlgo + ", iRetry = " + iRetry + ", iabFlip = " + iAbFlip);
+        if ( (dynamicAlgo && iAlgo == 0) || (dynamicAlgo == false && iAlgo == 3)) {
+            bValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setInvAlgo(dynamicAlgo ? 3 : 0);
+            appendToLog("After setInvAlgo, bValue = " + bValue);
+            if (bValue) bValue = setPopulation(getPopulation());
+            appendToLog("After setPopulation, bValue = " + bValue);
+            if (bValue) bValue = setRetryCount(iRetry);
+            appendToLog("After setRetryCount, bValue = " + bValue);
+            if (bValue) bValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoAbFlip(iAbFlip);
+            appendToLog("After setAlgoAbFlip, bValue = " + bValue);
+        }
+        return bValue;
     }
 
     public List<String> getProfileList() {
-        if (isCs710ServiceUUID() == false) return Arrays.asList(context.getResources().getStringArray(R.array.profile1_options));
-        else return Arrays.asList(context.getResources().getStringArray(R.array.profile3_options));
+        return Arrays.asList(context.getResources().getStringArray(R.array.profile1_options));
     }
     @Keep public int getCurrentProfile() {
         int iValue;
-        if (isCs710ServiceUUID()) iValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getCurrentProfile();
-        else iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getCurrentProfile();
-        if (serviceUUID2p1 != 1) {
-            List<String> profileList = getProfileList();
-            int index = 0;
-            for (index = 0; index < profileList.size(); index++) {
-                if (Integer.valueOf(profileList.get(index).substring(0, profileList.get(index).indexOf(":"))) == iValue)
-                    break;
-            }
-            if (index >= profileList.size()) index = -1;
-            iValue = index;
-        }
+        iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getCurrentProfile();
         return iValue;
     }
     @Keep public boolean setCurrentLinkProfile(int profile) {
         if (profile == getCurrentProfile()) return true;
-        if (serviceUUID2p1 != 1) {
-            List<String> profileList = getProfileList();
-            if (profile < 0 || profile >= profileList.size()) return false;
-            int profile1 = Integer.valueOf(profileList.get(profile).substring(0, profileList.get(profile).indexOf(":")));
-            appendToLog("old profile = " + profile + ", new profile = " + profile1);
-            profile = profile1;
-        }
         boolean result;
-        if (isCs710ServiceUUID()) result = mRfidDevice.mRfidReaderChip.mCs710Setting.setCurrentProfile(profile);
-        else result = mRfidDevice.mRfidReaderChip.mRx000Setting.setCurrentProfile(profile);
+        result = mRfidDevice.mRfidReaderChip.mRx000Setting.setCurrentProfile(profile);
         if (result) {
             mRfidDevice.mRfidReaderChip.setPwrManagementMode(false);
-            if (serviceUUID2p1 == 1) result = mRfidDevice.mRfidReaderChip.sendHostRegRequestHST_CMD(Cs108Connector.HostCommands.CMD_UPDATELINKPROFILE);
+            result = mRfidDevice.mRfidReaderChip.sendHostRegRequestHST_CMD(Cs108Connector.HostCommands.CMD_UPDATELINKPROFILE);
+        }
+        if (result && profile == 3) {
+            appendToLog("It is profile3");
+            if (getTagDelay() < 2) result = setTagDelay((byte)2);
         }
         return result;
     }
 
     public void resetEnvironmentalRSSI() { mRfidDevice.mRfidReaderChip.mRx000EngSetting.resetRSSI(); }
     public String getEnvironmentalRSSI() {
-        if (isCs710ServiceUUID()) {
-            appendToLog("Skipped to return 456");
-            return "456";
-        }
         appendToLog("Hello123: getEnvironmentalRSSI");
         mRfidDevice.mRfidReaderChip.setPwrManagementMode(false);
         int iValue =  mRfidDevice.mRfidReaderChip.mRx000EngSetting.getwideRSSI();
@@ -877,31 +838,15 @@ public class Cs108Library4A extends Cs108Connector {
     }
 
     public int getHighCompression() {
-        if (serviceUUID2p1 != 1) {
-            appendToLog("Skipped to return 1");
-            return 1;
-        }
         return mRfidDevice.mRfidReaderChip.mRx000MbpSetting.getHighCompression();
     }
     public int getRflnaGain() {
-        if (serviceUUID2p1 != 1) {
-            appendToLog("Skipped to return 1");
-            return 1;
-        }
         return mRfidDevice.mRfidReaderChip.mRx000MbpSetting.getRflnaGain();
     }
     public int getIflnaGain() {
-        if (serviceUUID2p1 != 1) {
-            appendToLog("Skipped to return 1");
-            return 1;
-        }
         return mRfidDevice.mRfidReaderChip.mRx000MbpSetting.getIflnaGain();
     }
     public int getAgcGain() {
-        if (serviceUUID2p1 != 1) {
-            appendToLog("Skipped to return 1");
-            return 1;
-        }
         return mRfidDevice.mRfidReaderChip.mRx000MbpSetting.getAgcGain();
     }
     public int getRxGain() { return mRfidDevice.mRfidReaderChip.mRx000MbpSetting.getRxGain(); }
@@ -2189,64 +2134,21 @@ public class Cs108Library4A extends Cs108Connector {
         return true;
     }
 
-    public byte getEventPackageUplinkEnable() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getEventPackageUplinkEnable();
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.getEventPackageUplinkEnable();
-    }
-    public boolean setEventPackageUplinkEnable(byte bEnable) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setEventPackageUplinkEnable(bEnable);
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.setEventPackageUplinkEnable(bEnable);
-    }
-
-    public int getIntraPkgDelay() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getIntraPkgDelay();
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.getIntraPkgDelay();
-    }
-    public boolean setIntraPkgDelay(int intraPkgDelay) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setIntraPkgDelay(intraPkgDelay);
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.setIntraPkgDelay(intraPkgDelay);
-    }
-
-    public byte[] getSelectConfiguraton(int iSelect) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getSelectConfiguraton(iSelect);
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectConfiguraton(iSelect);
-    }
-    public boolean setSelectConfiguraton(int iSelect, byte[] byteArrayData) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setSelectConfiguraton(iSelect, byteArrayData);
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.setSelectConfiguraton(iSelect, byteArrayData);
-    }
-    public byte[] getMultibankReadConfig(int iSet) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getMultibankReadConfig(iSet);
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.getMultibankReadConfig(iSet);
-    }
     public boolean setMultibankReadConfig(int iSet, byte[] byteArrayData) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setMultibankReadConfig(iSet, byteArrayData);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setMultibankReadConfig(iSet, byteArrayData);
     }
-    @Keep public int getDeTime() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getDeTime();
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.getDeTime();
-    }
-    @Keep public boolean setDeTime(int deTime) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setDeTime(deTime);
-        return mRfidDevice.mRfidReaderChip.mRx000Setting.setDeTime(deTime);
-    }
-
     long cycleDelaySetting;
     @Keep public long getCycleDelay() {
-        if (isCs710ServiceUUID()) cycleDelaySetting = mRfidDevice.mRfidReaderChip.mCs710Setting.getCycleDelay();
-        else cycleDelaySetting = mRfidDevice.mRfidReaderChip.mRx000Setting.getCycleDelay();
+        cycleDelaySetting = mRfidDevice.mRfidReaderChip.mRx000Setting.getCycleDelay();
         return cycleDelaySetting;
     }
     @Keep public boolean setCycleDelay(long cycleDelay) {
         cycleDelaySetting = cycleDelay;
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setCycleDelay(cycleDelay);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setCycleDelay(cycleDelay);
     }
 
     @Keep public void getAuthenticateReplyLength() {
-        if (isCs710ServiceUUID()) mRfidDevice.mRfidReaderChip.mCs710Setting.getAuthenticateReplyLength();
-        else mRfidDevice.mRfidReaderChip.mRx000Setting.getAuthenticateReplyLength();
+        mRfidDevice.mRfidReaderChip.mRx000Setting.getAuthenticateReplyLength();
     }
     @Keep public boolean setTam1Configuration(int keyId, String matchData) {
         if (keyId > 255) return false;
@@ -2257,8 +2159,7 @@ public class Cs108Library4A extends Cs108Connector {
         matchData = preChallenge + matchData;
         retValue = setAuthMatchData(matchData);
         if (retValue) {
-            if (isCs710ServiceUUID()) retValue = mRfidDevice.mRfidReaderChip.mCs710Setting.setHST_AUTHENTICATE_CFG(true, true, matchData.length() * 4);
-            else retValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setHST_AUTHENTICATE_CFG(true, true, matchData.length() * 4);
+            retValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setHST_AUTHENTICATE_CFG(true, true, matchData.length() * 4);
         }
         return retValue;
     }
@@ -2279,8 +2180,7 @@ public class Cs108Library4A extends Cs108Connector {
         matchData = preChallenge + matchData + postChallenge;
         retValue = setAuthMatchData(matchData);
         if (retValue) {
-            if (isCs710ServiceUUID()) retValue = mRfidDevice.mRfidReaderChip.mCs710Setting.setHST_AUTHENTICATE_CFG(true, true, matchData.length() * 4);
-            else retValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setHST_AUTHENTICATE_CFG(true, true, matchData.length() * 4);
+            retValue = mRfidDevice.mRfidReaderChip.mRx000Setting.setHST_AUTHENTICATE_CFG(true, true, matchData.length() * 4);
         }
         return retValue;
     }
@@ -2288,8 +2188,7 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public String getAuthMatchData() {
         int iValue1 = 96;
         String strValue;
-        if (isCs710ServiceUUID()) strValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getAuthMatchData();
-        else strValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAuthMatchData();
+        strValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAuthMatchData();
         if (strValue == null) return null;
         int strLength = iValue1 / 4;
         if (strLength * 4 != iValue1)  strLength++;
@@ -2298,22 +2197,18 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public boolean setAuthMatchData(String mask) {
         boolean result = false;
         if (mask != null) {
-            if (isCs710ServiceUUID()) result =mRfidDevice.mRfidReaderChip.mCs710Setting.setAuthMatchData(mask);
-            else result =mRfidDevice.mRfidReaderChip.mRx000Setting.setAuthMatchData(mask);
+            result =mRfidDevice.mRfidReaderChip.mRx000Setting.setAuthMatchData(mask);
         }
         return result;
     }
 
     @Keep public int getUntraceableEpcLength() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getUntraceableEpcLength();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getUntraceableEpcLength();
     }
     @Keep public boolean setUntraceable(boolean bHideEpc, int ishowEpcSize, int iHideTid, boolean bHideUser, boolean bHideRange) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setHST_UNTRACEABLE_CFG(bHideRange ? 2 : 0, bHideUser, iHideTid, ishowEpcSize, bHideEpc, false);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setHST_UNTRACEABLE_CFG(bHideRange ? 2 : 0, bHideUser, iHideTid, ishowEpcSize, bHideEpc, false);
     }
     @Keep public boolean setUntraceable(int range, boolean user, int tid, int epcLength, boolean epc, boolean uxpc) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setHST_UNTRACEABLE_CFG(range, user, tid, epcLength, epc, uxpc);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setHST_UNTRACEABLE_CFG(range, user, tid, epcLength, epc, uxpc);
     }
 
@@ -2411,124 +2306,98 @@ public class Cs108Library4A extends Cs108Connector {
 
     //    aetOperationMode(continuous, antennaSequenceMode, result)
     @Keep public int getStartQValue() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoStartQ(3);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoStartQ(3);
     }
     @Keep public int getMaxQValue() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoMaxQ(3);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoMaxQ(3);
     }
     @Keep public int getMinQValue() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoMinQ(3);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoMinQ(3);
     }
     public int getRetryCount() {
-        if (isCs710ServiceUUID()) {
-            appendToLog("Skip to return 0");
-            return 0;
-        }
         int algoSelect;
-        if (isCs710ServiceUUID()) algoSelect = mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoSelect();
-        else algoSelect = mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoSelect();
+        algoSelect = mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoSelect();
         if (algoSelect == 0 || algoSelect == 3) {
-            if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoRetry(algoSelect);
             return mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoRetry(algoSelect);
         }
         else return -1;
     }
     public boolean setRetryCount(int retryCount) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setAlgoRetry(retryCount);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoRetry(retryCount);
     }
 
     @Keep public boolean setDynamicQParms(int startQValue, int minQValue, int maxQValue, int retryCount) {
-        appendToLog("Hello6: invAlgo = 3");
+        appendToLog("setTagGroup: going to setAlgoSelect with input as 3");
         boolean result;
-        if (isCs710ServiceUUID()) result = mRfidDevice.mRfidReaderChip.mCs710Setting.setAlgoSelect(3);
-        else result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoSelect(3);
+        result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoSelect(3);
         if (result) {
-            if (isCs710ServiceUUID()) result = mRfidDevice.mRfidReaderChip.mCs710Setting.setAlgoStartQ(startQValue, maxQValue, minQValue, -1, -1, -1);
-            else result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoStartQ(startQValue, maxQValue, minQValue, -1, -1, -1);
+            result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoStartQ(startQValue, maxQValue, minQValue, -1, -1, -1);
         }
         if (result) result = setRetryCount(retryCount);
         return result;
     }
 
     @Keep public int getFixedQValue() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoStartQ(0);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoStartQ(0);
     }
     @Keep public int getFixedRetryCount() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoRetry(0);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoRetry(0);
     }
     @Keep public boolean getRepeatUnitNoTags() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoRunTilZero(0) == 1 ? true : false;
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoRunTilZero(0) == 1 ? true : false;
     }
 
     @Keep public boolean setFixedQParms(int qValue, int retryCount, boolean repeatUnitNoTags) {
         if (DEBUG) appendToLog("qValue=" + qValue + ", retryCount = " + retryCount + ", repeatUntilNoTags = " + repeatUnitNoTags);
         boolean result;
-        if (isCs710ServiceUUID()) result = mRfidDevice.mRfidReaderChip.mCs710Setting.setAlgoSelect(0);
-        else result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoSelect(0);
+        appendToLog("setTagGroup: going to setAlgoSelect with input as 0");
+        result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoSelect(0);
         appendToLog("Hello6: invAlgo = 0 ");
         if (qValue == getFixedQValue() && retryCount == getFixedRetryCount() && repeatUnitNoTags == getRepeatUnitNoTags())  return true;
         appendToLog("Hello6: new invAlgo parameters are set");
         if (result) {
-            if (isCs710ServiceUUID()) result = mRfidDevice.mRfidReaderChip.mCs710Setting.setAlgoStartQ(qValue, -1, -1, -1, -1, -1);
-            else result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoStartQ(qValue, -1, -1, -1, -1, -1);
+            result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoStartQ(qValue, -1, -1, -1, -1, -1);
         }
         if (result) result = setRetryCount(retryCount);
         if (result) {
-            if (isCs710ServiceUUID()) result = mRfidDevice.mRfidReaderChip.mCs710Setting.setAlgoRunTilZero(repeatUnitNoTags ? 1 : 0);
-            else result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoRunTilZero(repeatUnitNoTags ? 1 : 0);
+            result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoRunTilZero(repeatUnitNoTags ? 1 : 0);
         }
         return result;
     }
 
     @Keep public int getInvSelectIndex() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getInvSelectIndex();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getInvSelectIndex();
     }
     @Keep public boolean getSelectEnable() {
         int iValue;
-        if (isCs710ServiceUUID()) iValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getSelectEnable();
-        else iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectEnable();
+        iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectEnable();
         if (iValue < 0) return false;
         return iValue != 0 ? true : false;
     }
     @Keep public int getSelectTarget() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getSelectTarget();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectTarget();
     }
     @Keep public int getSelectAction() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getSelectAction();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectAction();
     }
     @Keep public int getSelectMaskBank() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getSelectMaskBank();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectMaskBank();
     }
     @Keep public int getSelectMaskOffset() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getSelectMaskOffset();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectMaskOffset();
     }
     @Keep public String getSelectMaskData() {
         int iValue1;
-        if (isCs710ServiceUUID()) iValue1 = mRfidDevice.mRfidReaderChip.mCs710Setting.getSelectMaskLength();
-        else iValue1 = mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectMaskLength();
+        iValue1 = mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectMaskLength();
         if (iValue1 < 0)    return null;
         String strValue;
-        if (isCs710ServiceUUID()) strValue = mRfidDevice.mRfidReaderChip.mCs710Setting.getSelectMaskData();
-        else strValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectMaskData();
+        strValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getSelectMaskData();
         if (strValue == null) return null;
         int strLength = iValue1 / 4;
         if (strLength * 4 != iValue1)  strLength++;
         return strValue.substring(0, strLength);
     }
     @Keep public boolean setInvSelectIndex(int invSelect) {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.setInvSelectIndex(invSelect);
         return mRfidDevice.mRfidReaderChip.mRx000Setting.setInvSelectIndex(invSelect);
     }
     class PreFilterData {
@@ -2617,37 +2486,6 @@ public class Cs108Library4A extends Cs108Connector {
         if (mask.length() > maskbytelen ) mask = mask.substring(0, maskbytelen);
         if (index == 0) preMatchData = new PreMatchData(enable, target, action, bank, offset, mask, maskblen, mRfidDevice.mRfidReaderChip.mRx000Setting.getQuerySelect(), getPwrlevel(), getInvAlgo(), getQValue());
         boolean result = true;
-        if (serviceUUID2p1 != 1) {
-            byte[] byteArrayData = new byte[] {
-                    0x01, 0x01, 0, 0, 0, 32, 16,
-                    (byte) 0xE2, (byte) 0x80, 0, 0,   0, 0, 0, 0,
-                    0, 0, 0, 0,   0, 0, 0, 0,
-                    0, 0, 0, 0,   0, 0, 0, 0,
-                    0, 0, 0, 0,   0, 0, 0, 0,
-                    4, 0, 0
-            };
-            byteArrayData[0] = (enable ? (byte)1 : 0);
-            byteArrayData[39] = (byte)target;
-            byteArrayData[40] = (byte)action;
-            byteArrayData[41] = (byte)delay;
-            byteArrayData[1] = (byte)bank;
-            byteArrayData[5] = (byte)offset;
-            byteArrayData[6] = (byte)maskblen;
-            for (int i = 0; i < mask.length(); i+=2) {
-                if (i != mask.length() - 1) byteArrayData[7+i/2] = (byte)Integer.parseInt(mask.substring(i/2, i+2), 16);
-                else {
-                    byte byteValue = (byte)Integer.parseInt(mask.substring(i), 16);
-                    byteValue <<= 4;
-                    byteArrayData[7+i/2] = byteValue;
-                }
-                appendToLog("settingUpdate end with i = " + i + ", data = " + String.format("%02X", byteArrayData[7+i/2]));
-            }
-            appendToLog("settingUpdate end with index = " + index + ", byteArrayData = " + byteArrayToString(byteArrayData));
-            boolean bValue = setSelectConfiguraton(index, byteArrayData);
-            if (bValue) System.arraycopy(byteArrayData, 0, mRfidDevice.mRfidReaderChip.mRx000Setting.selectConfiguration[index], 0, byteArrayData.length);
-            return bValue;
-        }
-
         if (index != mRfidDevice.mRfidReaderChip.mRx000Setting.getInvSelectIndex()) result = mRfidDevice.mRfidReaderChip.mRx000Setting.setInvSelectIndex(index);
         if (result) result = mRfidDevice.mRfidReaderChip.mRx000Setting.setSelectEnable(enable ? 1 : 0, target, action, delay);
         if (result) result = mRfidDevice.mRfidReaderChip.mRx000Setting.setSelectMaskBank(bank);
@@ -2741,24 +2579,6 @@ public class Cs108Library4A extends Cs108Connector {
 
                 retValue = true;
                 HostCommands hostCommand = HostCommands.CMD_18K6CINV;
-                if (serviceUUID2p1 != 1) {
-                    int bSelect = getAntennaSelect();
-                    boolean bSelectEnable = getSelectEnable();
-                    boolean bModeCompact = mRfidDevice.mRfidReaderChip.mRx000Setting.getInvModeCompact();
-                    boolean bMultiBank = true;
-                    appendToLog("startOperation with bSelect = " + bSelect + ", bSelectEnable = " + bSelectEnable + ", bModeCompact = " + bModeCompact);
-                    if (bSelectEnable) {
-                        if (bSelect != 3) setAntennaSelect(3);
-                        if (bMultiBank) hostCommand = HostCommands.CMD_18K6CINV_MB_SELECT;
-                        else if (bModeCompact) hostCommand = HostCommands.CMD_18K6CINV_COMPACT_SELECT;
-                        else hostCommand = HostCommands.CMD_18K6CINV_SELECT;
-                    } else {
-                        if (bSelect == 3) setAntennaSelect(0);
-                        if (bMultiBank) hostCommand = HostCommands.CMD_18K6CINV_MB;
-                        else if (bModeCompact) hostCommand = HostCommands.CMD_18K6CINV_COMPACT;
-                        else hostCommand = HostCommands.CMD_18K6CINV;
-                    }
-                }
                 retValue = mRfidDevice.mRfidReaderChip.sendHostRegRequestHST_CMD(hostCommand);
                 break;
         }
@@ -2775,14 +2595,12 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public boolean abortOperation() {
         boolean bRetValue = false;
         if (mRfidDevice.mRfidReaderChip != null) {
-            if (serviceUUID2p1 == 1) bRetValue = mRfidDevice.mRfidReaderChip.sendControlCommand(Cs108Connector.ControlCommands.ABORT);
-            else bRetValue = sendHostRegRequestHST_CMD(Cs108Connector.HostCommands.NULL);
+            bRetValue = mRfidDevice.mRfidReaderChip.sendControlCommand(Cs108Connector.ControlCommands.ABORT);
         }
         mRfidDevice.setInventoring(false);
         return bRetValue;
     }
     @Keep public void restoreAfterTagSelect() {
-        if (serviceUUID2p1 != 1) return;
         if (true) loadSetting1File();
         else if (DEBUG) appendToLog("postMatchDataChanged = " + postMatchDataChanged + ",  preMatchDataChanged = " + preMatchDataChanged + ", macVersion = " + getMacVer());
         if (checkHostProcessorVersion(getMacVer(), 2, 6, 8)) {
@@ -2796,7 +2614,7 @@ public class Cs108Library4A extends Cs108Connector {
             setPostMatchCriteria(postMatchDataOld.enable, postMatchDataOld.target, postMatchDataOld.offset, postMatchDataOld.mask);
             appendToLog("PowerLevel");
             setPowerLevel(postMatchDataOld.pwrlevel);
-            appendToLog("Hello6: invAlgo = " + postMatchDataOld.invAlgo); setInvAlgo1(postMatchDataOld.invAlgo);
+            appendToLog("writeBleStreamOut: invAlgo = " + postMatchDataOld.invAlgo); setInvAlgo1(postMatchDataOld.invAlgo);
             setQValue1(postMatchDataOld.qValue);
         }
         if (preMatchDataChanged) {
@@ -2804,7 +2622,7 @@ public class Cs108Library4A extends Cs108Connector {
             mRfidDevice.mRfidReaderChip.mRx000Setting.setQuerySelect(preMatchDataOld.querySelect);
             appendToLog("PowerLevel");
             setPowerLevel(preMatchDataOld.pwrlevel);
-            appendToLog("Hello6: invAlgo = " + preMatchDataOld.invAlgo); setInvAlgo1(preMatchDataOld.invAlgo);
+            appendToLog("writeBleStreamOut: invAlgo = " + preMatchDataOld.invAlgo); setInvAlgo1(preMatchDataOld.invAlgo);
             setQValue1(preMatchDataOld.qValue);
             setSelectCriteria(0, preMatchDataOld.enable, preMatchDataOld.target, preMatchDataOld.action, 0, preMatchDataOld.bank, preMatchDataOld.offset, preMatchDataOld.mask, preMatchDataOld.maskblen);
         }
@@ -2857,12 +2675,12 @@ public class Cs108Library4A extends Cs108Connector {
         }
         if (setSuccess) setSuccess = setOnlyPowerLevel(pwrlevel);
         appendToLog("Hello6: going to do setFixedQParms with setSuccess = " + setSuccess);
-        if (setSuccess) setSuccess = setFixedQParms(qValue, 5, false);
+        /*if (setSuccess) setSuccess = setFixedQParms(qValue, 5, false);
         mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoAbFlip(1);
         if (setSuccess) {
-            appendToLog("Hello6: invAlgo = false");
+            appendToLog("writeBleStreamOut: invAlgo = false");
             setSuccess = setInvAlgo1(false);
-        }
+        }*/
         if (setSuccess) setSuccess = mRfidDevice.mRfidReaderChip.mRx000Setting.setMatchRep(matchRep);
         if (setSuccess) setSuccess = mRfidDevice.mRfidReaderChip.mRx000Setting.setTagDelay(tagDelayDefaultNormalSetting);
         if (setSuccess) setSuccess = mRfidDevice.mRfidReaderChip.mRx000Setting.setCycleDelay(cycleDelaySetting);
@@ -3009,121 +2827,7 @@ public class Cs108Library4A extends Cs108Connector {
     final RegionCodes regionCodeDefault4Country2 = RegionCodes.FCC;
     RegionCodes[] getRegionList() {
         RegionCodes[] regionList = null;
-        if (isCs710ServiceUUID()) {
-            appendToLog("StreamOut: countrycode = " + getCountryCode());
-            switch (getCountryCode()) {
-                case 1:
-                    if (regionCode == null) regionCode = RegionCodes.Albania1;
-                    regionList = new RegionCodes[]{
-                            RegionCodes.Albania1, RegionCodes.Algeria1, RegionCodes.Algeria2, RegionCodes.Armenia, RegionCodes.Austria1,
-                            RegionCodes.Azerbaijan, RegionCodes.Bahrain, RegionCodes.Bangladesh, RegionCodes.Belarus, RegionCodes.Belgium1,
-                            RegionCodes.Bosnia, RegionCodes.Botswana, RegionCodes.Brunei1, RegionCodes.Bulgaria1, RegionCodes.Cameroon,
-                            RegionCodes.Congo, RegionCodes.Cotedlvoire, RegionCodes.Croatia, RegionCodes.Cyprus1, RegionCodes.Czech1,
-                            RegionCodes.Denmark1, RegionCodes.Egypt, RegionCodes.Estonia, RegionCodes.Finland1, RegionCodes.France,
-                            RegionCodes.Georgia, RegionCodes.Germany, RegionCodes.Ghana, RegionCodes.Greece, RegionCodes.HongKong1,
-                            RegionCodes.Hungary1, RegionCodes.Iceland, RegionCodes.India, RegionCodes.Iran, RegionCodes.Ireland1,
-                            RegionCodes.Italy, RegionCodes.Jordan, RegionCodes.Kazakhstan, RegionCodes.Kenya, RegionCodes.Kuwait,
-                            RegionCodes.Kyrgyz, RegionCodes.Latvia, RegionCodes.Lebanon, RegionCodes.Libya, RegionCodes.Liechtenstein1,
-                            RegionCodes.Lithuania1, RegionCodes.Luxembourg1, RegionCodes.Macedonia, RegionCodes.Malta1, RegionCodes.Mauritius,
-                            RegionCodes.Moldova1, RegionCodes.Montenegro, RegionCodes.Morocco, RegionCodes.Netherlands, RegionCodes.NewZealand1,
-                            RegionCodes.Nigeria, RegionCodes.Norway1, RegionCodes.Oman, RegionCodes.Pakistan, RegionCodes.Poland,
-                            RegionCodes.Portugal, RegionCodes.Romania, RegionCodes.Russia1, RegionCodes.SAfrica1, RegionCodes.Senegal,
-                            RegionCodes.Serbia, RegionCodes.Singapore1, RegionCodes.Slovak1, RegionCodes.Slovenia1, RegionCodes.Spain,
-                            RegionCodes.SriLanka, RegionCodes.Sudan, RegionCodes.Sweden1, RegionCodes.Switzerland1, RegionCodes.Syria,
-                            RegionCodes.Tajikistan, RegionCodes.Tanzania, RegionCodes.Tunisia, RegionCodes.Turkey, RegionCodes.Turkmenistan,
-                            RegionCodes.UAE, RegionCodes.Uganda, RegionCodes.UK1, RegionCodes.Ukraine, RegionCodes.Vietnam1,
-                            RegionCodes.Yemen, RegionCodes.Zimbabwe
-                    };
-                    break;
-                default:
-                case 2:
-                    String strSpecialCountryVersion;
-                    if (isCs710ServiceUUID()) strSpecialCountryVersion = mRfidDevice.mRfidReaderChip.mCs710Setting.getSpecialCountryVersion();
-                    else strSpecialCountryVersion = mRfidDevice.mRfidReaderChip.mRx000Setting.getSpecialCountryVersion();
-                    appendToLog("StreamOut: strSpecialCountryVersion = " + strSpecialCountryVersion);
-                    if (strSpecialCountryVersion == null) {
-                        if (regionCode == null) regionCode = RegionCodes.Bolivia;
-                        regionList = new RegionCodes[]{
-                                RegionCodes.Bolivia, RegionCodes.Canada, RegionCodes.Mexico, RegionCodes.USA
-                        };
-                    } else if (strSpecialCountryVersion.contains("AS")) {
-                        if (regionCode == null) regionCode = RegionCodes.Australia1;
-                        regionList = new RegionCodes[]{
-                                RegionCodes.Australia1, RegionCodes.Australia2
-                        };
-                    } else if (strSpecialCountryVersion.contains("NZ")) {
-                        regionCode = RegionCodes.NewZealand2;
-                        regionList = new RegionCodes[]{
-                                RegionCodes.NewZealand2
-                        };
-                    } else if (strSpecialCountryVersion.contains("OFCA")) {
-                        regionCode = RegionCodes.HongKong2;
-                        appendToLog("regionCode = " + regionCode.toString());
-                        regionList = new RegionCodes[]{
-                                RegionCodes.HongKong2
-                        };
-                    } else if (strSpecialCountryVersion.contains("RW")) {
-                        if (regionCode == null) regionCode = RegionCodes.Albania2;
-                        regionList = new RegionCodes[]{
-                                RegionCodes.Albania2, RegionCodes.Argentina, RegionCodes.Brazil1, RegionCodes.Brazil2, RegionCodes.Chile1,
-                                RegionCodes.Chile2, RegionCodes.Chile3, RegionCodes.Colombia, RegionCodes.CostaRica, RegionCodes.Cuba,
-                                RegionCodes.Dominican, RegionCodes.Ecuador, RegionCodes.ElSalvador, RegionCodes.Guatemala, RegionCodes.Jamaica,
-                                RegionCodes.Nicaragua, RegionCodes.Panama, RegionCodes.Paraguay, RegionCodes.Peru, RegionCodes.Philippines,
-                                RegionCodes.Singapore2, RegionCodes.Thailand, RegionCodes.Trinidad, RegionCodes.Uruguay, RegionCodes.Venezuela
-                        };
-                    } else {
-                        regionCode = null;
-                        regionList = new RegionCodes[]{
-                        };
-                    }
-                    break;
-                case 3:
-                    regionCode = null;
-                    regionList = new RegionCodes[]{
-                    };
-                    break;
-                case 4:
-                    if (regionCode == null) regionCode = RegionCodes.Taiwan1;
-                    regionList = new RegionCodes[]{
-                            RegionCodes.Taiwan1, RegionCodes.Taiwan2
-                    };
-                    break;
-                case 5:
-                    regionCode = null;
-                    regionList = new RegionCodes[]{
-                    };
-                    break;
-                case 6:
-                    regionCode = RegionCodes.Korea;
-                    regionList = new RegionCodes[]{
-                            RegionCodes.Korea
-                    };
-                    break;
-                case 7:
-                    if (regionCode == null) regionCode = RegionCodes.Algeria4;
-                    regionList = new RegionCodes[]{
-                            RegionCodes.Algeria4, RegionCodes.Brunei2, RegionCodes.Cambodia, RegionCodes.China, RegionCodes.Indonesia,
-                            RegionCodes.KoreaDPR, RegionCodes.Macao, RegionCodes.Malaysia, RegionCodes.Mongolia, RegionCodes.Vietnam2
-                    };
-                    break;
-                case 8:
-                    if (regionCode == null) regionCode = RegionCodes.Japan4;
-                    regionList = new RegionCodes[]{
-                            RegionCodes.Japan4, RegionCodes.Japan6
-                    };
-                    break;
-                case 9:
-                    if (regionCode == null) regionCode = RegionCodes.Algeria3;
-                    regionList = new RegionCodes[]{
-                            RegionCodes.Algeria3, RegionCodes.Austria2, RegionCodes.Belgium2, RegionCodes.Bulgaria2, RegionCodes.Cyprus2,
-                            RegionCodes.Czech2, RegionCodes.Denmark2, RegionCodes.Finland2, RegionCodes.Hungary2, RegionCodes.Ireland2,
-                            RegionCodes.Israel, RegionCodes.Liechtenstein2, RegionCodes.Lithuania2, RegionCodes.Luxembourg2, RegionCodes.Malta2,
-                            RegionCodes.Moldova2, RegionCodes.Norway2, RegionCodes.Russia3, RegionCodes.SAfrica2, RegionCodes.Slovak2,
-                            RegionCodes.Solvenia2, RegionCodes.Sweden2, RegionCodes.Switzerland2, RegionCodes.UK2
-                    };
-                    break;
-            }
-        } else {
+        {
             switch (getCountryCode()) {
                 case 1:
                     if (regionCode == null) regionCode = RegionCodes.ETSI;
@@ -3161,6 +2865,9 @@ public class Cs108Library4A extends Cs108Connector {
                         if (strSpecialCountryVersion.contains("OFCA")) {
                             regionCode = RegionCodes.HK;
                             regionList = new RegionCodes[]{RegionCodes.HK};
+                        } else if (strSpecialCountryVersion.contains("SG")) {
+                            regionCode = RegionCodes.SG;
+                            regionList = new RegionCodes[]{RegionCodes.SG};
                         } else if (strSpecialCountryVersion.contains("AS")) {
                             regionCode = RegionCodes.AU;
                             regionList = new RegionCodes[]{RegionCodes.AU};
@@ -3239,18 +2946,6 @@ public class Cs108Library4A extends Cs108Connector {
         if (DEBUG) appendToLog("this.countryInList =" + this.countryInList + ", countryInList = " + countryInList);
         if (this.countryInList == countryInList)    return true;
 
-        if (serviceUUID2p1 != 1) return true;
-        if (serviceUUID2p1 != 1) {
-            byte[] data = new byte[2];
-            data[0] = 0;
-            data[1] = (byte) ((countryInList + 1) & 0xFF);
-            boolean bValue = mRfidDevice.mRfidReaderChip.mCs710Setting.writeMAC3(0x3014, data);
-            if (bValue) {
-                this.countryInList = countryInList; appendToLog("saveSetting2File testpoint 3");
-            }
-            return bValue;
-        }
-
         RegionCodes[] regionList = getRegionList();
         if (DEBUG) appendToLog("regionList length =" + (regionList == null ? "NULL" : regionList.length));
         if (regionList == null)     return false;
@@ -3316,41 +3011,9 @@ public class Cs108Library4A extends Cs108Connector {
     public boolean getChannelHoppingDefault() {
         int countryCode = getCountryCode();
         appendToLog("getChannelHoppingDefault: countryCode (for channelOrderType) = " + countryCode);
-        if (serviceUUID2p1 == 1) {
+        {
             if (countryCode == 1 || countryCode == 8 || countryCode == 9) return false;
             return true;
-        } else {
-            boolean bValue = false;
-            switch (countryCode) {
-                case 1:
-                    bValue = false;
-                    if (regionCode == RegionCodes.NewZealand1) bValue = true;
-                    break;
-                case 2:
-                    bValue = true;
-                    if (regionCode == RegionCodes.Brazil1
-                    || regionCode == RegionCodes.Brazil2
-                    || regionCode == RegionCodes.Chile1) bValue = false;
-                    break;
-                case 4:
-                case 6:
-                    bValue = true;
-                    break;
-                case 7:
-                    bValue = true;
-                    if (regionCode == RegionCodes.Algeria4 || regionCode == RegionCodes.Brunei2) bValue = false;
-                    break;
-                case 8:
-                    bValue = false;
-                    break;
-                case 9:
-                    bValue = false;
-                    if (regionCode == RegionCodes.SAfrica2) bValue = true;
-                    break;
-                default:
-                    break;
-            }
-            return bValue;
         }
     }
 
@@ -3388,12 +3051,6 @@ public class Cs108Library4A extends Cs108Connector {
     public int getChannel() {
         int channel = -1;
         appendToLog("loadSetting1File: getChannel");
-        if (isCs710ServiceUUID()) {
-            if (mRfidDevice.mRfidReaderChip.mCs710Setting.getFreqChannelConfig() != 0) {
-                channel = mRfidDevice.mRfidReaderChip.mCs710Setting.getFreqChannelSelect();
-                appendToLog("loadSetting1File: getting channel = " + channel);
-            }
-        } else
         if (mRfidDevice.mRfidReaderChip.mRx000Setting.getFreqChannelConfig() != 0) {
             channel = mRfidDevice.mRfidReaderChip.mRx000Setting.getFreqChannelSelect();
             appendToLog("loadSetting1File: getting channel = " + channel);
@@ -3414,8 +3071,7 @@ public class Cs108Library4A extends Cs108Connector {
         return result;
     }
     int getCountryCode() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getCountryCode();
-        else return mRfidDevice.mRfidReaderChip.mRx000OemSetting.getCountryCode();
+        return mRfidDevice.mRfidReaderChip.mRx000OemSetting.getCountryCode();
     }
     int getFreqModifyCode() {
         return mRfidDevice.mRfidReaderChip.mRx000OemSetting.getFreqModifyCode();
@@ -3440,16 +3096,6 @@ public class Cs108Library4A extends Cs108Connector {
 
     byte qValueSetting = -1;
     public byte getQValue() {
-        if (serviceUUID2p1 != 1) {
-            int iValue = getQValue1();
-            if (iValue < 0) return -1;
-            qValueSetting = (byte)(iValue & 0xFF);
-            if (qValueSetting != getPopulation2Q(population)) {
-                population = 1;
-                for (int i = 0; i < qValueSetting-1; i++) population *= 2;
-                population--;
-            }
-        }
         return qValueSetting;
     }
     public boolean setQValue(byte byteValue) {
@@ -3458,21 +3104,19 @@ public class Cs108Library4A extends Cs108Connector {
         return setQValue1(byteValue);
     }
     int getQValue1() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getAlgoStartQ();
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoStartQ();
     }
     boolean setQValue1(int iValue) {
         boolean result = true;
-        if (isCs710ServiceUUID() == false) {
+        {
             int invAlgo = mRfidDevice.mRfidReaderChip.mRx000Setting.getInvAlgo();
             if (iValue != mRfidDevice.mRfidReaderChip.mRx000Setting.getAlgoStartQ(invAlgo)) {
-                appendToLog("Hello6: invAlgo = " + invAlgo);
+                appendToLog("setTagGroup: going to setAlgoSelect with invAlgo = " + invAlgo);
                 result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoSelect(invAlgo);
             }
         }
         if (result) {
-            if (isCs710ServiceUUID()) result = mRfidDevice.mRfidReaderChip.mCs710Setting.setAlgoStartQ(iValue);
-            else result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoStartQ(iValue);
+            result = mRfidDevice.mRfidReaderChip.mRx000Setting.setAlgoStartQ(iValue);
         }
         return result;
     }
@@ -3480,7 +3124,6 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public String getRadioSerial() {
         String strValue;
         strValue = getSerialNumber();
-        if (serviceUUID2p1 != 1) return strValue;
         if (strValue != null) {
             appendToLog("strValue length = " + strValue.length());
             if (strValue.length() > 13) strValue = strValue.substring(0, 13);
@@ -3488,10 +3131,6 @@ public class Cs108Library4A extends Cs108Connector {
         return strValue;
     }
     @Keep public String getRadioBoardVersion() {
-        if (serviceUUID2p1 != 1) {
-            appendToLog("Skipped with zero-length string return");
-            return "";
-        }
         String str = mRfidDevice.mRfidReaderChip.mRx000OemSetting.getSerialNumber();
         if (str != null) {
             if (str.length() == 16) {
@@ -3506,11 +3145,6 @@ public class Cs108Library4A extends Cs108Connector {
     }
     //Configuration Calls: Barcode
     @Keep public boolean getBarcodeOnStatus() { return mBarcodeDevice.getOnStatus(); }
-    @Keep public String getBarcodeSerial() {
-        String strValue = mBarcodeDevice.getSerialNumber();
-        if (strValue == null)   barcodeSendQuerySerialNumber();
-        return strValue;
-    }
     @Keep public void getBarcodePreSuffix() {
         if (mBarcodeDevice.getPrefix() == null || mBarcodeDevice.getSuffix() == null) barcodeSendQuerySelfPreSuffix();
     }
@@ -3523,8 +3157,6 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public void getBarcodeNoDuplicateReading() {
         barcodeSendQueryNoDuplicateReading();
     }
-    @Keep public void getBarcodeVersion() { barcodeSendQueryVersion(); }
-
 
     @Keep public boolean setBarcodeOn(boolean on) {
         boolean retValue;
@@ -3545,12 +3177,17 @@ public class Cs108Library4A extends Cs108Connector {
         if (DEBUG) appendToLog("mBarcodeToWrite size = " + mBarcodeDevice.mBarcodeToWrite.size());
         return retValue;
     }
+    int iModeSet = -1, iVibratieTimeSet = -1;
     @Keep public boolean setVibrateOn(int mode) {
         boolean retValue;
         Cs108BarcodeData cs108BarcodeData = new Cs108BarcodeData();
         if (mode > 0) cs108BarcodeData.barcodePayloadEvent = BarcodePayloadEvents.BARCODE_VIBRATE_ON;
         else    cs108BarcodeData.barcodePayloadEvent = BarcodePayloadEvents.BARCODE_VIBRATE_OFF;
         cs108BarcodeData.waitUplinkResponse = false;
+        if (iModeSet == mode && iVibratieTimeSet == getVibrateTime()) {
+            appendToLog("writeBleStreamOut.Hello: A7B3: Skip saving vibration data");
+            return true;
+        }
         if (mode > 0) {
             byte[] barcodeCommandData = new byte[3];
             barcodeCommandData[0] = (byte) (mode - 1);
@@ -3560,6 +3197,9 @@ public class Cs108Library4A extends Cs108Connector {
         }
         retValue = mBarcodeDevice.mBarcodeToWrite.add(cs108BarcodeData);
         if (DEBUG) appendToLog("mBarcodeToWrite size = " + mBarcodeDevice.mBarcodeToWrite.size());
+        if (retValue) {
+            iModeSet = mode; iVibratieTimeSet = getVibrateTime();
+        }
         return retValue;
     }
     //            MainActivity.mCs108Library4a.barcodeReadTriggerStart();
@@ -3599,7 +3239,7 @@ public class Cs108Library4A extends Cs108Connector {
             if (retValue) retValue = barcodeSendCommand("nls0308030;".getBytes());
             if (retValue) retValue = barcodeSendCommand("nls0307010;".getBytes());
             if (retValue) retValue = barcodeSendCommand("nls0309010;nls0310010;".getBytes());   //enable terminator, set terminator as 0x0D
-            if (retValue) retValue = barcodeSendCommand("nls0502110".getBytes());
+            if (retValue) retValue = barcodeSendCommand("nls0502110;".getBytes());
             if (retValue) barcodeSendCommand("nls0001150;nls0006000;".getBytes());
             if (retValue) {
                 mBarcodeDevice.bytesBarcodePrefix = prefixRef;
@@ -3632,10 +3272,64 @@ public class Cs108Library4A extends Cs108Connector {
         if (retValue) retValue = barcodeSendCommand("nls0006000;".getBytes());
         return retValue;
     }
+    boolean barcodeSendQuerySystem() {
+        byte[] datatt = new byte[] { 0x7E, 0x01, 0x30, 0x30, 0x30, 0x30, 0x40, 0x5F, 0x5F, 0x5F, 0x3F, 0x3B, 0x03 };
+        barcodeSendCommand(datatt);
+
+        byte[] datat = new byte[] { 0x7E, 0x01,
+                0x30, 0x30, 0x30, 0x30,
+                0x40, 0x51, 0x52, 0x59, 0x53, 0x59, 0x53, 0x2C, 0x50, 0x44, 0x4E, 0x2C, 0x50, 0x53, 0x4E, 0x3B,
+                0X03 };
+//        return barcodeSendQuery(datat);
+        return barcodeSendCommand(datat);
+    }
+    public String getBarcodeVersion() {
+        String strValue = mBarcodeDevice.getVersion();
+        if (strValue == null) barcodeSendQueryVersion();
+        return strValue;
+    }
+    boolean barcodeSendQueryVersion() {
+        byte[] data = new byte[] { 0x7E, 0x00,
+                0x00, 0x02,
+                0x33, 0x47,
+                0 };
+        return barcodeSendQuery(data);
+    }
+    public String getBarcodeESN() {
+        String strValue = mBarcodeDevice.getESN();
+        if (strValue == null) barcodeSendQueryESN();
+        return strValue;
+    }
+    boolean barcodeSendQueryESN() {
+        byte[] datat = new byte[] { 0x7E, 0x00,
+                0x00, 0x05,
+                0x33, 0x48, 0x30, 0x32, 0x30,
+                (byte)0xb2 };
+        return barcodeSendQuery(datat);
+    }
+    @Keep public String getBarcodeSerial() {
+        String strValue = mBarcodeDevice.getSerialNumber();
+        if (strValue == null)   barcodeSendQuerySerialNumber();
+        return strValue;
+    }
     boolean barcodeSendQuerySerialNumber() {
         byte[] datat = new byte[] { 0x7E, 0x00,
                 0x00, 0x05,
                 0x33, 0x48, 0x30, 0x33, 0x30,
+                (byte)0xb2 };
+        return barcodeSendQuery(datat);
+    }
+    public String getBarcodeDate() {
+        String strValue = mBarcodeDevice.getDate();
+        if (strValue == null)   barcodeSendQueryDate();
+        String strValue1 = getBarcodeESN();
+        if (strValue1 != null && strValue1.length() != 0) strValue += (", " + strValue1);
+        return strValue;
+    }
+    boolean barcodeSendQueryDate() {
+        byte[] datat = new byte[] { 0x7E, 0x00,
+                0x00, 0x05,
+                0x33, 0x48, 0x30, 0x34, 0x30,
                 (byte)0xb2 };
         return barcodeSendQuery(datat);
     }
@@ -3678,13 +3372,6 @@ public class Cs108Library4A extends Cs108Connector {
         byte[] data = new byte[] { 0x7E, 0x00,
                 0x00, 0x05,
                 0x33, 0x44, 0x30, 0x33, 0x31,
-                0 };
-        return barcodeSendQuery(data);
-    }
-    boolean barcodeSendQueryVersion() {
-        byte[] data = new byte[] { 0x7E, 0x00,
-                0x00, 0x03,
-                0x33, 0x47,
                 0 };
         return barcodeSendQuery(data);
     }
@@ -3776,10 +3463,6 @@ public class Cs108Library4A extends Cs108Connector {
     UpdateBluetoothProcessorFirmwareBootloader(filename,result)
     */
     @Keep public boolean batteryLevelRequest() {
-        if (serviceUUID2p1 != 1) {
-            appendToLog("Skipped with true return");
-            return true;
-        }
         Cs108NotificatiionData cs108NotificatiionData = new Cs108NotificatiionData();
         cs108NotificatiionData.notificationPayloadEvent = NotificationPayloadEvents.NOTIFICATION_GET_BATTERY_VOLTAGE;
         return mNotificationDevice.mNotificationToWrite.add(cs108NotificatiionData);
@@ -3818,6 +3501,50 @@ public class Cs108Library4A extends Cs108Connector {
         return mNotificationDevice.mNotificationToWrite.add(cs108NotificatiionData);
     }
     @Keep public boolean getAutoBarStartSTop() { return mNotificationDevice.getAutoBarStartStopStatus(); }
+
+    boolean triggerReporting = true;
+    public boolean getTriggerReporting() { return triggerReporting; }
+    public boolean setTriggerReporting(boolean triggerReporting) {
+        boolean bValue = false;
+        if (this.triggerReporting == triggerReporting) return true;
+        if (triggerReporting) {
+            bValue = setAutoTriggerReporting((byte) triggerReportingCountSetting);
+        } else bValue = stopAutoTriggerReporting();
+        if (bValue) this.triggerReporting = triggerReporting;
+        return bValue;
+    }
+
+    public final int iNO_SUCH_SETTING = 10000;
+    short triggerReportingCountSetting = 0;
+    public short getTriggerReportingCount() {
+        boolean bValue = false;
+        if (getcsModel() == 108) bValue = checkHostProcessorVersion(hostProcessorICGetFirmwareVersion(),  1, 0, 16);
+        if (bValue == false) return iNO_SUCH_SETTING; else
+            return triggerReportingCountSetting;
+    }
+    public boolean setTriggerReportingCount(short triggerReportingCount) {
+        boolean bValue = false;
+        if (triggerReportingCount < 0 || triggerReportingCount > 255) return false;
+        if (getTriggerReporting()) {
+            if (triggerReportingCountSetting == triggerReportingCount) return true;
+            bValue = setAutoTriggerReporting((byte)(triggerReportingCount & 0xFF));
+        } else bValue = true;
+        if (bValue) triggerReportingCountSetting = triggerReportingCount;
+        return true;
+    }
+
+    public boolean setAutoTriggerReporting(byte timeSecond) {
+        Cs108NotificatiionData cs108NotificatiionData = new Cs108NotificatiionData();
+        cs108NotificatiionData.notificationPayloadEvent = NotificationPayloadEvents.NOTIFICATION_AUTO_TRIGGER_REPORT;
+        cs108NotificatiionData.dataValues = new byte[1];
+        cs108NotificatiionData.dataValues[0] = timeSecond;
+        return mNotificationDevice.mNotificationToWrite.add(cs108NotificatiionData);
+    }
+    public boolean stopAutoTriggerReporting() {
+        Cs108NotificatiionData cs108NotificatiionData = new Cs108NotificatiionData();
+        cs108NotificatiionData.notificationPayloadEvent = NotificationPayloadEvents.NOTIFICATION_STOP_TRIGGER_REPORT;
+        return mNotificationDevice.mNotificationToWrite.add(cs108NotificatiionData);
+    }
 
     @Keep public String getBatteryDisplay(boolean voltageDisplay) {
         float floatValue = (float) getBatteryLevel() / 1000;
@@ -3962,6 +3689,7 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public int getBatteryLevel() { return mCs108ConnectorData.getVoltageMv(); }
     @Keep public int getBatteryCount() { return mCs108ConnectorData.getVoltageCnt(); }
     @Keep public boolean getTriggerButtonStatus() { return mNotificationDevice.getTriggerStatus(); }
+    public int getTriggerCount() { return mCs108ConnectorData.getTriggerCount(); }
     @Keep public void setNotificationListener(NotificationListener listener) { mNotificationDevice.setNotificationListener0(listener); }
 
     int batteryDisplaySelect = 1;
@@ -4006,15 +3734,19 @@ public class Cs108Library4A extends Cs108Connector {
 
     @Keep public Rx000pkgData onRFIDEvent() {
         Rx000pkgData rx000pkgData = null;
-        if (mrfidToWriteSize() != 0) mRfidDevice.mRfidReaderChip.mRx000ToRead.clear();
-        if (mRfidDevice.mRfidReaderChip.mRx000ToRead.size() != 0) {
+        //if (mrfidToWriteSize() != 0) mRfidDevice.mRfidReaderChip.mRx000ToRead.clear();
+        if (mRfidDevice.mRfidReaderChip.bRx000ToReading == false && mRfidDevice.mRfidReaderChip.mRx000ToRead.size() != 0) {
+            mRfidDevice.mRfidReaderChip.bRx000ToReading = true;
             int index = 0;
             try {
                 rx000pkgData = mRfidDevice.mRfidReaderChip.mRx000ToRead.get(index);
-                mRfidDevice.mRfidReaderChip.mRx000ToRead.remove(index);
+                if (false && rx000pkgData.responseType == HostCmdResponseTypes.TYPE_COMMAND_END)
+                    appendToLog("get mRx000ToRead with COMMAND_END");
+                mRfidDevice.mRfidReaderChip.mRx000ToRead.remove(index); //appendToLog("mRx000ToRead.remove");
             } catch (Exception ex) {
                 rx000pkgData = null;
             }
+            mRfidDevice.mRfidReaderChip.bRx000ToReading = false;
         }
         return rx000pkgData;
     }
@@ -4151,12 +3883,7 @@ public class Cs108Library4A extends Cs108Connector {
         String strModelName = getModelName(); //"CS108";
         appendToLog("iCountryCode = " + iCountryCode + ", strModelNumber = " + strModelName);
         if (iCountryCode > 0) {
-            if (isCs710ServiceUUID()) {
-                strCountryCode = (strModelName != null ? strModelName: "");
-                if (strCountryCode.length() != 0) strCountryCode += ":";
-                strCountryCode += mRfidDevice.mRfidReaderChip.mCs710Setting.getModelCode();
-            }
-            else strCountryCode = (strModelName != null ? strModelName: "") + "-" + String.valueOf(iCountryCode) + " " + mRfidDevice.mRfidReaderChip.mRx000OemSetting.getSpecialCountryVersion();
+            strCountryCode = (strModelName != null ? strModelName: "") + "-" + String.valueOf(iCountryCode) + " " + mRfidDevice.mRfidReaderChip.mRx000OemSetting.getSpecialCountryVersion();
         }
         return strCountryCode;
     }
@@ -4197,25 +3924,22 @@ public class Cs108Library4A extends Cs108Connector {
     }
     public boolean setPwrManagementMode(boolean bLowPowerStandby) { return mRfidDevice.mRfidReaderChip.setPwrManagementMode(bLowPowerStandby); }
     @Keep public String getSerialNumber() {
-        if (isCs710ServiceUUID()) return mRfidDevice.mRfidReaderChip.mCs710Setting.getSerialNumber();
-        else return mRfidDevice.mRfidReaderChip.mRx000OemSetting.getSerialNumber();
+        return mRfidDevice.mRfidReaderChip.mRx000OemSetting.getSerialNumber();
     }
     @Keep public boolean setInvBrandId(boolean invBrandId) { return mRfidDevice.mRfidReaderChip.mRx000Setting.setInvBrandId(invBrandId); }
 
-    @Keep public void macRead(int address) {
-        if (isCs710ServiceUUID()) mRfidDevice.mRfidReaderChip.mCs710Setting.readMAC(address);
-        else mRfidDevice.mRfidReaderChip.mRx000Setting.readMAC(address);
+    @Keep void macRead(int address) {
+        mRfidDevice.mRfidReaderChip.mRx000Setting.readMAC(address);
     }
-    void macWrite(int address, int value) {
-        if (isCs710ServiceUUID()) mRfidDevice.mRfidReaderChip.mCs710Setting.writeMAC(address, value);
-        else mRfidDevice.mRfidReaderChip.mRx000Setting.writeMAC(address, value);
+    public void macWrite(int address, long value) {
+        mRfidDevice.mRfidReaderChip.mRx000Setting.writeMAC(address, value);
     }
 
     public void set_fdCmdCfg(int value) {
         macWrite(0x117, value);
     }
     public void set_fdRegAddr(int addr) { macWrite(0x118, addr); }
-    public void set_fdWrite(int addr, int value) {
+    public void set_fdWrite(int addr, long value) {
         macWrite(0x118, addr);
         macWrite(0x119, value);
     }
@@ -4223,11 +3947,11 @@ public class Cs108Library4A extends Cs108Connector {
     public void set_fdBlockAddr4GetTemperature(int addr)  {
         macWrite(0x11b, addr);
     }
-    public void set_fdReadMem(int addr, int len) {
+    public void set_fdReadMem(int addr, long len) {
         macWrite(0x11c, addr);
         macWrite(0x11d, len);
     }
-    public void set_fdWriteMem(int addr, int len, int value) {
+    public void set_fdWriteMem(int addr, int len, long value) {
         set_fdReadMem(addr, len);
         macWrite(0x11e, value);
     }
@@ -4236,10 +3960,6 @@ public class Cs108Library4A extends Cs108Connector {
         int iValue = 0;
         if (tagFocus) iValue |= 0x10;
         if (fastId) iValue |= 0x20;
-        if (serviceUUID2p1 != 1) {
-            appendToLog("Skipped");
-            return;
-        }
         macWrite(0x203, iValue);
     }
 

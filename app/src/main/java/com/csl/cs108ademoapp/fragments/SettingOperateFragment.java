@@ -678,5 +678,6 @@ public class SettingOperateFragment extends CommonFragment {
         settingTask = new SettingTask((sameCheck ? button: button1), sameSetting, invalidRequest);
         settingTask.execute();
         MainActivity.mCs108Library4a.saveSetting2File();
+        mHandler.post(updateRunnable);
     }
 }

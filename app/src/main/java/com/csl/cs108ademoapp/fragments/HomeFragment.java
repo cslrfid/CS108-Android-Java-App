@@ -28,7 +28,7 @@ public class HomeFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState, true);
         return inflater.inflate(R.layout.home_layout, container, false);
     }
 

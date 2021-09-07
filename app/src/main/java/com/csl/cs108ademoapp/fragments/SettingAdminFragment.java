@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,8 +20,8 @@ import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SettingTask;
 
 public class SettingAdminFragment extends CommonFragment {
-    private CheckBox checkBoxInventoryBeep, checkBoxInventoryVibrate, checkBoxSaveFileEnable, checkBoxSaveCloudEnable, checkBoxSaveNewCloudEnable, checkBoxSaveAllCloudEnable;
-    private EditText editTextDeviceName, editTextCycleDelay, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout;
+    private CheckBox checkBoxTriggerReporting, checkBoxInventoryBeep, checkBoxInventoryVibrate, checkBoxSaveFileEnable, checkBoxSaveCloudEnable, checkBoxSaveNewCloudEnable, checkBoxSaveAllCloudEnable;
+    private EditText editTextDeviceName, editTextCycleDelay, editTextTriggerReportingCount, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout;
     private TextView textViewReaderModel;
     private Spinner spinnerQueryBattery, spinnerQueryRssi, spinnerQueryVibrateMode;
     private Button buttonCSLServer, button;
@@ -34,9 +35,10 @@ public class SettingAdminFragment extends CommonFragment {
     String deviceName = "";
     long cycleDelay = -1; long cycleDelayMin = 0; long cycleDelayMax = 2000;
     int iBeepCount = -1; int iBeepCountMin = 1; int iBeepCountMax = 100;
+    short sTriggerCount = -1, sTriggerCountMin = 1, sTriggerCountMax = 100;
     int iVibrateTime = -1; int iVibrateTimeMin = 1; int iVibrateTimeMax = 999;
     int iVibrateWindow = -1; int iVibrateWindowMin = 1; int iVibrateWindowMax = 4;
-    boolean inventoryBeep, inventoryVibrate, saveFileEnable, saveCloudEnable, saveNewCloudEnable, saveAllCloudEnable;
+    boolean triggerReporting, inventoryBeep, inventoryVibrate, saveFileEnable, saveCloudEnable, saveNewCloudEnable, saveAllCloudEnable;
     String serverName;
     int iServerTimeout = -1; int iServerTimeoutMin = 3; int iServerTimeoutMax = 9;
 
@@ -87,6 +89,12 @@ public class SettingAdminFragment extends CommonFragment {
         textViewAdminCycleDelayLabel.setText(stringAdminCycleDelayLabel);
         editTextCycleDelay = (EditText) getActivity().findViewById(R.id.settingAdminCycleDelay);
 
+        TextView textViewAdminTriggerReportingCountLabel = (TextView) getActivity().findViewById(R.id.settingAdminTriggerReportingCountLabel);
+        String stringAdminTriggeringReportingCountLabel = textViewAdminTriggerReportingCountLabel.getText().toString();
+        stringAdminTriggeringReportingCountLabel += "(" + String.valueOf(sTriggerCountMin) + "-" + String.valueOf(sTriggerCountMax) + ") sec";
+        textViewAdminTriggerReportingCountLabel.setText(stringAdminTriggeringReportingCountLabel);
+        editTextTriggerReportingCount = (EditText) getActivity().findViewById(R.id.settingAdminTriggerReportingCount);
+
         TextView textViewAdminBeepCountLabel = (TextView) getActivity().findViewById(R.id.settingAdminBeepCountLabel);
         String stringAdminBeepCountLabel = textViewAdminBeepCountLabel.getText().toString();
         stringAdminBeepCountLabel += "(" + String.valueOf(iBeepCountMin) + "-" + String.valueOf(iBeepCountMax) + ")";
@@ -105,6 +113,7 @@ public class SettingAdminFragment extends CommonFragment {
         textViewAdminVibrateWindowLabel.setText(stringAdminVibrateWindowLabel);
         editTextVibrateWindow = (EditText) getActivity().findViewById(R.id.settingAdminVibrateWindow);
 
+        checkBoxTriggerReporting = (CheckBox) getActivity().findViewById(R.id.settingAdminTriggerReporting);
         checkBoxInventoryBeep = (CheckBox) getActivity().findViewById(R.id.settingAdminInventoryBeep);
         checkBoxInventoryVibrate = (CheckBox) getActivity().findViewById(R.id.settingAdminInventoryVibrate);
         checkBoxSaveFileEnable = (CheckBox) getActivity().findViewById(R.id.settingAdminToFileEnable);
@@ -245,9 +254,11 @@ public class SettingAdminFragment extends CommonFragment {
                         rssiDisplaySelect = spinnerQueryRssi.getSelectedItemPosition();
                         vibrateModeSelect = spinnerQueryVibrateMode.getSelectedItemPosition();
                         if (editTextCycleDelay != null)   cycleDelay = Long.parseLong(editTextCycleDelay.getText().toString());
+                        if (editTextTriggerReportingCount != null)   sTriggerCount = Short.parseShort(editTextTriggerReportingCount.getText().toString());
                         if (editTextBeepCount != null)   iBeepCount = Integer.parseInt(editTextBeepCount.getText().toString());
                         if (editTextVibrateTime != null)    iVibrateTime = Integer.parseInt(editTextVibrateTime.getText().toString());
                         if (editTextVibrateWindow != null)  iVibrateWindow = Integer.parseInt(editTextVibrateWindow.getText().toString());
+                        triggerReporting = checkBoxTriggerReporting.isChecked();
                         inventoryBeep = checkBoxInventoryBeep.isChecked();
                         inventoryVibrate = checkBoxInventoryVibrate.isChecked();
                         saveFileEnable = checkBoxSaveFileEnable.isChecked();
@@ -280,6 +291,7 @@ public class SettingAdminFragment extends CommonFragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if(isVisibleToUser) {
+            checkBoxTriggerReporting.setChecked(MainActivity.mCs108Library4a.getTriggerReporting());
             checkBoxInventoryBeep.setChecked(MainActivity.mCs108Library4a.getInventoryBeep());
             checkBoxInventoryVibrate.setChecked(MainActivity.mCs108Library4a.getInventoryVibrate());
             checkBoxSaveFileEnable.setChecked(MainActivity.mCs108Library4a.getSaveFileEnable());
@@ -306,6 +318,14 @@ public class SettingAdminFragment extends CommonFragment {
             spinnerQueryRssi.setSelection(MainActivity.mCs108Library4a.getRssiDisplaySetting());
             spinnerQueryVibrateMode.setSelection(MainActivity.mCs108Library4a.getVibrateModeSetting());
             if (editTextCycleDelay != null)   editTextCycleDelay.setText(String.valueOf(MainActivity.mCs108Library4a.getCycleDelay()));
+            if (editTextTriggerReportingCount != null)   {
+                int triggerReportingCount = MainActivity.mCs108Library4a.getTriggerReportingCount();
+                if (triggerReportingCount != MainActivity.mCs108Library4a.iNO_SUCH_SETTING) {
+                    TableRow tableRow = (TableRow) getActivity().findViewById(R.id.settingAdminTriggerReportingRow);
+                    tableRow.setVisibility(View.VISIBLE);
+                }
+                editTextTriggerReportingCount.setText(String.valueOf(triggerReportingCount));
+            }
             if (editTextBeepCount != null)   editTextBeepCount.setText(String.valueOf(MainActivity.mCs108Library4a.getBeepCount()));
             if (editTextVibrateTime != null)   editTextVibrateTime.setText(String.valueOf(MainActivity.mCs108Library4a.getVibrateTime()));
             if (editTextVibrateWindow != null)   editTextVibrateWindow.setText(String.valueOf(MainActivity.mCs108Library4a.getVibrateWindow()));
@@ -361,6 +381,14 @@ public class SettingAdminFragment extends CommonFragment {
                     invalidRequest = true;
             }
         }
+        if (invalidRequest == false && editTextTriggerReportingCount != null) {
+            if (MainActivity.mCs108Library4a.getTriggerReportingCount() != sTriggerCount || sameCheck == false) {
+                sameSetting = false;
+                if (sTriggerCount < sTriggerCountMin || sTriggerCount > sTriggerCountMax) invalidRequest = true;
+                else if (MainActivity.mCs108Library4a.setTriggerReportingCount(sTriggerCount) == false)
+                    invalidRequest = true;
+            }
+        }
         if (invalidRequest == false && editTextBeepCount != null) {
             if (MainActivity.mCs108Library4a.getBeepCount() != iBeepCount || sameCheck == false) {
                 sameSetting = false;
@@ -390,6 +418,13 @@ public class SettingAdminFragment extends CommonFragment {
             if (MainActivity.mCs108Library4a.getInventoryVibrate() != inventoryVibrate || sameCheck == false) {
                 sameSetting = false;
                 if (MainActivity.mCs108Library4a.setInventoryVibrate(inventoryVibrate) == false)
+                    invalidRequest = true;
+            }
+        }
+        if (invalidRequest == false && checkBoxTriggerReporting != null) {
+            if (MainActivity.mCs108Library4a.getTriggerReporting() != triggerReporting || sameCheck == false) {
+                sameSetting = false;
+                if (MainActivity.mCs108Library4a.setTriggerReporting(triggerReporting) == false)
                     invalidRequest = true;
             }
         }

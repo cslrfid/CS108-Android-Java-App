@@ -471,7 +471,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5"
-        android:gravity="center">
+        android:gravity="center"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="0dp"
@@ -530,6 +531,63 @@
         android:layout_height="0dp"
         android:layout_weight="5"
         android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Barcode date code" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/moduleBar_date"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="50"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Barcode version" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:text="@string/colon" />
+
+        <TextView
+            android:id="@+id/moduleBar_version"
+            android:layout_width="0dp"
+            android:layout_weight="40"
+            android:gravity="center"
+            style="@style/style_normal_font" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:gravity="center"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="0dp"

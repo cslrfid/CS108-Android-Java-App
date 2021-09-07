@@ -650,6 +650,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
 
     boolean popRequest = false; Toast mytoast;
     void DeviceConnectTask4InventoryEnding(TaskCancelRReason taskCancelRReason) {
+        MainActivity.mCs108Library4a.abortOperation();  //added in case previous command end is received with inventory stopped
         MainActivity.mCs108Library4a.appendToLog("serverConnectValid = " + serverConnectValid);
         if (serverConnectValid && ALLOW_RTSAVE) {
             try {

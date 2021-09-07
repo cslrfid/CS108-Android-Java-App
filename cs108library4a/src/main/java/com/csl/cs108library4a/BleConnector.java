@@ -30,8 +30,6 @@ import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-//import com.google.android.things.bluetooth.BluetoothConfigManager;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -211,12 +209,6 @@ class BleConnector extends BluetoothGattCallback {
                             mHandler.removeCallbacks(mReadCharacteristicRunnable);
                             if (DEBUG) appendToLog("starts in onServicesDiscovered");
                             mHandler.postDelayed(mReadCharacteristicRunnable, 500);
-
-                            if (true && isCs710ServiceUUID() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                boolean bValue = gatt.requestMtu(255); //255);
-                                appendToLog("writeBleStreamOut: android 5 or above requests higher mtu returns " + bValue);
-                                //Log.i(TAG, "getMTU = " + getMTU());
-                            }
                 }
             }
         }
@@ -733,7 +725,7 @@ class BleConnector extends BluetoothGattCallback {
                     }
                 }
                 mBluetoothDevice = readerDevice;
-                characteristicListRead = false;
+                characteristicListRead = true; //skip in case there is problem in completing reading characteristic features, causing endless reading 0706 and 0C02
                 return true;
             }
         }
