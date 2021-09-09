@@ -111,12 +111,16 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         //playerN.start();
 
         buttonText = button.getText().toString().trim();
-        String buttonText1 = null; String strLastChar = buttonText.substring(buttonText.length()-1);
-        if (strLastChar.toUpperCase().matches("E")) {
-            buttonText1 = buttonText.substring(0, buttonText.length()-1);
-        } else if (buttonText.toUpperCase().matches("STOP")) {
-            buttonText1 = buttonText; buttonText1 += buttonText1.substring(buttonText.length()-1);
-        } else buttonText1 = buttonText;
+        String buttonText1 = ""; String strLastChar = "";
+        if (buttonText.length() != 0) {
+            strLastChar = buttonText.substring(buttonText.length() - 1);
+            if (strLastChar.toUpperCase().matches("E")) {
+                buttonText1 = buttonText.substring(0, buttonText.length() - 1);
+            } else if (buttonText.toUpperCase().matches("STOP")) {
+                buttonText1 = buttonText;
+                buttonText1 += buttonText1.substring(buttonText.length() - 1);
+            } else buttonText1 = buttonText;
+        }
         if (repeat || buttonText.length() == 0) button.setText("Stop");
         else {
             if (Character.isUpperCase(strLastChar.charAt(0))) button.setText(buttonText1 + "ING");
@@ -188,6 +192,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             Cs108Connector.Rx000pkgData rx000pkgData = MainActivity.mCs108Library4a.onRFIDEvent();
             if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0)   timeMillis = System.currentTimeMillis();
             else if (rx000pkgData != null) {
+                //MainActivity.mCs108Library4a.appendToLog("rx000pkgData.responseType = " + rx000pkgData.responseType.toString());
                 if (rx000pkgData.responseType == null) {
                     publishProgress("null response");
                 } else if (rx000pkgData.responseType == Cs108Connector.HostCmdResponseTypes.TYPE_18K6C_TAG_ACCESS) {
@@ -195,17 +200,19 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                         if (rx000pkgData.decodedError == null) {
                             if (done == false) {
                                 accessResult = rx000pkgData.decodedResult;
-                                MainActivity.mCs108Library4a.appendToLog("StreamOut, accResult=" + accessResult);
+                                //MainActivity.mCs108Library4a.appendToLog("StreamOut, accResult=" + accessResult);
                                 if (updateRunnable != null) {
-                                    MainActivity.mCs108Library4a.appendToLog("StreamOut: start updateRunnable");
+                                    //MainActivity.mCs108Library4a.appendToLog("StreamOut: start updateRunnable");
                                     mHandler.post(updateRunnable);
                                 }
                             }
                             done = true;
                             publishProgress(null, rx000pkgData.decodedResult);
+                        } else {
+                            //MainActivity.mCs108Library4a.appendToLog("decodeError = " + rx000pkgData.decodedError + ", length = " + rx000pkgData.decodedError.length());
+                            publishProgress(rx000pkgData.decodedError);
                         }
-                        else publishProgress(rx000pkgData.decodedError);
-                        iTimeOut = 500;
+                        iTimeOut = 1000;
                     }
                 } else if (rx000pkgData.responseType == Cs108Connector.HostCmdResponseTypes.TYPE_COMMAND_END) {
                     if (rx000pkgData.decodedError != null) { endingMessaage = rx000pkgData.decodedError; ending = true; }
@@ -224,17 +231,16 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 timeMillis = System.currentTimeMillis();
             }
             else if (notificationData != null) {
-                MainActivity.mCs108Library4a.appendToLog("resultError=" + MainActivity.mCs108Library4a.byteArrayToString(notificationData));
+                //MainActivity.mCs108Library4a.appendToLog("resultError=" + MainActivity.mCs108Library4a.byteArrayToString(notificationData));
                 publishProgress("Received notification uplink event 0xA101 with error code=" + MainActivity.mCs108Library4a.byteArrayToString(notificationData));
-                timeMillis = System.currentTimeMillis();
-                iTimeOut = 500;
+                taskCancelReason = TaskCancelRReason.TIMEOUT;
             }
             if (System.currentTimeMillis() - timeMillis > iTimeOut) {
-                MainActivity.mCs108Library4a.appendToLog("endingMessage: iTimeout = " + iTimeOut);
+                //MainActivity.mCs108Library4a.appendToLog("endingMessage: iTimeout = " + iTimeOut);
                 taskCancelReason = TaskCancelRReason.TIMEOUT;
             }
             if (taskCancelReason != TaskCancelRReason.NULL) {
-                MainActivity.mCs108Library4a.appendToLog("taskCancelReason=" + TaskCancelRReason.values());
+                //MainActivity.mCs108Library4a.appendToLog("taskCancelReason=" + TaskCancelRReason.values());
                 cancel(true);
             }
         }
@@ -248,6 +254,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     protected void onProgressUpdate(String... output) {
         if (true) progressUpdate(output);
         else if (output[0] != null) {
+            MainActivity.mCs108Library4a.appendToLog("onProgressUpdate output[0] = " + output[0]);
             if (output[0].length() == 2) {
                 if (output[0].contains("TT")) {
                     gotInventory = true;
@@ -275,6 +282,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 taskCancelReason = TaskCancelRReason.ERROR;
             }
         } else {
+            MainActivity.mCs108Library4a.appendToLog("onProgressUpdate output[1] = " + output[1]);
             if (registerYield != null) {
                 if (tagInventoried != null) {
                     tagList.add(tagInventoried);
@@ -305,6 +313,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
 
     protected void progressUpdate(String... output) {
         if (output[0] != null) {
+            MainActivity.mCs108Library4a.appendToLog("onProgressUpdate output[0] = " + output[0]);
             if (output[0].length() == 2) {
                 if (output[0].contains("TT")) {
                     gotInventory = true;
@@ -331,6 +340,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                     MainActivity.mCs108Library4a.appendToLog("output[0]: " + output[0] + ", resultError = " + resultError);
             }
         } else {
+            MainActivity.mCs108Library4a.appendToLog("onProgressUpdate output[1] = " + output[1]);
             if (registerYield != null) {
                 if (tagInventoried != null) {
                     tagList.add(tagInventoried);
@@ -359,6 +369,9 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             strErrorMessage = "";
             switch (taskCancelReason) {
                 case NULL:
+                    if (accessResult == null) MainActivity.mCs108Library4a.appendToLog("taskCancelReason: NULL accessResult");
+                    if (resultError != null) MainActivity.mCs108Library4a.appendToLog("taskCancelReason: resultError = " + resultError);
+                    if (endingMessaage != null) MainActivity.mCs108Library4a.appendToLog("taskCancelReason: endingMessaage = " + endingMessaage);
                     if (accessResult == null || (resultError != null && resultError.length() != 0) || (endingMessaage != null && endingMessaage.length() != 0)) strErrorMessage += ("Finish as COMMAND END is received " + (gotInventory ? "WITH" : "WITHOUT") + " tag response");
                     //else Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
                     break;

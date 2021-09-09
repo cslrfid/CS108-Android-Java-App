@@ -72,6 +72,8 @@ public class AboutFragment extends CommonFragment {
             TextView productSerial = (TextView) getActivity().findViewById(R.id.module_productserialnumber);
             TextView boardVersion = (TextView) getActivity().findViewById(R.id.module_boardversion);
             TextView barcodeSerial = (TextView) getActivity().findViewById(R.id.moduleBar_serialNumber);
+            TextView barcodeDate = (TextView) getActivity().findViewById(R.id.moduleBar_date);
+            TextView barcodeVersion = (TextView) getActivity().findViewById(R.id.moduleBar_version);
 
             TextView bluetoothVersion = (TextView) getActivity().findViewById(R.id.bluetooth_version);
             TextView bluetoothAddress = (TextView) getActivity().findViewById(R.id.bluetooth_address);
@@ -99,7 +101,11 @@ public class AboutFragment extends CommonFragment {
                 productSerial.setText(MainActivity.mCs108Library4a.getHostProcessorICSerialNumber());
                 boardVersion.setText(MainActivity.mCs108Library4a.getHostProcessorICBoardVersion());
                 if (MainActivity.mCs108Library4a.isBarcodeFailure()) barcodeSerial.setText("Not available");
-                else barcodeSerial.setText(MainActivity.mCs108Library4a.getBarcodeSerial());
+                else {
+                    barcodeSerial.setText(MainActivity.mCs108Library4a.getBarcodeSerial());
+                    barcodeDate.setText(MainActivity.mCs108Library4a.getBarcodeDate());
+                    barcodeVersion.setText(MainActivity.mCs108Library4a.getBarcodeVersion());
+                }
                 bluetoothAddress.setText(MainActivity.mCs108Library4a.getBluetoothDeviceAddress());
                 bluetoothRssi.setText(String.valueOf(MainActivity.mCs108Library4a.getRssi()));
             } else {

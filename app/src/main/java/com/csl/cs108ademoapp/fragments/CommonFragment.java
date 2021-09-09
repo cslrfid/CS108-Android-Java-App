@@ -26,7 +26,7 @@ import com.csl.cs108ademoapp.R;
 public abstract class CommonFragment extends Fragment {
     final boolean DEBUG = false; final String TAG = "Hello";
     private String fragmentName;
-    MenuItem menuBatteryVoltageItem;
+    MenuItem menuTriggerItem, menuBatteryVoltageItem;
     Handler mHandler = new Handler();
     boolean fragmentActive = false;
 
@@ -60,6 +60,28 @@ public abstract class CommonFragment extends Fragment {
         if (menuFragment)   setHasOptionsMenu(true);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
+
+    int triggerCount_old;
+    private final Runnable updateTriggerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.postDelayed(updateTriggerRunnable, 500);
+
+            if (menuTriggerItem == null) return;
+            if (MainActivity.mCs108Library4a.isBleConnected() == false) { menuTriggerItem.setTitle("");  return; }
+            if (menuTriggerItem.getTitle().toString().trim().length() != 0) {
+                menuTriggerItem.setTitle("");
+            } else {
+                int triggerCount = MainActivity.mCs108Library4a.getTriggerCount();
+                if (triggerCount != triggerCount_old) {
+                    triggerCount_old = triggerCount;
+                    if (MainActivity.mCs108Library4a.getTriggerButtonStatus()) menuTriggerItem.setTitle("Ton");
+                    else menuTriggerItem.setTitle("Toff");
+                }
+            }
+        }
+    };
+
     int batteryCount_old; boolean batteryUpdate = false; CustomPopupWindow batteryWarningPopupWindow; String strBatteryLow;
     private final Runnable updateBatteryRunnable = new Runnable() {
         @Override
@@ -119,6 +141,7 @@ public abstract class CommonFragment extends Fragment {
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog(fragmentName);
         if (menuFragment) {
             batteryCount_old = -1;
+            mHandler.post(updateTriggerRunnable);
             mHandler.post(updateBatteryRunnable);
         }
         super.onResume();
@@ -138,7 +161,8 @@ public abstract class CommonFragment extends Fragment {
             }
         } else {
             inflater.inflate(R.menu.menu_home, menu);
-            menuBatteryVoltageItem = menu.findItem(R.id.home_voltage);
+            menuBatteryVoltageItem = menu.findItem(R.id.home_voltage);;
+            menuTriggerItem = menu.findItem(R.id.home_trigger);
             menu.removeItem(R.id.home_menu);
             if (fragmentName.matches("InventoryFragment")
                     || fragmentName.contains("InventoryRfidiMultiFragment")
@@ -190,6 +214,7 @@ public abstract class CommonFragment extends Fragment {
     @Override
     public void onStop() {
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog(fragmentName);
+        mHandler.removeCallbacks(updateTriggerRunnable);
         mHandler.removeCallbacks(updateBatteryRunnable);
         super.onStop();
     }

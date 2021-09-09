@@ -267,7 +267,7 @@ public class SettingFilterPreFragment extends CommonFragment {
 
         settingTask = new SettingTask(button, sameSetting, invalidRequest);
         settingTask.execute();
-        //MainActivity.mCs108Library4a.saveSetting2File();
+        MainActivity.mCs108Library4a.saveSetting2File();
     }
 }
 

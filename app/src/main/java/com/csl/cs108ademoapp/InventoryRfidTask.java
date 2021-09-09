@@ -262,7 +262,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     int extraLength = 0;
                     if (extra1Bank != -1 && rx000pkgData.decodedData1 != null) extraLength += rx000pkgData.decodedData1.length;
                     if (extra2Bank != -1 && rx000pkgData.decodedData2 != null) extraLength += rx000pkgData.decodedData2.length;
-                    if (extraLength != 0 && MainActivity.mCs108Library4a.getcsModel() != 710) {
+                    if (extraLength != 0) {
                         byte[] decodedEpcNew = new byte[rx000pkgData.decodedEpc.length - extraLength];
                         System.arraycopy(rx000pkgData.decodedEpc, 0, decodedEpcNew, 0, decodedEpcNew.length);
                         rx000pkgData.decodedEpc = decodedEpcNew;
@@ -650,6 +650,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
 
     boolean popRequest = false; Toast mytoast;
     void DeviceConnectTask4InventoryEnding(TaskCancelRReason taskCancelRReason) {
+        MainActivity.mCs108Library4a.abortOperation();  //added in case previous command end is received with inventory stopped
         MainActivity.mCs108Library4a.appendToLog("serverConnectValid = " + serverConnectValid);
         if (serverConnectValid && ALLOW_RTSAVE) {
             try {

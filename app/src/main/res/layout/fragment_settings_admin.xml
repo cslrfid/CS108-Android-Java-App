@@ -107,50 +107,6 @@
         </TableRow>
 
         <TableRow
-            android:id="@+id/settingAdminIntraPackageDelayRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="4"
-                style="@style/style_normal_font"
-                android:text="IntraPackage delay in ms" />
-
-            <EditText
-                android:id="@+id/settingAdminIntraPackageDelay"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/settingAdminDeTimeRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="4"
-                style="@style/style_normal_font"
-                android:text="Duplicate elimination in seconds" />
-
-            <EditText
-                android:id="@+id/settingAdminDeTime"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical">
@@ -169,6 +125,36 @@
                 android:background="@drawable/my_edittext_background"
                 android:inputType="numberDecimal"
                 style="@style/style_normal_font" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/settingAdminTriggerReportingRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone">
+
+            <CheckBox
+                android:id="@+id/settingAdminTriggerReporting"
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Enable trigger report: " />
+
+            <TextView
+                android:id="@+id/settingAdminTriggerReportingCountLabel"
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="every " />
+
+            <EditText
+                android:id="@+id/settingAdminTriggerReportingCount"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                style="@style/style_normal_font"
+                android:text="255" />
         </TableRow>
 
         <TableRow
