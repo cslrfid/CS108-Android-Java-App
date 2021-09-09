@@ -16,7 +16,7 @@
         android:requestLegacyExternalStorage="true"
         android:theme="@style/AppTheme">
 
-        <service android:name="com.csl.cs108ademoapp.CustomIME"
+        <service android:name=".CustomIME"
             android:label="@string/app_ime"
             android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
@@ -26,7 +26,7 @@
         </service>
 
         <activity
-            android:name="com.csl.cs108ademoapp.MainActivity"
+            android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

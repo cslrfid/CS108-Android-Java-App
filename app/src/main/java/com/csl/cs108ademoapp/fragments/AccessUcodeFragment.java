@@ -477,6 +477,8 @@ public class AccessUcodeFragment extends CommonFragment {
     }
     void startAccessTask() {
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
+        MainActivity.mCs108Library4a.setInvAlgo(false);
+        if (MainActivity.mCs108Library4a.getRetryCount() < 2) MainActivity.mCs108Library4a.setRetryCount(2);
         if (updating == false) {
             updating = true; bankProcessing = 0;
             mHandler.removeCallbacks(updateRunnable);

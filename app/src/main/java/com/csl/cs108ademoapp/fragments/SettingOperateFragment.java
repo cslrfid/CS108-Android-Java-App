@@ -175,12 +175,7 @@ public class SettingOperateFragment extends CommonFragment {
         editTextRetry = (EditText) getActivity().findViewById(R.id.settingOperateRetry);
 
         spinnerProfile = (Spinner) getActivity().findViewById(R.id.settingOperateProfile);
-        if (false) {
-            targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.profile1_options, R.layout.custom_spinner_layout);
-            targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerProfile.setAdapter(targetAdapter);
-        }
-        else {
+        if (true) {
             ArrayAdapter<String> targetAdapter1 = new ArrayAdapter<String>(getContext(),  android.R.layout.simple_spinner_dropdown_item, MainActivity.mCs108Library4a.getProfileList());
             targetAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerProfile.setAdapter(targetAdapter1);
@@ -683,5 +678,6 @@ public class SettingOperateFragment extends CommonFragment {
         settingTask = new SettingTask((sameCheck ? button: button1), sameSetting, invalidRequest);
         settingTask.execute();
         MainActivity.mCs108Library4a.saveSetting2File();
+        mHandler.post(updateRunnable);
     }
 }
