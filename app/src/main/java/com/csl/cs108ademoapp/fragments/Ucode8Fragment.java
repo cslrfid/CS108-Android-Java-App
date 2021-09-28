@@ -103,9 +103,10 @@ public class Ucode8Fragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
         mAdapter.fragment0.onDestroy();
         mAdapter.fragment1.onDestroy();
+        MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
+        MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }
 

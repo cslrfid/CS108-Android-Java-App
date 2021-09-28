@@ -198,6 +198,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     long firstTimeOld = 0, timeMillisSound = 0; int totalOld = 0;
     @Override
     protected void onProgressUpdate(String... output) {
+        if (false) MainActivity.mCs108Library4a.appendToLog("InventoryRfidTask: output[0] = " + output[0]);
         if (output[0] != null) {
             if (output[0].length() == 1) inventoryHandler_endReason();
             else if (output[0].length() == 2) {
@@ -307,7 +308,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     MainActivity.mCs108Library4a.appendToLog("HelloK: strMdid = " + strMdid + ", MainMdid = " + MainActivity.mDid + ", bFastId = " + bFastId);
 
                     int iPc = Integer.parseInt(strPc, 16);
-                    String strXpc = null; int iSensorData = ReaderDevice.INVALID_SENSORDATA; if ((iPc & 0x0200) != 0) {
+                    String strXpc = null; int iSensorData = ReaderDevice.INVALID_SENSORDATA; if ((iPc & 0x0200) != 0 && strEpc != null && strEpc.length() >= 8) {
                         int iXpcw1 = Integer.parseInt(strEpc.substring(0, 4), 16);
                         if ((iXpcw1 & 0x8000) != 0) {
                             strXpc = strEpc.substring(0, 8);
@@ -349,27 +350,47 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                         }
                         if (bValidFastId == false) return;
                         MainActivity.mCs108Library4a.appendToLog("HelloK: Doing IMPINJ Inventory  with strMdid = " + strMdid + ", strEpc1 = " + strEpc1 + ":, strTid = " + strTid);
-                    } else if (strMdid != null && MainActivity.mDid != null) {
+                    } else if (MainActivity.mDid != null) {
+                        MainActivity.mCs108Library4a.appendToLog("HelloK: MainActivity.mDid = " + MainActivity.mDid);
                         if (MainActivity.mDid.matches("E2806894B")) {
                             if (strEpc.length() >= 24) {
                                 String strEpc1 = strEpc.substring(0, strEpc.length() - 24);
                                 String strTid = strEpc.substring(strEpc.length() - 24, strEpc.length());
+                                MainActivity.mCs108Library4a.appendToLog("HelloK: matched E2806894B with strEpc = " + strEpc + ", strEpc1 = " + strEpc1 + ", strTid = " + strTid + ", strExtra1 = " + strExtra1);
+                                boolean matched = true;
                                 if (strExtra1 != null) {
-                                    if (strExtra1.length() == 8 && strTid.contains(strExtra1)) {
-                                        strEpc = strEpc1; strAddresss = strEpc;
-                                        strExtra2 = strTid;
-                                        extra2Bank = 2;
-                                        data2_offset = 0;
-                                    }
+                                    if (!(strExtra1.length() == 8 && strTid.contains(strExtra1))) matched = false;
+                                }
+                                if (matched) {
+                                    strEpc = strEpc1;
+                                    strAddresss = strEpc;
+                                    strExtra2 = strTid;
+                                    extra2Bank = 2;
+                                    data2_offset = 0;
+                                }
+                                if (strTid.contains("E2806894") == false) {
+                                    MainActivity.mCs108Library4a.appendToLog("HelloK: Skip the record without strExtra1 E2806894: " + strEpc);
+                                    return;
                                 }
                             }
-                        } else if (MainActivity.mDid.matches("E2806894C")) {
-                            if (strExtra1 != null && strEpc.length() >= 4) {
-                                if (strExtra1.contains("E2806894")) {
-                                    String strEpc1 = strEpc.substring(0, strEpc.length() - 4);
-                                    String strTid = strEpc.substring(strEpc.length() - 4, strEpc.length());
+                        } else if (MainActivity.mDid.matches("E2806894C") || MainActivity.mDid.matches("E2806894d")) {
+                            if (strEpc.length() >= 4) {
+                                String strEpc1 = strEpc.substring(0, strEpc.length() - 4);
+                                String strBrand = strEpc.substring(strEpc.length() - 4, strEpc.length());
+                                MainActivity.mCs108Library4a.appendToLog("HelloK: matched E2806894B with strEpc = " + strEpc + ", strEpc1 = " + strEpc1 + ", strBrand = " + strBrand + ", strExtra1 = " + strExtra1);
+                                boolean matched = true;
+                                if (strExtra1 != null || MainActivity.mDid.matches("E2806894d")) {
+                                    if (!(strExtra1 != null && strExtra1.length() == 8 && strExtra1.contains("E2806894"))) {
+                                        matched = false;
+                                        if (MainActivity.mDid.matches("E2806894d")) {
+                                            MainActivity.mCs108Library4a.appendToLog("HelloK: Skip the record without strExtra1 E2806894: " + strEpc);
+                                            return;
+                                        }
+                                    }
+                                }
+                                if (matched) {
                                     strEpc = strEpc1; strAddresss = strEpc;
-                                    brand = strTid;
+                                    brand = strBrand;
                                     MainActivity.mCs108Library4a.appendToLog("HelloK: brand 1 = " + brand + ", strEpc = " + strEpc);
                                 }
                             }
@@ -429,7 +450,14 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             readerDevice.setBrand(brand);
                             readerDevice.setCodeTempC(codeTempC);
                             readerDevice.setSensorData(iSensorData);
-                            readerDevice.setExtra(strExtra1, extra1Bank, data1_offset, strExtra2, extra2Bank, data2_offset);
+                            if (strExtra1 != null) readerDevice.setExtra1(strExtra1, extra1Bank, data1_offset);
+                            else if (readerDevice.getstrExtra1() != null) {
+                                MainActivity.mCs108Library4a.appendToLog("HelloK: no null replacement of StrExtra1");
+                            }
+                            if (strExtra2 != null) readerDevice.setExtra2(strExtra2, extra2Bank, data2_offset);
+                            else if (readerDevice.getstrExtra2() != null) {
+                                MainActivity.mCs108Library4a.appendToLog("HelloK: no null replacement of StrExtra2");
+                            }
                             tagsList.set(iMatchItem, readerDevice);
                             match = true;
                             updated = true;

@@ -41,11 +41,14 @@ public class HomeFragment extends CommonFragment {
             actionBar.setIcon(android.R.drawable.ic_menu_save);
             actionBar.setTitle(R.string.title_activity_home);
         }
-        mHandler.post(runnableConfiguring);
+        MainActivity.mDid = null;
+        if (MainActivity.sharedObjects.versioinWarningShown == false)
+            mHandler.post(runnableConfiguring);
     }
 
     @Override
     public void onStop() {
+        stopProgressDialog();
         mHandler.removeCallbacks(runnableConfiguring);
         super.onStop();
     }
@@ -61,9 +64,9 @@ public class HomeFragment extends CommonFragment {
     Runnable runnableConfiguring = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: runnableConfiguring(): mrfidToWriteSize = " + MainActivity.mCs108Library4a.mrfidToWriteSize());
+            if (true) MainActivity.mCs108Library4a.appendToLog("AAA: runnableConfiguring(): mrfidToWriteSize = " + MainActivity.mCs108Library4a.mrfidToWriteSize());
             boolean progressShown = false;
-            if (progressDialog != null) if (progressDialog.isShowing()) progressShown = true;
+            if (progressDialog != null) { if (progressDialog.isShowing()) progressShown = true; }
             if (MainActivity.mCs108Library4a.isBleConnected() == false) {
                 if (progressShown) {
                     stopProgressDialog();

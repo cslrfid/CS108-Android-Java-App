@@ -6,8 +6,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 30
         versionCode 31
-        versionName "2.1.13"
-        buildConfigField 'String', 'VERSION_NAME', "\"2.1.13\""
+        versionName "2.1.21"
+        buildConfigField 'String', 'VERSION_NAME', "\"2.1.21\""
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }

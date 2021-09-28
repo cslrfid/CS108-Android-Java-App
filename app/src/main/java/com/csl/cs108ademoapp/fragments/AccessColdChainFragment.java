@@ -289,14 +289,18 @@ public class AccessColdChainFragment extends CommonFragment {
                 boolean invalid = processTickItems();
                 MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
                 if (bankProcessing++ != 0 && invalid) rerunRequest = false;
-                else {
+                else  {
+                    Cs108Connector.HostCommands hostCommand;
+                    if (readWriteTypes == ReadWriteTypes.TEMPERATURE) hostCommand = Cs108Connector.HostCommands.CMD_GETSENSORDATA;
+                    else if (operationRead) hostCommand = Cs108Connector.HostCommands.CMD_18K6CREAD;
+                    else hostCommand = Cs108Connector.HostCommands.CMD_18K6CWRITE;
                     accessTask = new AccessTask(
                             (operationRead ? buttonRead : buttonWrite), null,
                             invalid,
                             editTextRWTagID.getText().toString(), 1, 32,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                            (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE),
+                            hostCommand,
                             0, false, false,true,
                             null, null, null, null, null);
                     accessTask.execute();
@@ -360,7 +364,7 @@ public class AccessColdChainFragment extends CommonFragment {
             else if (accessResult == null) {
                 if (readWriteTypes == ReadWriteTypes.CONFIGURATION) {
                     textViewConfigOk.setText("E"); checkBoxConfig.setChecked(false);
-                } else if (readWriteTypes == ReadWriteTypes.TEMPERATURE) {
+                } else if (readWriteTypes == ReadWriteTypes.TEMPERATURE && operationRead) {
                     textViewTemperatureOk.setText("E"); checkBoxTemperature.setChecked(false);
                 } else if (readWriteTypes == ReadWriteTypes.ENABLE) {
                     textViewEnableOk.setText("E"); checkBoxEnable.setChecked(false);
@@ -391,17 +395,26 @@ public class AccessColdChainFragment extends CommonFragment {
                             editTextSamplingInterval.setText(String.valueOf(bValue2 & 0x3F));
                         }
                     }
-                } else if (readWriteTypes == ReadWriteTypes.TEMPERATURE) {
+                } else if (readWriteTypes == ReadWriteTypes.TEMPERATURE && operationRead) {
                     textViewTemperatureOk.setText("O"); checkBoxTemperature.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
-                    if (accessResult.length() == 4 && operationRead) {
+                    MainActivity.mCs108Library4a.appendToLog("accessResult of Temperature = " + accessResult);
+
+                    if (accessResult.length() >= 16) {
+                        int indexBegin = accessResult.length() - 16;
+                        String stringValue = accessResult.substring(indexBegin, indexBegin + 4);
+                        MainActivity.mCs108Library4a.appendToLog("temperature part of Temperature accessResult = " + stringValue);
+                        accessResult = stringValue;
+                    }
+                    if (accessResult.length() == 4) {
                         byte bValue = Byte.parseByte(accessResult.substring(0, 1), 16);
                         if ((bValue & 0x8) != 0) textViewBatteryAlarm.setVisibility(View.VISIBLE);
                         else if ((bValue & 0x2) != 0) textViewOverAlarm.setVisibility(View.VISIBLE);
                         else if ((bValue & 01) != 0) textViewUnderAlarm.setVisibility(View.VISIBLE);
 
                         bValue = Byte.parseByte(accessResult.substring(1, 2), 16);
-                        byte bValue2 = Byte.parseByte(accessResult.substring(2, 4), 16);
-                        if ((bValue & 0x01) != 0 && bValue2 == 0) textViewTemperature.setText("Invalid");
+                        Integer iValue2 = Integer.parseInt(accessResult.substring(2, 4), 16);
+                        iValue2 &= 0x1FF;
+                        if ((bValue & 0x01) != 0 && iValue2 == 0) textViewTemperature.setText("Invalid");
                         else {
                             String stringValue = getTemperatue(accessResult.substring(1, 4));
                             stringValue += (char) 0x00B0 + "C";
@@ -587,17 +600,27 @@ public class AccessColdChainFragment extends CommonFragment {
                 }
             }
         } else if (checkBoxTemperature.isChecked() == true) {
-            accOffset = 0x100; accSize = 1; readWriteTypes = ReadWriteTypes.TEMPERATURE; textViewTemperatureOk.setText("");
-            if (operationRead) {
-                textViewTemperature = (TextView) getActivity().findViewById(R.id.accessCCTemperature);
-                textViewTemperature.setText("");
-                textViewUnderAlarm = (TextView) getActivity().findViewById(R.id.accessCCUnderTempAlarm);
-                textViewUnderAlarm.setVisibility(View.INVISIBLE);
-                textViewOverAlarm = (TextView) getActivity().findViewById(R.id.accessCCOverTempAlarm);
-                textViewOverAlarm.setVisibility(View.INVISIBLE);
-                textViewBatteryAlarm = (TextView) getActivity().findViewById(R.id.accessCCBatteryAlarm);
-                textViewBatteryAlarm.setVisibility(View.INVISIBLE);
-            } else invalidRequest1 = true;
+            readWriteTypes = ReadWriteTypes.TEMPERATURE;
+            if (bankProcessing == 0) {
+                if (operationRead) {
+                    textViewTemperature = (TextView) getActivity().findViewById(R.id.accessCCTemperature);
+                    textViewTemperature.setText("");
+                    textViewUnderAlarm = (TextView) getActivity().findViewById(R.id.accessCCUnderTempAlarm);
+                    textViewUnderAlarm.setVisibility(View.INVISIBLE);
+                    textViewOverAlarm = (TextView) getActivity().findViewById(R.id.accessCCOverTempAlarm);
+                    textViewOverAlarm.setVisibility(View.INVISIBLE);
+                    textViewBatteryAlarm = (TextView) getActivity().findViewById(R.id.accessCCBatteryAlarm);
+                    textViewBatteryAlarm.setVisibility(View.INVISIBLE);
+                    textViewTemperatureOk.setText("");
+                    if (true) {
+                        MainActivity.mCs108Library4a.macWrite(0x11F, 3);
+                        return false;
+                    }
+                    accOffset = 0x100; accSize = 1; operationRead = false;
+                } else invalidRequest1 = true;
+            } else {
+                accOffset = 0x100; accSize = 1; operationRead = true;
+            }
         } else if (checkBoxEnable.isChecked() == true) {
             accOffset = 0x10D; accSize = 1; readWriteTypes = ReadWriteTypes.ENABLE; textViewEnableOk.setText("");
             if (operationRead) spinnerEnable.setSelection(0);

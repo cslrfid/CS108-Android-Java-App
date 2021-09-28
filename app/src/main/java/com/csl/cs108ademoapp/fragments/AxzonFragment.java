@@ -119,15 +119,15 @@ public class AxzonFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
+        if (mAdapter.fragment0 != null) if (mAdapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment0.onDestroy();
+        if (mAdapter.fragment1 != null) if (mAdapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment1.onDestroy();
+        if (mAdapter.fragment2 != null) if (mAdapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment2.onDestroy();
+        if (mAdapter.fragment3 != null) if (mAdapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment3.onDestroy();
         if (MainActivity.selectFor != -1) {
             MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
             MainActivity.mCs108Library4a.setSelectCriteriaDisable(2);
             MainActivity.selectFor = -1;
         }
-        if (mAdapter.fragment0 != null) if (mAdapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment0.onDestroy();
-        if (mAdapter.fragment1 != null) if (mAdapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment1.onDestroy();
-        if (mAdapter.fragment2 != null) if (mAdapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment2.onDestroy();
-        if (mAdapter.fragment3 != null) if (mAdapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment3.onDestroy();
         MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }

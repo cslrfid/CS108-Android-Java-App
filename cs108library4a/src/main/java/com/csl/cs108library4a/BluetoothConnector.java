@@ -64,11 +64,7 @@ public class BluetoothConnector {
         }
 
         byte[] deviceName = null;
-        String getBluetoothIcName(int serviceUUID2p1) {
-            if (serviceUUID2p1 != 1) {
-                appendToLog("Skip getBluetoothIcName with return 123");
-                return "123";
-            }
+        String getBluetoothIcName() {
             if (deviceName == null) {
                 boolean repeatRequest = false;
                 if (mBluetoothIcToWrite.size() != 0) {
@@ -213,7 +209,7 @@ public class BluetoothConnector {
         }
 
         public int sendDataToWriteSent = 0;
-        public byte[] sendBluetoothIcToWrite(int serviceUUID2p1) {
+        public byte[] sendBluetoothIcToWrite() {
             if (sendDataToWriteSent >= 5) {
                 int oldSize = mBluetoothIcToWrite.size();
                 mBluetoothIcToWrite.remove(0); sendDataToWriteSent = 0;
@@ -222,11 +218,6 @@ public class BluetoothConnector {
                 Toast.makeText(mContext, "Problem in sending data to Bluetooth Module. Removed data sending after count-out", Toast.LENGTH_SHORT).show();
             } else {
                 if (DEBUG) appendToLog("size = " + mBluetoothIcToWrite.size() + ", PayloadEvents = " + mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent.toString());
-                if (serviceUUID2p1 != 1 && mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent != BluetoothIcPayloadEvents.GET_VERSION) {
-                    appendToLog("Skipped writeBluetoothIc event with true return: " + mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent);
-                    mBluetoothIcToWrite.remove(0);
-                }
-
                 return writeBluetoothIc(mBluetoothIcToWrite.get(0));
             }
             return null;

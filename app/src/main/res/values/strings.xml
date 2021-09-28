@@ -138,6 +138,11 @@
         <item>All</item>
     </string-array>
 
+    <string-array name="admin_savingformat_options">
+        <item>JSON</item>
+        <item>CSV</item>
+    </string-array>
+
     <string-array name="frequencyOrder_options">
         <item>Frequency hopping</item>
         <item>Fixed channel</item>

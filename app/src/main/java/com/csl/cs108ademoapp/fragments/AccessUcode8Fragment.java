@@ -11,7 +11,7 @@ import com.csl.cs108ademoapp.R;
 
 public class AccessUcode8Fragment extends CommonFragment {
     final boolean DEBUG = true;
-    RadioButton radioButtonSelectEpc, radioButtonSelectEpcTid, radioButtonSelectEpcBrand;
+    RadioButton radioButtonSelectEpc, radioButtonSelectEpcTid, radioButtonSelectEpcBrand, radioButtonSelectEpcBrandTidCheck;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -25,16 +25,14 @@ public class AccessUcode8Fragment extends CommonFragment {
 
         radioButtonSelectEpc = (RadioButton) getActivity().findViewById(R.id.accessUC8SelectEpc);
         radioButtonSelectEpcTid = (RadioButton) getActivity().findViewById(R.id.accessUC8SelectEpcTid);
-        radioButtonSelectEpcBrand = (RadioButton) getActivity().findViewById(R.id.accessUC8SelectEpcBrand);
+        radioButtonSelectEpcBrand = (RadioButton) getActivity().findViewById(R.id.accessUC8SelectEpcBrand); radioButtonSelectEpcBrand.setChecked(true);
+        radioButtonSelectEpcBrandTidCheck = (RadioButton) getActivity().findViewById(R.id.accessUC8SelectEpcBrandTidCheck);
 
         MainActivity.mCs108Library4a.setSameCheck(false);
     }
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.setInvBrandId(false);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }
 
@@ -47,7 +45,7 @@ public class AccessUcode8Fragment extends CommonFragment {
             MainActivity.mCs108Library4a.appendToLog("AccessUcode8Fragment is now VISIBLE");
             //            setNotificationListener();
         } else {
-            if (radioButtonSelectEpc != null && radioButtonSelectEpcTid != null && radioButtonSelectEpcBrand != null) {
+            if (radioButtonSelectEpc != null && radioButtonSelectEpcTid != null && radioButtonSelectEpcBrand != null && radioButtonSelectEpcBrandTidCheck != null) {
                 if (radioButtonSelectEpc.isChecked()) {
                     MainActivity.mCs108Library4a.appendToLog("Selected EPC");
                     MainActivity.mDid = "E2806894A";
@@ -59,6 +57,10 @@ public class AccessUcode8Fragment extends CommonFragment {
                 if (radioButtonSelectEpcBrand.isChecked()) {
                     MainActivity.mCs108Library4a.appendToLog("Selected EPC+BRAND");
                     MainActivity.mDid = "E2806894C";
+                }
+                if (radioButtonSelectEpcBrandTidCheck.isChecked()) {
+                    MainActivity.mCs108Library4a.appendToLog("Selected EPC+BRAND");
+                    MainActivity.mDid = "E2806894d";
                 }
             }
             userVisibleHint = false;
