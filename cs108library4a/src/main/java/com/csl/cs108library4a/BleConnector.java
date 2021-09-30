@@ -160,8 +160,6 @@ class BleConnector extends BluetoothGattCallback {
             if (true) appendToLog("status=" + status + ". restart discoverServices"); mBluetoothGatt.discoverServices();
         } else {
             UUID UUID_READER_SERVICE = UUID.fromString("00009800-0000-1000-8000-00805f9b34fb");
-            if (serviceUUID2p1 != 1) UUID_READER_SERVICE = UUID.fromString("00009802-0000-1000-8000-00805f9b34fb");
-            appendToLog("serviceUD1D2p1 = " + serviceUUID2p1);
             mReaderStreamOutCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_OUT_CHARACTERISTIC);
             mReaderStreamInCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_IN_CHARACTERISTIC);
             appendToLog("mReaderStreamOutCharacteristic flag = " + mReaderStreamOutCharacteristic.getProperties());

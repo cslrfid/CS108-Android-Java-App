@@ -166,11 +166,7 @@ public class BluetoothConnector {
                                 if (cs108ReadData.dataValues.length - 2 < length) length = cs108ReadData.dataValues.length - 2;
                                 System.arraycopy(cs108ReadData.dataValues, 2, mBluetoothIcVersion, 0, length);
                                 if (mBluetoothIcVersion[0] == 3) icsModel = 463;
-                                else if (mBluetoothIcVersion[0] == 1) {
-                                    if (mBluetoothIcVersion[1] == 0 && mBluetoothIcVersion[2] < 10) icsModel = 710;
-                                    else icsModel = 108;
-                                    appendToLog("New Checkpoint with icsModel = " + icsModel);
-                                }
+                                else if (mBluetoothIcVersion[0] == 1) icsModel = 108;
                                 mBluetoothIcVersionUpdated = true;
                                 if (true) appendToLog("mBluetoothIcVersionUpdated is true");
                             }

@@ -211,7 +211,6 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     }
 
     public int getServiceUUID2p1() { return serviceUUID2p1; }
-    public void setServiceUUID2p1(int serviceUUID2p1) { this.serviceUUID2p1 = serviceUUID2p1; }
 
     public int getPhase() { return phase; }
     public void setPhase(int phase) { this.phase = phase; }

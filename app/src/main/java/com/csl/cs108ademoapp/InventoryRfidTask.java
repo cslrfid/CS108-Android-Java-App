@@ -368,10 +368,10 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                                     extra2Bank = 2;
                                     data2_offset = 0;
                                 }
-                                if (strTid.contains("E2806894") == false) {
+                                /*if (strTid.contains("E2806894") == false) {
                                     MainActivity.mCs108Library4a.appendToLog("HelloK: Skip the record without strExtra1 E2806894: " + strEpc);
                                     return;
-                                }
+                                }*/
                             }
                         } else if (MainActivity.mDid.matches("E2806894C") || MainActivity.mDid.matches("E2806894d")) {
                             if (strEpc.length() >= 4) {
@@ -382,10 +382,10 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                                 if (strExtra1 != null || MainActivity.mDid.matches("E2806894d")) {
                                     if (!(strExtra1 != null && strExtra1.length() == 8 && strExtra1.contains("E2806894"))) {
                                         matched = false;
-                                        if (MainActivity.mDid.matches("E2806894d")) {
+                                        /*if (MainActivity.mDid.matches("E2806894d")) {
                                             MainActivity.mCs108Library4a.appendToLog("HelloK: Skip the record without strExtra1 E2806894: " + strEpc);
                                             return;
-                                        }
+                                        }*/
                                     }
                                 }
                                 if (matched) {
@@ -396,6 +396,26 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             }
                         }
                     }
+
+                    MainActivity.mCs108Library4a.appendToLog("strTidCompared = " + strMdid + ", MainActivity.mDid = " + MainActivity.mDid + ", strExtra1 = " + strExtra1 + ", strExtra2 = " + strExtra2);
+                    if (strMdid != null) {
+                        String strTidCompared = strMdid;
+                        if (strTidCompared.indexOf("E28011") == 0) strTidCompared = "E28011";
+                        if (strTidCompared.matches("E282402")) { }
+                        else if (strTidCompared.matches("E282403")) { }
+                        else if (strTidCompared.matches("E282405")) { }
+                        else if (strTidCompared.matches("E2806894") && MainActivity.mDid.matches("E2806894C")) { }
+                        else { //if (strMdid.matches("E280B0"))
+                            boolean bMatched = false;
+                            if (strExtra1 != null && strExtra1.indexOf(strTidCompared) == 0) {
+                                bMatched = true; MainActivity.mCs108Library4a.appendToLog("strExtra1 contains strTidCompared");
+                            } else if (strExtra2 != null && strExtra2.indexOf(strTidCompared) == 0) {
+                                bMatched = true; MainActivity.mCs108Library4a.appendToLog("strEXTRA2 contains strTidCompared");
+                            }
+                            if (bMatched == false) return;
+                        }
+                    }
+
                     rssi = rx000pkgData.decodedRssi;
                     phase = rx000pkgData.decodedPhase;
                     chidx = rx000pkgData.decodedChidx;

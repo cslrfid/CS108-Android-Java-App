@@ -401,7 +401,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 extra2Bank = 3;
                 extra2Offset = 0x120;
                 extra2Count = 1;
-            } else if (mDid.indexOf("E280B") == 0) {
+            } else if (mDid.indexOf("E280B0") == 0) {
                 extra1Bank = 3;
                 extra1Offset = 188;
                 extra1Count = 2;
