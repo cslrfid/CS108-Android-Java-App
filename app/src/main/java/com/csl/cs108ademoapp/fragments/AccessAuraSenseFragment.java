@@ -113,8 +113,6 @@ public class AccessAuraSenseFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }
 

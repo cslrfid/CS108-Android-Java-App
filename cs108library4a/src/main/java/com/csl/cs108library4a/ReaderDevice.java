@@ -211,7 +211,6 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     }
 
     public int getServiceUUID2p1() { return serviceUUID2p1; }
-    public void setServiceUUID2p1(int serviceUUID2p1) { this.serviceUUID2p1 = serviceUUID2p1; }
 
     public int getPhase() { return phase; }
     public void setPhase(int phase) { this.phase = phase; }
@@ -280,6 +279,18 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     }
     public void setSensorData(int sensorData) { this.sensorData = sensorData; }
 
+    public String getstrExtra1() { return strExtra1; }
+    public void setExtra1(String strExtra1, int extra1Bank, int extra1Offset) {
+        this.strExtra1 = strExtra1;
+        this.extra1Bank = extra1Bank;
+        this.extra1Offset = extra1Offset;
+    }
+    public String getstrExtra2() { return strExtra2; }
+    public void setExtra2(String strExtra2, int extra2Bank, int extra2Offset) {
+        this.strExtra2 = strExtra2;
+        this.extra2Bank = extra2Bank;
+        this.extra2Offset = extra2Offset;
+    }
     public void setExtra(String strExtra1, int extra1Bank, int extra1Offset, String strExtra2, int extra2Bank, int extra2Offset) {
         this.strExtra1 = strExtra1;
         this.extra1Bank = extra1Bank;

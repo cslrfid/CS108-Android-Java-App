@@ -103,13 +103,13 @@ public class MicronFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onDestroy();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onDestroy();
         if (MainActivity.selectFor != -1) {
             MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
             MainActivity.mCs108Library4a.setSelectCriteriaDisable(2);
             MainActivity.selectFor = -1;
         }
-        if (mAdapter.fragment0 != null) mAdapter.fragment0.onDestroy();
-        if (mAdapter.fragment1 != null) mAdapter.fragment1.onDestroy();
         MainActivity.mCs108Library4a.restoreAfterTagSelect();
         super.onDestroy();
     }

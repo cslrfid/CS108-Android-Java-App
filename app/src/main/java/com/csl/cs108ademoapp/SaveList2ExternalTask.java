@@ -9,7 +9,11 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.Settings;
 
+import androidx.core.app.ActivityCompat;
+
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 import org.json.JSONArray;
@@ -18,6 +22,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -25,13 +30,16 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -50,12 +58,54 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
     ArrayList<ReaderDevice> tagsList; ReaderDevice tagDevice1;
     CustomPopupWindow customPopupWindow;
     boolean savedFile = false;
+    int fileFormat = 0;
 
     String url = null;
     HttpURLConnection con;
+    String stringBluetoothMAC, stringWifiMac;
 
     public SaveList2ExternalTask(ArrayList<ReaderDevice> tagsList) {
         this.tagsList = tagsList;
+
+        stringBluetoothMAC = BluetoothAdapter.getDefaultAdapter().getAddress().replaceAll(":", "");
+        mCs108Library4a.appendToLog("stringBluetoothMac from getMacAddress = " + stringBluetoothMAC);
+        if (stringBluetoothMAC.contains("020000000000")) {
+            final String SECURE_SETTINGS_BLUETOOTH_ADDRESS = "bluetooth_address";
+            String macAddress = Settings.Secure.getString(mContext.getContentResolver(), SECURE_SETTINGS_BLUETOOTH_ADDRESS); //Not OK in android 8
+            mCs108Library4a.appendToLog("stringBluetoothMac from Settings.Secure.getString = " + macAddress);
+            stringBluetoothMAC = macAddress;
+        }
+
+        stringWifiMac = ((WifiManager) MainActivity.mContext.getSystemService(WIFI_SERVICE)).getConnectionInfo().getMacAddress().replaceAll(":", "");
+        mCs108Library4a.appendToLog("stringWifMac from getMacAddress = " + stringWifiMac);
+        if (stringWifiMac.contains("020000000000")) {
+            try {
+                List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+                for (NetworkInterface nif : all) {
+                    mCs108Library4a.appendToLog("nif.getName = " + nif.getName() + ", macByts = " + mCs108Library4a.byteArrayToString(nif.getHardwareAddress()));
+                }
+
+                WifiManager wifiMan = (WifiManager) mContext.getSystemService(WIFI_SERVICE);
+                int wifiState = wifiMan.getWifiState();
+                //wifiMan.setWifiEnabled(true);
+                File fl = new File("/sys/class/net/wlan0/address");
+                FileInputStream fin = new FileInputStream(fl);  //Not Ok in Amdroid 11
+                StringBuilder builder = new StringBuilder();
+                int ch;
+                while ((ch = fin.read()) != -1) {
+                    builder.append((char) ch);
+                }
+                String fileMAC = builder.toString();
+                mCs108Library4a.appendToLog("getName: file content = " + fileMAC);
+                fin.close();
+
+                stringWifiMac = fileMAC;
+                //boolean enabled = WifiManager.WIFI_STATE_ENABLED == wifiState;
+                //wifiMan.setWifiEnabled(enabled);
+            } catch (Exception ex) {
+                mCs108Library4a.appendToLog("Exception : " + ex.getCause());
+            }
+        }
     }
     public SaveList2ExternalTask() { }
 
@@ -63,7 +113,8 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
     protected void onPreExecute() {
         if (tagsList == null) cancel(true);
 
-        messageStr = createJSON(tagsList, null).toString();
+        if (MainActivity.mCs108Library4a.getSavingFormatSetting() == 0) messageStr = createJSON(tagsList, null).toString();
+        else messageStr = createCSV(tagsList, null);
         resultDisplay = save2File(messageStr, true);
         customPopupWindow = new CustomPopupWindow(mContext);
         mCs108Library4a.appendToLog("SaveList2ExternalTask: resultDisplay = " + resultDisplay);
@@ -205,9 +256,18 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
             object.put("rfidReaderInternalSerialNumber", MainActivity.mCs108Library4a.getRadioSerial());
 
             object.put("smartPhoneName", Build.MODEL);
-            object.put("smartPhoneSerialNumber", Build.SERIAL);
-            object.put("smartPhoneBluetoothMACAddress",  BluetoothAdapter.getDefaultAdapter().getAddress().replaceAll(":", ""));
-            object.put("smartPhoneWiFiMACAddress", ((WifiManager) MainActivity.mContext.getSystemService(WIFI_SERVICE)).getConnectionInfo().getMacAddress().replaceAll(":", ""));
+            String strPhoneSerial = null;
+            /*if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                try {
+                    strPhoneSerial = Build.getSerial();
+                } catch (Exception ex) {
+                    mCs108Library4a.appendToLog("Exception = " + ex.getCause());
+                }
+            } else*/
+                strPhoneSerial = Build.SERIAL;
+            object.put("smartPhoneSerialNumber", strPhoneSerial);
+            object.put("smartPhoneBluetoothMACAddress",  stringBluetoothMAC);
+            object.put("smartPhoneWiFiMACAddress", stringWifiMac);
 
             object.put("smartPhoneUUID", null);
             object.put("pcName", null);
@@ -220,17 +280,110 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         return object;
     }
 
+    public String createCSV(ArrayList<ReaderDevice> tagsList0, ReaderDevice tagDevice0) {
+        String object = "";
+        int csvColumnSelect = MainActivity.mCs108Library4a.getCsvColumnSelectSetting();
+        try {
+            if (tagsList0 != null || tagDevice0 != null) {
+                JSONArray jsonArray = new JSONArray();
+                int i = 1; if (tagsList0 != null) i = tagsList0.size();
+                if (true) {
+                    String objectTag;
+                    objectTag = "PC,";
+                    objectTag += "EPC,";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.RESERVE_BANK.ordinal())) != 0) objectTag += "Reserve Bank,";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.EPC_BANK.ordinal())) != 0) objectTag += "EPC Bank,";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TID_BANK.ordinal())) != 0) objectTag += "TID Bank,";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.USER_BANK.ordinal())) != 0) objectTag += "User Bank,";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.PHASE.ordinal())) != 0) objectTag += "Phase,";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.CHANNEL.ordinal())) != 0) objectTag += "Channel,";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TIME.ordinal())) != 0) objectTag += "Time Of Read,";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TIMEZONE.ordinal())) != 0) objectTag += "Time Zone,";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.LOCATION.ordinal())) != 0) objectTag += "location Of Read Latitude, Location of Read Longitude, ";
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.DIRECTION.ordinal())) != 0) objectTag += "eCompass";
+                    objectTag += "\n";
+                    object += objectTag;
+                }
+
+                while (--i >= 0) {
+                    ReaderDevice tagDevice;
+                    if (tagsList0 != null) tagDevice = tagsList0.get(i);
+                    else tagDevice = tagDevice0;
+
+                    String accessPassword = null, killPassword = null, pcData = null, epcData = null, resBankData = null, epcBankData = null, tidBankData = null, userBankData = null;
+                    String timeOfRead = null, timeZone = null, location = null, compass = null;
+                    int phase = -1, channel = -1;
+                    if (tagDevice != null) {
+                        pcData = tagDevice.getPc();
+                        epcData = tagDevice.getAddress();
+                        resBankData = tagDevice.getRes();
+                        epcBankData = tagDevice.getEpc();
+                        tidBankData = tagDevice.getTid();
+                        userBankData = tagDevice.getUser();
+                        timeOfRead = tagDevice.getTimeOfRead(); MainActivity.mCs108Library4a.appendToLog("timeOfRead = " + timeOfRead );
+                        if (false) {
+                            int index = timeOfRead.indexOf(".");
+                            if (index >= 0) {
+                                String string1 = timeOfRead.substring(0, index);
+                                timeOfRead = string1;
+                                MainActivity.mCs108Library4a.appendToLog("index = " + index + ", revised timeOfRead = " + timeOfRead );
+                            }
+                        }
+                        timeZone = tagDevice.getTimeZone();
+                        location = tagDevice.getLocation();
+                        compass = tagDevice.getCompass();
+                        phase = tagDevice.getPhase();
+                        channel = tagDevice.getChannel();
+                    }
+
+                    String objectTag;
+                    objectTag = String.format("=\"%s\",", pcData);
+                    objectTag += String.format("=\"%s\",", epcData);
+
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.RESERVE_BANK.ordinal())) != 0) objectTag += String.format("=\"%s\",", resBankData);
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.EPC_BANK.ordinal())) != 0) objectTag += String.format("=\"%s\",", epcBankData);
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TID_BANK.ordinal())) != 0) objectTag += String.format("=\"%s\",", tidBankData);
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.USER_BANK.ordinal())) != 0) objectTag += String.format("=\"%s\",", userBankData);
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.PHASE.ordinal())) != 0) objectTag += String.format("%d,", phase);
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.CHANNEL.ordinal())) != 0) objectTag += String.format("%d,", channel);
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TIME.ordinal())) != 0) objectTag += String.format("=\"%s\",", timeOfRead);
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TIMEZONE.ordinal())) != 0) objectTag += String.format("%s,", timeZone);
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.LOCATION.ordinal())) != 0) objectTag += String.format("%s,", location);
+                    if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.DIRECTION.ordinal())) != 0)objectTag += String.format("%s", compass);
+                    objectTag += "\n";
+                    object += objectTag;
+                }
+
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.OTHERS.ordinal())) != 0) {
+                    object += "\nUser Description,this is example tag data\n";
+
+                    object += String.format("RFID Reader Name,=\"%s\"\n", MainActivity.mCs108Library4a.getBluetoothICFirmwareName());
+                    object += String.format("RFID Reader Serial Number,=\"%s\"\n", MainActivity.mCs108Library4a.getHostProcessorICSerialNumber());
+                    object += String.format("RFID Reader Radio Serial Number,=\"%s\"\n", MainActivity.mCs108Library4a.getRadioSerial());
+                    if (true) {
+                        object += String.format("RFID Reader Barcode Serial Number,=\"%s\"\n", MainActivity.mCs108Library4a.getBarcodeSerial());
+                        object += String.format("RFID Reader Bluetooth MAC address,=\"%s\"\n", MainActivity.mCs108Library4a.getBluetoothDeviceAddress());
+                    }
+                    object += String.format("Smart Phone Name,=\"%s\"\n", Build.MODEL);
+                }
+            }
+        } catch (Exception ex) { }
+        return object;
+    }
+
     public String save2File(String messageStr, boolean requestPermission) {
         String resultDisplay = "";
         if (MainActivity.mCs108Library4a.getSaveFileEnable() == false) return "No saving file as it is disabled";
         boolean writeExtPermission = true;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                mCs108Library4a.appendToLog("WRITE_EXTERNAL_STORAGE Permission is required !!!");
                 writeExtPermission = false;
                 if (requestPermission) { MainActivity.permissionRequesting = true; requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 return null; }
-            }
+            } else mCs108Library4a.appendToLog("WRITE_EXTERNAL_STORAGE Permission is GRANTED !!!");
         }
+
         errorDisplay = null;
         if (writeExtPermission == false) {
             errorDisplay = "denied WRITE_EXTERNAL_STORAGE Permission !!!";
@@ -241,7 +394,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
             if (path.exists() == false) errorDisplay = "Error in making directory !!!";
             else {
                 String dateTime = new SimpleDateFormat("yyMMdd_HHmmss").format(new Date());
-                String fileName = "cs108Java_" + dateTime + ".txt";
+                String fileName = "cs108Java_" + dateTime + (mCs108Library4a.getSavingFormatSetting() == 0 ? ".txt" : ".csv");
                 File file = new File(path, fileName);
                 if (file == null) errorDisplay = "Error in making directory !!!";
                 else {

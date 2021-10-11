@@ -20,7 +20,6 @@ public class InventoryAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = null;
         switch (index) {
             case 0:
-                MainActivity.mDid = null;
                 fragment = InventoryRfidiMultiFragment.newInstance(false, null);
                 fragment0 = fragment;
                 break;

@@ -174,16 +174,6 @@ public class MainActivity extends AppCompatActivity {
     CustomProgressDialog progressDialog;
     private void selectItem(DrawerPositions position) {
         Log.i(TAG, "MainActivity.selectItem: position = " + position);
-        if (false && position != DrawerPositions.MAIN && position != DrawerPositions.ABOUT &&  position != DrawerPositions.CONNECT && mCs108Library4a != null) {
-            if (MainActivity.mCs108Library4a.isRfidFailure() == false && mCs108Library4a.mrfidToWriteSize() != 0) {
-                if (configureDisplaying == false) {
-                    progressDialog = new CustomProgressDialog(this, "Initializing reader. Please wait.");
-                    progressDialog.show();
-                    mHandler.post(configureRunnable);
-                }
-                return;
-            }
-        }
         if (true && position != DrawerPositions.MAIN && position != DrawerPositions.ABOUT && position != DrawerPositions.CONNECT && mCs108Library4a.isBleConnected() == false) {
             Toast.makeText(MainActivity.mContext, "Bluetooth Disconnected.  Please Connect.", Toast.LENGTH_SHORT).show();
             return;
@@ -208,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new InventoryRfidSearchFragment();
                 break;
             case MULTIBANK:
-                mDid = null;
                 fragment = InventoryRfidiMultiFragment.newInstance(true, null);
                 break;
             case SETTING:

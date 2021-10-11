@@ -1,15 +1,18 @@
 package com.csl.cs108ademoapp.fragments;
 
+import android.inputmethodservice.Keyboard;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -18,12 +21,14 @@ import android.widget.Toast;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SettingTask;
+import com.csl.cs108library4a.Cs108Library4A;
 
 public class SettingAdminFragment extends CommonFragment {
     private CheckBox checkBoxTriggerReporting, checkBoxInventoryBeep, checkBoxInventoryVibrate, checkBoxSaveFileEnable, checkBoxSaveCloudEnable, checkBoxSaveNewCloudEnable, checkBoxSaveAllCloudEnable;
+    private CheckBox checkBoxCsvColumnResBank, checkBoxCsvColumnEpcBank, checkBoxCsvColumnTidBank, checkBoxCsvColumnUserBank, checkBoxCsvColumnPhase, checkBoxCsvColumnChannel, checkBoxCsvColumnTime, checkBoxCsvColumnTimeZone, checkBoxCsvColumnLocation, checkBoxCsvColumnDirection, checkBoxCsvColumnOthers;
     private EditText editTextDeviceName, editTextCycleDelay, editTextTriggerReportingCount, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout;
     private TextView textViewReaderModel;
-    private Spinner spinnerQueryBattery, spinnerQueryRssi, spinnerQueryVibrateMode;
+    private Spinner spinnerQueryBattery, spinnerQueryRssi, spinnerQueryVibrateMode, spinnerSavingFormat;
     private Button buttonCSLServer, button;
 
     final boolean sameCheck = true;
@@ -32,6 +37,8 @@ public class SettingAdminFragment extends CommonFragment {
     int batteryDisplaySelect = -1;
     int rssiDisplaySelect = -1;
     int vibrateModeSelect = -1;
+    int savingFormatSelect = -1;
+    int csvColumnSelect = -1;
     String deviceName = "";
     long cycleDelay = -1; long cycleDelayMin = 0; long cycleDelayMax = 2000;
     int iBeepCount = -1; int iBeepCountMin = 1; int iBeepCountMax = 100;
@@ -82,6 +89,44 @@ public class SettingAdminFragment extends CommonFragment {
             targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerQueryVibrateMode.setAdapter(targetAdapter);
         }
+
+        spinnerSavingFormat = (Spinner) getActivity().findViewById(R.id.settingAdminSavingFormat);
+        {
+            ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.admin_savingformat_options, R.layout.custom_spinner_layout);
+            targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerSavingFormat.setAdapter(targetAdapter);
+            spinnerSavingFormat.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.settingAdminCSVColumnSelectLayout);
+                    switch (i) {
+                        case 1:
+                            linearLayout.setVisibility(View.VISIBLE);
+                            break;
+                        default:
+                            linearLayout.setVisibility(View.GONE);
+                            break;
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+        }
+
+        checkBoxCsvColumnResBank = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnResBank);
+        checkBoxCsvColumnEpcBank = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnEpcBank);
+        checkBoxCsvColumnTidBank = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnTidBank);
+        checkBoxCsvColumnUserBank = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnUserBank);
+        checkBoxCsvColumnPhase = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnPhase);
+        checkBoxCsvColumnChannel = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnChannel);
+        checkBoxCsvColumnTime = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnTime);
+        checkBoxCsvColumnTimeZone = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnTimeZone);
+        checkBoxCsvColumnLocation = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnLocation);
+        checkBoxCsvColumnDirection = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnDirection);
+        checkBoxCsvColumnOthers = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnOthers);
 
         TextView textViewAdminCycleDelayLabel = (TextView) getActivity().findViewById(R.id.settingAdminCycleDelayLabel);
         String stringAdminCycleDelayLabel = textViewAdminCycleDelayLabel.getText().toString();
@@ -253,6 +298,21 @@ public class SettingAdminFragment extends CommonFragment {
                         batteryDisplaySelect = spinnerQueryBattery.getSelectedItemPosition();
                         rssiDisplaySelect = spinnerQueryRssi.getSelectedItemPosition();
                         vibrateModeSelect = spinnerQueryVibrateMode.getSelectedItemPosition();
+                        savingFormatSelect = spinnerSavingFormat.getSelectedItemPosition();
+                        {
+                            csvColumnSelect = 0;
+                            if (checkBoxCsvColumnResBank.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.RESERVE_BANK.ordinal());
+                            if (checkBoxCsvColumnEpcBank.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.EPC_BANK.ordinal());
+                            if (checkBoxCsvColumnTidBank.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.TID_BANK.ordinal());
+                            if (checkBoxCsvColumnUserBank.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.USER_BANK.ordinal());
+                            if (checkBoxCsvColumnPhase.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.PHASE.ordinal());
+                            if (checkBoxCsvColumnChannel.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.CHANNEL.ordinal());
+                            if (checkBoxCsvColumnTime.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.TIME.ordinal());
+                            if (checkBoxCsvColumnTimeZone.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.TIMEZONE.ordinal());
+                            if (checkBoxCsvColumnLocation.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.LOCATION.ordinal());
+                            if (checkBoxCsvColumnDirection.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.DIRECTION.ordinal());
+                            if (checkBoxCsvColumnOthers.isChecked()) csvColumnSelect |= (0x01 << Cs108Library4A.CsvColumn.OTHERS.ordinal());
+                        }
                         if (editTextCycleDelay != null)   cycleDelay = Long.parseLong(editTextCycleDelay.getText().toString());
                         if (editTextTriggerReportingCount != null)   sTriggerCount = Short.parseShort(editTextTriggerReportingCount.getText().toString());
                         if (editTextBeepCount != null)   iBeepCount = Integer.parseInt(editTextBeepCount.getText().toString());
@@ -317,6 +377,21 @@ public class SettingAdminFragment extends CommonFragment {
             spinnerQueryBattery.setSelection(MainActivity.mCs108Library4a.getBatteryDisplaySetting());
             spinnerQueryRssi.setSelection(MainActivity.mCs108Library4a.getRssiDisplaySetting());
             spinnerQueryVibrateMode.setSelection(MainActivity.mCs108Library4a.getVibrateModeSetting());
+            spinnerSavingFormat.setSelection(MainActivity.mCs108Library4a.getSavingFormatSetting());
+            {
+                int csvColumnSelect = MainActivity.mCs108Library4a.getCsvColumnSelectSetting();
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.RESERVE_BANK.ordinal())) != 0) checkBoxCsvColumnResBank.setChecked(true); else checkBoxCsvColumnResBank.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.EPC_BANK.ordinal())) != 0) checkBoxCsvColumnEpcBank.setChecked(true); else checkBoxCsvColumnEpcBank.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TID_BANK.ordinal())) != 0) checkBoxCsvColumnTidBank.setChecked(true); else checkBoxCsvColumnTidBank.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.USER_BANK.ordinal())) != 0) checkBoxCsvColumnUserBank.setChecked(true); else checkBoxCsvColumnUserBank.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.PHASE.ordinal())) != 0) checkBoxCsvColumnPhase.setChecked(true); else checkBoxCsvColumnPhase.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.CHANNEL.ordinal())) != 0) checkBoxCsvColumnChannel.setChecked(true); else checkBoxCsvColumnChannel.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TIME.ordinal())) != 0) checkBoxCsvColumnTime.setChecked(true); else checkBoxCsvColumnTime.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TIMEZONE.ordinal())) != 0) checkBoxCsvColumnTimeZone.setChecked(true); else checkBoxCsvColumnTimeZone.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.LOCATION.ordinal())) != 0) checkBoxCsvColumnLocation.setChecked(true); else checkBoxCsvColumnLocation.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.DIRECTION.ordinal())) != 0) checkBoxCsvColumnDirection.setChecked(true); else checkBoxCsvColumnDirection.setChecked(false);
+                if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.OTHERS.ordinal())) != 0) checkBoxCsvColumnOthers.setChecked(true); else checkBoxCsvColumnOthers.setChecked(false);
+            }
             if (editTextCycleDelay != null)   editTextCycleDelay.setText(String.valueOf(MainActivity.mCs108Library4a.getCycleDelay()));
             if (editTextTriggerReportingCount != null)   {
                 int triggerReportingCount = MainActivity.mCs108Library4a.getTriggerReportingCount();
@@ -371,6 +446,16 @@ public class SettingAdminFragment extends CommonFragment {
         if (invalidRequest == false && (MainActivity.mCs108Library4a.getVibrateModeSetting() != vibrateModeSelect || sameCheck == false)) {
             sameSetting = false;
             if (MainActivity.mCs108Library4a.setVibrateModeSetting(vibrateModeSelect) == false)
+                invalidRequest = true;
+        }
+        if (invalidRequest == false && (MainActivity.mCs108Library4a.getSavingFormatSetting() != savingFormatSelect || sameCheck == false)) {
+            sameSetting = false;
+            if (MainActivity.mCs108Library4a.setSavingFormatSetting(savingFormatSelect) == false)
+                invalidRequest = true;
+        }
+        if (invalidRequest == false && (MainActivity.mCs108Library4a.getCsvColumnSelectSetting() != csvColumnSelect || sameCheck == false)) {
+            sameSetting = false;
+            if (MainActivity.mCs108Library4a.setCsvColumnSelectSetting(csvColumnSelect) == false)
                 invalidRequest = true;
         }
         if (invalidRequest == false && editTextCycleDelay != null) {

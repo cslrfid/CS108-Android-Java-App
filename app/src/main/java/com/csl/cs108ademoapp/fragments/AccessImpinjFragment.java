@@ -45,6 +45,7 @@ public class AccessImpinjFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
+        MainActivity.mCs108Library4a.abortOperation();
         MainActivity.mCs108Library4a.setSameCheck(true);
         MainActivity.mCs108Library4a.setTagGroup(MainActivity.mCs108Library4a.getQuerySelect(), data2Restore.iQuerySession, data2Restore.iQueryTarget);
         MainActivity.mCs108Library4a.setTagDelay((byte)data2Restore.tagDelay);

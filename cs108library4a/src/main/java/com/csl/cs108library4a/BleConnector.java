@@ -63,8 +63,6 @@ class BleConnector extends BluetoothGattCallback {
 
     int serviceUUID2p1 = 0;
     void setServiceUUIDType(int serviceUUID2p1) { this.serviceUUID2p1 = serviceUUID2p1; }
-    int getServiceUUIDType() { return serviceUUID2p1; }
-    boolean isCs710ServiceUUID() { return serviceUUID2p1 == 3; }
     private final UUID UUID_READER_STREAM_OUT_CHARACTERISTIC = UUID.fromString("00009900-0000-1000-8000-00805f9b34fb");
     private final UUID UUID_READER_STREAM_IN_CHARACTERISTIC = UUID.fromString("00009901-0000-1000-8000-00805f9b34fb");
 
@@ -162,8 +160,6 @@ class BleConnector extends BluetoothGattCallback {
             if (true) appendToLog("status=" + status + ". restart discoverServices"); mBluetoothGatt.discoverServices();
         } else {
             UUID UUID_READER_SERVICE = UUID.fromString("00009800-0000-1000-8000-00805f9b34fb");
-            if (serviceUUID2p1 != 1) UUID_READER_SERVICE = UUID.fromString("00009802-0000-1000-8000-00805f9b34fb");
-            appendToLog("serviceUD1D2p1 = " + serviceUUID2p1);
             mReaderStreamOutCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_OUT_CHARACTERISTIC);
             mReaderStreamInCharacteristic = getCharacteristic(UUID_READER_SERVICE, UUID_READER_STREAM_IN_CHARACTERISTIC);
             appendToLog("mReaderStreamOutCharacteristic flag = " + mReaderStreamOutCharacteristic.getProperties());
@@ -364,7 +360,11 @@ class BleConnector extends BluetoothGattCallback {
             boolean bValue = mBluetoothGatt.writeCharacteristic(mReaderStreamOutCharacteristic);
             if (bValue == false) {
                 writeBleFailure++;
-                if (true) appendToLog("writeCharacteristic(): ERROR for " + byteArrayToString(value));
+                if (true) appendToLog("writeCharacteristic(): ERROR for " + byteArrayToString(value) + ", writeBleFailure = " + writeBleFailure);
+                if (writeBleFailure > 5) {
+                    appendToLogView("writeBleFailure is too much. mReaderStreamOutCharacteristic is set NULL to assume disconnection !!!");
+                    mReaderStreamOutCharacteristic = null;
+                }
             } else {
                 if (DEBUG_BTDATA0) appendToLog(byteArrayToString(value));
                 _writeCharacteristic_in_progress = true;
@@ -437,7 +437,7 @@ class BleConnector extends BluetoothGattCallback {
     void processBleStreamInData() {
     }
 
-    private int intervalProcessBleStreamInData = 50;
+    private int intervalProcessBleStreamInData = 100; //50;
     int getIntervalProcessBleStreamInData() { return intervalProcessBleStreamInData; }
     final Runnable runnableProcessBleStreamInData = new Runnable() {
         @Override
