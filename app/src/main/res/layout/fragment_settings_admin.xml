@@ -251,6 +251,153 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical">
 
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_normal_font"
+                android:text="Saving format" />
+
+            <Spinner
+                android:id="@+id/settingAdminSavingFormat"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/my_edittext_background"
+                style="@style/style_default_spinner" />
+        </TableRow>
+
+        <LinearLayout
+            android:id="@+id/settingAdminCSVColumnSelectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:gravity="center|bottom"
+            android:orientation="vertical" >
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Select CSV columns: " />
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnOthers"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Others" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnResBank"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Res. Bank" />
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnEpcBank"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="EPC Bank" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnTidBank"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Tid Bank" />
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnUserBank"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="User Bank" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnPhase"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Phase" />
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnChannel"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Channel" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnTime"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Time" />
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnTimeZone"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Time zone" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnLocation"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Location" />
+
+                <CheckBox
+                    android:id="@+id/settingAdminCSVColumnDirection"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Direction" />
+            </TableRow>
+        </LinearLayout>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
             <CheckBox
                 android:id="@+id/settingAdminToCloudEnable"
                 android:layout_width="0dp"

@@ -136,7 +136,7 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
                 backport = reader.getBackport2(); if (backport > reader.INVALID_BACKPORT) strExtra += String.format("\nBP2=%d", backport);
             } else if (codeTempC > reader.INVALID_CODETEMPC) { //for Ctesius tags
                 strExtra = ("T=" + String.format("%.1f", codeTempC) + (char) 0x00B0 + "C");
-            } else if (reader.getDetails().contains("E2806894")) { //for code8 tags
+            } else if (brand != null) { //reader.getDetails().contains("E2806894")) { //for code8 tags
                 strExtra = ((brand != null) ? ("Brand=" + brand) : "");
             } else if (reader.getSensorData() < reader.INVALID_SENSORDATA) {
                 strExtra = "SD=" + String.valueOf(reader.getSensorData());

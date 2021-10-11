@@ -34,7 +34,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     long timeMillis, startTimeMillis, runTimeMillis;
     int accessError, backscatterError;
     boolean timeoutError, crcError;
-    String resultError = "";
+    public String resultError = "";
     boolean success;
     boolean done = false;
     boolean ending = false;
@@ -233,7 +233,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             else if (notificationData != null) {
                 //MainActivity.mCs108Library4a.appendToLog("resultError=" + MainActivity.mCs108Library4a.byteArrayToString(notificationData));
                 publishProgress("Received notification uplink event 0xA101 with error code=" + MainActivity.mCs108Library4a.byteArrayToString(notificationData));
-                taskCancelReason = TaskCancelRReason.TIMEOUT;
+                taskCancelReason = TaskCancelRReason.ERROR;
             }
             if (System.currentTimeMillis() - timeMillis > iTimeOut) {
                 //MainActivity.mCs108Library4a.appendToLog("endingMessage: iTimeout = " + iTimeOut);

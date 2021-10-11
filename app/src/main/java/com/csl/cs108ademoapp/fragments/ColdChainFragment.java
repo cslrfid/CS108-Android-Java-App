@@ -18,7 +18,7 @@ public class ColdChainFragment extends CommonFragment {
     private ViewPager viewPager;
     ColdChainAdapter mAdapter;
 
-    private String[] tabs = {"Scan", "Configuration"};
+    private String[] tabs = {"Select Tag", "One-shot", "Logging"};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -28,7 +28,7 @@ public class ColdChainFragment extends CommonFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) mAdapter.fragment1;
+        InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) mAdapter.fragment0;
         switch (item.getItemId()) {
             case R.id.menuAction_1:
                 fragment1.clearTagsList();
@@ -81,36 +81,41 @@ public class ColdChainFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        mAdapter.fragment0.onPause();
-        mAdapter.fragment1.onPause();
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onPause();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onPause();
+        if (mAdapter.fragment2 != null) mAdapter.fragment2.onPause();
         super.onPause();
     }
 
     @Override
     public void onStop() {
-        mAdapter.fragment0.onStop();
-        mAdapter.fragment1.onStop();
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onStop();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onStop();
+        if (mAdapter.fragment2 != null) mAdapter.fragment2.onStop();
         super.onStop();
     }
 
     @Override
     public void onDestroyView() {
-        mAdapter.fragment0.onDestroyView();
-        mAdapter.fragment1.onDestroyView();
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onDestroyView();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onDestroyView();
+        if (mAdapter.fragment2 != null) mAdapter.fragment2.onDestroyView();
         super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
-        mAdapter.fragment0.onDestroy();
-        mAdapter.fragment1.onDestroy();
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onDestroy();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onDestroy();
+        if (mAdapter.fragment2 != null) mAdapter.fragment2.onDestroy();
         super.onDestroy();
     }
 
     @Override
     public void onDetach() {
-        mAdapter.fragment0.onDetach();
-        mAdapter.fragment1.onDetach();
+        if (mAdapter.fragment0 != null) mAdapter.fragment0.onDetach();
+        if (mAdapter.fragment1 != null) mAdapter.fragment1.onDetach();
+        if (mAdapter.fragment2 != null) mAdapter.fragment2.onDetach();
         super.onDetach();
     }
 

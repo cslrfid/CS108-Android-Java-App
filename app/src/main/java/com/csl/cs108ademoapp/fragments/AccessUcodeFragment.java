@@ -247,14 +247,20 @@ public class AccessUcodeFragment extends CommonFragment {
 
         MainActivity.mCs108Library4a.getAuthenticateReplyLength();
         MainActivity.mCs108Library4a.getUntraceableEpcLength();
-        setupTagID();
         MainActivity.mCs108Library4a.setSameCheck(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setupTagID();
     }
 
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
         MainActivity.mCs108Library4a.setSameCheck(true);
+        //MainActivity.mCs108Library4a.appendToLog("onDestroy");
         super.onDestroy();
     }
 
@@ -280,11 +286,16 @@ public class AccessUcodeFragment extends CommonFragment {
 
     void setupTagID() {
         ReaderDevice tagSelected = MainActivity.tagSelected;
+        MainActivity.mCs108Library4a.appendToLog("Start with tagSelected = " + (tagSelected == null ? "NULL" : (tagSelected.getSelected() + ", " + tagSelected.getAddress())));
         boolean bSelected = false;
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
                 bSelected = true;
-                if (editTextRWTagID != null) editTextRWTagID.setText(tagSelected.getAddress());
+                //MainActivity.mCs108Library4a.appendToLog("editTextRWTagID = " + (editTextRWTagID == null ? "NULL" : "VALID"));
+                if (editTextRWTagID != null) {
+                    //MainActivity.mCs108Library4a.appendToLog("editTextRWTagID.setTTEXT " + tagSelected.getAddress());
+                    editTextRWTagID.setText(tagSelected.getAddress());
+                }
 
                 String stringDetail = tagSelected.getDetails();
                 int indexUser = stringDetail.indexOf("USER=");

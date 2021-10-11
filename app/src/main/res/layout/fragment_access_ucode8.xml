@@ -42,6 +42,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="EPC + Brand identifier" />
+
+                    <RadioButton
+                        android:id="@+id/accessUC8SelectEpcBrandTidCheck"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="EPC + Brand identifier + Tid Check" />
                 </RadioGroup>
             </TableRow>
         </LinearLayout>

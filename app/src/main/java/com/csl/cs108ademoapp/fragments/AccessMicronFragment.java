@@ -238,8 +238,13 @@ public class AccessMicronFragment extends CommonFragment {
             }
         });
 
-        setupTagID();
         MainActivity.mCs108Library4a.setSameCheck(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setupTagID();
     }
 
     @Override
