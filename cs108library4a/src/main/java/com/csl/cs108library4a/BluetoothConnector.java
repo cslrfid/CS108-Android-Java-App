@@ -25,7 +25,7 @@ public class BluetoothConnector {
 
     private int icsModel = -1;
     int getCsModel() {
-        appendToLog("icsModel = " + icsModel);
+        if (false) appendToLog("icsModel = " + icsModel);
         return icsModel;
     }
 

@@ -34,8 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static android.bluetooth.BluetoothDevice.BOND_NONE;
-import static android.bluetooth.BluetoothDevice.PHY_LE_2M;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
@@ -51,12 +49,13 @@ class BleConnector extends BluetoothGattCallback {
         return mBluetoothDevice;
     }
 
-    private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothGatt mBluetoothGatt;
+    BluetoothManager mBluetoothManager;
+    BluetoothAdapter mBluetoothAdapter;
+    BluetoothGatt mBluetoothGatt;
     private BluetoothLeScanner mleScanner;
 
-    private int mBluetoothProfile;
-    boolean isBleConnected() { return mBluetoothProfile == BluetoothProfile.STATE_CONNECTED && mReaderStreamOutCharacteristic != null; }
+    int mBluetoothConnectionState;
+    boolean isBleConnected() { return mBluetoothConnectionState == BluetoothProfile.STATE_CONNECTED && mReaderStreamOutCharacteristic != null; }
 
     private boolean mScanning = false;
     boolean isBleScanning() { return mScanning; }
@@ -71,7 +70,7 @@ class BleConnector extends BluetoothGattCallback {
     private boolean characteristicListRead = false;
     boolean isCharacteristicListRead() { return characteristicListRead; }
 
-    private BluetoothGattCharacteristic mReaderStreamOutCharacteristic;
+    BluetoothGattCharacteristic mReaderStreamOutCharacteristic;
     private BluetoothGattCharacteristic mReaderStreamInCharacteristic;
     private long mStreamWriteCount, mStreamWriteCountOld;
     private boolean _readCharacteristic_in_progress;
@@ -118,25 +117,32 @@ class BleConnector extends BluetoothGattCallback {
     @Override
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
         super.onConnectionStateChange(gatt, status, newState);
+        appendToLog("abcc: newState = " + newState);
         if (gatt != mBluetoothGatt) {
-            if (DEBUG) appendToLog("INVALID mBluetoothGatt");
-//        } else if (status != BluetoothGatt.GATT_SUCCESS) {
-//            if (DEBUG) appendToLog("NOT GATT_SUCCESS, newState=" + newState);
+            appendToLog("abcc mismatched mBluetoothGatt = " + (gatt != mBluetoothGatt) + ", status = " + status);
         } else {
-            mBluetoothProfile = newState;
+            mBluetoothConnectionState = newState;
             switch (newState) {
                 case BluetoothProfile.STATE_DISCONNECTED:
-                    forcedDisconnect(false);
-                    if (DEBUG) appendToLog("state=Disconnected");
+                    if (DEBUG) appendToLog("abcc state=Disconnected with status = " + status);
                     break;
 
                 case BluetoothProfile.STATE_CONNECTED:
-                    if (disconnectRunning) break;
+                    if (DEBUG) appendToLog("abcc state=Connected with status = " + status);
+                    if (disconnectRunning) {
+                        appendToLog("abcc disconnectRunning !!!");
+                        break;
+                    }
                     mStreamWriteCount = mStreamWriteCountOld = 0;
                     _readCharacteristic_in_progress = _writeCharacteristic_in_progress = false;
+                    if (bDiscoverStarted) {
+                        appendToLog("abc discovery has been started before");
+                        break;
+                    }
                     appendToLog("Start discoverServices");
                     if (mBluetoothGatt.discoverServices()) {
-                        if (DEBUG) appendToLog("state=Connected. discoverServices starts");
+                        bDiscoverStarted = true;
+                        if (DEBUG) appendToLog("state=Connected. discoverServices starts with status = " + status);
                     } else {
                         if (DEBUG) appendToLog("state=Connected. discoverServices FAIL");
                     }
@@ -151,6 +157,7 @@ class BleConnector extends BluetoothGattCallback {
         }
     }
 
+    boolean bDiscoverStarted = false;
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
         super.onServicesDiscovered(gatt, status);
@@ -330,16 +337,15 @@ class BleConnector extends BluetoothGattCallback {
             onCharacteristicWriteFailue++;
             if (DEBUG) appendToLog("status=" + status);
         } else {
+            onCharacteristicWriteFailue = 0;
             if (DEBUG_BTDATA) appendToLog("characteristic=" + characteristic.getUuid().toString().substring(4, 8) + ", sent " + (mStreamWriteCount - mStreamWriteCountOld) + " bytes");
             _writeCharacteristic_in_progress = false;
         }
     }
 
-    private int writeBleCounter = 0;
     private int writeBleFailure = 0;
     private int onCharacteristicWriteFailue = 0;
     boolean writeBleStreamOut(byte[] value) {
-        //appendToLog("Start");
         if (mBluetoothGatt == null) {
             if (DEBUG) appendToLog("ERROR with NULL mBluetoothGatt");
         } else if (mReaderStreamOutCharacteristic == null) {
@@ -348,29 +354,22 @@ class BleConnector extends BluetoothGattCallback {
             if (true) appendToLog("isBleBusy()  = " + isBleBusy() + ", characteristicListRead = " + characteristicListRead);
         } else {
             mReaderStreamOutCharacteristic.setValue(value);
-            if (((writeBleCounter / 100) * 100) == writeBleCounter) {
-                if (true) appendToLog("writeBleCounter = " + writeBleCounter + ", writeBleFailure = " + writeBleFailure + ", onCharacteristicWriteFailue = " + onCharacteristicWriteFailue);
-                if (writeBleCounter == 1000) {
-                    writeBleCounter = 0;
-                    writeBleFailure = 0;
-                    onCharacteristicWriteFailue = 0;
-                }
-            }
-            writeBleCounter++;
             boolean bValue = mBluetoothGatt.writeCharacteristic(mReaderStreamOutCharacteristic);
-            if (bValue == false) {
-                writeBleFailure++;
-                if (true) appendToLog("writeCharacteristic(): ERROR for " + byteArrayToString(value) + ", writeBleFailure = " + writeBleFailure);
-                if (writeBleFailure > 5) {
-                    appendToLogView("writeBleFailure is too much. mReaderStreamOutCharacteristic is set NULL to assume disconnection !!!");
-                    mReaderStreamOutCharacteristic = null;
-                }
-            } else {
+            if (bValue == false) writeBleFailure++;
+            else {
+                writeBleFailure = 0;
                 if (DEBUG_BTDATA0) appendToLog(byteArrayToString(value));
                 _writeCharacteristic_in_progress = true;
                 mStreamWriteCountOld = mStreamWriteCount;
                 mStreamWriteCount += value.length;
                 return true;
+            }
+            if (writeBleFailure != 0 || onCharacteristicWriteFailue != 0) {
+                appendToLogView("failure in writeCharacteristic(" + byteArrayToString(value) + "), writeBleFailure = " + writeBleFailure + ", onCharacteristicWriteFailue = " + onCharacteristicWriteFailue);
+                if (writeBleFailure > 5 || onCharacteristicWriteFailue > 5) {
+                    appendToLogView("writeBleFailure is too much. start disconnect !!!");
+                    disconnect(); //mReaderStreamOutCharacteristic = null;
+                }
             }
         }
         return false;
@@ -387,7 +386,7 @@ class BleConnector extends BluetoothGattCallback {
             }
         } else if (!characteristic.equals(mReaderStreamInCharacteristic)) {
             if (DEBUG) utility.appendToLogRunnable("onCharacteristicChanged(): characteristic is not ReaderSteamIn");
-        } else if (mBluetoothProfile == BluetoothProfile.STATE_DISCONNECTED) {
+        } else if (mBluetoothConnectionState == BluetoothProfile.STATE_DISCONNECTED) {
                 streamInBufferHead = 0;
                 streamInBufferTail = 0;
                 streamInBufferSize = 0;
@@ -483,7 +482,7 @@ class BleConnector extends BluetoothGattCallback {
 
         PackageManager mPackageManager = mContext.getPackageManager();
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            BluetoothManager mBluetoothManager = (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+            mBluetoothManager = (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
             mBluetoothAdapter = mBluetoothManager.getAdapter();
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 boolean isBle5 = mBluetoothAdapter.isLeCodedPhySupported();
@@ -598,7 +597,7 @@ class BleConnector extends BluetoothGattCallback {
                 }
             }
             if (enable == false) {
-                if (DEBUG) appendToLog("scanLeDevice(" + enable + ") with mScanCallBack is " + (mScanCallBack != null ? "VALID" : "INVALID"));
+                if (DEBUG) appendToLog("abcc scanLeDevice(" + enable + ") with mScanCallBack is " + (mScanCallBack != null ? "VALID" : "INVALID"));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     if (mScanCallBack != null) mleScanner.stopScan(mScanCallBack);
                 } else {
@@ -681,6 +680,7 @@ class BleConnector extends BluetoothGattCallback {
     };
 */
     boolean connectBle(ReaderDevice readerDevice) {
+        appendToLog("abcc: start connecting " + readerDevice.getName());
         if (readerDevice == null) {
             if (DEBUG) appendToLog("with NULL readerDevice");
         } else {
@@ -691,30 +691,12 @@ class BleConnector extends BluetoothGattCallback {
                 if (DEBUG) appendToLog("connectBle(" + address + ") with DISABLED mBluetoothAdapter");
             } else {
                 utility.debugFileSetup();
-                mHandler.removeCallbacks(mDisconnectRunnable);
                 utility.setReferenceTimeMs();
                 if (DEBUG) appendToLog("connectBle(" + address + "): connectGatt starts");
-/*
-                IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-                intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-                mContext.registerReceiver(myReceiver, intentFilter);
-*/
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { //android 8 = api level 26
-                    BluetoothDevice mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(address);
-                    appendToLog("mBluetoothDevice.getBondState() = " + mBluetoothDevice.getBondState());
-                    boolean bOkBond = true;
-                    if (false && mBluetoothDevice.getBondState() == BOND_NONE) {
-                        bOkBond = mBluetoothDevice.createBond();
-                        if (bOkBond) appendToLog("sucess to creatBond");
-                        else appendToLog("failed to createBond");
-                    }
-                    appendToLog("writeBleStreamOut: android 8 or above sets PHY_LE_2M");
-                    if (bOkBond) mBluetoothGatt = mBluetoothDevice.connectGatt(mContext, false, this, BluetoothDevice.TRANSPORT_LE, PHY_LE_2M);
-                    else return  false;
-                } else {
-                    mBluetoothGatt = mBluetoothAdapter.getRemoteDevice(address).connectGatt(mContext, false, this);
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mBluetoothConnectionState = -1;
+                mBluetoothGatt = mBluetoothAdapter.getRemoteDevice(address).connectGatt(mContext, false, this);
+                if (mBluetoothGatt != null) mBluetoothGattActive = true;
+                if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     if (true) {
                         mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
                         appendToLog("Stream Set to HIGH");
@@ -733,49 +715,65 @@ class BleConnector extends BluetoothGattCallback {
     }
 
     void disconnect() {
-        if (mBluetoothAdapter == null) {
-            if (DEBUG) appendToLog("with NULL mBluetoothAdapter");
-        } else if (!mBluetoothAdapter.isEnabled()) {
-            if (DEBUG) appendToLog("DISABLED mBluetoothAdapter");
-        } else if (mBluetoothGatt == null) {
+        appendToLog("abcc: start disconnect ");
+        if (mBluetoothGatt == null) {
             if (DEBUG) appendToLog("NULL mBluetoothGatt");
         } else {
             utility.debugFileClose();
             mReaderStreamOutCharacteristic = null;
-            mBluetoothGatt.disconnect();
             mHandler.removeCallbacks(mDisconnectRunnable);
-            mHandler.postDelayed(mDisconnectRunnable, 200); disconnectRunning = true;
-            if (DEBUG) appendToLog("done");
+            mHandler.post(mDisconnectRunnable); disconnectRunning = true;
+            if (DEBUG) appendToLog("abcc done and start mDisconnectRunnable");
         }
     }
-    void forcedDisconnect(boolean bForce) {
-        if (bForce) forcedDisconnect1();
+    boolean mBluetoothGattActive = false;
+    boolean forcedDisconnect1() {
         mHandler.removeCallbacks(mReadRssiRunnable);
         mHandler.removeCallbacks(mReadCharacteristicRunnable);
-    }
-    void forcedDisconnect1() {
-        if (mBluetoothGatt != null) { appendToLog("mDisconnectRunnable(): Close the GATT"); mBluetoothGatt.close(); }
-        mBluetoothProfile = BluetoothProfile.STATE_DISCONNECTED;
+        if (mBluetoothGatt != null) {
+            if (mBluetoothGattActive) {
+                appendToLog("abcc mDisconnectRunnable(): close mBluetoothGatt");
+                mBluetoothGatt.close();
+                mBluetoothGattActive = false;
+            } else {
+                appendToLog("abcc mDisconnectRunnable(): Null mBluetoothGatt");
+                mBluetoothGatt = null;
+                return true;
+            }
+        }
+        return false;
+        //mBluetoothConnectionState = -1;
     }
 
     private boolean disconnectRunning = false;
+    BluetoothDevice bluetoothDeviceConnectOld;
     private final Runnable mDisconnectRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mBluetoothProfile != BluetoothProfile.STATE_DISCONNECTED) {
-                forcedDisconnect(true);
-                if (DEBUG) appendToLog("mDisconnectRunnable(): disconnect");
-                mHandler.postDelayed(mDisconnectRunnable, 500);
-            } else {
-                forcedDisconnect1();
-                if (DEBUG) appendToLog("mDisconnectRunnable(): END");
+            boolean done = false;
+            int bGattConnection = -1;
+            if (bluetoothDeviceConnectOld != null) bGattConnection = mBluetoothManager.getConnectionState(bluetoothDeviceConnectOld, BluetoothProfile.GATT);
+            if (DEBUG) appendToLog("abcc DisconnectRunnable(): disconnect with mBluetoothConnectionState = " + mBluetoothConnectionState + ", gattConnection = " + bGattConnection);
+            if (mBluetoothConnectionState < 0) {
+                appendToLog("abcc DisconnectRunnable(): start mBluetoothGatt.disconnect");
+                mBluetoothGatt.disconnect();
+                mBluetoothConnectionState = BluetoothProfile.STATE_DISCONNECTED;
+            } else if (mBluetoothConnectionState != BluetoothProfile.STATE_DISCONNECTED) {
+                appendToLog("abcc 2 DisconnectRunnable(): start mBluetoothGatt.disconnect");
+                mBluetoothGatt.disconnect(); //forcedDisconnect(true);
+                mBluetoothConnectionState = BluetoothProfile.STATE_DISCONNECTED;
+            } else if (forcedDisconnect1()) {
+                if (DEBUG) appendToLog("abcc mDisconnectRunnable(): END");
                 disconnectRunning = false;
+                if (false) mBluetoothAdapter.disable();
+                done = true;
             }
+            if (done == false) mHandler.postDelayed(mDisconnectRunnable, 100);
         }
     };
 
     boolean isBleBusy() {
-        return mBluetoothProfile != BluetoothProfile.STATE_CONNECTED || _readCharacteristic_in_progress /*|| _writeCharacteristic_in_progress*/;
+        return mBluetoothConnectionState != BluetoothProfile.STATE_CONNECTED || _readCharacteristic_in_progress /*|| _writeCharacteristic_in_progress*/;
     }
 
     private BluetoothGattCharacteristic getCharacteristic(UUID service, UUID characteristic) {

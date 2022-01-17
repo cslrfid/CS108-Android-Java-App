@@ -265,6 +265,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
+        mHandler.removeCallbacks(runnableCheckReady);
         MainActivity.mCs108Library4a.setNotificationListener(null);
         if (inventoryRfidTask != null) {
             if (DEBUG) MainActivity.mCs108Library4a.appendToLog("InventoryRfidiMultiFragment().onDestory(): VALID inventoryRfidTask");
@@ -354,6 +355,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 return;
             } else if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0) {
                 Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
+                mHandler.post(runnableCheckReady);
                 return;
             }
             if (bAdd2End) rfidListView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
@@ -568,4 +570,20 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         }
         inventoryRfidTask.execute();
     }
+
+    private final Runnable runnableCheckReady = new Runnable() {
+        @Override
+        public void run() {
+            if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0) {
+                button.setEnabled(false);
+                button.setText("Please wait");
+                MainActivity.mCs108Library4a.setNotificationListener(null);
+                mHandler.postDelayed(runnableCheckReady, 500);
+            } else {
+                button.setText("Start");
+                button.setEnabled(true);
+                setNotificationListener();
+            }
+        }
+    };
 }
