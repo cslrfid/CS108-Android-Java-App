@@ -73,7 +73,7 @@ public class ConnectionFragment extends CommonFragment {
 
                 if (mCs108Library4a.isBleConnected() && readerDevice.isConnected() && (readerDevice.getSelected() || false)) {
                     mCs108Library4a.disconnect(false);
-                    readerDevice.setConnected(false);
+                    readersList.clear();
                 } else if (mCs108Library4a.isBleConnected() == false && readerDevice.getSelected() == false) {
                     boolean validStart = false;
                     if (deviceConnectTask == null) {
@@ -95,15 +95,17 @@ public class ConnectionFragment extends CommonFragment {
                     }
                 }
 
-                if (readerDevice.getSelected()) readerDevice.setSelected(false);
-                else readerDevice.setSelected(true);
-                readersList.set(position, readerDevice);
-                for (int i = 0; i < readersList.size(); i++) {
-                    if (i != position) {
-                        ReaderDevice readerDevice1 = readersList.get(i);
-                        if (readerDevice1.getSelected()) {
-                            readerDevice1.setSelected(false);
-                            readersList.set(i, readerDevice1);
+                if (readersList.size() > position) {
+                    if (readerDevice.getSelected()) readerDevice.setSelected(false);
+                    else readerDevice.setSelected(true);
+                    readersList.set(position, readerDevice);
+                    for (int i = 0; i < readersList.size(); i++) {
+                        if (i != position) {
+                            ReaderDevice readerDevice1 = readersList.get(i);
+                            if (readerDevice1.getSelected()) {
+                                readerDevice1.setSelected(false);
+                                readersList.set(i, readerDevice1);
+                            }
                         }
                     }
                 }
@@ -157,7 +159,7 @@ public class ConnectionFragment extends CommonFragment {
             }
             if (operating == false) {
                 deviceScanTask = new DeviceScanTask();
-                deviceScanTask.execute(); mCs108Library4a.appendToLog("Started DeviceScanTask");
+                deviceScanTask.execute();
             }
             mHandler.postDelayed(checkRunnable, 5000);
         }
@@ -291,7 +293,7 @@ public class ConnectionFragment extends CommonFragment {
 
             MainActivity.mCs108Library4a.appendToLog("start of Connection with mrfidToWriteSize = " + mCs108Library4a.mrfidToWriteSize());
             mCs108Library4a.connect(connectingDevice);
-            waitTime = 20;
+            waitTime = 30;
             setting = -1;
             progressDialog = new CustomProgressDialog(getActivity(), prgressMsg);
             progressDialog.show();
@@ -333,7 +335,7 @@ public class ConnectionFragment extends CommonFragment {
                 Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.error_bluetooth_connection_failed), Toast.LENGTH_SHORT).show();
             }
             super.onCancelled();
-            mCs108Library4a.disconnect(false); mCs108Library4a.appendToLog("done");
+            mCs108Library4a.disconnect(false);
 
             bConnecting = false;
         }

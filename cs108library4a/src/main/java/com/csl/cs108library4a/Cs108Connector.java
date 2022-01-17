@@ -64,7 +64,7 @@ public class Cs108Connector extends BleConnector {
     @Override
     void disconnect() {
         super.disconnect();
-        appendToLog("done");
+        appendToLog("abcc done");
         mRfidDevice.mRfidToWrite.clear();
         mRfidDevice.mRfidReaderChip.mRx000ToWrite.clear();
     }

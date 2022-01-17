@@ -42,7 +42,7 @@ public class HomeFragment extends CommonFragment {
             actionBar.setTitle(R.string.title_activity_home);
         }
         MainActivity.mDid = null;
-        if (MainActivity.sharedObjects.versioinWarningShown == false)
+        if (true || MainActivity.sharedObjects.versioinWarningShown == false)
             mHandler.post(runnableConfiguring);
     }
 

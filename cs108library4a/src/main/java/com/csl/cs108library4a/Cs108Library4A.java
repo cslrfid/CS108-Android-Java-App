@@ -2,6 +2,7 @@ package com.csl.cs108library4a;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
@@ -162,10 +163,13 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public boolean isBleScanning()  { return super.isBleScanning(); }
     ArrayList<Cs108ScanData> mScanResultList = new ArrayList<>();
     @Keep public boolean scanLeDevice(final boolean enable) {
-        if (enable && isBleConnected()) return true;
+        if (enable) mHandler.removeCallbacks(connectRunnable);
 
-        appendToLog("scanLeDevice(" + enable + ")");
-        return super.scanLeDevice(enable, this.mLeScanCallback, this.mScanCallback);
+        appendToLog("abcc scanLeDevice(" + enable + ")");
+        if (bluetoothDeviceConnectOld != null) appendToLog("abcc abcc 1 bluetoothDeviceConnectOld connection state = " + mBluetoothManager.getConnectionState(bluetoothDeviceConnectOld, BluetoothProfile.GATT));
+        boolean bValue = super.scanLeDevice(enable, this.mLeScanCallback, this.mScanCallback);
+        appendToLog("abcc isScanning = " + isBleScanning());
+        return bValue;
     }
     int check9800_serviceUUID2p1 = 0;
     boolean check9800(Cs108Library4A.Cs108ScanData scanResultA) {
@@ -209,13 +213,6 @@ public class Cs108Library4A extends Cs108Connector {
         return found98;
     }
 
-    @Override
-    @Keep public boolean scanLeDevice(final boolean enable, BluetoothAdapter.LeScanCallback mLeScanCallback, ScanCallback mScanCallBack) {
-//        usbDeviceScannedList.clear();
-        appendToLog("scanLeDevice(" + enable + "mLeScanCallback = " + (mLeScanCallback != null ? "VALID" : "NULL") + "mScanCallBack = " + (mScanCallBack != null ? "VALID" : "NULL"));
-        return super.scanLeDevice(enable, mLeScanCallback, mScanCallBack);
-//        mUsbConnector.scanUsbDevice(enable);
-    }
     @Keep public String getBluetoothDeviceName() { if (getmBluetoothDevice() == null) return null; return getmBluetoothDevice().getName(); }
     @Keep public String getBluetoothDeviceAddress() { if (getmBluetoothDevice() == null) return null; return getmBluetoothDevice().getAddress(); }
 
@@ -273,29 +270,66 @@ public class Cs108Library4A extends Cs108Connector {
         return(bleConnection);
     }
 
+    boolean bNeedReconnect = false; int iConnectStateTimer = 0;
+    final Runnable connectRunnable = new Runnable() {
+        @Override
+        public void run() {
+            appendToLog("abcc connectRunnable: mBluetoothConnectionState = " + mBluetoothConnectionState + ", bNeedReconnect = " + bNeedReconnect);
+            if (isBleScanning()) {
+                appendToLog("abcc connectRunnable: still scanning. Stop scanning first");
+                scanLeDevice(false);
+            } else if (bNeedReconnect) {
+                if (readerDeviceConnect == null) return;
+                else if (mBluetoothGatt == null) {
+                    appendToLog("abcc connectRunnable: connect1 again");
+                    connect1(null);
+                    bNeedReconnect = false;
+                }
+            } else if (mBluetoothConnectionState == BluetoothProfile.STATE_DISCONNECTED) { //mReaderStreamOutCharacteristic valid around 1500ms
+                iConnectStateTimer = 0;
+                appendToLog("abcc connectRunnable: disconnect as disconnected connectionState is received");
+                bNeedReconnect = true;
+                if (mBluetoothGatt != null) disconnect();
+            } else if (mReaderStreamOutCharacteristic == null) {
+                appendToLog("abcc connectRunnable: disconnect as not yet discovery, iConnectStateTimer = " + iConnectStateTimer);
+                if (++iConnectStateTimer > 10) { }
+            } else return;
+            mHandler.postDelayed(connectRunnable, 500);
+        }
+    };
     ReaderDevice readerDeviceConnect;
     @Keep public boolean connect(ReaderDevice readerDevice) {
         if (isBleConnected()) return true;
+        if (mBluetoothGatt != null) disconnect();
         if (readerDevice != null) readerDeviceConnect = readerDevice;
         if (false) {
             mHandler.removeCallbacks(runnableToggleConnection);
             mHandler.post(runnableToggleConnection);
             return true;
-        } else return connect1(readerDevice);
+        } else {
+            mHandler.removeCallbacks(connectRunnable);
+            mHandler.postDelayed(connectRunnable, 500);
+            return connect1(readerDevice);
+        }
 	}
     boolean connect1(ReaderDevice readerDevice) {
         appendToLog("Connect with NULLreaderDevice = " + (readerDevice == null) + ", NULLreaderDeviceConnect = " + (readerDeviceConnect == null));
+        if (isBleScanning()) {
+            appendToLog("abcc still scanning. Stop scanning first");
+            scanLeDevice(false);
+        }
         if (readerDevice == null && readerDeviceConnect != null)    readerDevice = readerDeviceConnect;
         boolean result = false;
         if (readerDevice != null) {
+            bNeedReconnect = false; iConnectStateTimer = 0; bDiscoverStarted = false;
             setServiceUUIDType(readerDevice.getServiceUUID2p1());
             result = super.connectBle(readerDevice);
-            if (DEBUG) appendToLog("Result = " + result);
+            if (true) appendToLog("Result = " + result);
         }
         return result;
     }
     @Keep public void disconnect(boolean tempDisconnect) {
-        appendToLog("tempDisconnect: getBarcodeOnStatus = " + (getBarcodeOnStatus() ? "on" : "off"));
+        appendToLog("abcc tempDisconnect: getBarcodeOnStatus = " + (getBarcodeOnStatus() ? "on" : "off"));
         if (DEBUG) appendToLog("tempDisconnect = " + tempDisconnect);
         mHandler.removeCallbacks(checkVersionRunnable);
         mHandler.removeCallbacks(runnableToggleConnection);
@@ -309,14 +343,18 @@ public class Cs108Library4A extends Cs108Connector {
         } else appendToLog("tempDisconnect: getBarcodeOnStatus is false");
         mHandler.postDelayed(disconnectRunnable, 100);
         appendToLog("done with tempDisconnect = " + tempDisconnect);
-        if (tempDisconnect == false)    readerDeviceConnect = null;
+        if (tempDisconnect == false)    {
+            mHandler.removeCallbacks(connectRunnable);
+            bluetoothDeviceConnectOld = mBluetoothAdapter.getRemoteDevice(readerDeviceConnect.getAddress());
+            readerDeviceConnect = null;
+        }
     }
 
     void disconnect() { super.disconnect(); }
     final Runnable disconnectRunnable = new Runnable() {
         @Override
         public void run() {
-            appendToLog("disconnectRunnable with mBarcodeToWrite.size = " + mBarcodeDevice.mBarcodeToWrite.size());
+            appendToLog("abcc disconnectRunnable with mBarcodeToWrite.size = " + mBarcodeDevice.mBarcodeToWrite.size());
             if (mBarcodeDevice.mBarcodeToWrite.size() != 0) mHandler.postDelayed(disconnectRunnable, 100);
             else disconnect();
         }
@@ -721,7 +759,6 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep public long getPwrlevel() {
         long lValue = 0;
         lValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getAntennaPower(-1);
-        appendToLog("AntennaPower = " + lValue);
         return lValue;
     }
     long pwrlevelSetting;
@@ -2946,7 +2983,7 @@ public class Cs108Library4A extends Cs108Connector {
                 if (isBleConnected() == false) {
                     if (connect1(readerDeviceConnect) == false) return;
                 } else return;
-            } else { disconnect(true); appendToLog("done"); }
+            } else { disconnect(); appendToLog("done"); }
             mHandler.postDelayed(runnableToggleConnection, 500);
         }
     };
