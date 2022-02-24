@@ -86,7 +86,7 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
             rssiTextView.setVisibility(View.VISIBLE);
             double rssiValue = reader.getRssi();
             if (MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0 && rssiValue > 0)
-                rssiValue -= 106.98;
+                rssiValue -= MainActivity.mCs108Library4a.dBuV_dBm_constant;
             rssiTextView.setText(String.format("%.1f", rssiValue));
         }
 

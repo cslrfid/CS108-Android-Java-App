@@ -425,7 +425,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
 
                     double rssiGeiger = rssi;
                     if (MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0)
-                        rssiGeiger -= 106.98;
+                        rssiGeiger -= MainActivity.mCs108Library4a.dBuV_dBm_constant;
                     if (geigerTagRssiView != null)
                         geigerTagRssiView.setText(String.format("%.1f", rssiGeiger));
                     if (geigerTagGotView != null) geigerTagGotView.setText(strEpc);

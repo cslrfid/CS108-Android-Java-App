@@ -2,11 +2,11 @@
     package="com.csl.cs108library4a">
 
     <uses-feature android:name="android.hardware.bluetooth_le" />
-    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
-    <uses-permission android:name="android.permission.USB_PERMISSION" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

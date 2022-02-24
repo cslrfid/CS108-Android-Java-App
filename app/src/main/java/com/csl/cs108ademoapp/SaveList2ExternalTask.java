@@ -11,8 +11,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
 
-import androidx.core.app.ActivityCompat;
-
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
@@ -379,8 +377,11 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 mCs108Library4a.appendToLog("WRITE_EXTERNAL_STORAGE Permission is required !!!");
                 writeExtPermission = false;
-                if (requestPermission) { MainActivity.permissionRequesting = true; requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                return null; }
+                if (requestPermission) {
+                    mCs108Library4a.appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
+                    MainActivity.permissionRequesting = true; requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                    return null;
+                }
             } else mCs108Library4a.appendToLog("WRITE_EXTERNAL_STORAGE Permission is GRANTED !!!");
         }
 

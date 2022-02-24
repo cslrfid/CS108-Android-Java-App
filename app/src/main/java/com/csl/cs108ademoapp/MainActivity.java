@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.nfc.NdefMessage;
-import android.nfc.NfcAdapter;
 import android.os.Handler;
-import android.os.Parcelable;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -16,8 +14,6 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,9 +24,6 @@ import com.csl.cs108ademoapp.adapters.DrawerListAdapter;
 import com.csl.cs108ademoapp.fragments.*;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
-
-import java.io.UnsupportedEncodingException;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     final boolean DEBUG = false; final String TAG = "Hello";
@@ -52,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     public static ReaderDevice tagSelected;
     Handler mHandler = new Handler();
 
-    public static NfcAdapter nfcAdapter = null;
     PendingIntent mPendingIntent;
     IntentFilter writeTagFilters[];
     String[][] techList;
@@ -85,28 +77,6 @@ public class MainActivity extends AppCompatActivity {
         mCs108Library4a = new Cs108Library4A(mContext, mLogView);
         mSensorConnector = new SensorConnector(mContext);
 
-        InputMethodManager imeManager = (InputMethodManager) getApplicationContext().getSystemService(INPUT_METHOD_SERVICE);
-        List<InputMethodInfo> lst = imeManager.getInputMethodList();
-        for (InputMethodInfo info : lst) {
-//            MainActivity.mCs108Library4a.appendToLog(info.getId() + " " + info.loadLabel(getPackageManager()).toString());
-        }
-//        Intent intent = new Intent(MainActivity.this, CustomIME.class);
- //       startService(intent);
-//        savedInstanceState = null;
-
-        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        if (nfcAdapter == null) MainActivity.mCs108Library4a.appendToLog("onNewIntent !!! This device doesn't support NFC");
-        else if (nfcAdapter.isEnabled() == false) MainActivity.mCs108Library4a.appendToLog("onNewIntent !!! This device doesn't enable NFC");
-        else {
-            readFromIntent(getIntent());
-
-            mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-            IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-            tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
-            writeTagFilters = new IntentFilter[] { tagDetected };
-            techList = new String[][]{{android.nfc.tech.Ndef.class.getName()}, {android.nfc.tech.NdefFormatable.class.getName()}};
-        }
-
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) selectItem(DrawerPositions.MAIN);
         Log.i(TAG, "MainActivity.onCreate.onCreate: END");
@@ -128,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (nfcAdapter != null && nfcAdapter.isEnabled()) nfcAdapter.enableForegroundDispatch(this, mPendingIntent, writeTagFilters, techList);
         activityActive = true; wedged = false;
         if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onResume()");
     }
@@ -136,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onPause()");
-        if (nfcAdapter != null) nfcAdapter.disableForegroundDispatch(this);
         activityActive = false;
         super.onPause();
     }
@@ -290,7 +258,9 @@ public class MainActivity extends AppCompatActivity {
     public static boolean permissionRequesting;
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        MainActivity.mCs108Library4a.appendToLog("onRequestPermissionsResult ====");
+        MainActivity.mCs108Library4a.appendToLog("permissionRequesting: requestCode = " + requestCode + ", permissions is " + (permissions == null ? "null" : "valid") + ", grantResults is " + (grantResults == null ? "null" : "valid") );
+        MainActivity.mCs108Library4a.appendToLog("permissionRequesting: permissions[" + permissions.length + "] = " + (permissions != null && permissions.length > 0 ? permissions[0] : ""));
+        MainActivity.mCs108Library4a.appendToLog("permissionRequesting: grantResults[" + grantResults.length + "] = " + (grantResults != null && grantResults.length > 0 ? grantResults[0] : "") );
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         permissionRequesting = false;
     }
@@ -414,58 +384,9 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         mCs108Library4a.appendToLog("onNewIntent !!! intent.getAction = " + intent.getAction());
         readFromIntent(intent);
-//        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())) {
-//        }
     }
     private void readFromIntent(Intent intent) {
         mCs108Library4a.appendToLog("onNewIntent !!! readFromIntent entry");
         String action = intent.getAction();
-        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)
-                || NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)
-                || NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-            mCs108Library4a.appendToLog("onNewIntent !!! readFromIntent getAction = " + action);
-            Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-            mCs108Library4a.appendToLog("onNewIntent !!! readFromIntent rawMsgs.length = " + rawMsgs.length);
-            mCs108Library4a.appendToLog("onNewIntent !!! readFromIntent rawMsgs[0].toString = " + rawMsgs[0].toString());
-            NdefMessage[] msgs = null;
-            if (rawMsgs != null) {
-                msgs = new NdefMessage[rawMsgs.length];
-                for (int i = 0; i < rawMsgs.length; i++) {
-                    msgs[i] = (NdefMessage) rawMsgs[i];
-                }
-            }
-            buildTagViews(msgs);
-        }
-    }
-
-    private void buildTagViews(NdefMessage[] msgs) {
-        if (msgs == null || msgs.length == 0) return;
-        mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews msgs.length = " + msgs.length + ", msgs[0].getRecords().size = " + msgs[0].getRecords().length);
-
-        String text = "";
-        for (int x = 0; x < msgs.length; x++) {
-        for (int y = 0; y < msgs[0].getRecords().length; y++) {
-            mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews msgs[" + x + "][" + y + "].Inf = " + msgs[x].getRecords()[y].getTnf());
-            mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews msgs[" + x + "][" + y + "].Type = " + mCs108Library4a.byteArrayToString(msgs[x].getRecords()[y].getType()));
-            mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews msgs[" + x + "][" + y + "].Id = " + mCs108Library4a.byteArrayToString(msgs[x].getRecords()[y].getId()));
-            mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews msgs[" + x + "][" + y + "].Payload = " + mCs108Library4a.byteArrayToString(msgs[x].getRecords()[y].getPayload()));
-            mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews msgs[" + x + "][" + y + "].Class = " + msgs[x].getRecords()[y].getClass().toString());
-        }}
-
-        byte[] payload = msgs[0].getRecords()[0].getPayload();
-        mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews payload.length = " + payload.length + ", with payload[0] = " + payload[0]);
-        mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews payload = " + mCs108Library4a.byteArrayToString(payload));
-        String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16"; // Get the Text Encoding
-        int languageCodeLength = payload[0] & 0063; // Get the Language Code, e.g. "en"
-        // String languageCode = new String(payload, 1, languageCodeLength, "US-ASCII");
-        try {
-            // Get the Text
-            text = new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
-            mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews text = " + text);
-        } catch (UnsupportedEncodingException e) {
-            mCs108Library4a.appendToLog("onNewIntent !!! buildTagViews UnsupportedEncoding" + e.toString());
-            Log.e("UnsupportedEncoding", e.toString());
-        }
-        //tvNFCContent.setText("NFC Content: " + text);
     }
 }
