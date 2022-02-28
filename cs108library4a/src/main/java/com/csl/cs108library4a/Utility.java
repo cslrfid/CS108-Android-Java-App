@@ -102,6 +102,7 @@ public class Utility {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 writeExtPermission = false;
+                appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
                 requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 return;
             }

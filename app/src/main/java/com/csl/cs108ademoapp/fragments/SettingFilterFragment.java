@@ -18,7 +18,7 @@ public class SettingFilterFragment extends CommonFragment {
     private ViewPager viewPager;
     FilterAdapter mAdapter;
 
-    private String[] tabs = {"Pre-filter", "Post-filter"};
+    private String[] tabs = {"Pre-filter", "Post-filter", "Rssi-filter"};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

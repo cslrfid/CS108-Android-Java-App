@@ -7,10 +7,11 @@ import androidx.viewpager.widget.PagerAdapter;
 
 import com.csl.cs108ademoapp.fragments.SettingFilterPostFragment;
 import com.csl.cs108ademoapp.fragments.SettingFilterPreFragment;
+import com.csl.cs108ademoapp.fragments.SettingFilterRssiFragment;
 
 public class FilterAdapter extends FragmentStatePagerAdapter {
-    private final int NO_OF_TABS = 2;
-    public Fragment fragment0, fragment1;
+    private final int NO_OF_TABS = 3;
+    public Fragment fragment0, fragment1, fragment2;
 
     @Override
     public Fragment getItem(int position) {
@@ -23,6 +24,10 @@ public class FilterAdapter extends FragmentStatePagerAdapter {
             case 1:
                 fragment = new SettingFilterPostFragment();
                 fragment1 = fragment;
+                break;
+            case 2:
+                fragment = new SettingFilterRssiFragment();
+                fragment2 = fragment;
                 break;
             default:
                 fragment = null;

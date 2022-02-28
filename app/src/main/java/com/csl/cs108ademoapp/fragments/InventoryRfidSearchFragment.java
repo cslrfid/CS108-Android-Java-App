@@ -31,7 +31,7 @@ import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class InventoryRfidSearchFragment extends CommonFragment {
-    final double dBuV_dBm_constant = 106.98;
+    double dBuV_dBm_constant = MainActivity.mCs108Library4a.dBuV_dBm_constant;
     final int labelMin = -90;
     final int labelMax = -10;
 

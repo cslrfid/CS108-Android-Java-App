@@ -1,5 +1,9 @@
 package com.csl.cs108library4a;
 
+import static androidx.core.app.ActivityCompat.requestPermissions;
+
+import android.Manifest;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -11,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import androidx.annotation.Keep;
+import androidx.core.app.ActivityCompat;
 
 import android.widget.TextView;
 
@@ -89,7 +94,6 @@ public class Cs108Library4A extends Cs108Connector {
                 if (f.name != null) {
                     boolean matched = false;
                     if (f.name.contains("bluetooth_le")) matched = true;
-                    else if (f.name.contains("usb.host")) matched = true;
                     if (matched) appendToLogView("feature = " + f.name);
                 }
             }
@@ -178,6 +182,11 @@ public class Cs108Library4A extends Cs108Connector {
         int iNewADLength = 0;
         byte[] newAD = new byte[0];
         int iNewADIndex = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            appendToLog("requestPermissions BLUETOOTH_CONNECT 123");
+            requestPermissions((Activity) context, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 123);
+            return false;
+        }
         String strTemp = scanResultA.getDevice().getName();
         if (strTemp != null) appendToLog("Found name = " + strTemp + ", length = " + String.valueOf(strTemp.length()));
         for (byte bdata : scanResultA.getScanRecord()) {
@@ -279,8 +288,13 @@ public class Cs108Library4A extends Cs108Connector {
                 appendToLog("abcc connectRunnable: still scanning. Stop scanning first");
                 scanLeDevice(false);
             } else if (bNeedReconnect) {
-                if (readerDeviceConnect == null) return;
-                else if (mBluetoothGatt == null) {
+                if (mBluetoothGatt != null) {
+                    appendToLog("abcc connectRunnable: mBluetoothGatt is null before connect. disconnect first");
+                    disconnect();
+                } else if (readerDeviceConnect == null) {
+                    appendToLog("abcc connectRunnable: exit with null readerDeviceConnect");
+                    return;
+                } else if (mBluetoothGatt == null) {
                     appendToLog("abcc connectRunnable: connect1 again");
                     connect1(null);
                     bNeedReconnect = false;
@@ -298,26 +312,15 @@ public class Cs108Library4A extends Cs108Connector {
         }
     };
     ReaderDevice readerDeviceConnect;
-    @Keep public boolean connect(ReaderDevice readerDevice) {
-        if (isBleConnected()) return true;
+    @Keep public void connect(ReaderDevice readerDevice) {
+        if (isBleConnected()) return;
         if (mBluetoothGatt != null) disconnect();
         if (readerDevice != null) readerDeviceConnect = readerDevice;
-        if (false) {
-            mHandler.removeCallbacks(runnableToggleConnection);
-            mHandler.post(runnableToggleConnection);
-            return true;
-        } else {
-            mHandler.removeCallbacks(connectRunnable);
-            mHandler.postDelayed(connectRunnable, 500);
-            return connect1(readerDevice);
-        }
+        mHandler.removeCallbacks(connectRunnable);
+        bNeedReconnect = true; mHandler.post(connectRunnable);
 	}
     boolean connect1(ReaderDevice readerDevice) {
         appendToLog("Connect with NULLreaderDevice = " + (readerDevice == null) + ", NULLreaderDeviceConnect = " + (readerDeviceConnect == null));
-        if (isBleScanning()) {
-            appendToLog("abcc still scanning. Stop scanning first");
-            scanLeDevice(false);
-        }
         if (readerDevice == null && readerDeviceConnect != null)    readerDevice = readerDeviceConnect;
         boolean result = false;
         if (readerDevice != null) {
@@ -364,9 +367,9 @@ public class Cs108Library4A extends Cs108Connector {
         String macVersion = getMacVer();
         String hostVersion = hostProcessorICGetFirmwareVersion();
         String bluetoothVersion = getBluetoothICFirmwareVersion();
-        String strVersionRFID = "2.6.43"; String[] strRFIDVersions = strVersionRFID.split("\\.");
-        String strVersionBT = "1.0.14"; String[] strBTVersions = strVersionBT.split("\\.");
-        String strVersionHost = "1.0.15"; String[] strHostVersions = strVersionHost.split("\\.");
+        String strVersionRFID = "2.6.44"; String[] strRFIDVersions = strVersionRFID.split("\\.");
+        String strVersionBT = "1.0.16"; String[] strBTVersions = strVersionBT.split("\\.");
+        String strVersionHost = "1.0.17"; String[] strHostVersions = strVersionHost.split("\\.");
         String stringPopup = "";
         int icsModel = getcsModel();
 
@@ -401,7 +404,7 @@ public class Cs108Library4A extends Cs108Connector {
         appendToLog("PowerLevel");
         setPowerLevel(300);
         setTagGroup(0, 0, 2);
-        setPopulation(30);
+        setPopulation(60);
         setInvAlgoNoSave(true);
         setCurrentLinkProfile(1);
     }
@@ -882,7 +885,7 @@ public class Cs108Library4A extends Cs108Connector {
         int iValue =  mRfidDevice.mRfidReaderChip.mRx000EngSetting.getwideRSSI();
         if (iValue < 0) return null;
         if (iValue > 255) return "Invalid data";
-        double dValue = mRfidDevice.mRfidReaderChip.decodeWideBandRSSI((byte)iValue);
+        double dValue = mRfidDevice.mRfidReaderChip.decodeNarrowBandRSSI((byte)iValue);
         return String.format("%.2f dB", dValue);
     }
 
@@ -2550,6 +2553,59 @@ public class Cs108Library4A extends Cs108Connector {
         return result;
     }
 
+    @Keep public boolean getRssiFilterEnable() {
+        int iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getRssiFilterType();
+        if (iValue < 0) return false;
+        iValue &= 0xF;
+        return (iValue > 0 ? true : false);
+    }
+    @Keep public int getRssiFilterType() {
+        int iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getRssiFilterType();
+        if (iValue < 0) return 0;
+        iValue &= 0xF;
+        if (iValue < 2) return 0;
+        return iValue - 1;
+    }
+    @Keep public int getRssiFilterOption() {
+        int iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getRssiFilterOption();
+        if (iValue < 0) return 0;
+        iValue &= 0xF;
+        return iValue;
+    }
+    @Keep public boolean setRssiFilterConfig(boolean enable, int rssiFilterType, int rssiFilterOption) {
+        int iValue = 0;
+        if (enable == false) iValue = 0;
+        else iValue = rssiFilterType + 1;
+        return mRfidDevice.mRfidReaderChip.mRx000Setting.setHST_INV_RSSI_FILTERING_CONFIG(iValue, rssiFilterOption);
+    }
+    @Keep public double getRssiFilterThreshold1() {
+        int iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getRssiFilterThreshold1();
+        appendToLog("iValue = " + iValue);
+        byte byteValue = (byte)(iValue & 0xFF);
+        appendToLog("byteValue = " + byteValue);
+        double dValue = mRfidDevice.mRfidReaderChip.decodeNarrowBandRSSI(byteValue);
+        appendToLog("dValue = " + dValue);
+        return dValue;
+    }
+    @Keep public double getRssiFilterThreshold2() {
+        int iValue = mRfidDevice.mRfidReaderChip.mRx000Setting.getRssiFilterThreshold2();
+        appendToLog("iValue = " + iValue);
+        byte byteValue = (byte)(iValue & 0xFF);
+        double dValue = mRfidDevice.mRfidReaderChip.decodeNarrowBandRSSI(byteValue);
+        return dValue;
+    }
+    @Keep public boolean setRssiFilterThreshold(double rssiFilterThreshold1, double rssiFilterThreshold2) {
+        appendToLog("rssiFilterThreshold = " + rssiFilterThreshold1 + ", " + rssiFilterThreshold2);
+        return mRfidDevice.mRfidReaderChip.mRx000Setting.setHST_INV_RSSI_FILTERING_THRESHOLD(mRfidDevice.mRfidReaderChip.encodeNarrowBandRSSI(rssiFilterThreshold1), mRfidDevice.mRfidReaderChip.encodeNarrowBandRSSI(rssiFilterThreshold2));
+    }
+    @Keep public long getRssiFilterCount() {
+        return mRfidDevice.mRfidReaderChip.mRx000Setting.getRssiFilterCount();
+    }
+    @Keep public boolean setRssiFilterCount(long rssiFilterCount) {
+        appendToLog("rssiFilterCount = " + rssiFilterCount);
+        return mRfidDevice.mRfidReaderChip.mRx000Setting.setHST_INV_RSSI_FILTERING_COUNT(rssiFilterCount);
+    }
+
     @Keep public boolean getInvMatchEnable() {
         return mRfidDevice.mRfidReaderChip.mRx000Setting.getInvMatchEnable() > 0 ? true : false;
     }
@@ -2981,7 +3037,7 @@ public class Cs108Library4A extends Cs108Connector {
             if (isBleConnected() == false)  toggledConnection = true;
             if (toggledConnection) {
                 if (isBleConnected() == false) {
-                    if (connect1(readerDeviceConnect) == false) return;
+                    if (connect1(null) == false) return;
                 } else return;
             } else { disconnect(); appendToLog("done"); }
             mHandler.postDelayed(runnableToggleConnection, 500);
@@ -3746,6 +3802,7 @@ public class Cs108Library4A extends Cs108Connector {
         return true;
     }
 
+    public final double dBuV_dBm_constant = 106.98;
     int rssiDisplaySelect = 1;
     @Keep public int getRssiDisplaySetting() { return rssiDisplaySelect; }
     @Keep public boolean setRssiDisplaySetting(int rssiDisplaySelect) {
@@ -3796,14 +3853,6 @@ public class Cs108Library4A extends Cs108Connector {
             Cs108ScanData cs108ScanData = mScanResultList.get(0); mScanResultList.remove(0);
             return cs108ScanData;
         } else return null;
-/*        if (false) return mScanResultList;
-        ArrayList<UsbDevice> usbDevicesList = mUsbConnector.getUsbDeviceList();
-        ArrayList<Cs108ScanData> cs108SScanDataList = new ArrayList<Cs108ScanData>();
-        for (UsbDevice usbDevice: usbDevicesList) {
-            Cs108ScanData cs108RfidData = new Cs108ScanData(usbDevice.getDeviceName(), "CS108 USB DEVICE", 0, null);
-            cs108SScanDataList.add(cs108RfidData);
-        }
-        return cs108SScanDataList; */
     }
 
     @Keep public Rx000pkgData onRFIDEvent() {

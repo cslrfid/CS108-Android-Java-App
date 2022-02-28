@@ -88,6 +88,24 @@
         <item>Bit</item>
     </string-array>
 
+    <string-array name="filterType_options">
+        <item>NB_RSSI value filtering</item>
+        <item>RSSI value filtering</item>
+    </string-array>
+
+    <string-array name="filter_options">
+        <item>NB_RSSI/RSSI "&lt;"= threshold 1</item>
+        <item>NB_RSSI/RSSI >= threshold 1</item>
+        <item>NB_RSSI/RSSI == threshold 1</item>
+        <item>NB_RSSI/RSSI "&lt;"= threshold 2 and >= threshold 1</item>
+        <item>NB_RSSI/RSSI "&lt;"= threshold 1 and >= threshold 2</item>
+    </string-array>
+
+    <string-array name="filter_options1">
+        <item>NB_RSSI/RSSI "&lt;"= threshold 1</item>
+        <item>NB_RSSI/RSSI >= threshold 1</item>
+    </string-array>
+
     <string-array name="write_memoryBank_options">
         <item>EPC</item>
         <item>User</item>
