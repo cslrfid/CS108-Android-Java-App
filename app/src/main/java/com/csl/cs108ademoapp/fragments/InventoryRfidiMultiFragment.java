@@ -217,7 +217,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         rfidRunTime = (TextView) getActivity().findViewById(R.id.inventoryRfidRunTime1);
         rfidVoltageLevel = (TextView) getActivity().findViewById(R.id.inventoryRfidVoltageLevel1);
         TextView rfidFilterOn = (TextView) getActivity().findViewById(R.id.inventoryRfidFilterOn1);
-        if (mDid != null || (MainActivity.mCs108Library4a.getSelectEnable() == false && MainActivity.mCs108Library4a.getInvMatchEnable() == false))
+        if (mDid != null || (MainActivity.mCs108Library4a.getSelectEnable() == false && MainActivity.mCs108Library4a.getInvMatchEnable() == false && MainActivity.mCs108Library4a.getRssiFilterEnable() == false))
             rfidFilterOn.setVisibility(View.INVISIBLE);
 
         rfidYieldView = (TextView) getActivity().findViewById(R.id.inventoryRfidYield1);

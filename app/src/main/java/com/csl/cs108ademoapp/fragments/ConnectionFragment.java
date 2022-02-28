@@ -167,7 +167,6 @@ public class ConnectionFragment extends CommonFragment {
 
     private class DeviceScanTask extends AsyncTask<Void, String, String> {
         private long timeMillisUpdate = System.currentTimeMillis();
-        boolean usbDeviceFound = false;
         ArrayList<ReaderDevice> readersListOld = new ArrayList<ReaderDevice>();
         boolean wait4process = false; boolean scanning = false;
 

@@ -1,6 +1,5 @@
 package com.csl.cs108ademoapp.fragments;
 
-import android.inputmethodservice.Keyboard;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputFilter;

@@ -377,15 +377,10 @@ public class Cs108Connector extends BleConnector {
         mBluetoothConnector = new BluetoothConnector(context, mLogView);
     }
 
-    private enum CS108Connection {
-        BLUETOOTH, USB, OTHER
-    }
-
     enum Cs108ConnectedDevices {
         RFID, BARCODE, NOTIFICATION, SILICON_LAB, BLUETOOTH, OTHER
     }
     class Cs108ReadData {
-        CS108Connection cs108Connection;
         Cs108ConnectedDevices cs108ConnectedDevices;
         byte[] dataValues;
         boolean invalidSequence;
@@ -401,7 +396,6 @@ public class Cs108Connector extends BleConnector {
     Context context; TextView mLogView;
     Cs108Connector(Context context, TextView mLogView) {
         super(context, mLogView);
-//        mUsbConnector = new UsbConnector(context, mLogView, 33896, 4292);
 
         this.context = context;
         this.mLogView = mLogView;
@@ -626,7 +620,7 @@ public class Cs108Connector extends BleConnector {
 
         boolean inventoring = false;
         boolean isInventoring() { return  inventoring; }
-        void setInventoring(boolean enable) { inventoring = enable; debugFileEnable(enable); }
+        void setInventoring(boolean enable) { inventoring = enable; debugFileEnable(false); }
 
         RfidReaderChip mRfidReaderChip = new RfidReaderChip();
 
@@ -1630,7 +1624,7 @@ public class Cs108Connector extends BleConnector {
         //HST_OEM_ADDR, HST_OEM_DATA,
         HST_ANT_CYCLES, HST_ANT_DESC_SEL, HST_ANT_DESC_CFG, MAC_ANT_DESC_STAT, HST_ANT_DESC_PORTDEF, HST_ANT_DESC_DWELL, HST_ANT_DESC_RFPOWER, HST_ANT_DESC_INV_CNT,
         HST_TAGMSK_DESC_SEL, HST_TAGMSK_DESC_CFG, HST_TAGMSK_BANK, HST_TAGMSK_PTR, HST_TAGMSK_LEN, HST_TAGMSK_0_3,
-        HST_QUERY_CFG, HST_INV_CFG, HST_INV_SEL, HST_INV_ALG_PARM_0, HST_INV_ALG_PARM_1, HST_INV_ALG_PARM_2, HST_INV_ALG_PARM_3, HST_INV_EPC_MATCH_CFG, HST_INV_EPCDAT_0_3,
+        HST_QUERY_CFG, HST_INV_CFG, HST_INV_SEL, HST_INV_ALG_PARM_0, HST_INV_ALG_PARM_1, HST_INV_ALG_PARM_2, HST_INV_ALG_PARM_3, HST_INV_RSSI_FILTERING_CONFIG, HST_INV_RSSI_FILTERING_THRESHOLD, HST_INV_RSSI_FILTERING_COUNT, HST_INV_EPC_MATCH_CFG, HST_INV_EPCDAT_0_3,
         HST_TAGACC_DESC_CFG, HST_TAGACC_BANK, HST_TAGACC_PTR, HST_TAGACC_CNT, HST_TAGACC_LOCKCFG, HST_TAGACC_ACCPWD, HST_TAGACC_KILLPWD, HST_TAGWRDAT_SEL, HST_TAGWRDAT_0,
         HST_RFTC_CURRENT_PROFILE,
         HST_RFTC_FRQCH_SEL, HST_RFTC_FRQCH_CFG, HST_RFTC_FRQCH_DESC_PLLDIVMULT, HST_RFTC_FRQCH_DESC_PLLDACCTL, HST_RFTC_FRQCH_CMDSTART,
@@ -1730,6 +1724,12 @@ public class Cs108Connector extends BleConnector {
             }
 
             if (set_default_setting) {
+                rssiFilterType = mDefault.rssiFilterType;
+                rssiFilterOption = mDefault.rssiFilterOption;
+                rssiFilterThreshold1 = mDefault.rssiFilterThreshold;
+                rssiFilterThreshold2 = mDefault.rssiFilterThreshold;
+                rssiFilterCount = mDefault.rssiFilterCount;
+
                 matchEnable = mDefault.matchEnable;
                 matchType = mDefault.matchType;
                 matchLength = mDefault.matchLength;
@@ -1789,6 +1789,11 @@ public class Cs108Connector extends BleConnector {
             int tagJoin = 0;
             int brandid = 0;
             int algoSelect = 3;
+
+            int rssiFilterType = 0;
+            int rssiFilterOption = 0;
+            int rssiFilterThreshold = 0;
+            long rssiFilterCount = 0;
 
             int matchEnable = 0;
             int matchType = 0;
@@ -2786,6 +2791,101 @@ public class Cs108Connector extends BleConnector {
         boolean setAlgoRunTilZero(int algoRunTilZero) {
             if (algoSelect < ALGOSELECT_MIN || algoSelect > ALGOSELECT_MAX) return false;
             return algoSelectedData[algoSelect].setAlgoRunTilZero(algoRunTilZero);
+        }
+
+        int rssiFilterConfig = -1;
+        final int RSSIFILTERTYPE_INVALID = -1, RSSIFILTERTYPE_MIN = 0, RSSIFILTERTYPE_MAX = 2;
+        int rssiFilterType = RSSIFILTERTYPE_INVALID;
+        final int RSSIFILTEROPTION_INVALID = -1, RSSIFILTEROPTION_MIN = 0, RSSIFILTEROPTION_MAX = 4;
+        int rssiFilterOption = RSSIFILTEROPTION_INVALID;
+        int getRssiFilterType() {
+            if (rssiFilterType < 0) getHST_INV_RSSI_FILTERING_CONFIG();
+            return rssiFilterType;
+        }
+        int getRssiFilterOption() {
+            if (rssiFilterOption < 0) getHST_INV_RSSI_FILTERING_CONFIG();
+            return rssiFilterOption;
+        }
+        private boolean getHST_INV_RSSI_FILTERING_CONFIG() {
+            byte[] msgBuffer = new byte[]{(byte) 0x70, 0, 7, 9, 0, 0, 0, 0};
+            return mRfidDevice.mRfidReaderChip.sendHostRegRequest(HostRegRequests.HST_INV_RSSI_FILTERING_CONFIG, false, msgBuffer);
+        }
+        boolean setHST_INV_RSSI_FILTERING_CONFIG(int rssiFilterType, int rssiFilterOption) {
+            byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 7, 9, 0, 0, 0, 0};
+            if (rssiFilterType < RSSIFILTERTYPE_MIN || rssiFilterType > RSSIFILTERTYPE_MAX)
+                rssiFilterType = mDefault.rssiFilterType;
+            if (rssiFilterOption < RSSIFILTEROPTION_MIN || matchType > RSSIFILTEROPTION_MAX)
+                rssiFilterOption = mDefault.rssiFilterOption;
+            if (this.rssiFilterType == rssiFilterType && this.rssiFilterOption == rssiFilterOption && sameCheck) return true;
+            msgBuffer[4] |= (byte) (rssiFilterType & 0xF);
+            msgBuffer[4] |= (byte) ((rssiFilterOption & 0xF) << 4);
+            this.rssiFilterType = rssiFilterType;
+            this.rssiFilterOption = rssiFilterOption;
+            boolean bValue = mRfidDevice.mRfidReaderChip.sendHostRegRequest(HostRegRequests.HST_INV_RSSI_FILTERING_CONFIG, true, msgBuffer);
+            if (false) getHST_INV_RSSI_FILTERING_CONFIG();
+            return bValue;
+        }
+
+        final int RSSIFILTERTHRESHOLD_INVALID = -1, RSSIFILTERTHRESHOLD_MIN = 0, RSSIFILTERTHRESHOLD_MAX = 0xFFFF;
+        int rssiFilterThreshold1 = RSSIFILTERTHRESHOLD_INVALID;
+        int getRssiFilterThreshold1() {
+            if (rssiFilterThreshold1 < 0) getHST_INV_RSSI_FILTERING_THRESHOLD();
+            return rssiFilterThreshold1;
+        }
+        int rssiFilterThreshold2 = RSSIFILTERTHRESHOLD_INVALID;
+        int getRssiFilterThreshold2() {
+            if (rssiFilterThreshold2 < 0) getHST_INV_RSSI_FILTERING_THRESHOLD();
+            return rssiFilterThreshold2;
+        }
+        private boolean getHST_INV_RSSI_FILTERING_THRESHOLD() {
+            byte[] msgBuffer = new byte[]{(byte) 0x70, 0, 8, 9, 0, 0, 0, 0};
+            return mRfidDevice.mRfidReaderChip.sendHostRegRequest(HostRegRequests.HST_INV_RSSI_FILTERING_THRESHOLD, false, msgBuffer);
+        }
+        boolean setHST_INV_RSSI_FILTERING_THRESHOLD(int rssiFilterThreshold1, int rssiFilterThreshold2) {
+            byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 8, 9, 0, 0, 0, 0};
+            if (rssiFilterThreshold1 < RSSIFILTERTHRESHOLD_MIN || rssiFilterThreshold1 > RSSIFILTERTHRESHOLD_MAX)
+                rssiFilterThreshold1 = mDefault.rssiFilterThreshold;
+            if (rssiFilterThreshold2 < RSSIFILTERTHRESHOLD_MIN || rssiFilterThreshold2 > RSSIFILTERTHRESHOLD_MAX)
+                rssiFilterThreshold2 = mDefault.rssiFilterThreshold;
+            if (this.rssiFilterThreshold1 == rssiFilterThreshold1 && this.rssiFilterThreshold2 == rssiFilterThreshold2 && sameCheck) return true;
+            msgBuffer[4] |= (byte) (rssiFilterThreshold1 & 0xFF);
+            msgBuffer[5] |= (byte) ((rssiFilterThreshold1 >> 8) & 0xFF);
+            msgBuffer[6] |= (byte) (rssiFilterThreshold2 & 0xFF);
+            msgBuffer[7] |= (byte) ((rssiFilterThreshold2 >> 8) & 0xFF);
+            this.rssiFilterThreshold1 = rssiFilterThreshold1;
+            this.rssiFilterThreshold2 = rssiFilterThreshold2;
+            boolean bValue = mRfidDevice.mRfidReaderChip.sendHostRegRequest(HostRegRequests.HST_INV_RSSI_FILTERING_THRESHOLD, true, msgBuffer);
+            if (false) getHST_INV_RSSI_FILTERING_THRESHOLD();
+            return bValue;
+        }
+
+        final long RSSIFILTERCOUNT_INVALID = -1, RSSIFILTERCOUNT_MIN = 0, RSSIFILTERCOUNT_MAX = 1000000;
+        long rssiFilterCount = RSSIFILTERCOUNT_INVALID;
+        long getRssiFilterCount() {
+            if (rssiFilterCount < 0) getHST_INV_RSSI_FILTERING_COUNT();
+            return rssiFilterCount;
+        }
+        private boolean getHST_INV_RSSI_FILTERING_COUNT() {
+            byte[] msgBuffer = new byte[]{(byte) 0x70, 0, 9, 9, 0, 0, 0, 0};
+            return mRfidDevice.mRfidReaderChip.sendHostRegRequest(HostRegRequests.HST_INV_RSSI_FILTERING_THRESHOLD, false, msgBuffer);
+        }
+        boolean setHST_INV_RSSI_FILTERING_COUNT(long rssiFilterCount) {
+            appendToLog("entry: rssiFilterCount = " + rssiFilterCount + ", this.rssiFilterCount = " + this.rssiFilterCount);
+            byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 9, 9, 0, 0, 0, 0};
+            if (rssiFilterCount < RSSIFILTERCOUNT_MIN || rssiFilterCount > RSSIFILTERCOUNT_MAX)
+                rssiFilterCount = mDefault.rssiFilterCount;
+            appendToLog("rssiFilterCount 1 = " + rssiFilterCount + ", this.rssiFilterCount = " + this.rssiFilterCount);
+            if (this.rssiFilterCount == rssiFilterCount && sameCheck) return true;
+            appendToLog("rssiFilterCount 2 = " + rssiFilterCount + ", this.rssiFilterCount = " + this.rssiFilterCount);
+            msgBuffer[4] |= (byte) (rssiFilterCount & 0xFF);
+            msgBuffer[5] |= (byte) ((rssiFilterCount >> 8) & 0xFF);
+            msgBuffer[6] |= (byte) ((rssiFilterCount >> 16) & 0xFF);
+            msgBuffer[7] |= (byte) ((rssiFilterCount >> 24) & 0xFF);
+            this.rssiFilterCount = rssiFilterCount;
+            appendToLog("entering to sendHostRegRequest: rssiFilterCount = " + rssiFilterCount);
+            boolean bValue = mRfidDevice.mRfidReaderChip.sendHostRegRequest(HostRegRequests.HST_INV_RSSI_FILTERING_COUNT, true, msgBuffer);
+            appendToLog("after sendHostRegRequest: rssiFilterCount = " + rssiFilterCount);
+            return bValue;
         }
 
         final int MATCHENABLE_INVALID = -1; final int MATCHENABLE_MIN = 0; final int MATCHENABLE_MAX = 1;
@@ -4330,13 +4430,29 @@ public class Cs108Connector extends BleConnector {
         private boolean clearTempDataIn_request = false;
         boolean commandOperating;
 
-        double decodeWideBandRSSI(byte byteRSSI) {
+        double decodeNarrowBandRSSI(byte byteRSSI) {
             byte mantissa = byteRSSI;
             mantissa &= 0x07;
             byte exponent = byteRSSI;
             exponent >>= 3;
             double dValue = 20 * log10(pow(2, exponent) * (1 + (mantissa / pow(2, 3))));
+            if (false) appendToLog("byteRSSI = " + String.format("%X", byteRSSI) + ", mantissa = " + mantissa + ", exponent = " + exponent + "dValue = " + dValue);
             return dValue;
+        }
+        int encodeNarrowBandRSSI(double dRSSI) {
+            double dValue = dRSSI / 20;
+            dValue = pow(10, dValue);
+            int exponent = 0;
+            if (false) appendToLog("exponent = " + exponent + ", dValue = " + dValue);
+            while ((dValue + 0.5) >= 2) {
+                dValue /= 2; exponent++;
+                if (false) appendToLog("exponent = " + exponent + ", dValue = " + dValue);
+            }
+            dValue--;
+            int mantissa = (int)((dValue * 8) + 0.5);
+            int iValue = ((exponent & 0x1F) << 3) | (mantissa & 0x7);
+            if (false) appendToLog("dRssi = " + dRSSI + ", exponent = " + exponent + ", mantissa = " + mantissa + ", iValue = " + String.format("%X", iValue));
+            return iValue;
         }
 
         long firmware_ontime_ms = 0; long date_time_ms = 0; boolean bRx000ToReading = false;
@@ -4739,6 +4855,22 @@ public class Cs108Connector extends BleConnector {
                                                     }
                                                     break;
                                                 }
+                                                case 0x0907:
+                                                    mRx000Setting.rssiFilterType = dataIn[startIndex + 4] & 0xF;
+                                                    mRx000Setting.rssiFilterOption = (dataIn[startIndex + 4] >> 4) & 0xF;
+                                                    break;
+                                                case 0x0908:
+                                                    mRx000Setting.rssiFilterThreshold1 = dataIn[startIndex + 4];
+                                                    mRx000Setting.rssiFilterThreshold1 += (dataIn[startIndex + 5] << 8);
+                                                    mRx000Setting.rssiFilterThreshold2 = dataIn[startIndex + 6];
+                                                    mRx000Setting.rssiFilterThreshold2 += (dataIn[startIndex + 7] << 8);
+                                                    break;
+                                                case 0x0909:
+                                                    mRx000Setting.rssiFilterCount = dataIn[startIndex + 4];
+                                                    mRx000Setting.rssiFilterCount += (dataIn[startIndex + 5] << 8);
+                                                    mRx000Setting.rssiFilterCount += (dataIn[startIndex + 6] << 16);
+                                                    mRx000Setting.rssiFilterCount += (dataIn[startIndex + 7] << 24);
+                                                    break;
                                                 case 0x0911:
                                                     mRx000Setting.matchEnable = dataIn[startIndex + 4] & 0x01;
                                                     mRx000Setting.matchType = ((dataIn[startIndex + 4] & 0x02) >> 1);
@@ -4983,7 +5115,6 @@ public class Cs108Connector extends BleConnector {
                                                             date_time_ms = date_time;
                                                             if (true)
                                                                 appendToLog("command COMMAND_BEGIN is found with packageLength=" + packageLengthRead + ", with firmware count=" + lValue + ", date_time=" + date_time + ", expected firmware count=" + expected_firmware_ontime_ms);
-                                                            //if (mUsbConnector != null) mUsbConnector.inventorRunning = true;
                                                         }
                                                     }
                                                 }
@@ -5036,17 +5167,7 @@ public class Cs108Connector extends BleConnector {
                                                                     time1 = time1 = time1 << 8;
                                                                     time1 |= dataA.dataValues[0] & 0x00FF;
                                                                     dataA.decodedTime = time1;
-
-                                                                    if (true)
-                                                                        dataA.decodedRssi = decodeWideBandRSSI(dataA.dataValues[13 - 8]);
-                                                                    else {
-                                                                        byte nbRssi = dataA.dataValues[13 - 8];
-                                                                        byte mantissa = nbRssi;
-                                                                        mantissa &= 0x07;
-                                                                        byte exponent = nbRssi;
-                                                                        exponent >>= 3;
-                                                                        dataA.decodedRssi = 20 * log10(pow(2, exponent) * (1 + (mantissa / pow(2, 3))));
-                                                                    }
+                                                                    dataA.decodedRssi = decodeNarrowBandRSSI(dataA.dataValues[13 - 8]);
 
                                                                     byte bValue = dataA.dataValues[14 - 8];
                                                                     bValue &= 0x7F;
@@ -5119,16 +5240,7 @@ public class Cs108Connector extends BleConnector {
                                                                         index += epcLength;
                                                                     }
                                                                     if (dataValuesFull.length >= index + 1) {
-                                                                        if (true)
-                                                                            dataA.decodedRssi = decodeWideBandRSSI(dataValuesFull[index]);
-                                                                        else {
-                                                                            byte nbRssi = dataValuesFull[index];
-                                                                            byte mantissa = nbRssi;
-                                                                            mantissa &= 0x07;
-                                                                            byte exponent = nbRssi;
-                                                                            exponent >>= 3;
-                                                                            dataA.decodedRssi = 20 * log10(pow(2, exponent) * (1 + (mantissa / pow(2, 3))));
-                                                                        }
+                                                                        dataA.decodedRssi = decodeNarrowBandRSSI(dataValuesFull[index]);
                                                                         index++;
                                                                     }
                                                                     if (false)
@@ -5731,27 +5843,9 @@ public class Cs108Connector extends BleConnector {
             boolean validRequest = false;
 
             if (isBleConnected() == false) return false;
-            if (false && bifMacAccessHistoryData(msgBuffer)) {
-                if (findMacAccessHistory(msgBuffer) >= 0) {
-                    appendToLog("setAlgoRetry: No sending as same data = " + byteArrayToString(msgBuffer));
-                    return true;
-                }
-            }
             addMacAccessHistory(msgBuffer);
             switch (hostRegRequests) {
                 case MAC_OPERATION:
-//                case MAC_VER:
-//                case MAC_LAST_COMMAND_DURATION:
-                    //needResponse = true;
-//                    validRequest = true;
-//                    break;
-//                case HST_CMNDIAGS:
-//                case HST_MBP_ADDR:
-//                case HST_MBP_DATA:
-//                case HST_OEM_ADDR:
-//                case HST_OEM_DATA:
-//                    validRequest = true;
-//                    break;
                 case HST_ANT_CYCLES:
                 case HST_ANT_DESC_SEL:
                 case HST_ANT_DESC_CFG:
@@ -5777,8 +5871,9 @@ public class Cs108Connector extends BleConnector {
                 case HST_INV_ALG_PARM_1:
                 case HST_INV_ALG_PARM_2:
                 case HST_INV_ALG_PARM_3:
-//                    validRequest = true;
-//                    break;
+                case HST_INV_RSSI_FILTERING_CONFIG:
+                case HST_INV_RSSI_FILTERING_THRESHOLD:
+                case HST_INV_RSSI_FILTERING_COUNT:
                 case HST_INV_EPC_MATCH_CFG:
                 case HST_INV_EPCDAT_0_3:
                     validRequest = true;
