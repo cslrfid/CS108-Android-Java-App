@@ -3743,6 +3743,7 @@ public class Cs108Connector extends BleConnector {
             }
             return antennaPower;
         }
+        boolean antennaPowerSet = false;
         boolean setAntennaPower(long antennaPower) {
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 6, 7, 0, 0, 0, 0};
             if (antennaPower < ANTPOWER_MIN || antennaPower > ANTPOWER_MAX)
@@ -3751,6 +3752,7 @@ public class Cs108Connector extends BleConnector {
             msgBuffer[4] = (byte) (antennaPower % 256);
             msgBuffer[5] = (byte) ((antennaPower >> 8) % 256);
             this.antennaPower = antennaPower;
+            antennaPowerSet = true;
             return mRfidDevice.mRfidReaderChip.sendHostRegRequest(HostRegRequests.HST_ANT_DESC_RFPOWER, true, msgBuffer);
         }
 
@@ -4673,9 +4675,8 @@ public class Cs108Connector extends BleConnector {
                                                         appendToLog("found antenna dwell=" + mRx000Setting.antennaSelectedData[mRx000Setting.antennaSelect].antennaDwell);
                                                     break;
                                                 case 0x0706:
+                                                    if (mRx000Setting.antennaSelectedData[mRx000Setting.antennaSelect].antennaPowerSet == false)
                                                     mRx000Setting.antennaSelectedData[mRx000Setting.antennaSelect].antennaPower = (dataIn[startIndex + 4] & 0xFF) + (dataIn[startIndex + 5] & 0xFF) * 256 + (dataIn[startIndex + 6] & 0xFF) * 256 * 256 + (dataIn[startIndex + 7] & 0xFF) * 256 * 256 * 256;
-                                                    if (DEBUG)
-                                                        appendToLog("found antenna power=" + mRx000Setting.antennaSelectedData[mRx000Setting.antennaSelect].antennaPower);
                                                     break;
                                                 case 0x0707:
                                                     mRx000Setting.antennaSelectedData[mRx000Setting.antennaSelect].antennaInvCount = (dataIn[startIndex + 4] & 0xFF) + (dataIn[startIndex + 5] & 0xFF) * 256 + (dataIn[startIndex + 6] & 0xFF) * 256 * 256 + (dataIn[startIndex + 7] & 0xFF) * 256 * 256 * 256;

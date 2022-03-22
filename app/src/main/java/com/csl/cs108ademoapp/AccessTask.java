@@ -41,7 +41,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     private String endingMessaage;
 
     int qValue=0;
-    boolean repeat=false, nextNew=false;
+    int repeat=0;
     boolean bEnableErrorPopWindow=true;
 
     boolean gotInventory;
@@ -73,7 +73,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     public AccessTask(Button button, TextView textViewWriteCount, boolean invalidRequest,
                       String selectMask, int selectBank, int selectOffset,
                       String strPassword, int powerLevel, Cs108Connector.HostCommands hostCommand,
-                      int qValue, boolean repeat, boolean nextNew, boolean resetCount,
+                      int qValue, int repeat, boolean resetCount,
                       TextView registerRunTime, TextView registerTagGot, TextView registerVoltageLevel,
                       TextView registerYieldView, TextView registerTotalView) {
         this.button = button;
@@ -92,8 +92,8 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         this.powerLevel = powerLevel;
         this.hostCommand = hostCommand;
         this.qValue = qValue;
+        if (repeat > 255) repeat = 255;
         this.repeat = repeat;
-        this.nextNew = nextNew;
         if (resetCount) {
             total = 0;
             tagList.clear();
@@ -121,7 +121,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 buttonText1 += buttonText1.substring(buttonText.length() - 1);
             } else buttonText1 = buttonText;
         }
-        if (repeat || buttonText.length() == 0) button.setText("Stop");
+        if (repeat > 1 || buttonText.length() == 0) button.setText("Stop");
         else {
             if (Character.isUpperCase(strLastChar.charAt(0))) button.setText(buttonText1 + "ING");
             else button.setText(buttonText1 + "ing");
@@ -151,8 +151,8 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         }
         if (invalidRequest == false) {
             if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessTask(): powerLevel = " + powerLevel);
-            int matchRep = 0;
-            if (repeat == false || nextNew) matchRep = 1;
+            int matchRep = 1;
+            if (repeat > 1) matchRep = repeat;
             if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
             else if (skipSelect) { }
             else if (MainActivity.mCs108Library4a.setSelectedTag(selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
@@ -192,38 +192,32 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             Cs108Connector.Rx000pkgData rx000pkgData = MainActivity.mCs108Library4a.onRFIDEvent();
             if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0)   timeMillis = System.currentTimeMillis();
             else if (rx000pkgData != null) {
-                //MainActivity.mCs108Library4a.appendToLog("rx000pkgData.responseType = " + rx000pkgData.responseType.toString());
                 if (rx000pkgData.responseType == null) {
                     publishProgress("null response");
                 } else if (rx000pkgData.responseType == Cs108Connector.HostCmdResponseTypes.TYPE_18K6C_TAG_ACCESS) {
-                    if (true) {
-                        if (rx000pkgData.decodedError == null) {
-                            if (done == false) {
-                                accessResult = rx000pkgData.decodedResult;
-                                //MainActivity.mCs108Library4a.appendToLog("StreamOut, accResult=" + accessResult);
-                                if (updateRunnable != null) {
-                                    //MainActivity.mCs108Library4a.appendToLog("StreamOut: start updateRunnable");
-                                    mHandler.post(updateRunnable);
-                                }
-                            }
-                            done = true;
+                    if (rx000pkgData.decodedError == null) {
+                        if (done == false) {
+                            accessResult = rx000pkgData.decodedResult;
+                            if (repeat > 0) repeat--;
+                            if (updateRunnable != null) mHandler.post(updateRunnable);
                             publishProgress(null, rx000pkgData.decodedResult);
-                        } else {
-                            //MainActivity.mCs108Library4a.appendToLog("decodeError = " + rx000pkgData.decodedError + ", length = " + rx000pkgData.decodedError.length());
-                            publishProgress(rx000pkgData.decodedError);
                         }
-                        iTimeOut = 1000;
-                    }
+                        done = true;
+                    } else publishProgress(rx000pkgData.decodedError);
+                    iTimeOut = 1000;
                 } else if (rx000pkgData.responseType == Cs108Connector.HostCmdResponseTypes.TYPE_COMMAND_END) {
+                    MainActivity.mCs108Library4a.appendToLog("BtData: repeat = " + repeat + ", decodedError = " + rx000pkgData.decodedError + ", resultError = " + resultError);
                     if (rx000pkgData.decodedError != null) { endingMessaage = rx000pkgData.decodedError; ending = true; }
-                    else if (repeat && (nextNew == false || resultError.length() != 0)) {
+                    else if (repeat > 0 && resultError.length() == 0) {
                         resultError = "";
+                        MainActivity.mCs108Library4a.setMatchRep(repeat);
                         MainActivity.mCs108Library4a.sendHostRegRequestHST_CMD(hostCommand);
                     } else {
                         endingMessaage = "";
                         ending = true;
                     }
                 } else if (rx000pkgData.responseType == Cs108Connector.HostCmdResponseTypes.TYPE_18K6C_INVENTORY) {
+                    done = false;
                     publishProgress("TT", MainActivity.mCs108Library4a.byteArrayToString(rx000pkgData.decodedEpc));
                 } else {
                     publishProgress("Unhandled Response: " + rx000pkgData.responseType.toString());
@@ -252,66 +246,6 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     String tagInventoried = null;
     @Override
     protected void onProgressUpdate(String... output) {
-        if (true) progressUpdate(output);
-        else if (output[0] != null) {
-            MainActivity.mCs108Library4a.appendToLog("onProgressUpdate output[0] = " + output[0]);
-            if (output[0].length() == 2) {
-                if (output[0].contains("TT")) {
-                    gotInventory = true;
-                    boolean matched = false;
-                    for (int i = 0; i < tagList.size(); i++) {
-                        if (output[1].matches(tagList.get(i))) {
-                            matched = true;
-                            break;
-                        }
-                    }
-                    if (registerTagGot != null) registerTagGot.setText(output[1]);
-                    if (matched == false) tagInventoried = output[1];
-                } else if (output[0].contains("WW")) {
-                    long timePeriod = (System.currentTimeMillis() - startTimeMillis) / 1000;
-                    if (timePeriod > 0) {
-                        if (registerRunTime != null) registerRunTime.setText(String.format("Run time: %d sec", timePeriod));
-                    }
-                } else if (taskCancelReason == TaskCancelRReason.NULL) {
-                    if (registerVoltageLevel != null) registerVoltageLevel.setText(MainActivity.mCs108Library4a.getBatteryDisplay(true));
-                }
-            } else {
-                resultError += output[0];
-                if (true)
-                    MainActivity.mCs108Library4a.appendToLog("output[0]: " + output[0] + ", resultError = " + resultError);
-                taskCancelReason = TaskCancelRReason.ERROR;
-            }
-        } else {
-            MainActivity.mCs108Library4a.appendToLog("onProgressUpdate output[1] = " + output[1]);
-            if (registerYield != null) {
-                if (tagInventoried != null) {
-                    tagList.add(tagInventoried);
-                    tagInventoried = null;
-                }
-                registerYield.setText("Unique:" + Integer.toString(tagList.size()));
-            }
-            if (registerTotal != null) registerTotal.setText("Total:" + Integer.toString(++total));
-        }
-    }
-
-    @Override
-    protected void onCancelled() {
-        super.onCancelled();
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("endingMesssage: taskCancelReason = " + taskCancelReason);
-        //if (taskCancelReason != TaskCancelRReason.NULL) MainActivity.mCs108Library4a.abortOperation1(); else
-        MainActivity.mCs108Library4a.abortOperation();
-        if (taskCancelReason == TaskCancelRReason.NULL)  taskCancelReason = TaskCancelRReason.DESTORY;
-        DeviceConnectTask4RegisterEnding();
-    }
-
-    @Override
-    protected void onPostExecute(String result) {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessSecurityLockFragment.InventoryRfidTask.onPostExecute(): " + result);
-
-        DeviceConnectTask4RegisterEnding();
-    }
-
-    protected void progressUpdate(String... output) {
         if (output[0] != null) {
             MainActivity.mCs108Library4a.appendToLog("onProgressUpdate output[0] = " + output[0]);
             if (output[0].length() == 2) {
@@ -352,13 +286,28 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         }
     }
 
+    @Override
+    protected void onCancelled() {
+        super.onCancelled();
+        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("endingMesssage: taskCancelReason = " + taskCancelReason);
+        MainActivity.mCs108Library4a.abortOperation();
+        if (taskCancelReason == TaskCancelRReason.NULL)  taskCancelReason = TaskCancelRReason.DESTORY;
+        DeviceConnectTask4RegisterEnding();
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessSecurityLockFragment.InventoryRfidTask.onPostExecute(): " + result);
+        DeviceConnectTask4RegisterEnding();
+    }
+
     void DeviceConnectTask4RegisterEnding() {
         String strErrorMessage = "";
         if (false) {
             boolean success = false;
             MainActivity.mCs108Library4a.appendToLog("repeat = " + repeat + ", taskCancelReason = " + taskCancelReason.toString()
                     + ", backscatterError = " + backscatterError + ", accessError =" + accessError + ", accessResult = " + accessResult + ", resultError = " + resultError);
-            if ((repeat == false && taskCancelReason != TaskCancelRReason.NULL) || backscatterError != 0 || accessError != 0 || accessResult == null || resultError.length() != 0) {
+            if ((repeat <= 1 && taskCancelReason != TaskCancelRReason.NULL) || backscatterError != 0 || accessError != 0 || accessResult == null || resultError.length() != 0) {
                 MainActivity.mCs108Library4a.appendToLog("FAILURE"); Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_FAILURE, Toast.LENGTH_SHORT).show();
                 playerO.start();
             } else {

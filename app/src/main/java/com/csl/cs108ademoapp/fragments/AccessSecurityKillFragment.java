@@ -121,7 +121,7 @@ public class AccessSecurityKillFragment extends CommonFragment {
         String strTagID = editTextTagID.getText().toString();
         String strPassword = editTextPassword.getText().toString();
         int powerLevel = Integer.valueOf(editTextAntennaPower.getText().toString());
-        accessTask = new AccessTask(button, null, invalidRequest, strTagID, 1, 32, strPassword, powerLevel, Cs108Connector.HostCommands.CMD_18K6CKILL, 0, false, false, true, null, null, null, null, null);
+        accessTask = new AccessTask(button, null, invalidRequest, strTagID, 1, 32, strPassword, powerLevel, Cs108Connector.HostCommands.CMD_18K6CKILL, 0, 0, true, null, null, null, null, null);
         accessTask.execute();
     }
 }

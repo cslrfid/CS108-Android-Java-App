@@ -58,6 +58,17 @@
         <item>User</item>
     </string-array>
 
+    <string-array name="write_memoryBank_options">
+        <item>EPC</item>
+        <item>User</item>
+    </string-array>
+
+    <string-array name="write_data_options">
+        <item>No change</item>
+        <item>Barcode before writing</item>
+        <item>add 1 after writing</item>
+    </string-array>
+
     <string-array name="fd_command_options">
         <item>Read/Write Memory</item>
         <item>Auth</item>
@@ -104,11 +115,6 @@
     <string-array name="filter_options1">
         <item>NB_RSSI/RSSI "&lt;"= threshold 1</item>
         <item>NB_RSSI/RSSI >= threshold 1</item>
-    </string-array>
-
-    <string-array name="write_memoryBank_options">
-        <item>EPC</item>
-        <item>User</item>
     </string-array>
 
     <string-array name="filterPre_SLaction_options">

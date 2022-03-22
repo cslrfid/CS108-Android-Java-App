@@ -301,7 +301,7 @@ public class AccessColdChainFragment extends CommonFragment {
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             hostCommand,
-                            0, false, false,true,
+                            0, 0, true,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;

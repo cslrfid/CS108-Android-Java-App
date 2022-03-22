@@ -2736,13 +2736,16 @@ public class Cs108Library4A extends Cs108Connector {
     }
     @Keep public boolean setSelectedTag(String strTagId, int selectBank, long pwrlevel) {
         boolean isValid = false;
+        appendToLog("strTagId = " + strTagId + ", selectBank = " + selectBank);
         if (selectBank < 0 || selectBank > 3) return false;
         int selectOffset = (selectBank == 1 ? 32 : 0);
         isValid = setSelectedTag1(strTagId, selectBank, selectOffset, 0, pwrlevel, 0, 0);
         return isValid;
     }
+    public boolean setMatchRep(int matchRep) { return mRfidDevice.mRfidReaderChip.mRx000Setting.setMatchRep(matchRep); }
     @Keep public boolean setSelectedTag(String selectMask, int selectBank, int selectOffset, long pwrlevel, int qValue, int matchRep) {
         boolean isValid = false;
+        appendToLog("strTagId = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset);
         isValid = setSelectedTag1(selectMask, selectBank, selectOffset, 0, pwrlevel, qValue, matchRep);
         return isValid;
     }
@@ -2752,7 +2755,7 @@ public class Cs108Library4A extends Cs108Connector {
     @Keep boolean setSelectedTag1(String selectMask, int selectBank, int selectOffset, int delay, long pwrlevel, int qValue, int matchRep) {
         boolean setSuccess = true;
         if (selectMask == null)   selectMask = "";
-        if (selectMask.length() == 0) return false;
+        //if (selectMask.length() == 0) return false;
 
         if (tagSelectByMatching) {
             if (postMatchDataChanged == false) {
