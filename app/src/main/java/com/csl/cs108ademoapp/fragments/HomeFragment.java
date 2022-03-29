@@ -84,7 +84,7 @@ public class HomeFragment extends CommonFragment {
                 stopProgressDialog();
                 if (MainActivity.sharedObjects.versioinWarningShown == false) {
                     String stringPopup = MainActivity.mCs108Library4a.checkVersion();
-                    if (stringPopup != null && stringPopup.length() != 0) {
+                    if (false && stringPopup != null && stringPopup.length() != 0) {
                         stringPopup = "Firmware too old\nPlease upgrade firmware to at least:" + stringPopup;
                         CustomPopupWindow customPopupWindow = new CustomPopupWindow((Context)getActivity());
                         customPopupWindow.popupStart(stringPopup, false);

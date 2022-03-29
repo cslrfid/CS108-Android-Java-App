@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -574,9 +575,6 @@ class BleConnector extends BluetoothGattCallback {
                     bAlerting = true;
                     popupAlert();
                     return false;
-                } else {
-                    appendToLog("requestPermissions ACCESS_FINE_LOCATION 123");
-                    requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
                 }
             }
         }
@@ -614,11 +612,8 @@ class BleConnector extends BluetoothGattCallback {
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     if (DEBUG) appendToLog("scanLeDevice(" + enable + "): START with mleScanner. ActivityCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_SCAN) = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                        appendToLog("requestPermissions BLUETOOTH_SCAN 123");
-                        requestPermissions(activity, new String[]{Manifest.permission.BLUETOOTH_SCAN}, 123);
-                        return false;
-                    } else mleScanner.startScan(mScanCallBack);
+                    if (isBLUETOOTH_CONNECTinvalid()) return true;
+                    else mleScanner.startScan(mScanCallBack);
                 } else {
                     if (DEBUG) appendToLog("scanLeDevice(" + enable + "): START with mBluetoothAdapter");
                     mBluetoothAdapter.startLeScan(mLeScanCallback);
@@ -649,6 +644,7 @@ class BleConnector extends BluetoothGattCallback {
                         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                             appendToLog("requestPermissions ACCESS_FINE_LOCATION 123");
                             requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
+                            Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
                         }
                         {
                             LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
@@ -889,6 +885,22 @@ class BleConnector extends BluetoothGattCallback {
             System.arraycopy(streamInBuffer, streamInBufferHead, buffer, byteOffset, length);
             streamInBufferHead += length;
         }}
+    }
+
+    boolean isBLUETOOTH_CONNECTinvalid() {
+        boolean bValue = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (
+                ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
+        )) {
+            appendToLog("requestPermissions BLUETOOTH_CONNECT & BLUETOOTH_CONNECT 123");
+            requestPermissions((Activity) mContext, new String[] {
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT
+            }, 123);
+            Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
+            bValue = true;
+        }
+        return bValue;
     }
 
     private Utility utility;

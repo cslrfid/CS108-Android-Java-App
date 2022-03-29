@@ -18,4 +18,6 @@
         <item>13: Miller 8 160kHz Tari 20us</item>
         <item>15: Miller 4 640kHz Tari 7.5us</item>
     </string-array>
+
+    <string name="toast_permission_not_granted">"Permissions are not granted. Please allow them in system setting."</string>
 </resources>

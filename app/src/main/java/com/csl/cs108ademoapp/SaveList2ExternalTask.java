@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
@@ -380,6 +381,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
                 if (requestPermission) {
                     mCs108Library4a.appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
                     MainActivity.permissionRequesting = true; requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                    Toast.makeText(mContext, com.csl.cs108library4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
                     return null;
                 }
             } else mCs108Library4a.appendToLog("WRITE_EXTERNAL_STORAGE Permission is GRANTED !!!");

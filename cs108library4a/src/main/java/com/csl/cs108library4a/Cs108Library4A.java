@@ -14,10 +14,12 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
+
 import androidx.annotation.Keep;
 import androidx.core.app.ActivityCompat;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,7 +41,8 @@ public class Cs108Library4A extends Cs108Connector {
     BluetoothAdapter.LeScanCallback mLeScanCallback = null;
     ScanCallback mScanCallback = null;
 
-    @Keep public Cs108Library4A(Context context, TextView mLogView) {
+    @Keep
+    public Cs108Library4A(Context context, TextView mLogView) {
         super(context, mLogView);
         this.context = context;
 
@@ -63,7 +66,8 @@ public class Cs108Library4A extends Cs108Connector {
                         if (true) found98 = check9800(scanResultA);
                         appendToLog("found98 = " + found98 + ", mScanResultList 0 = " + (mScanResultList != null ? "VALID" : "NULL"));
                         if (mScanResultList != null && found98) {
-                            scanResultA.serviceUUID2p2 = check9800_serviceUUID2p1; mScanResultList.add(scanResultA);
+                            scanResultA.serviceUUID2p2 = check9800_serviceUUID2p1;
+                            mScanResultList.add(scanResultA);
                             appendToLog("mScanResultList 0 = " + mScanResultList.size());
                         }
                     }
@@ -79,7 +83,8 @@ public class Cs108Library4A extends Cs108Connector {
                     if (true) found98 = check9800(scanResultA);
                     appendToLog("found98 = " + found98 + ", mScanResultList 1 = " + (mScanResultList != null ? "VALID" : "NULL"));
                     if (mScanResultList != null && found98) {
-                        scanResultA.serviceUUID2p2 = check9800_serviceUUID2p1; mScanResultList.add(scanResultA);
+                        scanResultA.serviceUUID2p2 = check9800_serviceUUID2p1;
+                        mScanResultList.add(scanResultA);
                         appendToLog("mScanResultList 1 = " + mScanResultList.size());
                     }
                 }
@@ -102,14 +107,16 @@ public class Cs108Library4A extends Cs108Connector {
         File path = context.getFilesDir();
         File[] fileArray = path.listFiles();
         boolean deleteFiles = false;
-        if (DEBUG) appendToLog("Number of file in data storage sub-directory = " + fileArray.length);
+        if (DEBUG)
+            appendToLog("Number of file in data storage sub-directory = " + fileArray.length);
         for (int i = 0; i < fileArray.length; i++) {
             String fileName = fileArray[i].toString();
             if (DEBUG) appendToLog("Stored file (" + i + ") = " + fileName);
             File file = new File(fileName);
-            if (deleteFiles)    file.delete();
+            if (deleteFiles) file.delete();
         }
-        if (deleteFiles)    if (DEBUG) appendToLog("Stored file size after DELETE = " + path.listFiles().length);
+        if (deleteFiles)
+            if (DEBUG) appendToLog("Stored file size after DELETE = " + path.listFiles().length);
         if (false) {
             double[] tableFreq = FCCTableOfFreq;
             double[] tableFreq0 = FCCTableOfFreq0;
@@ -118,7 +125,7 @@ public class Cs108Library4A extends Cs108Connector {
                 for (int j = 0; j < 50; j++) {
                     if (FCCTableOfFreq0[i] == FCCTableOfFreq[j]) {
                         fccFreqSortedIdx0[i] = j;
-                    if (DEBUG) appendToLog("fccFreqSortedIdx0[" + i + "] = " + j);
+                        if (DEBUG) appendToLog("fccFreqSortedIdx0[" + i + "] = " + j);
                         break;
                     }
                 }
@@ -129,7 +136,7 @@ public class Cs108Library4A extends Cs108Connector {
                 for (int j = 0; j < 50; j++) {
                     if (FCCTableOfFreq1[i] == FCCTableOfFreq[j]) {
                         fccFreqSortedIdx1[i] = j;
-                    if (DEBUG) appendToLog("fccFreqSortedIdx1[" + i + "] = " + j);
+                        if (DEBUG) appendToLog("fccFreqSortedIdx1[" + i + "] = " + j);
                         break;
                     }
                 }
@@ -157,36 +164,52 @@ public class Cs108Library4A extends Cs108Connector {
         }
     }
 
-    public String getlibraryVersion() { return BuildConfig.VERSION_NAME; }
+    public String getlibraryVersion() {
+        return BuildConfig.VERSION_NAME;
+    }
 
-    public String byteArrayToString(byte[] packet) { return super.byteArrayToString(packet); }
-    public void appendToLog(String s) { super.appendToLog(s); }
-    public void appendToLogView(String s) { super.appendToLogView(s); }
+    public String byteArrayToString(byte[] packet) {
+        return super.byteArrayToString(packet);
+    }
+
+    public void appendToLog(String s) {
+        super.appendToLog(s);
+    }
+
+    public void appendToLogView(String s) {
+        super.appendToLogView(s);
+    }
 
     @Override
-    @Keep public boolean isBleScanning()  { return super.isBleScanning(); }
+    @Keep
+    public boolean isBleScanning() {
+        return super.isBleScanning();
+    }
+
     ArrayList<Cs108ScanData> mScanResultList = new ArrayList<>();
-    @Keep public boolean scanLeDevice(final boolean enable) {
+
+    @Keep
+    public boolean scanLeDevice(final boolean enable) {
         if (enable) mHandler.removeCallbacks(connectRunnable);
 
         appendToLog("abcc scanLeDevice(" + enable + ")");
-        if (bluetoothDeviceConnectOld != null) appendToLog("abcc abcc 1 bluetoothDeviceConnectOld connection state = " + mBluetoothManager.getConnectionState(bluetoothDeviceConnectOld, BluetoothProfile.GATT));
+        if (bluetoothDeviceConnectOld != null)
+            appendToLog("abcc abcc 1 bluetoothDeviceConnectOld connection state = " + mBluetoothManager.getConnectionState(bluetoothDeviceConnectOld, BluetoothProfile.GATT));
         boolean bValue = super.scanLeDevice(enable, this.mLeScanCallback, this.mScanCallback);
         appendToLog("abcc isScanning = " + isBleScanning());
         return bValue;
     }
+
     int check9800_serviceUUID2p1 = 0;
+
     boolean check9800(Cs108Library4A.Cs108ScanData scanResultA) {
         boolean found98 = false;
         if (false) appendToLog("decoded data size = " + scanResultA.decoded_scanRecord.size());
         int iNewADLength = 0;
         byte[] newAD = new byte[0];
         int iNewADIndex = 0;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            appendToLog("requestPermissions BLUETOOTH_CONNECT 123");
-            requestPermissions((Activity) context, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 123);
-            return false;
-        }
+        if (isBLUETOOTH_CONNECTinvalid()) return true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) return true;
         String strTemp = scanResultA.getDevice().getName();
         if (strTemp != null) appendToLog("Found name = " + strTemp + ", length = " + String.valueOf(strTemp.length()));
         for (byte bdata : scanResultA.getScanRecord()) {
@@ -368,8 +391,8 @@ public class Cs108Library4A extends Cs108Connector {
         String hostVersion = hostProcessorICGetFirmwareVersion();
         String bluetoothVersion = getBluetoothICFirmwareVersion();
         String strVersionRFID = "2.6.44"; String[] strRFIDVersions = strVersionRFID.split("\\.");
-        String strVersionBT = "1.0.16"; String[] strBTVersions = strVersionBT.split("\\.");
-        String strVersionHost = "1.0.17"; String[] strHostVersions = strVersionHost.split("\\.");
+        String strVersionBT = "1.0.17"; String[] strBTVersions = strVersionBT.split("\\.");
+        String strVersionHost = "1.0.16"; String[] strHostVersions = strVersionHost.split("\\.");
         String stringPopup = "";
         int icsModel = getcsModel();
 
