@@ -228,7 +228,7 @@ public class UtraceFragment extends CommonFragment {
                         editTextAccessRWAccPassword.getText().toString(),
                         Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                         Cs108Connector.HostCommands.CMD_UNTRACEABLE,
-                        0, false, false,true,
+                        0, 0, true,
                         null, null, null, null, null);
                 accessTask.execute();
                 rerunRequest = true;

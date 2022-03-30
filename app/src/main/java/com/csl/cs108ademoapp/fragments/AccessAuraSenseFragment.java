@@ -178,7 +178,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                             selectTag.editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(selectTag.editTextaccessRWAntennaPower.getText().toString()),
                             (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE),
-                            0, false, false,true,
+                            0, 0, true,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;
