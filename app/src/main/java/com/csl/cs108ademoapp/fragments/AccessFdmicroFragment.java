@@ -550,7 +550,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                 selectTag.editTextAccessRWAccPassword.getText().toString(),
                 Integer.valueOf(selectTag.editTextaccessRWAntennaPower.getText().toString()),
                 hostCommand,
-                0, false, false, true,
+                0, 0, true,
                 null, null, null, null, null);
         accessTask.setRunnable(updateRunnable);
         accessTask.execute();

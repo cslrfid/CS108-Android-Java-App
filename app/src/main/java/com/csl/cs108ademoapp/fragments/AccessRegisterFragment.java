@@ -1,5 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cs108ademoapp.MainActivity.mContext;
+
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,33 +12,48 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.InventoryBarcodeTask;
+import com.csl.cs108ademoapp.InventoryRfidTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
+import com.csl.cs108library4a.ReaderDevice;
+
+import java.util.ArrayList;
 
 public class AccessRegisterFragment extends CommonFragment {
-    Spinner spinnerSelectBank;
-    EditText editTextSelectMask, editTextBarValue;
-    Button buttonReadBar, buttonWrite;
-    EditText editTextPassword, editTextWriteLength, editTextAntennaPower;
-    CheckBox checkBoxAutoRun, checkBoxNewValue, checkBoxNewBarcode;
-    TextView textViewWriteCount, textViewRunTime, textViewTagGot, textViewVoltageLevel;
+    CustomPopupWindow customPopupWindow;
+
+    TableRow tableRowSelectMask, tableRowSelectBank;
+    Spinner spinnerSelectBank, spinnerAccessBank, spinnerWriteDataType;
+    EditText editTextSelectMask, editTextSelectPopulation, editTextPassword, editTextAntennaPower, editTextWriteData, editTextWriteLength;
+    CheckBox checkBoxWriteLengthEnable;
+    TextView textViewSelectedTags, textViewWriteCount, textViewRunTime, textViewTagGot, textViewVoltageLevel;
     TextView textViewYield, textViewTotal;
+    Button buttonSelect, buttonClearSelect, buttonReadBar, buttonWrite;
+
+    InventoryRfidTask inventoryRfidTask;
     InventoryBarcodeTask inventoryBarcodeTask;
     AccessTask accessTask;
-    boolean newBarcode;
-    String barValueOld = "";
+
+    ReaderDevice tagSelected = MainActivity.tagSelected;
+    boolean newWriteData;
+    String writeValueOld = "";
+    int iAutoRun = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,12 +69,50 @@ public class AccessRegisterFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_access);
         actionBar.setTitle(R.string.title_activity_registertag);
 
+        customPopupWindow = new CustomPopupWindow(mContext);
+
+        tableRowSelectMask = (TableRow) getActivity().findViewById(R.id.registerSelectMaskRow);
+        tableRowSelectBank = (TableRow) getActivity().findViewById(R.id.registerSelectBankRow);
+
         spinnerSelectBank = (Spinner) getActivity().findViewById(R.id.registerSelectBank);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSelectBank.setAdapter(targetAdapter);
+        spinnerSelectBank.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: //if EPC
+                        if (tagSelected != null) editTextSelectMask.setText(tagSelected.getAddress());
+                        break;
+                    case 1:
+                        if (tagSelected != null) { if (tagSelected.getTid() != null) editTextSelectMask.setText(tagSelected.getTid()); }
+                        break;
+                    case 2:
+                        if (tagSelected != null) { if (tagSelected.getUser() != null) editTextSelectMask.setText(tagSelected.getUser()); }
+                        break;
+                    default:
+                        break;
+                }
+            }
 
-        Button buttonConfirm = (Button) getActivity().findViewById(R.id.regtagConfirm2Button);
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        spinnerAccessBank = (Spinner) getActivity().findViewById(R.id.registerAccessBank);
+        targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.write_memoryBank_options, R.layout.custom_spinner_layout);
+        targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerAccessBank.setAdapter(targetAdapter);
+
+        spinnerWriteDataType = (Spinner) getActivity().findViewById(R.id.registerWriteDataType);
+        targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.write_data_options, R.layout.custom_spinner_layout);
+        targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerWriteDataType.setAdapter(targetAdapter);
+
+        Button buttonConfirm = (Button) getActivity().findViewById(R.id.registerConfirm2Button);
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -66,22 +121,15 @@ public class AccessRegisterFragment extends CommonFragment {
         });
 
         editTextSelectMask = (EditText) getActivity().findViewById(R.id.registerSelectMask);
-//        editTextSelectMask.setText("19dec16");
-
-        checkBoxNewValue = (CheckBox) getActivity().findViewById(R.id.registerNewValue);
-        checkBoxNewValue.setVisibility(View.GONE);
-        checkBoxNewValue.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                resetOldValue();
-            }
-        });
-
-        editTextBarValue = (EditText) getActivity().findViewById(R.id.registerBarValue);
-        editTextBarValue.setEnabled(true);
+        editTextSelectPopulation = (EditText) getActivity().findViewById(R.id.registerSelectPopulation);
+        editTextPassword = (EditText) getActivity().findViewById(R.id.registerPassword);
+        editTextPassword.setText("00000000");
+        editTextAntennaPower = (EditText) getActivity().findViewById(R.id.registerAntennaPower);
+        editTextWriteData = (EditText) getActivity().findViewById(R.id.registerWriteData);
+        editTextWriteData.setEnabled(true);
 //        editTextBarValue.setText("19dec163");
-        newBarcode = false; editTextBarValue.setTextColor(Color.RED);
-        editTextBarValue.addTextChangedListener(new TextWatcher() {
+        newWriteData = false; editTextWriteData.setTextColor(Color.RED);
+        editTextWriteData.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
 
@@ -90,98 +138,153 @@ public class AccessRegisterFragment extends CommonFragment {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                String barValue = editTextBarValue.getText().toString().trim();
-                if (true) newBarcode = true;
-                if (barValue.matches(barValueOld) == false) {
-                    barValueOld = barValue;
-                    editTextBarValue.setTextColor(Color.BLACK);
-                    checkBoxNewValue.setEnabled(true);
-                    checkBoxNewValue.setText("Reset to old value");
-                    newBarcode = true;
+                String writeValue = editTextWriteData.getText().toString().trim();
+                if (true) newWriteData = true;
+                if (writeValue.matches(writeValueOld) == false) {
+                    writeValueOld = writeValue;
+                    editTextWriteData.setTextColor(Color.BLACK);
+                    //checkBoxNewValue.setEnabled(true);
+                    //checkBoxNewValue.setText("Reset to old value");
+                    newWriteData = true;
                 }
 
                 if (inventoryBarcodeTask != null) {
-                    if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) //if (runningAuto123 && newBarcode)
-                    startStopBarcodeHandler(false);
+                    if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) {
+                        barcodeReadDone = true; MainActivity.mCs108Library4a.appendToLog("barcodeReadDone = true in textChanged");
+                        MainActivity.mCs108Library4a.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(false);
+                    }
                 }
-                if (true) {
-                    int length1 = barValue.length() * 4;
+                if (checkBoxWriteLengthEnable.isChecked() == false) {
+                    int length1 = writeValue.length() * 4;
                     int length = length1 / 16;
                     if (length * 16 != length1) length++;
                     editTextWriteLength.setText(String.valueOf(length));
                 }
             }
         });
-        checkBoxNewBarcode = (CheckBox) getActivity().findViewById(R.id.registerNewBarcode);
+        editTextWriteLength = (EditText) getActivity().findViewById(R.id.registerWriteLength);
+
+        checkBoxWriteLengthEnable = (CheckBox) getActivity().findViewById(R.id.registerWriteLengthEnable);
+        checkBoxWriteLengthEnable.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (isChecked) editTextWriteLength.setEnabled(true);
+                else editTextWriteLength.setEnabled(false);
+            }
+        });
+
+        buttonClearSelect = (Button) getActivity().findViewById(R.id.registerClearSelectButton);
+        buttonClearSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tagSelected = null;
+                editTextSelectMask.setText("");
+            }
+        });
+
+        buttonSelect = (Button) getActivity().findViewById(R.id.registerSelectButton);
+        buttonSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (buttonSelect.getText().toString().contains("Clear")) {
+                    buttonClearSelect.setVisibility(View.VISIBLE);
+                    tableRowSelectMask.setVisibility(View.VISIBLE);
+                    tableRowSelectBank.setVisibility(View.VISIBLE);
+                    textViewSelectedTags.setText("");
+                    buttonSelect.setText("Read");
+                } else if (buttonSelect.getText().toString().contains("Stop")) {
+                    inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.BUTTON_RELEASE;
+                    mHandler.removeCallbacks(runnableSelect);
+                    textViewSelectedTags.setText("");
+                    for (int i = 0; i < epcArrayList.size(); i++) {
+                        textViewSelectedTags.append(epcArrayList.get(i) + "\n");
+                    }
+                    if (textViewSelectedTags.getText().toString().trim().length() == 0)  {
+                        buttonSelect.setText("Read");
+                    } else {
+                        buttonClearSelect.setVisibility(View.GONE);
+                        tableRowSelectMask.setVisibility(View.GONE);
+                        tableRowSelectBank.setVisibility(View.GONE);
+                        buttonSelect.setText("Clear");
+                    }
+                }
+                else {
+                    textViewSelectedTags.setText("");
+                    String strTagId = editTextSelectMask.getText().toString();
+                    int selectBank = spinnerSelectBank.getSelectedItemPosition() + 1;
+                    long pwrlevel = Integer.parseInt(editTextAntennaPower.getText().toString());
+                    MainActivity.mCs108Library4a.setSelectedTag(strTagId, selectBank, pwrlevel);
+                    MainActivity.mCs108Library4a.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY);
+                    inventoryRfidTask = new InventoryRfidTask();
+                    inventoryRfidTask.execute();
+                    MainActivity.sharedObjects.serviceArrayList.clear(); epcArrayList.clear();
+                    mHandler.post(runnableSelect); buttonSelect.setText("Stop");
+                }
+            }
+        });
 
         buttonReadBar = (Button) getActivity().findViewById(R.id.registerReadBarButton);
         buttonReadBar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startStopBarcodeHandler(false);
+                MainActivity.mCs108Library4a.appendToLog("going to startStopBarcodeHandler 2"); startStopBarcodeHandler(false);
             }
         });
 
-        editTextPassword = (EditText) getActivity().findViewById(R.id.registerPassword);
-        editTextPassword.setText("00000000");
-
-        editTextWriteLength = (EditText) getActivity().findViewById(R.id.registerWriteLength);
-        editTextWriteLength.setText("2");
-
-        editTextAntennaPower = (EditText) getActivity().findViewById(R.id.registerAntennaPower);
-        editTextAntennaPower.setText(String.valueOf(300));
-
-        checkBoxAutoRun = (CheckBox) getActivity().findViewById(R.id.registerAutoRun);
-
+        textViewSelectedTags = (TextView) getActivity().findViewById(R.id.registerSelectedTags);
         //textViewWriteCount = (TextView) getActivity().findViewById(R.id.registerWrittenCount);
         textViewRunTime = (TextView) getActivity().findViewById(R.id.registerRunTime);
         textViewTagGot = (TextView) getActivity().findViewById(R.id.registetTagGotView);
         textViewVoltageLevel = (TextView) getActivity().findViewById(R.id.registerVoltageLevel);
 
-        Button buttonWrite3 = (Button) getActivity().findViewById(R.id.regtagWrite3Button);
-        buttonWrite3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (accessTask != null) if (accessTask.getStatus() == AsyncTask.Status.RUNNING) return;
-                checkBoxAutoRun.setChecked(false); checkBoxNewBarcode.setChecked(false);
-                runningAuto123 = false;
-                startStopAccessHandler(false);
-            }
-        });
-
-        Button buttonAuto123 = (Button) getActivity().findViewById(R.id.regtagAuto123Button);
-        buttonAuto123.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (accessTask != null) if (accessTask.getStatus() == AsyncTask.Status.RUNNING) return;
-                checkBoxAutoRun.setChecked(true); checkBoxNewBarcode.setChecked(true);
-                runningAuto123 = true; mHandler.post(runnableAuto123);
-            }
-        });
-
-        Button buttonAuto23 = (Button) getActivity().findViewById(R.id.regtagAuto23Button);
-        buttonAuto23.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (accessTask != null) if (accessTask.getStatus() == AsyncTask.Status.RUNNING) return;
-                checkBoxAutoRun.setChecked(true); checkBoxNewBarcode.setChecked(false);
-                startStopAccessHandler(false);
-            }
-        });
-
-        buttonWrite = (Button) getActivity().findViewById(R.id.regtagWriteButton);
+        buttonWrite = (Button) getActivity().findViewById(R.id.registerWriteButton);
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (buttonWrite.getText().toString().trim().length() == 0) return;
-                checkBoxAutoRun.setChecked(false); checkBoxNewBarcode.setChecked(false);
-
-                runningAuto123 = false;
-                startStopAccessHandler(false);
+                runningAuto123 = 0; startStopAccessHandler(false);
             }
         });
+
+        Button buttonWrite3 = (Button) getActivity().findViewById(R.id.registerWrite3Button);
+        buttonWrite3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (accessTask != null) if (accessTask.getStatus() == AsyncTask.Status.RUNNING) return;
+                runningAuto123 = 0; startStopAccessHandler(false);
+            }
+        });
+
+        Button buttonAuto = (Button) getActivity().findViewById(R.id.registerAutoButton);
+        buttonAuto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (accessTask != null) if (accessTask.getStatus() == AsyncTask.Status.RUNNING) return;
+                runningAuto123 = 1; startStopAccessHandler(false);
+            }
+        });
+
+        Button buttonAuto123 = (Button) getActivity().findViewById(R.id.registerAutoButtonWBarcodeRead);
+        buttonAuto123.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (accessTask != null) if (accessTask.getStatus() == AsyncTask.Status.RUNNING) return;
+                runningAuto123 = 2; mHandler.post(runnableAuto123);
+            }
+        });
+
         textViewYield = (TextView) getActivity().findViewById(R.id.registerYieldView);
         textViewTotal = (TextView) getActivity().findViewById(R.id.registerTotalView);
+
+        Button buttonResetCount = (Button) getActivity().findViewById(R.id.registerResetCountButton);
+        buttonResetCount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                resetCount = true;
+                textViewRunTime.setText(""); textViewTagGot.setText(""); textViewVoltageLevel.setText("");
+                textViewYield.setText(""); textViewTotal.setText("");
+            }
+        });
 
         MainActivity.mCs108Library4a.setSameCheck(false);
     }
@@ -201,10 +304,10 @@ public class AccessRegisterFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         MainActivity.mCs108Library4a.setNotificationListener(null);
-        if (accessTask != null) {
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AcccessRegisterFragment().onDestory(): VALID inventoryRfidTask");
-            accessTask.taskCancelReason = AccessTask.TaskCancelRReason.DESTORY;
-        }
+        mHandler.removeCallbacks(runnableSelect);
+        mHandler.removeCallbacks(runnableAuto123);
+        if (inventoryBarcodeTask != null) inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.DESTORY;
+        if (accessTask != null) accessTask.taskCancelReason = AccessTask.TaskCancelRReason.DESTORY;
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AcccessRegisterFragment().onDestory(): onDestory()");
         MainActivity.mCs108Library4a.setSameCheck(true);
         MainActivity.mCs108Library4a.restoreAfterTagSelect();
@@ -220,22 +323,132 @@ public class AccessRegisterFragment extends CommonFragment {
             @Override
             public void onChange() {
                 MainActivity.mCs108Library4a.appendToLog("TRIGGER key is pressed.");
-                startStopAccessHandler(true);
+                if (barcodeReadRequesting) {
+                    if (customPopupWindow.popupWindow.isShowing()) {
+                        customPopupWindow.popupWindow.dismiss();
+                        barcodeReadRequesting = false; MainActivity.mCs108Library4a.appendToLog("barcodeReadRequesting = false");
+                        ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun 1 = true after popup");
+                    }
+                }
             }
         });
     }
 
-    boolean runningAuto123 = false;
+    ArrayList<String> epcArrayList = new ArrayList<String>();
+    Runnable runnableSelect = new Runnable() {
+        @Override
+        public void run() {
+            while (MainActivity.sharedObjects.serviceArrayList.size() != 0) {
+                String strEpc = MainActivity.sharedObjects.serviceArrayList.get(0); MainActivity.sharedObjects.serviceArrayList.remove(0);
+                boolean matched = false;
+                for (int i = 0; i < epcArrayList.size(); i++) {
+                    if (epcArrayList.get(i).matches(strEpc)) {
+                        matched = true;
+                        break;
+                    }
+                }
+                if (matched == false && strEpc != null) {
+                    epcArrayList.add(strEpc);
+                }
+            }
+            textViewSelectedTags.setText("unique tag number = " + epcArrayList.size());
+            mHandler.postDelayed(runnableSelect, 1000);
+        }
+    };
+
+    boolean ready2nextRun = true, barcodeReadRequesting = false, barcodeReadDone = false;
+    boolean runningAccessTask = false; int runningAuto123 = 0, totalTag = 0;
     Runnable runnableAuto123 = new Runnable() {
         @Override
         public void run() {
             boolean running = false;
-            if (inventoryBarcodeTask != null) { if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) running = true; }
+            MainActivity.mCs108Library4a.appendToLog("found barcodeReadRequesting as " + barcodeReadRequesting );
+            if (barcodeReadRequesting) {
+                if (customPopupWindow.popupWindow.isShowing()) running = true;
+                else {
+                    barcodeReadRequesting = false; MainActivity.mCs108Library4a.appendToLog("barcodeReadRequesting = false");
+                    ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun 1 = true after popup");
+                }
+            }
+            MainActivity.mCs108Library4a.appendToLog("runnableAuto123: runningAuto123 = " + runningAuto123 + ", inventoryBarcodeTask = " + (inventoryBarcodeTask != null ? "valid" : "null"));
+            if (runningAuto123 == 2 && inventoryBarcodeTask != null) { if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) running = true; }
+            MainActivity.mCs108Library4a.appendToLog("runnableAuto123: accessTask = " + (accessTask != null ? "valid" : "null"));
             if (accessTask != null) { if (accessTask.getStatus() == AsyncTask.Status.RUNNING) running = true; }
-            if (running == false && runningAuto123) { startStopAccessHandler(false); running = true; }
-            if (running) mHandler.postDelayed(runnableAuto123, 250);
+            MainActivity.mCs108Library4a.appendToLog("runnableAuto123: running = " + running);
+            if (running == false) {
+                int totalTagNew = getTotalTag();
+                if (runningAccessTask) {
+                    if (totalTagNew > totalTag) {
+                        if (spinnerWriteDataType.getSelectedItemPosition() == 2) editTextWriteData.setText(incrementString(editTextWriteData.getText().toString()));
+                    } else runningAuto123 = 0;
+                }
+                MainActivity.mCs108Library4a.appendToLog("runnableAuto123: totalTagNew = " + totalTagNew + ", totalTag = " + totalTag + ", runningAuto123 = " + runningAuto123 + ", runningAccessTask = " + runningAccessTask);
+                runningAccessTask = false;
+
+                boolean bcontinue = true;
+                if (spinnerWriteDataType.getSelectedItemPosition() == 1 && ready2nextRun == false) {
+                    if (buttonSelect.getText().toString().contains("Clear")) {
+                        if (textViewSelectedTags.getText().toString().trim().length() == 0) bcontinue = false;
+                    }
+                    if (bcontinue) {
+                        customPopupWindow.popupStart("Next barcode.", false);
+                        barcodeReadRequesting = true; MainActivity.mCs108Library4a.appendToLog("barcodeReadRequesting = true");
+                        barcodeReadDone = false; MainActivity.mCs108Library4a.appendToLog("barcodeReadDone = false as popup");
+                        bcontinue = false;
+                        running = true;
+                    }
+                }
+                if (bcontinue) {
+                    if (ready2nextRun == false) {
+                        if (buttonSelect.getText().toString().contains("Clear")) {
+                            if (textViewSelectedTags.getText().toString().trim().length() != 0) {
+                                ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun = true as valid selected tag in textview");
+                            }
+                        } else {
+                            ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun = true as not clear");
+                        }
+                    }
+                    if (ready2nextRun) {
+                        if (startStopAccessHandler(false)) running = true;
+                    }
+                }
+            }
+            if (running && runningAuto123 == 2) mHandler.postDelayed(runnableAuto123, 250);
+            else {
+                ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun = true at the runnable end");
+                barcodeReadRequesting = false; barcodeReadDone = false; MainActivity.mCs108Library4a.appendToLog("barcodeReadDone = false at the runnable end");
+            }
         }
     };
+
+    String incrementString(String string1) {
+        for (int i = 0; i < string1.length(); i++) {
+            String string2 = string1.substring(string1.length() - 1 - i, string1.length() - i);
+            Integer iValue = Integer.valueOf(string2, 16);
+            if (++iValue >= 16) iValue = 0;
+            String stringA = string1.substring(0, string1.length() - 1 - i);
+            String stringB = String.format("%X", iValue);
+            String stringC = null;
+            if (i > 0) stringC = string1.substring(string1.length() - i, string1.length());
+            MainActivity.mCs108Library4a.appendToLog("stringABC = " + stringA + "," + stringB + "," + stringC);
+            String stringABC = (stringA != null ? stringA : "") + stringB + (stringC != null ? stringC : "");
+            string1 = stringABC;
+            if (iValue != 0) break;
+        }
+        return string1;
+    }
+
+    int getTotalTag() {
+        int iValue = 0;
+        String stringTotal = textViewTotal.getText().toString();
+        String stringTotalTag = stringTotal.replaceAll("[^0-9.]", "");
+        try {
+            iValue = Integer.parseInt(stringTotalTag);
+        } catch (Exception ex) {
+        }
+        MainActivity.mCs108Library4a.appendToLog("totalTag = " + iValue);
+        return iValue;
+    }
 
     void startStopBarcodeHandler(boolean buttonTrigger) {
         if (MainActivity.sharedObjects.runningInventoryRfidTask) {
@@ -252,138 +465,180 @@ public class AccessRegisterFragment extends CommonFragment {
                 return;
             }
             if (MainActivity.mCs108Library4a.isBarcodeFailure()) {
+                MainActivity.mCs108Library4a.appendToLog("Toasted 'Barcode is disable'");
                 Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                 return;
             }
             boolean noToast = true; //runningAuto123;
-            inventoryBarcodeTask = new InventoryBarcodeTask(null, null, editTextBarValue, null, null, null, buttonReadBar, buttonWrite, null, noToast);
+            inventoryBarcodeTask = new InventoryBarcodeTask(null, null, editTextWriteData, null, null, null, buttonReadBar, buttonWrite, null, noToast);
             inventoryBarcodeTask.execute();
         } else inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.STOP;
     }
 
-    void startStopAccessHandler(boolean buttonTrigger) {
-        if (inventoryBarcodeTask != null) { if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) { startStopBarcodeHandler(buttonTrigger); return; } }
+    boolean startStopAccessHandler(boolean buttonTrigger) {
+        boolean runningBarcode = false;
+        if (inventoryBarcodeTask != null) {
+            if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) {
+                MainActivity.mCs108Library4a.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(buttonTrigger);
+                runningBarcode = true;
+            }
+        }
 
-        boolean started = false;
-        if (accessTask != null) { if (accessTask.getStatus() == AsyncTask.Status.RUNNING) started = true; }
-        if (buttonTrigger && ((started && MainActivity.mCs108Library4a.getTriggerButtonStatus()) || (started == false && MainActivity.mCs108Library4a.getTriggerButtonStatus() == false))) return;
-        if (started == false) {
-            if (MainActivity.mCs108Library4a.isBleConnected() == false) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
-                return;
-            } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
-                Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
-                return;
-            } else if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            boolean startBarcode = false;
-            if (newBarcode == false && checkBoxNewBarcode.isChecked()) startBarcode = true;
-            if (startBarcode) startStopBarcodeHandler(buttonTrigger);
-            else {
-                startAccessTask();
-                resetOldValue();
-            }
-        } else {
+        boolean runningAccessTask = false;
+        if (accessTask != null) { if (accessTask.getStatus() == AsyncTask.Status.RUNNING) runningAccessTask = true; }
+        if (buttonTrigger && ((runningAccessTask && MainActivity.mCs108Library4a.getTriggerButtonStatus()) || (runningAccessTask == false && MainActivity.mCs108Library4a.getTriggerButtonStatus() == false))) {
+            return true;
+        }
+
+        boolean validResult = true;
+        if (runningBarcode) { }
+        else if (runningAccessTask) {
             if (buttonTrigger) accessTask.taskCancelReason = AccessTask.TaskCancelRReason.BUTTON_RELEASE;
             else accessTask.taskCancelReason = AccessTask.TaskCancelRReason.STOP;
+        } else {
+            if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                validResult = false;
+            } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                validResult = false;
+            } else if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0) {
+                Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
+                validResult = false;
+            }
+
+            if (validResult) {
+                if (barcodeReadDone == false && spinnerWriteDataType.getSelectedItemPosition() == 1) {
+                    MainActivity.mCs108Library4a.appendToLog("going to startStopBarcodeHandler 2");
+                    startStopBarcodeHandler(buttonTrigger);
+                } else {
+                    totalTag = getTotalTag();
+                    if (startAccessTask()) validResult = false;
+                    else if (runningAuto123 == 2) this.runningAccessTask = true;
+                    MainActivity.mCs108Library4a.appendToLog("runningAccessTask = " + this.runningAccessTask);
+                    resetOldValue();
+                    ready2nextRun = false;
+                    MainActivity.mCs108Library4a.appendToLog("ready2nextRun = false after startStopAccessHandler");
+                }
+            }
         }
+        return validResult;
     }
 
     void resetOldValue() {
-        editTextBarValue.setTextColor(Color.RED);
-        checkBoxNewValue.setEnabled(false);
+        editTextWriteData.setTextColor(Color.RED);
+        /*checkBoxNewValue.setEnabled(false);
         checkBoxNewValue.setText("Old value");
-        checkBoxNewValue.setChecked(false);
-        newBarcode = false;
+        checkBoxNewValue.setChecked(false);*/
+        newWriteData = false;
     }
 
     boolean resetCount = true;
-    void startAccessTask() {
+    boolean startAccessTask() {
         boolean invalidRequest1 = false;
 
-        int selectBank = spinnerSelectBank.getSelectedItemPosition(); MainActivity.mCs108Library4a.appendToLog("selectBank = " + selectBank);
-
-        EditText editTextSelectOffset = (EditText) getActivity().findViewById(R.id.registerSelectOffset);
-        int selectOffset = 0;
+        int selectQValue = -1, selectPopulation = -1;
         try {
-            selectOffset = Integer.parseInt(editTextSelectOffset.getText().toString());
+            selectPopulation = Integer.parseInt(editTextSelectPopulation.getText().toString());
         } catch (Exception ex) { }
-        MainActivity.mCs108Library4a.appendToLog("selectOffset = " + selectOffset);
+        if (selectPopulation < 0) invalidRequest1 = true;
+        else if (selectPopulation <= getTotalTag()) invalidRequest1 = true;
+        else {
+            selectQValue = MainActivity.mCs108Library4a.getPopulation2Q(selectPopulation);
+            if (selectQValue < 0) invalidRequest1 = true;
+        }
+        MainActivity.mCs108Library4a.appendToLog("selectQValue = " + selectQValue + ", selectPopulation = " + selectPopulation);
 
-        EditText editTextSelectPopulation = (EditText) getActivity().findViewById(R.id.registerSelectPopulation);
-        int selectQValue = 0;
+        String selectMask = "";
+        int selectBank1 = -1;
+        int selectOffset1 = -1;
+        if (buttonSelect.getText().toString().contains("Clear")) {
+            String[] stringSplited = textViewSelectedTags.getText().toString().split("\n", 2);
+            if (stringSplited != null && stringSplited.length > 0 && stringSplited[0] != null && stringSplited[0].trim().length() != 0) {
+                selectMask = stringSplited[0].trim();
+                selectBank1 = 1;
+                selectOffset1 = 32;
+                if (stringSplited.length > 1 && stringSplited[1] != null && stringSplited[1].trim().length() != 0) textViewSelectedTags.setText(stringSplited[1].trim());
+                else textViewSelectedTags.setText("");
+            }
+        } else {
+            selectMask = editTextSelectMask.getText().toString().trim();
+            int selectBankPosition = spinnerSelectBank.getSelectedItemPosition();
+            selectBank1 = selectBankPosition + 1;
+            int selectOffset = 0;
+            try {
+                EditText editTextSelectOffset = (EditText) getActivity().findViewById(R.id.registerSelectOffset);
+                selectOffset = Integer.parseInt(editTextSelectOffset.getText().toString());
+            } catch (Exception ex) { }
+            selectOffset1 = selectBankPosition == 0 ? selectOffset + 32 : selectOffset;
+        }
+        if (selectMask.trim().length() == 0 || selectBank1 < 0 || selectOffset1 < 0) {
+            invalidRequest1 = true;
+        }
+
+        String password = editTextPassword.getText().toString();
+        if (password.length() != 8) invalidRequest1 = true;
+
+        int antennaPower = -1;
         try {
-            selectQValue = Integer.parseInt(editTextSelectPopulation.getText().toString());
+            editTextAntennaPower = (EditText) getActivity().findViewById(R.id.registerAntennaPower);
+            antennaPower = Integer.parseInt(editTextAntennaPower.getText().toString());
         } catch (Exception ex) { }
-        selectQValue = MainActivity.mCs108Library4a.getPopulation2Q(selectQValue);
-        MainActivity.mCs108Library4a.appendToLog("selectQValue = " + selectQValue);
+        if (antennaPower < 0) invalidRequest1 = true;
 
-        String selectMask = editTextSelectMask.getText().toString(); MainActivity.mCs108Library4a.appendToLog("selectMask = " + selectMask);
+        int accessBank = spinnerAccessBank.getSelectedItemPosition() == 0 ? 1 : 3;
+        MainActivity.mCs108Library4a.appendToLog("accessBank = " + accessBank);
+        if (invalidRequest1 == false) {
+            if (MainActivity.mCs108Library4a.setAccessBank(accessBank) == false) invalidRequest1 = true;
+        }
 
-//        editTextBarValue.setText("19dec163");
-        String barValue = editTextBarValue.getText().toString(); MainActivity.mCs108Library4a.appendToLog("barValue = " + barValue);
-
-        String password = editTextPassword.getText().toString(); MainActivity.mCs108Library4a.appendToLog("password = " + password);
-
-        EditText editTextWriteOffset = (EditText) getActivity().findViewById(R.id.registerWriteOffset);
-        int writeOffset = 0;
+        int writeOffset = -1;
         try {
+            EditText editTextWriteOffset = (EditText) getActivity().findViewById(R.id.registerWriteOffset);
             writeOffset = Integer.parseInt(editTextWriteOffset.getText().toString());
+            if (spinnerAccessBank.getSelectedItemPosition() == 0) writeOffset += 2;
         } catch (Exception ex) { }
+        if (writeOffset < 0) invalidRequest1 = true;
         MainActivity.mCs108Library4a.appendToLog("writeOffset = " + writeOffset);
+        if (invalidRequest1 == false) {
+            if (MainActivity.mCs108Library4a.setAccessOffset(writeOffset) == false) invalidRequest1 = true;
+        }
 
-        int writeLength = 0;
+        int writeLength = -1;
         try {
             writeLength = Integer.parseInt(editTextWriteLength.getText().toString());
         } catch (Exception ex) { }
+        if (writeLength < 0) invalidRequest1 = true;
         MainActivity.mCs108Library4a.appendToLog("writeLength = " + writeLength);
-
-        int antennaPower = 0;
-        try {
-            antennaPower = Integer.parseInt(editTextAntennaPower.getText().toString());
-        } catch (Exception ex) { }
-        MainActivity.mCs108Library4a.appendToLog("antennaPower = " + antennaPower);
-
-        boolean resetCount = true;
-        if (this.resetCount == false) {
-            if (checkBoxAutoRun.isChecked() && checkBoxNewBarcode.isChecked()) resetCount = false;
-            else resetCount = newBarcode;
-        }
-        this.resetCount = false;
-        boolean isNewBarcode = checkBoxNewBarcode.isChecked(); MainActivity.mCs108Library4a.appendToLog("isNewBarcode = " + isNewBarcode);
-
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(1) == false) {
-                invalidRequest1 = true; MainActivity.mCs108Library4a.appendToLog("setAccessBank");
+            if (writeLength == 0) invalidRequest1 = true;
+            else if (MainActivity.mCs108Library4a.setAccessCount(writeLength) == false) {
+                invalidRequest1 = true;
             }
         }
-        if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessOffset(writeOffset + 2) == false) {
-                invalidRequest1 = true; MainActivity.mCs108Library4a.appendToLog("setAccessOffset");
-            }
-        }
-        if (invalidRequest1 == false) {
-            if (writeLength == 0) {
-                invalidRequest1 = true; MainActivity.mCs108Library4a.appendToLog("writeLength");
-            } else if (MainActivity.mCs108Library4a.setAccessCount(writeLength) == false) {
-                invalidRequest1 = true; MainActivity.mCs108Library4a.appendToLog("setAccessCount");
-            }
-        }
-        if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessWriteData(barValue) == false) {
-                invalidRequest1 = true; MainActivity.mCs108Library4a.appendToLog("setAccessWriteData(" + barValue + ")");
-            }
-        }
-        int selectOffset1 = selectBank == 0 ? selectOffset + 32 : selectOffset;
-        MainActivity.mCs108Library4a.appendToLog("selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", selectOffset1= " + selectOffset1 + ", invalidRequest1 = " + invalidRequest1);
 
+        String writeData = editTextWriteData.getText().toString().trim();
+        if (writeData.length() == 0) invalidRequest1 = true;
+        MainActivity.mCs108Library4a.appendToLog("writeData = " + writeData);
+        if (invalidRequest1 == false) {
+            if (MainActivity.mCs108Library4a.setAccessWriteData(writeData) == false) {
+                invalidRequest1 = true;
+            }
+        }
+
+        int repeatCount = 0;
+        if (runningAuto123 == 1) repeatCount = selectPopulation;
+
+        MainActivity.mCs108Library4a.appendToLog("invalidRequest1 = " + invalidRequest1
+                + ", selectMask = " + selectMask + ", selectBank1 = " + selectBank1 + ", selectOffset1 = " + selectOffset1
+                + ", password = " + password + ", power = " + antennaPower + ", repeatCount = " + repeatCount + ", resetCount = " + resetCount);
         accessTask = new AccessTask(buttonWrite, textViewWriteCount, invalidRequest1,
-                selectMask, selectBank + 1, (selectBank == 0 ? selectOffset + 32 : selectOffset),
-                password, antennaPower, Cs108Connector.HostCommands.CMD_18K6CWRITE, selectQValue, checkBoxAutoRun.isChecked(), checkBoxNewBarcode.isChecked(), resetCount,
+                selectMask, selectBank1, selectOffset1,
+                password, antennaPower, Cs108Connector.HostCommands.CMD_18K6CWRITE, selectQValue, repeatCount, resetCount,
                 textViewRunTime, textViewTagGot, textViewVoltageLevel,
                 textViewYield, textViewTotal);
         accessTask.execute();
+        resetCount = false;
+        return invalidRequest1;
     }
 }

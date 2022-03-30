@@ -48,7 +48,6 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     private Button button;
 
     private ReaderListAdapter readerListAdapter;
-
     private InventoryRfidTask inventoryRfidTask;
 
     void clearTagsList() {
@@ -200,7 +199,8 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     readerDevice.setSelected(true);
                 }
                 MainActivity.sharedObjects.tagsList.set(position, readerDevice);
-                MainActivity.tagSelected = readerDevice;
+               if (readerDevice.getSelected()) MainActivity.tagSelected = readerDevice;
+               else MainActivity.tagSelected = null;
                 for (int i = 0; i < MainActivity.sharedObjects.tagsList.size(); i++) {
                     if (i != position) {
                         ReaderDevice readerDevice1 = MainActivity.sharedObjects.tagsList.get(i);

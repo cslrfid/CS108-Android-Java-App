@@ -186,7 +186,7 @@ public class AccessSecurityLockFragment extends CommonFragment {
                 invalidRequest = true;
             }
         }
-        accessTask = new AccessTask(button, null, invalidRequest, strTagID, 1, 32, strPassword, powerLevel, Cs108Connector.HostCommands.CMD_18K6CLOCK, 0, false, false,true, null, null, null, null, null);
+        accessTask = new AccessTask(button, null, invalidRequest, strTagID, 1, 32, strPassword, powerLevel, Cs108Connector.HostCommands.CMD_18K6CLOCK, 0, 0, true, null, null, null, null, null);
         accessTask.execute();
     }
 }
