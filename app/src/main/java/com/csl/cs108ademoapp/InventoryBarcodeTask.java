@@ -47,7 +47,7 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
         taskCancelReason = TaskCancelRReason.NULL;
         if (barcodeYieldView != null) barcodeYieldView.setText("");
 
-        MainActivity.mCs108Library4a.barcodeInvventory(true);
+        MainActivity.mCs108Library4a.barcodeInventory(true);
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog("InventoryBarcodeFragment.InventoryRfidTask.onPreExecute()");
         if (MainActivity.mCs108Library4a.getInventoryVibrate() && bUseVibrateMode0 == false) MainActivity.mCs108Library4a.setVibrateOn(3);
     }
@@ -253,7 +253,7 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
 
     void DeviceConnectTask4InventoryEnding(TaskCancelRReason taskCancelRReason) {
         if (readerListAdapter != null) readerListAdapter.notifyDataSetChanged();
-        MainActivity.mCs108Library4a.barcodeInvventory(false);
+        MainActivity.mCs108Library4a.barcodeInventory(false);
         if (DEBUG) MainActivity.mCs108Library4a.appendToLog("DeviceConnectTask4InventoryEnding(): sent setBarcodeOn(false)");
         if (taskCancelReason == null) {
             new Handler().postDelayed(new Runnable() {

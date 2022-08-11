@@ -24,7 +24,7 @@ import java.util.Locale;
 
 import static androidx.core.app.ActivityCompat.requestPermissions;
 
-public class Utility {
+class Utility {
     private Context mContext; private TextView mLogView;
     Utility(Context context, TextView mLogView) {
         mContext = context;
@@ -100,12 +100,12 @@ public class Utility {
     private static File fileDebug; private static boolean enableFileDebug = false;
     void debugFileSetup() {
         boolean writeExtPermission = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 writeExtPermission = false;
                 appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
                 requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
+                if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
                 return;
             }
         }

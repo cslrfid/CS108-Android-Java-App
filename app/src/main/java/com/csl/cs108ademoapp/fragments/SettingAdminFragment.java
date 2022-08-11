@@ -266,7 +266,7 @@ public class SettingAdminFragment extends CommonFragment {
                 if (MainActivity.mCs108Library4a.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (false && MainActivity.mCs108Library4a.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -285,7 +285,7 @@ public class SettingAdminFragment extends CommonFragment {
                 if (MainActivity.mCs108Library4a.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (false && MainActivity.mCs108Library4a.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else if (updateRunning) {
@@ -409,13 +409,13 @@ public class SettingAdminFragment extends CommonFragment {
                 String name = MainActivity.mCs108Library4a.getBluetoothICFirmwareName();
                 if (name == null)   updating = true;
                 else if (name.length() == 0) updating = true;
-                else    editTextDeviceName.setText(name);
+                else editTextDeviceName.setText(name);
             }
             if (updating == false) {
                 String name = MainActivity.mCs108Library4a.getModelNumber();
                 if (name == null)   updating = true;
                 else if (name.length() == 0)    updating = true;
-                else    textViewReaderModel.setText(name);
+                else textViewReaderModel.setText(name);
             }
             if (updating) {
                 mHandler.postDelayed(updateRunnable, 1000);

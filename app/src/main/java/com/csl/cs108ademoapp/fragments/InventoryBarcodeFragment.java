@@ -78,15 +78,15 @@ public class InventoryBarcodeFragment extends CommonFragment {
                 } else {
                     readerDevice.setSelected(true);
                 }
-                MainActivity.sharedObjects.tagsList.set(position, readerDevice);
+                MainActivity.sharedObjects.barsList.set(position, readerDevice);
                 if (readerDevice.getSelected()) MainActivity.tagSelected = readerDevice;
                 else MainActivity.tagSelected = null;
-                for (int i = 0; i < MainActivity.sharedObjects.tagsList.size(); i++) {
+                for (int i = 0; i < MainActivity.sharedObjects.barsList.size(); i++) {
                     if (i != position) {
-                        ReaderDevice readerDevice1 = MainActivity.sharedObjects.tagsList.get(i);
+                        ReaderDevice readerDevice1 = MainActivity.sharedObjects.barsList.get(i);
                         if (readerDevice1.getSelected()) {
                             readerDevice1.setSelected(false);
-                            MainActivity.sharedObjects.tagsList.set(i, readerDevice1);
+                            MainActivity.sharedObjects.barsList.set(i, readerDevice1);
                         }
                     }
                 }
