@@ -13,6 +13,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -260,7 +261,18 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         MainActivity.mCs108Library4a.appendToLog("permissionRequesting: requestCode = " + requestCode + ", permissions is " + (permissions == null ? "null" : "valid") + ", grantResults is " + (grantResults == null ? "null" : "valid") );
         MainActivity.mCs108Library4a.appendToLog("permissionRequesting: permissions[" + permissions.length + "] = " + (permissions != null && permissions.length > 0 ? permissions[0] : ""));
-        MainActivity.mCs108Library4a.appendToLog("permissionRequesting: grantResults[" + grantResults.length + "] = " + (grantResults != null && grantResults.length > 0 ? grantResults[0] : "") );
+        if (grantResults != null && grantResults.length != 0) {
+            boolean bNegative = false;
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] < 0) bNegative = true;
+                mCs108Library4a.appendToLog("permissionRequesting: grantResults[" + i + "] = " + grantResults[i] );
+            }
+            if (bNegative) {
+                Toast toast = Toast.makeText(this, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT);
+                if (false) toast.setGravity(Gravity.TOP | Gravity.RIGHT, 100, 200);
+                toast.show();
+            }
+        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         permissionRequesting = false;
     }

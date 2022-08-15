@@ -644,7 +644,7 @@ class BleConnector extends BluetoothGattCallback {
                         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                             appendToLog("requestPermissions ACCESS_FINE_LOCATION 123");
                             requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
-                            Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
+                            if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
                         }
                         {
                             LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
@@ -897,7 +897,7 @@ class BleConnector extends BluetoothGattCallback {
                     Manifest.permission.BLUETOOTH_SCAN,
                     Manifest.permission.BLUETOOTH_CONNECT
             }, 123);
-            Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
+            if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
             bValue = true;
         }
         return bValue;

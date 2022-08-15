@@ -89,7 +89,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         return strName;
     }
 
-    void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -291,7 +291,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.extra2Bank = extra2Bank;
         this.extra2Offset = extra2Offset;
     }
-    public void setExtra(String strExtra1, int extra1Bank, int extra1Offset, String strExtra2, int extra2Bank, int extra2Offset) {
+    void setExtra(String strExtra1, int extra1Bank, int extra1Offset, String strExtra2, int extra2Bank, int extra2Offset) {
         this.strExtra1 = strExtra1;
         this.extra1Bank = extra1Bank;
         this.extra1Offset = extra1Offset;

@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
-public class CustomAlertDialog {
-    public Runnable ans_true = null;
-    public Runnable ans_false = null;
+class CustomAlertDialog {
+    Runnable ans_true = null;
+    Runnable ans_false = null;
 
-    public boolean Confirm(Activity act, String Title, String ConfirmText,
+    boolean Confirm(Activity act, String Title, String ConfirmText,
                            String CancelBtn, String OkBtn, Runnable aProcedure, Runnable bProcedure) {
         ans_true = aProcedure;
         ans_false= bProcedure;

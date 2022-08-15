@@ -374,14 +374,14 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         String resultDisplay = "";
         if (MainActivity.mCs108Library4a.getSaveFileEnable() == false) return "No saving file as it is disabled";
         boolean writeExtPermission = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 mCs108Library4a.appendToLog("WRITE_EXTERNAL_STORAGE Permission is required !!!");
                 writeExtPermission = false;
                 if (requestPermission) {
                     mCs108Library4a.appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
                     MainActivity.permissionRequesting = true; requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                    Toast.makeText(mContext, com.csl.cs108library4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
+                    if (false) Toast.makeText(mContext, com.csl.cs108library4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
                     return null;
                 }
             } else mCs108Library4a.appendToLog("WRITE_EXTERNAL_STORAGE Permission is GRANTED !!!");

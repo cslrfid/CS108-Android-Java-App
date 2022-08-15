@@ -165,9 +165,11 @@ public class AccessReadWriteFragment extends CommonFragment {
                 String strEpcValue = tagSelected.getAddress();
                 String detail = tagSelected.getDetails();
                 String header = "PC=";
-                int index = detail.indexOf(header) + header.length();
-                strPCValueRef = detail.substring(index, index + 4);
-                updatePCEpc(strPCValueRef, strEpcValue);
+                if (detail != null && detail.indexOf(header) >= 0) {
+                    int index = detail.indexOf(header) + header.length();
+                    strPCValueRef = detail.substring(index, index + 4);
+                    updatePCEpc(strPCValueRef, strEpcValue);
+                }
             }
         }
         MainActivity.mCs108Library4a.setSameCheck(true);

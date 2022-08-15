@@ -171,7 +171,7 @@ public class AccessFdmicroFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 if (isOperationRunning()) return;
-                SaveList2ExternalTask saveExternalTask = new SaveList2ExternalTask(MainActivity.sharedObjects.barsList);
+                SaveList2ExternalTask saveExternalTask = new SaveList2ExternalTask(MainActivity.sharedObjects.tagsList);
                 String strMessage = "EPC: " + selectTag.editTextTagID.getText().toString() + "\n";
                 strMessage += textViewLoggingValue1.getText().toString();
                 if (logData != null) {

@@ -6,7 +6,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class BluetoothConnector {
+class BluetoothConnector {
     final boolean DEBUG = false;
 
     Context mContext; TextView mLogView;
@@ -102,7 +102,7 @@ public class BluetoothConnector {
             return true;
         }
 
-        public ArrayList<Cs108BluetoothIcData> mBluetoothIcToWrite = new ArrayList<>();
+        ArrayList<Cs108BluetoothIcData> mBluetoothIcToWrite = new ArrayList<>();
         private ArrayList<Cs108BluetoothIcData> mBluetoothIcToRead = new ArrayList<>();
 
         private boolean arrayTypeSet(byte[] dataBuf, int pos, BluetoothIcPayloadEvents event) {
@@ -204,8 +204,8 @@ public class BluetoothConnector {
             return match;
         }
 
-        public int sendDataToWriteSent = 0;
-        public byte[] sendBluetoothIcToWrite() {
+        int sendDataToWriteSent = 0;
+        byte[] sendBluetoothIcToWrite() {
             if (sendDataToWriteSent >= 5) {
                 int oldSize = mBluetoothIcToWrite.size();
                 mBluetoothIcToWrite.remove(0); sendDataToWriteSent = 0;
