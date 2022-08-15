@@ -65,20 +65,16 @@ public abstract class CommonFragment extends Fragment {
     private final Runnable updateTriggerRunnable = new Runnable() {
         @Override
         public void run() {
-            mHandler.postDelayed(updateTriggerRunnable, 500);
+            mHandler.postDelayed(updateTriggerRunnable, MainActivity.mCs108Library4a.getTriggerReportingCount() * 1100);
 
             if (menuTriggerItem == null) return;
             if (MainActivity.mCs108Library4a.isBleConnected() == false) { menuTriggerItem.setTitle("");  return; }
-            if (menuTriggerItem.getTitle().toString().trim().length() != 0) {
-                menuTriggerItem.setTitle("");
-            } else {
-                int triggerCount = MainActivity.mCs108Library4a.getTriggerCount();
-                if (triggerCount != triggerCount_old) {
-                    triggerCount_old = triggerCount;
-                    if (MainActivity.mCs108Library4a.getTriggerButtonStatus()) menuTriggerItem.setTitle("Ton");
-                    else menuTriggerItem.setTitle("Toff");
-                }
-            }
+            int triggerCount = MainActivity.mCs108Library4a.getTriggerCount();
+            if (triggerCount != triggerCount_old) {
+                triggerCount_old = triggerCount;
+                if (MainActivity.mCs108Library4a.getTriggerButtonStatus()) menuTriggerItem.setTitle("Ton");
+                else menuTriggerItem.setTitle("Toff");
+            } else menuTriggerItem.setTitle("");
         }
     };
 

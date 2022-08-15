@@ -4418,7 +4418,7 @@ public class Cs108Connector extends BleConnector {
 
     boolean bFirmware_reset_before = false;
     final int RFID_READING_BUFFERSIZE = 1024;
-    public class RfidReaderChip {
+    class RfidReaderChip {
         byte[] mRfidToReading = new byte[RFID_READING_BUFFERSIZE];
         int mRfidToReadingOffset = 0;
         ArrayList<Cs108RfidData> mRx000ToWrite = new ArrayList<>();
@@ -4446,12 +4446,15 @@ public class Cs108Connector extends BleConnector {
             dValue = pow(10, dValue);
             int exponent = 0;
             if (false) appendToLog("exponent = " + exponent + ", dValue = " + dValue);
-            while ((dValue + 0.5) >= 2) {
+            while ((dValue + 0.062) >= 2) {
                 dValue /= 2; exponent++;
                 if (false) appendToLog("exponent = " + exponent + ", dValue = " + dValue);
             }
             dValue--;
             int mantissa = (int)((dValue * 8) + 0.5);
+            while (mantissa >= 8) {
+                mantissa -= 8; exponent++;
+            }
             int iValue = ((exponent & 0x1F) << 3) | (mantissa & 0x7);
             if (false) appendToLog("dRssi = " + dRSSI + ", exponent = " + exponent + ", mantissa = " + mantissa + ", iValue = " + String.format("%X", iValue));
             return iValue;
@@ -5699,7 +5702,7 @@ public class Cs108Connector extends BleConnector {
         }
 
         boolean bLowPowerStandby = false;
-        public boolean setPwrManagementMode(boolean bLowPowerStandby) {
+        boolean setPwrManagementMode(boolean bLowPowerStandby) {
             appendToLog("pwrMgmtStatus: setPwrManagementMode(" + bLowPowerStandby + ")");
             if (bLowPowerStandby == false) return true;     //for testing if setPwrManagementMode(false) is needed
             if (this.bLowPowerStandby == bLowPowerStandby) return true;
