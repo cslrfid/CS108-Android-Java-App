@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -25,6 +26,7 @@ import java.util.Locale;
 import static androidx.core.app.ActivityCompat.requestPermissions;
 
 class Utility {
+    final boolean DEBUG_PKDATA = false, DEBUG_APDATA = false;
     private Context mContext; private TextView mLogView;
     Utility(Context context, TextView mLogView) {
         mContext = context;
@@ -51,6 +53,20 @@ class Utility {
         }
         return (i == length);
     }
+
+    String byteArray2DisplayString(byte[] byteData) {
+        if (false) appendToLog("String0 = " + byteArrayToString(byteData));
+        String str = "";
+        try {
+            str = new String(byteData, "UTF-8");
+            str = str.replaceAll("[^\\x00-\\x7F]", "");
+            str = str.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        if (false) appendToLog("String1 = " + str);
+        return str;
+    }
     String byteArrayToString(byte[] packet) {
         if (packet == null) return "";
         StringBuilder sb = new StringBuilder(packet.length * 2);
@@ -59,7 +75,15 @@ class Utility {
         }
         return sb.toString();
     }
-
+    int byteArrayToInt(byte[] bytes) {
+        int iValue = 0;
+        int length = bytes.length;
+        if (bytes.length > 4) length = 4;
+        for (int i = 0; i < length; i++) {
+            iValue = (iValue << 8) + (bytes[i] & 0xFF);
+        }
+        return iValue;
+    }
     private static Handler mHandler = new Handler();
     void appendToLogRunnable(final String s) {
         mHandler.post(new Runnable() {
@@ -72,7 +96,6 @@ class Utility {
     String appendToLog(String s) {
         String TAG = "";
         StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
-        boolean logged = false;
         boolean foundMe = false;
         for(int i=0; i<stacktrace.length; i++) {
             StackTraceElement e = stacktrace[i];
@@ -81,8 +104,8 @@ class Utility {
                 foundMe = true;
             } else if (foundMe) {
                 if (!methodName.startsWith("access$")) {
-                    TAG = String.format(Locale.US, "%s.%s", e.getClassName(), methodName);
-                    logged = true;
+                    //TAG = String.format(Locale.US, "%s.%s", e.getClassName(), methodName);
+                    TAG = String.format(Locale.US, "%s", methodName);
                     break;
                 }
             }
@@ -91,6 +114,7 @@ class Utility {
         String string = "\n" + getReferencedCurrentTimeMs() + "." + s;
         return (string);
     }
+
     void appendToLogView(String s) {
         appendToLog(s);
         String string = "\n" + getReferencedCurrentTimeMs() + "." + s;
@@ -147,4 +171,95 @@ class Utility {
             }
         }
     }
+
+    String getlast3digitVersion(String str) {
+        if (str != null) {
+            int len = str.length();
+            if (len > 3) {
+                String strOut = "";
+                if (str.substring(len-3, len-2).matches("0")) strOut = str.substring(len-2, len-1);
+                else strOut = str.substring(len-3, len-1);
+                strOut += "." + str.substring(len-1, len);
+                return strOut;
+            }
+        }
+        return null;
+    }
+
+
+    boolean isVersionGreaterEqual(String version, int majorVersion, int minorVersion, int buildVersion) {
+        if (version == null) return false;
+        if (version.length() == 0) return false;
+        String[] versionPart = version.split("[ .,-]+");
+
+        if (versionPart == null) return false;
+        try {
+            int value = Integer.valueOf(versionPart[0]);
+            if (value < majorVersion) return false;
+            if (value > majorVersion) return true;
+
+            if (versionPart.length < 2) return true;
+            value = Integer.valueOf(versionPart[1]);
+            if (value < minorVersion) return false;
+            if (value > minorVersion) return true;
+
+            if (versionPart.length < 3) return true;
+            value = Integer.valueOf(versionPart[2]);
+            if (value < buildVersion) return false;
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    double get2BytesOfRssi(byte[] bytes, int index) {
+        int iValue = (bytes[index] & 0xFF) * 256 + (bytes[index + 1] & 0xFF);
+        if ((iValue & 0x8000) != 0) iValue ^= ~0xFFFF;
+        double dValue = iValue;
+        return dValue/100;
+    }
+
+    float decodeAsygnTemperature(String string) {
+        String stringUser5 = string.substring(20, 24); int iUser5 = Integer.valueOf(stringUser5, 16);
+        String stringUser6 = string.substring(24, 28); int iUser6 = Integer.valueOf(stringUser6, 16);
+        String stringUser1 = string.substring(4, 8); int iUser1 = Integer.valueOf(stringUser1, 16);
+        switch (iUser1 & 0xC000) {
+            case 0xc000:
+                iUser1 &= 0x1FFF; iUser1 /= 8;
+                break;
+            case 0x8000:
+                iUser1 &= 0xFFF; iUser1 /= 4;
+                break;
+            case 0x4000:
+                iUser1 &= 0x7FF; iUser1 /= 2;
+                break;
+            default:
+                iUser1 &= 0x3FF;
+                break;
+        }
+        float temperature = -1;
+        appendToLog("input string " + string + ", user1 = " + stringUser1 + ", user5 = " + stringUser5 + ", user6 = " + stringUser6);
+        //iUser1 = 495; iUser6 = 3811;
+        appendToLog("iUser1 = " + iUser1 + ", iUser5 = " + iUser5 + ", iUser6 = " + iUser6);
+        if (iUser5 == 3000) {
+            float calibOffset = (float) 3860.27 - (float) iUser6;
+            appendToLog("calibOffset = " + calibOffset);
+            float acqTempCorrected = (float) iUser1 + calibOffset / 8;
+            appendToLog("acqTempCorrected = " + acqTempCorrected);
+            temperature = (float) 0.3378 * acqTempCorrected - (float) 133;
+            appendToLog("temperature = " + temperature);
+        } else if (iUser5 == 1835) {
+            float expAcqTemp = (float) 398.54 - (float) iUser5 / (float) 100;
+            appendToLog("expAcqTemp = " + expAcqTemp);
+            expAcqTemp /= (float) 0.669162;
+            appendToLog("expAcqTemp = " + expAcqTemp);
+            float calibOffset = ((float) 8 * expAcqTemp) - (float) iUser6;
+            float acqTempCorrected = (float) iUser1 + calibOffset;
+            acqTempCorrected /= 8;
+            temperature = (float) -0.669162 * acqTempCorrected;
+            temperature += 398.54;
+            appendToLog("expAcqTemp = " + expAcqTemp + ". calibOffset = " + calibOffset + ", acqTempCorrected = " + acqTempCorrected + ", temperature = " + temperature);
+        }
+        return temperature;
+    } //4278
 }

@@ -18,7 +18,7 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SelectTag;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 
 public class AccessAuraSenseFragment extends CommonFragment {
     final boolean DEBUG = true;
@@ -77,10 +77,10 @@ public class AccessAuraSenseFragment extends CommonFragment {
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -94,10 +94,10 @@ public class AccessAuraSenseFragment extends CommonFragment {
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -107,7 +107,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
             }
         });
 
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
     }
 
     void startAccessTask() {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("startAccessTask()");
         if (updating == false) {
             updating = true;
             bankProcessing = 0; checkProcessing = 0;
@@ -153,43 +153,43 @@ public class AccessAuraSenseFragment extends CommonFragment {
         public void run() {
             boolean rerunRequest = false; boolean taskRequest = false;
             if (accessTask == null) {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessAuraSenseFragment().updateRunnable(): NULL accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
             } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
                 rerunRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessAuraSenseFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
                 taskRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessAuraSenseFragment().updateRunnable(): FINISHED accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment().updateRunnable(): FINISHED accessReadWriteTask");
             }
-            if (processResult()) { rerunRequest = true; MainActivity.mCs108Library4a.appendToLog("processResult is TRUE");}
+            if (processResult()) { rerunRequest = true; MainActivity.csLibrary4A.appendToLog("processResult is TRUE");}
             else if (taskRequest) {
                 boolean invalid = processTickItems();
-                MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
+                MainActivity.csLibrary4A.appendToLog("processTickItems, invalid = " + invalid);
                 if (bankProcessing++ != 0 && invalid == true)   rerunRequest = false;
                 else {
                     String selectMask = selectTag.editTextTagID.getText().toString();
                     int selectBank = selectTag.spinnerSelectBank.getSelectedItemPosition()+1;
-                    int selectOffset = Integer.valueOf(selectTag.editTextRWSelectOffset.getText().toString());
+                    int selectOffset = Integer.valueOf(selectTag.editTextSelectOffset.getText().toString());
                     accessTask = new AccessTask(
                             (operationRead ? buttonRead : buttonWrite), null,
                             invalid,
                             selectMask, selectBank, selectOffset,
-                            selectTag.editTextAccessRWAccPassword.getText().toString(),
-                            Integer.valueOf(selectTag.editTextaccessRWAntennaPower.getText().toString()),
-                            (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE),
+                            selectTag.editTextAccessPassword.getText().toString(),
+                            Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()),
+                            (operationRead ? Cs108Library4A.HostCommands.CMD_18K6CREAD: Cs108Library4A.HostCommands.CMD_18K6CWRITE),
                             0, 0, true,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;
-                    MainActivity.mCs108Library4a.appendToLog("accessTask is created with selectBank = " + selectBank);
+                    MainActivity.csLibrary4A.appendToLog("accessTask is created with selectBank = " + selectBank);
                 }
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 500);
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessAuraSenseFragment().updateRunnable(): Restart");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment().updateRunnable(): Restart");
             } else updating = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessAuraSenseFragment().updateRunnable(): Ending with updating = " + updating);
+            MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment().updateRunnable(): Ending with updating = " + updating);
         }
     };
 
@@ -217,7 +217,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                     //checkBoxUserCode5.setChecked(false);
                 }
             } else {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.USERCODE1) {
                     textViewUserCode1OK.setText("O");
                     //checkBoxUserCode1.setChecked(false);
@@ -293,7 +293,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                 else if (radioButtonAuraSens2Store.isChecked()) iValue = 0x1000;
                 else if (radioButtonAuraSens2Calibration.isChecked()) iValue = 0x2000;
                 writeData = String.format("%04X", iValue);
-                MainActivity.mCs108Library4a.appendToLog("WriteData = " + writeData);
+                MainActivity.csLibrary4A.appendToLog("WriteData = " + writeData);
             }
         } else if (checkBoxUserCode2.isChecked() == true && checkProcessing < 2 && operationRead) {
             accBank = 3; accSize = 1; accOffset = 0x120; readWriteTypes = ReadWriteTypes.USERCODE2; checkProcessing = 2;
@@ -332,25 +332,25 @@ public class AccessAuraSenseFragment extends CommonFragment {
         }
 
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(accBank) == false) {
+            if (MainActivity.csLibrary4A.setAccessBank(accBank) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessOffset(accOffset) == false) {
+            if (MainActivity.csLibrary4A.setAccessOffset(accOffset) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
             if (accSize == 0) {
                 invalidRequest1 = true;
-            } else if (MainActivity.mCs108Library4a.setAccessCount(accSize) == false) {
+            } else if (MainActivity.csLibrary4A.setAccessCount(accSize) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false && operationRead == false) {
             if (invalidRequest1 == false) {
-                if (MainActivity.mCs108Library4a.setAccessWriteData(writeData) == false) {
+                if (MainActivity.csLibrary4A.setAccessWriteData(writeData) == false) {
                     invalidRequest1 = true;
                 }
             }

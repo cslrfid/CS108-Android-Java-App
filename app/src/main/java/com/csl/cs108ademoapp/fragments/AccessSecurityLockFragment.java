@@ -16,7 +16,7 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class AccessSecurityLockFragment extends CommonFragment {
@@ -69,10 +69,10 @@ public class AccessSecurityLockFragment extends CommonFragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -86,13 +86,13 @@ public class AccessSecurityLockFragment extends CommonFragment {
                 editTextTagID.setText(tagSelected.getAddress());
             }
         }
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessSecurityLockFragment().onResume(): userVisibleHint = " + userVisibleHint);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessSecurityLockFragment().onResume(): userVisibleHint = " + userVisibleHint);
         if (userVisibleHint) {
             setNotificationListener();
         }
@@ -100,13 +100,13 @@ public class AccessSecurityLockFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        MainActivity.mCs108Library4a.setNotificationListener(null);
+        MainActivity.csLibrary4A.setNotificationListener(null);
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setNotificationListener(null);
+        MainActivity.csLibrary4A.setNotificationListener(null);
         if (accessTask != null) accessTask.cancel(true);
         super.onDestroy();
     }
@@ -117,12 +117,12 @@ public class AccessSecurityLockFragment extends CommonFragment {
         super.setUserVisibleHint(isVisibleToUser);
         if(getUserVisibleHint()) {
             userVisibleHint = true;
-            MainActivity.mCs108Library4a.appendToLog("AccessSecurityLockFragment is now VISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessSecurityLockFragment is now VISIBLE");
             setNotificationListener();
         } else {
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessSecurityLockFragment is now INVISIBLE");
-            MainActivity.mCs108Library4a.setNotificationListener(null);
+            MainActivity.csLibrary4A.appendToLog("AccessSecurityLockFragment is now INVISIBLE");
+            MainActivity.csLibrary4A.setNotificationListener(null);
         }
     }
 
@@ -131,11 +131,11 @@ public class AccessSecurityLockFragment extends CommonFragment {
     }
 
     void setNotificationListener() {
-        MainActivity.mCs108Library4a.setNotificationListener(new Cs108Connector.NotificationListener() {
+        MainActivity.csLibrary4A.setNotificationListener(new Cs108Library4A.NotificationListener() {
             @Override
             public void onChange() {
-                MainActivity.mCs108Library4a.appendToLog("TRIGGER key is pressed.");
-                if (MainActivity.mCs108Library4a.getTriggerButtonStatus()) startAccessTask();
+                MainActivity.csLibrary4A.appendToLog("TRIGGER key is pressed.");
+                if (MainActivity.csLibrary4A.getTriggerButtonStatus()) startAccessTask();
             }
         });
     }
@@ -150,31 +150,31 @@ public class AccessSecurityLockFragment extends CommonFragment {
             accessLockAction = 0x3FF;
             accessLockMask = 0x3FF;
         } else {
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
             lockAction = spinner4KillPwd.getSelectedItemPosition();
             accessLockAction |= ((lockAction == 0 ? 0 : lockAction - 1) << 8);
             accessLockMask |= ((lockAction == 0 ? 0 : 3) << 8);
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("Kill: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("Kill: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
 
             lockAction = spinner4AccessPwd.getSelectedItemPosition();
             accessLockAction |= ((lockAction == 0 ? 0 : lockAction - 1) << 6);
             accessLockMask |= ((lockAction == 0 ? 0 : 3) << 6);
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("Access: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("Access: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
 
             lockAction = spinner4EpcMemory.getSelectedItemPosition();
             accessLockAction |= ((lockAction == 0 ? 0 : lockAction - 1) << 4);
             accessLockMask |= ((lockAction == 0 ? 0 : 3) << 4);
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("Epc: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("Epc: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
 
             lockAction = spinner4TidMemory.getSelectedItemPosition();
             accessLockAction |= ((lockAction == 0 ? 0 : lockAction - 1) << 2);
             accessLockMask |= ((lockAction == 0 ? 0 : 3) << 2);
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("Tid: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("Tid: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
 
             lockAction = spinner4UserMemory.getSelectedItemPosition();
             accessLockAction |= (lockAction == 0 ? 0 : lockAction - 1);
             accessLockMask |= (lockAction == 0 ? 0 : 3);
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("Uesr: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("Uesr: accessLockAction = " + String.format("%x", accessLockAction) + ", accessLockMask = " + String.format("%x", accessLockMask));
         }
 
         boolean invalidRequest = false;
@@ -182,11 +182,11 @@ public class AccessSecurityLockFragment extends CommonFragment {
         String strPassword = editTextPassword.getText().toString();
         int powerLevel = Integer.valueOf(editTextAntennaPower.getText().toString());
         if (invalidRequest == false) {
-            if (MainActivity.mCs108Library4a.setAccessLockAction(accessLockAction, accessLockMask) == false) {
+            if (MainActivity.csLibrary4A.setAccessLockAction(accessLockAction, accessLockMask) == false) {
                 invalidRequest = true;
             }
         }
-        accessTask = new AccessTask(button, null, invalidRequest, strTagID, 1, 32, strPassword, powerLevel, Cs108Connector.HostCommands.CMD_18K6CLOCK, 0, 0, true, null, null, null, null, null);
+        accessTask = new AccessTask(button, null, invalidRequest, strTagID, 1, 32, strPassword, powerLevel, Cs108Library4A.HostCommands.CMD_18K6CLOCK, 0, 0, true, null, null, null, null, null);
         accessTask.execute();
     }
 }

@@ -17,13 +17,14 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SettingTask;
 import com.csl.cs108library4a.Cs108Library4A;
 
 public class SettingAdminFragment extends CommonFragment {
-    private CheckBox checkBoxTriggerReporting, checkBoxInventoryBeep, checkBoxInventoryVibrate, checkBoxSaveFileEnable, checkBoxSaveCloudEnable, checkBoxSaveNewCloudEnable, checkBoxSaveAllCloudEnable;
+    private CheckBox checkBoxTriggerReporting, checkBoxInventoryBeep, checkBoxInventoryVibrate, checkBoxSaveFileEnable, checkBoxSaveCloudEnable, checkBoxSaveNewCloudEnable, checkBoxSaveAllCloudEnable, checkBoxDebugEnable;
     private CheckBox checkBoxCsvColumnResBank, checkBoxCsvColumnEpcBank, checkBoxCsvColumnTidBank, checkBoxCsvColumnUserBank, checkBoxCsvColumnPhase, checkBoxCsvColumnChannel, checkBoxCsvColumnTime, checkBoxCsvColumnTimeZone, checkBoxCsvColumnLocation, checkBoxCsvColumnDirection, checkBoxCsvColumnOthers;
     private EditText editTextDeviceName, editTextCycleDelay, editTextTriggerReportingCount, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout;
     private TextView textViewReaderModel;
@@ -44,7 +45,7 @@ public class SettingAdminFragment extends CommonFragment {
     short sTriggerCount = -1, sTriggerCountMin = 1, sTriggerCountMax = 100;
     int iVibrateTime = -1; int iVibrateTimeMin = 1; int iVibrateTimeMax = 999;
     int iVibrateWindow = -1; int iVibrateWindowMin = 1; int iVibrateWindowMax = 4;
-    boolean triggerReporting, inventoryBeep, inventoryVibrate, saveFileEnable, saveCloudEnable, saveNewCloudEnable, saveAllCloudEnable;
+    boolean triggerReporting, inventoryBeep, inventoryVibrate, saveFileEnable, saveCloudEnable, saveNewCloudEnable, saveAllCloudEnable, debugEnable;
     String serverName;
     int iServerTimeout = -1; int iServerTimeoutMin = 3; int iServerTimeoutMax = 9;
 
@@ -87,6 +88,12 @@ public class SettingAdminFragment extends CommonFragment {
             ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.admin_vibratemode_options, R.layout.custom_spinner_layout);
             targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerQueryVibrateMode.setAdapter(targetAdapter);
+        }
+
+        if (MainActivity.csLibrary4A.get98XX() == 2) {
+            LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.settingAdminCycleDelayRow);
+            linearLayout.setVisibility(View.GONE);
+            spinnerQueryVibrateMode.setEnabled(false);
         }
 
         spinnerSavingFormat = (Spinner) getActivity().findViewById(R.id.settingAdminSavingFormat);
@@ -188,17 +195,17 @@ public class SettingAdminFragment extends CommonFragment {
         buttonReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isBarcodeFailure()) {
+                } else if (MainActivity.csLibrary4A.isBarcodeFailure()) {
                     Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
-                    MainActivity.mCs108Library4a.setBarcodeOn(true);
-                    MainActivity.mCs108Library4a.barcodeSendCommandConinuous();
-                    MainActivity.mCs108Library4a.setBarcodeOn(false);
-                    MainActivity.mCs108Library4a.saveSetting2File();
+                    MainActivity.csLibrary4A.setBarcodeOn(true);
+                    MainActivity.csLibrary4A.barcodeSendCommandConinuous();
+                    MainActivity.csLibrary4A.setBarcodeOn(false);
+                    MainActivity.csLibrary4A.saveSetting2File();
                     Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -208,16 +215,16 @@ public class SettingAdminFragment extends CommonFragment {
         buttonReset2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isBarcodeFailure()) {
+                } else if (MainActivity.csLibrary4A.isBarcodeFailure()) {
                     Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
-                    MainActivity.mCs108Library4a.setBarcodeOn(true);
-                    MainActivity.mCs108Library4a.barcodeSendCommandTrigger();
-                    MainActivity.mCs108Library4a.saveSetting2File();
+                    MainActivity.csLibrary4A.setBarcodeOn(true);
+                    MainActivity.csLibrary4A.barcodeSendCommandTrigger();
+                    MainActivity.csLibrary4A.saveSetting2File();
                     Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -227,15 +234,15 @@ public class SettingAdminFragment extends CommonFragment {
         buttonReset3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isBarcodeFailure()) {
+                } else if (MainActivity.csLibrary4A.isBarcodeFailure()) {
                     Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
-                    MainActivity.mCs108Library4a.setBarcodeOn(true);
-                    MainActivity.mCs108Library4a.barcodeSendCommandSetPreSuffix();
+                    MainActivity.csLibrary4A.setBarcodeOn(true);
+                    MainActivity.csLibrary4A.barcodeSendCommandSetPreSuffix();
                     Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -245,15 +252,15 @@ public class SettingAdminFragment extends CommonFragment {
         buttonReset4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isBarcodeFailure()) {
+                } else if (MainActivity.csLibrary4A.isBarcodeFailure()) {
                     Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
-                    MainActivity.mCs108Library4a.setBarcodeOn(true);
-                    MainActivity.mCs108Library4a.barcodeSendCommandResetPreSuffix();
+                    MainActivity.csLibrary4A.setBarcodeOn(true);
+                    MainActivity.csLibrary4A.barcodeSendCommandResetPreSuffix();
                     Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -263,16 +270,21 @@ public class SettingAdminFragment extends CommonFragment {
         buttonReset1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (false && MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (false && MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
-                    MainActivity.mCs108Library4a.setReaderDefault();
-                    MainActivity.mCs108Library4a.saveSetting2File();
+                    MainActivity.csLibrary4A.setReaderDefault();
+                    MainActivity.csLibrary4A.saveSetting2File();
                     Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
+
+                    mHandler.post(updateRunnable);
+                    CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                    String stringInfo = "Please power cycle reader and also this application";
+                    customPopupWindow.popupStart(stringInfo, false);
                 }
             }
         });
@@ -282,10 +294,10 @@ public class SettingAdminFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 boolean validValue = false;
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (false && MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (false && MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else if (updateRunning) {
@@ -326,6 +338,7 @@ public class SettingAdminFragment extends CommonFragment {
                         saveAllCloudEnable = checkBoxSaveAllCloudEnable.isChecked();
                         serverName = editTextServer.getText().toString();
                         iServerTimeout = Integer.parseInt(editTextServerTimeout.getText().toString());
+                        debugEnable = checkBoxDebugEnable.isChecked();
                         settingUpdate();
                     } catch (Exception ex) {
                         Toast.makeText(MainActivity.mContext, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
@@ -334,14 +347,16 @@ public class SettingAdminFragment extends CommonFragment {
             }
         });
 
-        if (sameCheck == false) MainActivity.mCs108Library4a.setSameCheck(false);
+        checkBoxDebugEnable = (CheckBox) getActivity().findViewById(R.id.settingAdminDebugEnable);
+
+        if (sameCheck == false) MainActivity.csLibrary4A.setSameCheck(false);
         mHandler.post(updateRunnable);
     }
 
     @Override
     public void onDestroy() {
         if (settingTask != null) settingTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
         mHandler.removeCallbacks(updateRunnable);
         super.onDestroy();
     }
@@ -350,13 +365,14 @@ public class SettingAdminFragment extends CommonFragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if(isVisibleToUser) {
-            checkBoxTriggerReporting.setChecked(MainActivity.mCs108Library4a.getTriggerReporting());
-            checkBoxInventoryBeep.setChecked(MainActivity.mCs108Library4a.getInventoryBeep());
-            checkBoxInventoryVibrate.setChecked(MainActivity.mCs108Library4a.getInventoryVibrate());
-            checkBoxSaveFileEnable.setChecked(MainActivity.mCs108Library4a.getSaveFileEnable());
-            checkBoxSaveCloudEnable.setChecked(MainActivity.mCs108Library4a.getSaveCloudEnable());
-            checkBoxSaveNewCloudEnable.setChecked(MainActivity.mCs108Library4a.getSaveNewCloudEnable());
-            checkBoxSaveAllCloudEnable.setChecked(MainActivity.mCs108Library4a.getSaveAllCloudEnable());
+            checkBoxTriggerReporting.setChecked(MainActivity.csLibrary4A.getTriggerReporting());
+            checkBoxInventoryBeep.setChecked(MainActivity.csLibrary4A.getInventoryBeep());
+            checkBoxInventoryVibrate.setChecked(MainActivity.csLibrary4A.getInventoryVibrate());
+            checkBoxSaveFileEnable.setChecked(MainActivity.csLibrary4A.getSaveFileEnable());
+            checkBoxSaveCloudEnable.setChecked(MainActivity.csLibrary4A.getSaveCloudEnable());
+            checkBoxSaveNewCloudEnable.setChecked(MainActivity.csLibrary4A.getSaveNewCloudEnable());
+            checkBoxSaveAllCloudEnable.setChecked(MainActivity.csLibrary4A.getSaveAllCloudEnable());
+            checkBoxDebugEnable.setChecked(MainActivity.csLibrary4A.getUserDebugEnable());
         }
     }
 
@@ -373,12 +389,12 @@ public class SettingAdminFragment extends CommonFragment {
             boolean updating = false;
 
             updateRunning = true;
-            spinnerQueryBattery.setSelection(MainActivity.mCs108Library4a.getBatteryDisplaySetting());
-            spinnerQueryRssi.setSelection(MainActivity.mCs108Library4a.getRssiDisplaySetting());
-            spinnerQueryVibrateMode.setSelection(MainActivity.mCs108Library4a.getVibrateModeSetting());
-            spinnerSavingFormat.setSelection(MainActivity.mCs108Library4a.getSavingFormatSetting());
+            spinnerQueryBattery.setSelection(MainActivity.csLibrary4A.getBatteryDisplaySetting());
+            spinnerQueryRssi.setSelection(MainActivity.csLibrary4A.getRssiDisplaySetting());
+            spinnerQueryVibrateMode.setSelection(MainActivity.csLibrary4A.getVibrateModeSetting());
+            spinnerSavingFormat.setSelection(MainActivity.csLibrary4A.getSavingFormatSetting());
             {
-                int csvColumnSelect = MainActivity.mCs108Library4a.getCsvColumnSelectSetting();
+                int csvColumnSelect = MainActivity.csLibrary4A.getCsvColumnSelectSetting();
                 if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.RESERVE_BANK.ordinal())) != 0) checkBoxCsvColumnResBank.setChecked(true); else checkBoxCsvColumnResBank.setChecked(false);
                 if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.EPC_BANK.ordinal())) != 0) checkBoxCsvColumnEpcBank.setChecked(true); else checkBoxCsvColumnEpcBank.setChecked(false);
                 if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.TID_BANK.ordinal())) != 0) checkBoxCsvColumnTidBank.setChecked(true); else checkBoxCsvColumnTidBank.setChecked(false);
@@ -391,30 +407,42 @@ public class SettingAdminFragment extends CommonFragment {
                 if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.DIRECTION.ordinal())) != 0) checkBoxCsvColumnDirection.setChecked(true); else checkBoxCsvColumnDirection.setChecked(false);
                 if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.OTHERS.ordinal())) != 0) checkBoxCsvColumnOthers.setChecked(true); else checkBoxCsvColumnOthers.setChecked(false);
             }
-            if (editTextCycleDelay != null)   editTextCycleDelay.setText(String.valueOf(MainActivity.mCs108Library4a.getCycleDelay()));
+            if (editTextCycleDelay != null)   editTextCycleDelay.setText(String.valueOf(MainActivity.csLibrary4A.getCycleDelay()));
             if (editTextTriggerReportingCount != null)   {
-                int triggerReportingCount = MainActivity.mCs108Library4a.getTriggerReportingCount();
-                if (triggerReportingCount != MainActivity.mCs108Library4a.iNO_SUCH_SETTING) {
+                int triggerReportingCount = MainActivity.csLibrary4A.getTriggerReportingCount();
+                if (triggerReportingCount != MainActivity.csLibrary4A.iNO_SUCH_SETTING) {
                     TableRow tableRow = (TableRow) getActivity().findViewById(R.id.settingAdminTriggerReportingRow);
                     tableRow.setVisibility(View.VISIBLE);
                 }
                 editTextTriggerReportingCount.setText(String.valueOf(triggerReportingCount));
             }
-            if (editTextBeepCount != null)   editTextBeepCount.setText(String.valueOf(MainActivity.mCs108Library4a.getBeepCount()));
-            if (editTextVibrateTime != null)   editTextVibrateTime.setText(String.valueOf(MainActivity.mCs108Library4a.getVibrateTime()));
-            if (editTextVibrateWindow != null)   editTextVibrateWindow.setText(String.valueOf(MainActivity.mCs108Library4a.getVibrateWindow()));
-            editTextServer.setText(MainActivity.mCs108Library4a.getServerLocation());
-            editTextServerTimeout.setText(String.valueOf(MainActivity.mCs108Library4a.getServerTimeout()));
+            if (editTextBeepCount != null)   editTextBeepCount.setText(String.valueOf(MainActivity.csLibrary4A.getBeepCount()));
+            if (editTextVibrateTime != null)   editTextVibrateTime.setText(String.valueOf(MainActivity.csLibrary4A.getVibrateTime()));
+            if (editTextVibrateWindow != null)   editTextVibrateWindow.setText(String.valueOf(MainActivity.csLibrary4A.getVibrateWindow()));
+            editTextServer.setText(MainActivity.csLibrary4A.getServerLocation());
+            editTextServerTimeout.setText(String.valueOf(MainActivity.csLibrary4A.getServerTimeout()));
             if (updating == false) {
-                String name = MainActivity.mCs108Library4a.getBluetoothICFirmwareName();
-                if (name == null)   updating = true;
-                else if (name.length() == 0) updating = true;
+                String name = MainActivity.csLibrary4A.getBluetoothICFirmwareName();
+                if (name == null)   {
+                    MainActivity.csLibrary4A.appendToLog("updating 1");
+                    updating = true;
+                }
+                else if (name.length() == 0) {
+                    MainActivity.csLibrary4A.appendToLog("updating 2");
+                    updating = true;
+                }
                 else editTextDeviceName.setText(name);
             }
             if (updating == false) {
-                String name = MainActivity.mCs108Library4a.getModelNumber();
-                if (name == null)   updating = true;
-                else if (name.length() == 0)    updating = true;
+                String name = MainActivity.csLibrary4A.getModelNumber();
+                if (name == null)   {
+                    MainActivity.csLibrary4A.appendToLog("updating 3");
+                    updating = true;
+                }
+                else if (name.length() == 0)    {
+                    MainActivity.csLibrary4A.appendToLog("updating 4");
+                    updating = true;
+                }
                 else textViewReaderModel.setText(name);
             }
             if (updating) {
@@ -427,149 +455,157 @@ public class SettingAdminFragment extends CommonFragment {
         boolean sameSetting = true;
         boolean invalidRequest = false;
 
-        if (invalidRequest == false && (MainActivity.mCs108Library4a.getBluetoothICFirmwareName().matches(deviceName) == false || sameCheck == false)) {
+        if (invalidRequest == false && (MainActivity.csLibrary4A.getBluetoothICFirmwareName().matches(deviceName) == false || sameCheck == false)) {
             sameSetting = false;
-            if (MainActivity.mCs108Library4a.setBluetoothICFirmwareName(deviceName) == false)
+            if (MainActivity.csLibrary4A.setBluetoothICFirmwareName(deviceName) == false)
                 invalidRequest = true;
         }
-        if (invalidRequest == false && (MainActivity.mCs108Library4a.getBatteryDisplaySetting() != batteryDisplaySelect || sameCheck == false)) {
+        if (invalidRequest == false && (MainActivity.csLibrary4A.getBatteryDisplaySetting() != batteryDisplaySelect || sameCheck == false)) {
             sameSetting = false;
-            if (MainActivity.mCs108Library4a.setBatteryDisplaySetting(batteryDisplaySelect) == false)
+            if (MainActivity.csLibrary4A.setBatteryDisplaySetting(batteryDisplaySelect) == false)
                 invalidRequest = true;
         }
-        if (invalidRequest == false && (MainActivity.mCs108Library4a.getRssiDisplaySetting() != rssiDisplaySelect || sameCheck == false)) {
+        if (invalidRequest == false && (MainActivity.csLibrary4A.getRssiDisplaySetting() != rssiDisplaySelect || sameCheck == false)) {
             sameSetting = false;
-            if (MainActivity.mCs108Library4a.setRssiDisplaySetting(rssiDisplaySelect) == false)
+            if (MainActivity.csLibrary4A.setRssiDisplaySetting(rssiDisplaySelect) == false)
                 invalidRequest = true;
         }
-        if (invalidRequest == false && (MainActivity.mCs108Library4a.getVibrateModeSetting() != vibrateModeSelect || sameCheck == false)) {
+        if (invalidRequest == false && (MainActivity.csLibrary4A.getVibrateModeSetting() != vibrateModeSelect || sameCheck == false)) {
             sameSetting = false;
-            if (MainActivity.mCs108Library4a.setVibrateModeSetting(vibrateModeSelect) == false)
+            if (MainActivity.csLibrary4A.setVibrateModeSetting(vibrateModeSelect) == false)
                 invalidRequest = true;
         }
-        if (invalidRequest == false && (MainActivity.mCs108Library4a.getSavingFormatSetting() != savingFormatSelect || sameCheck == false)) {
+        if (invalidRequest == false && (MainActivity.csLibrary4A.getSavingFormatSetting() != savingFormatSelect || sameCheck == false)) {
             sameSetting = false;
-            if (MainActivity.mCs108Library4a.setSavingFormatSetting(savingFormatSelect) == false)
+            if (MainActivity.csLibrary4A.setSavingFormatSetting(savingFormatSelect) == false)
                 invalidRequest = true;
         }
-        if (invalidRequest == false && (MainActivity.mCs108Library4a.getCsvColumnSelectSetting() != csvColumnSelect || sameCheck == false)) {
+        if (invalidRequest == false && (MainActivity.csLibrary4A.getCsvColumnSelectSetting() != csvColumnSelect || sameCheck == false)) {
             sameSetting = false;
-            if (MainActivity.mCs108Library4a.setCsvColumnSelectSetting(csvColumnSelect) == false)
+            if (MainActivity.csLibrary4A.setCsvColumnSelectSetting(csvColumnSelect) == false)
                 invalidRequest = true;
         }
         if (invalidRequest == false && editTextCycleDelay != null) {
-            if (MainActivity.mCs108Library4a.getCycleDelay() != cycleDelay || sameCheck == false) {
+            if (MainActivity.csLibrary4A.getCycleDelay() != cycleDelay || sameCheck == false) {
                 sameSetting = false;
                 if (cycleDelay < cycleDelayMin || cycleDelay > cycleDelayMax) invalidRequest = true;
-                else if (MainActivity.mCs108Library4a.setCycleDelay(cycleDelay) == false)
+                else if (MainActivity.csLibrary4A.setCycleDelay(cycleDelay) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && editTextTriggerReportingCount != null) {
-            if (MainActivity.mCs108Library4a.getTriggerReportingCount() != sTriggerCount || sameCheck == false) {
+            if (MainActivity.csLibrary4A.getTriggerReportingCount() != sTriggerCount || sameCheck == false) {
                 sameSetting = false;
                 if (sTriggerCount < sTriggerCountMin || sTriggerCount > sTriggerCountMax) invalidRequest = true;
-                else if (MainActivity.mCs108Library4a.setTriggerReportingCount(sTriggerCount) == false)
+                else if (MainActivity.csLibrary4A.setTriggerReportingCount(sTriggerCount) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && editTextBeepCount != null) {
-            if (MainActivity.mCs108Library4a.getBeepCount() != iBeepCount || sameCheck == false) {
+            if (MainActivity.csLibrary4A.getBeepCount() != iBeepCount || sameCheck == false) {
                 sameSetting = false;
                 if (iBeepCount < iBeepCountMin || iBeepCount > iBeepCountMax) invalidRequest = true;
-                else if (MainActivity.mCs108Library4a.setBeepCount(iBeepCount) == false)
+                else if (MainActivity.csLibrary4A.setBeepCount(iBeepCount) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && editTextVibrateTime != null) {
-            if (MainActivity.mCs108Library4a.getVibrateTime() != iVibrateTime || sameCheck == false) {
+            if (MainActivity.csLibrary4A.getVibrateTime() != iVibrateTime || sameCheck == false) {
                 sameSetting = false;
                 if (iVibrateTime < iVibrateTimeMin || iVibrateTime > iVibrateTimeMax) invalidRequest = true;
-                else if (MainActivity.mCs108Library4a.setVibrateTime(iVibrateTime) == false)
+                else if (MainActivity.csLibrary4A.setVibrateTime(iVibrateTime) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && editTextVibrateWindow != null) {
-            if (MainActivity.mCs108Library4a.getVibrateWindow() != iVibrateWindow || sameCheck == false) {
+            if (MainActivity.csLibrary4A.getVibrateWindow() != iVibrateWindow || sameCheck == false) {
                 sameSetting = false;
                 if (iVibrateWindow < iVibrateWindowMin || iVibrateWindow > iVibrateWindowMax) invalidRequest = true;
-                else if (MainActivity.mCs108Library4a.setVibrateWindow(iVibrateWindow) == false)
+                else if (MainActivity.csLibrary4A.setVibrateWindow(iVibrateWindow) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && checkBoxInventoryVibrate != null) {
-            MainActivity.mCs108Library4a.appendToLog("getInventoryVibrate = " + MainActivity.mCs108Library4a.getInventoryVibrate() + ", inventoryVibrate = " + inventoryVibrate);
-            if (MainActivity.mCs108Library4a.getInventoryVibrate() != inventoryVibrate || sameCheck == false) {
+            MainActivity.csLibrary4A.appendToLog("getInventoryVibrate = " + MainActivity.csLibrary4A.getInventoryVibrate() + ", inventoryVibrate = " + inventoryVibrate);
+            if (MainActivity.csLibrary4A.getInventoryVibrate() != inventoryVibrate || sameCheck == false) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setInventoryVibrate(inventoryVibrate) == false)
+                if (MainActivity.csLibrary4A.setInventoryVibrate(inventoryVibrate) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && checkBoxTriggerReporting != null) {
-            if (MainActivity.mCs108Library4a.getTriggerReporting() != triggerReporting || sameCheck == false) {
+            if (MainActivity.csLibrary4A.getTriggerReporting() != triggerReporting || sameCheck == false) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setTriggerReporting(triggerReporting) == false)
+                if (MainActivity.csLibrary4A.setTriggerReporting(triggerReporting) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && checkBoxInventoryBeep != null) {
-            MainActivity.mCs108Library4a.appendToLog("getInventoryBeep = " + MainActivity.mCs108Library4a.getInventoryBeep() + ", inventoryBeep = " + inventoryBeep);
-            if (MainActivity.mCs108Library4a.getInventoryBeep() != inventoryBeep || sameCheck == false) {
+            MainActivity.csLibrary4A.appendToLog("getInventoryBeep = " + MainActivity.csLibrary4A.getInventoryBeep() + ", inventoryBeep = " + inventoryBeep);
+            if (MainActivity.csLibrary4A.getInventoryBeep() != inventoryBeep || sameCheck == false) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setInventoryBeep(inventoryBeep) == false)
+                if (MainActivity.csLibrary4A.setInventoryBeep(inventoryBeep) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && checkBoxSaveFileEnable != null) {
-            MainActivity.mCs108Library4a.appendToLog("getSaveFileEnable = " + MainActivity.mCs108Library4a.getSaveFileEnable() + ", saveFileEnable = " + saveFileEnable);
-            if (MainActivity.mCs108Library4a.getSaveFileEnable() != saveFileEnable || sameCheck == false) {
+            MainActivity.csLibrary4A.appendToLog("getSaveFileEnable = " + MainActivity.csLibrary4A.getSaveFileEnable() + ", saveFileEnable = " + saveFileEnable);
+            if (MainActivity.csLibrary4A.getSaveFileEnable() != saveFileEnable || sameCheck == false) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setSaveFileEnable(saveFileEnable) == false)
+                if (MainActivity.csLibrary4A.setSaveFileEnable(saveFileEnable) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && checkBoxSaveCloudEnable != null) {
-            MainActivity.mCs108Library4a.appendToLog("getSaveCloudEnable = " + MainActivity.mCs108Library4a.getSaveCloudEnable() + ", saveCloudEnable = " + saveCloudEnable);
-            if (MainActivity.mCs108Library4a.getSaveCloudEnable() != saveCloudEnable || sameCheck == false) {
+            MainActivity.csLibrary4A.appendToLog("getSaveCloudEnable = " + MainActivity.csLibrary4A.getSaveCloudEnable() + ", saveCloudEnable = " + saveCloudEnable);
+            if (MainActivity.csLibrary4A.getSaveCloudEnable() != saveCloudEnable || sameCheck == false) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setSaveCloudEnable(saveCloudEnable) == false)
+                if (MainActivity.csLibrary4A.setSaveCloudEnable(saveCloudEnable) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && checkBoxSaveNewCloudEnable != null) {
-            MainActivity.mCs108Library4a.appendToLog("getSaveNewCloudEnable = " + MainActivity.mCs108Library4a.getSaveNewCloudEnable() + ", saveNewCloudEnable = " + saveNewCloudEnable);
-            if (MainActivity.mCs108Library4a.getSaveNewCloudEnable() != saveNewCloudEnable || sameCheck == false) {
+            MainActivity.csLibrary4A.appendToLog("getSaveNewCloudEnable = " + MainActivity.csLibrary4A.getSaveNewCloudEnable() + ", saveNewCloudEnable = " + saveNewCloudEnable);
+            if (MainActivity.csLibrary4A.getSaveNewCloudEnable() != saveNewCloudEnable || sameCheck == false) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setSaveNewCloudEnable(saveNewCloudEnable) == false)
+                if (MainActivity.csLibrary4A.setSaveNewCloudEnable(saveNewCloudEnable) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && checkBoxSaveAllCloudEnable != null) {
-            MainActivity.mCs108Library4a.appendToLog("getSaveAllCloudEnable = " + MainActivity.mCs108Library4a.getSaveAllCloudEnable() + ", saveAllCloudEnable = " + saveAllCloudEnable);
-            if (MainActivity.mCs108Library4a.getSaveAllCloudEnable() != saveAllCloudEnable || sameCheck == false) {
+            MainActivity.csLibrary4A.appendToLog("getSaveAllCloudEnable = " + MainActivity.csLibrary4A.getSaveAllCloudEnable() + ", saveAllCloudEnable = " + saveAllCloudEnable);
+            if (MainActivity.csLibrary4A.getSaveAllCloudEnable() != saveAllCloudEnable || sameCheck == false) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setSaveAllCloudEnable(saveAllCloudEnable) == false)
+                if (MainActivity.csLibrary4A.setSaveAllCloudEnable(saveAllCloudEnable) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && editTextServer != null) {
-            String serverLocation = MainActivity.mCs108Library4a.getServerLocation(); if (serverLocation == null) serverLocation = "";
+            String serverLocation = MainActivity.csLibrary4A.getServerLocation(); if (serverLocation == null) serverLocation = "";
             if (serverLocation.matches(serverName) == false || sameCheck == false) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setServerLocation(serverName) == false)
+                if (MainActivity.csLibrary4A.setServerLocation(serverName) == false)
                     invalidRequest = true;
             }
         }
         if (invalidRequest == false && editTextServerTimeout != null) {
-            if (MainActivity.mCs108Library4a.getServerTimeout() != iServerTimeout || sameCheck == false) {
+            if (MainActivity.csLibrary4A.getServerTimeout() != iServerTimeout || sameCheck == false) {
                 sameSetting = false;
                 if (iServerTimeout < iServerTimeoutMin || iServerTimeout > iServerTimeoutMax) invalidRequest = true;
-                else if (MainActivity.mCs108Library4a.setServerTimeout(iServerTimeout) == false)
+                else if (MainActivity.csLibrary4A.setServerTimeout(iServerTimeout) == false)
+                    invalidRequest = true;
+            }
+        }
+        if (invalidRequest == false && checkBoxDebugEnable != null) {
+            MainActivity.csLibrary4A.appendToLog("getDebugEnable = " + MainActivity.csLibrary4A.getUserDebugEnable() + ", debugEnable = " + debugEnable);
+            if (MainActivity.csLibrary4A.getUserDebugEnable() != debugEnable || sameCheck == false) {
+                sameSetting = false;
+                if (MainActivity.csLibrary4A.setUserDebugEnable(debugEnable) == false)
                     invalidRequest = true;
             }
         }
         settingTask = new SettingTask(button, sameSetting, invalidRequest);
         settingTask.execute();
-        MainActivity.mCs108Library4a.saveSetting2File();
+        MainActivity.csLibrary4A.saveSetting2File();
     }
 }

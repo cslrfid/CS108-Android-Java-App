@@ -43,7 +43,7 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
         this.selectDupElim = selectDupElim;
         this.select4Extra1 = select4Extra1;
         this.select4Extra2 = select4Extra2;
-        MainActivity.mCs108Library4a.appendToLog("select4Extra1 = " + select4Extra1 + ", select4Extra2 = " + select4Extra2);
+        MainActivity.csLibrary4A.appendToLog("select4Extra1 = " + select4Extra1 + ", select4Extra2 = " + select4Extra2);
     }
 
     @Override
@@ -67,6 +67,10 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
                 text1 += reader.getAddress();
             }
         }
+        if (MainActivity.csLibrary4A.isBleScanning()) {
+            if (reader.getServiceUUID2p1() == 0) text1 += "\nCS108 Reader";
+            else if (reader.getServiceUUID2p1() == 2) text1 += "\nCS710S Reader";
+        }
         checkedTextView.setText(text1);
         if (reader.getSelected()) {
             checkedTextView.setChecked(true);
@@ -85,8 +89,8 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
             TextView rssiTextView = (TextView) convertView.findViewById(R.id.reader_rssi);
             rssiTextView.setVisibility(View.VISIBLE);
             double rssiValue = reader.getRssi();
-            if (MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0 && rssiValue > 0)
-                rssiValue -= MainActivity.mCs108Library4a.dBuV_dBm_constant;
+            if (MainActivity.csLibrary4A.getRssiDisplaySetting() != 0 && rssiValue > 0)
+                rssiValue -= MainActivity.csLibrary4A.dBuV_dBm_constant;
             rssiTextView.setText(String.format("%.1f", rssiValue));
         }
 
@@ -156,7 +160,7 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
                 int phase = reader.getPhase();
                 String stringDetailB = null;
                 if (channel != 0 || phase != 0) {
-                    double dChannel = MainActivity.mCs108Library4a.getLogicalChannel2PhysicalFreq(reader.getChannel());
+                    double dChannel = MainActivity.csLibrary4A.getLogicalChannel2PhysicalFreq(reader.getChannel());
                     stringDetailB = "Phase=" + phase + "\n" + dChannel + "MHz";
                 }
                 if (stringDetailB != null) readerDetailB.setText(stringDetailB);

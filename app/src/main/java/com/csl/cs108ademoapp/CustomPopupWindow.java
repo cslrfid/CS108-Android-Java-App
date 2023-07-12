@@ -10,7 +10,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
-import static com.csl.cs108ademoapp.MainActivity.mCs108Library4a;
+import static com.csl.cs108ademoapp.MainActivity.csLibrary4A;
 
 public class CustomPopupWindow {
     Context context;
@@ -27,7 +27,7 @@ public class CustomPopupWindow {
         TextView textViewDismiss = (TextView)popupView.findViewById(R.id.dismissMessage);
         int iLenghtMax = 300;
         if (message.length() > iLenghtMax) message = message.substring(0, iLenghtMax) + " .....";
-        mCs108Library4a.appendToLog("SaveList2ExternalTask: popupStart message = " + message);
+        csLibrary4A.appendToLog("SaveList2ExternalTask: popupStart message = " + message);
         textViewDismiss.setText(message);
         Button btnDismiss = (Button)popupView.findViewById(R.id.dismiss);
         if (wait) btnDismiss.setVisibility(View.GONE);

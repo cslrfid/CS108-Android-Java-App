@@ -20,8 +20,8 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="uEm EM4325"
-            android:onClick="coldChainClicked" />
+            android:text="Register Tag"
+            android:onClick="regClicked"/>
 
         <Button
             style="@style/DashboardButton"
@@ -29,8 +29,8 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="Axzon Magnus"
-            android:onClick="rfMicronClicked"/>
+            android:text="Simple Inventory"
+            android:onClick="simpleInventoryClicked"/>
 
         <Button
             style="@style/DashboardButton"
@@ -38,8 +38,8 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="Axzon"
-            android:onClick="axzonClicked"/>
+            android:text="Impinj"
+            android:onClick="impInventoryClicked"/>
 
         <Button
             style="@style/DashboardButton"
@@ -47,8 +47,9 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="Johar CTESIUS"
-            android:onClick="ctesiusClicked"/>
+            android:visibility="gone"
+            android:text="Impinj M775"
+            android:onClick="m775Clicked"/>
 
         <Button
             style="@style/DashboardButton"
@@ -56,17 +57,9 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="FM13DT160"
-            android:onClick="fdmicroClicked" />
-
-        <Button
-            style="@style/DashboardButton"
-            android:layout_height="50dp"
-            android:layout_marginTop="@dimen/home_icon_margin_1"
-            android:background="@drawable/btn_back"
-            android:gravity="center"
-            android:text="NXP UCODE DNA"
-            android:onClick="uCodeClicked"/>
+            android:visibility="gone"
+            android:text="Impinj Autotune"
+            android:onClick="autoTuneClicked"/>
 
         <Button
             style="@style/DashboardButton"
@@ -83,7 +76,16 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="CS9010 BAP"
+            android:text="NXP UCODE DNA"
+            android:onClick="uCodeClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="uEm CS9010 BAP"
             android:onClick="bapCardClicked" />
 
         <Button
@@ -92,8 +94,8 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="Impinj FastID Focus"
-            android:onClick="impInventoryClicked"/>
+            android:text="uEm Cold-chain CS8300"
+            android:onClick="coldChainClicked" />
 
         <Button
             style="@style/DashboardButton"
@@ -110,8 +112,8 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:text="Register Tag"
-            android:onClick="regClicked"/>
+            android:text="Axzon"
+            android:onClick="axzonClicked"/>
 
         <Button
             style="@style/DashboardButton"
@@ -119,7 +121,52 @@
             android:layout_marginTop="@dimen/home_icon_margin_1"
             android:background="@drawable/btn_back"
             android:gravity="center"
-            android:textSize="25sp"
+            android:visibility="gone"
+            android:text="Axzon Magnus"
+            android:onClick="rfMicronClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="FM13DT160"
+            android:onClick="fdmicroClicked" />
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="Johar CTESIUS"
+            android:onClick="ctesiusClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="Asygn AS321x"
+            android:onClick="asygnClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:text="Led Tag"
+            android:onClick="ledInventoryClicked"/>
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
             android:text="Large Sized Memory Read"
             android:onClick="rrUserClicked"/>
 
@@ -131,6 +178,14 @@
             android:gravity="center"
             android:text="Wedge"
             android:onClick="wedgeClicked" />
+
+        <Button
+            style="@style/DashboardButton"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/home_icon_margin_1"
+            android:background="@drawable/btn_back"
+            android:gravity="center"
+            android:onClick="blankClicked"/>
     </LinearLayout>
     </ScrollView>
 

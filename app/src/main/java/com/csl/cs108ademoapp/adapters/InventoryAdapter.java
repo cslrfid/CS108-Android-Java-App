@@ -4,9 +4,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
-import android.util.Log;
 
-import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.fragments.InventoryBarcodeFragment;
 import com.csl.cs108ademoapp.fragments.InventoryRfidiMultiFragment;
 
@@ -16,7 +14,6 @@ public class InventoryAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int index) {
-        Log.i("Hello", "InventoryAdadpter.getItem");
         Fragment fragment = null;
         switch (index) {
             case 0:

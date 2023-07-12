@@ -13,7 +13,7 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class AccessSecurityKillFragment extends CommonFragment {
@@ -44,10 +44,10 @@ public class AccessSecurityKillFragment extends CommonFragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -61,13 +61,13 @@ public class AccessSecurityKillFragment extends CommonFragment {
                 editTextTagID.setText(tagSelected.getAddress());
             }
         }
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessSecurityKillFragment().onResume(): userVisibleHint = " + userVisibleHint);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessSecurityKillFragment().onResume(): userVisibleHint = " + userVisibleHint);
         if (userVisibleHint) {
             setNotificationListener();
         }
@@ -75,13 +75,13 @@ public class AccessSecurityKillFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        MainActivity.mCs108Library4a.setNotificationListener(null);
+        MainActivity.csLibrary4A.setNotificationListener(null);
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setNotificationListener(null);
+        MainActivity.csLibrary4A.setNotificationListener(null);
         if (accessTask != null) accessTask.cancel(true);
         super.onDestroy();
     }
@@ -92,12 +92,12 @@ public class AccessSecurityKillFragment extends CommonFragment {
         super.setUserVisibleHint(isVisibleToUser);
         if(getUserVisibleHint()) {
             userVisibleHint = true;
-            MainActivity.mCs108Library4a.appendToLog("AccessSecurityKillFragment is now VISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessSecurityKillFragment is now VISIBLE");
             setNotificationListener();
         } else {
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessSecurityKillFragment is now INVISIBLE");
-            MainActivity.mCs108Library4a.setNotificationListener(null);
+            MainActivity.csLibrary4A.appendToLog("AccessSecurityKillFragment is now INVISIBLE");
+            MainActivity.csLibrary4A.setNotificationListener(null);
         }
     }
 
@@ -106,11 +106,11 @@ public class AccessSecurityKillFragment extends CommonFragment {
     }
 
     void setNotificationListener() {
-        MainActivity.mCs108Library4a.setNotificationListener(new Cs108Connector.NotificationListener() {
+        MainActivity.csLibrary4A.setNotificationListener(new Cs108Library4A.NotificationListener() {
             @Override
             public void onChange() {
-                MainActivity.mCs108Library4a.appendToLog("TRIGGER key is pressed.");
-                if (MainActivity.mCs108Library4a.getTriggerButtonStatus()) startAccessTask();
+                MainActivity.csLibrary4A.appendToLog("TRIGGER key is pressed.");
+                if (MainActivity.csLibrary4A.getTriggerButtonStatus()) startAccessTask();
             }
         });
     }
@@ -121,7 +121,7 @@ public class AccessSecurityKillFragment extends CommonFragment {
         String strTagID = editTextTagID.getText().toString();
         String strPassword = editTextPassword.getText().toString();
         int powerLevel = Integer.valueOf(editTextAntennaPower.getText().toString());
-        accessTask = new AccessTask(button, null, invalidRequest, strTagID, 1, 32, strPassword, powerLevel, Cs108Connector.HostCommands.CMD_18K6CKILL, 0, 0, true, null, null, null, null, null);
+        accessTask = new AccessTask(button, null, invalidRequest, strTagID, 1, 32, strPassword, powerLevel, Cs108Library4A.HostCommands.CMD_18K6CKILL, 0, 0, true, null, null, null, null, null);
         accessTask.execute();
     }
 }

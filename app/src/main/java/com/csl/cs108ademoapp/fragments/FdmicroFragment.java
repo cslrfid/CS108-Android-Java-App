@@ -31,13 +31,16 @@ public class FdmicroFragment extends CommonFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) mAdapter.fragment0;
         switch (item.getItemId()) {
-            case R.id.menuAction_1:
+            case R.id.menuAction_clear:
                 fragment.clearTagsList();
                 return true;
-            case R.id.menuAction_2:
+            case R.id.menuAction_sortRssi:
+                fragment.sortTagsListByRssi();
+                return true;
+            case R.id.menuAction_sort:
                 fragment.sortTagsList();
                 return true;
-            case R.id.menuAction_3:
+            case R.id.menuAction_save:
                 fragment.saveTagsList();
                 return true;
             default:

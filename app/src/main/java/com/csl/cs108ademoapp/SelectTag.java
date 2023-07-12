@@ -11,7 +11,7 @@ import android.widget.TableRow;
 import static com.csl.cs108ademoapp.MainActivity.tagSelected;
 
 public class SelectTag {
-    public EditText editTextTagID, editTextRWSelectOffset, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
+    public EditText editTextTagID, editTextSelectOffset, editTextAccessPassword, editTextAccessAntennaPower;
     public Spinner spinnerSelectBank;
     public TableRow tableRowSelectMemoryBank, tableRowSelectPassword;
 
@@ -20,7 +20,7 @@ public class SelectTag {
         tableRowSelectPassword = (TableRow) activity.findViewById(R.id.selectPasswordRow);
 
         editTextTagID = (EditText) activity.findViewById(R.id.selectTagID);
-        editTextRWSelectOffset = (EditText) activity.findViewById(R.id.selectMemoryOffset);
+        editTextSelectOffset = (EditText) activity.findViewById(R.id.selectMemoryOffset);
         //editTextRWSelectOffset.setVisibility(View.VISIBLE);
 
         spinnerSelectBank = (Spinner) activity.findViewById(R.id.selectMemoryBank);
@@ -39,12 +39,12 @@ public class SelectTag {
             }
         });
 
-        editTextAccessRWAccPassword = (EditText) activity.findViewById(R.id.selectPasswordValue);
-        editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
-        editTextAccessRWAccPassword.setText("00000000");
+        editTextAccessPassword = (EditText) activity.findViewById(R.id.selectPasswordValue);
+        editTextAccessPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessPassword, 8));
+        editTextAccessPassword.setText("00000000");
 
-        editTextaccessRWAntennaPower = (EditText) activity.findViewById(R.id.selectAntennaPower);
-        editTextaccessRWAntennaPower.setText(String.valueOf(300));
+        editTextAccessAntennaPower = (EditText) activity.findViewById(R.id.selectAntennaPower);
+        editTextAccessAntennaPower.setText(String.valueOf(300));
     }
 
     public void updateBankSelected() {
@@ -55,15 +55,15 @@ public class SelectTag {
         switch (position) {
             case 0: //if EPC
                 if (tagSelected != null) editTextTagID.setText(tagSelected.getAddress());
-                editTextRWSelectOffset.setText("32");
+                editTextSelectOffset.setText("32");
                 break;
             case 1:
                 if (tagSelected != null) { if (tagSelected.getTid() != null) editTextTagID.setText(tagSelected.getTid()); }
-                editTextRWSelectOffset.setText("0");
+                editTextSelectOffset.setText("0");
                 break;
             case 2:
                 if (tagSelected != null) { if (tagSelected.getUser() != null) editTextTagID.setText(tagSelected.getUser()); }
-                editTextRWSelectOffset.setText("0");
+                editTextSelectOffset.setText("0");
                 break;
             default:
                 break;

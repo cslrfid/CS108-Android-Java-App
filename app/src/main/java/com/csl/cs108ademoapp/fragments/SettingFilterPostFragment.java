@@ -51,10 +51,10 @@ public class SettingFilterPostFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 boolean validValue = false;
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -71,14 +71,14 @@ public class SettingFilterPostFragment extends CommonFragment {
             }
         });
 
-        if (sameCheck == false) MainActivity.mCs108Library4a.setSameCheck(false);
+        if (sameCheck == false) MainActivity.csLibrary4A.setSameCheck(false);
         mHandler.post(updateRunnable);
     }
 
     @Override
     public void onDestroy() {
         if (settingTask != null) settingTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
         mHandler.removeCallbacks(updateRunnable);
         super.onDestroy();
     }
@@ -94,14 +94,14 @@ public class SettingFilterPostFragment extends CommonFragment {
             long lValue;
             boolean updating = false;
 
-            if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0)   updating = true;
+            if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0)   updating = true;
             else {
                 if (updating == false) {
-                    checkBoxEnable.setChecked(MainActivity.mCs108Library4a.getInvMatchEnable());
-                    checkBoxType.setChecked(MainActivity.mCs108Library4a.getInvMatchType());
+                    checkBoxEnable.setChecked(MainActivity.csLibrary4A.getInvMatchEnable());
+                    checkBoxType.setChecked(MainActivity.csLibrary4A.getInvMatchType());
                 }
                 if (updating == false) {
-                    int iValue1 = MainActivity.mCs108Library4a.getInvMatchOffset();
+                    int iValue1 = MainActivity.csLibrary4A.getInvMatchOffset();
                     if (iValue1 < 0) {
                         updating = true;
                     } else {
@@ -109,7 +109,7 @@ public class SettingFilterPostFragment extends CommonFragment {
                     }
                 }
                 if (updating == false && filterPostMaskData.getText().length() == 0) {
-                    String strValue = MainActivity.mCs108Library4a.getInvMatchData();
+                    String strValue = MainActivity.csLibrary4A.getInvMatchData();
                     if (strValue == null) {
                         updating = true;
                     } else {
@@ -126,7 +126,7 @@ public class SettingFilterPostFragment extends CommonFragment {
     void settingUpdate() {
         boolean dataMatched = false;
         invMatchData = filterPostMaskData.getText().toString();
-        String strValue = MainActivity.mCs108Library4a.getInvMatchData();
+        String strValue = MainActivity.csLibrary4A.getInvMatchData();
         boolean sameSetting = true;
         boolean invalidRequest = false;
 
@@ -135,12 +135,12 @@ public class SettingFilterPostFragment extends CommonFragment {
         } else if (invMatchData.length() == 0 && strValue.length() == 0) {
             dataMatched = true;
         } else dataMatched = invMatchData.matches(strValue);
-        if (MainActivity.mCs108Library4a.getInvMatchEnable() != invMatchEnable
-                || MainActivity.mCs108Library4a.getInvMatchType() != invMatchType
-                || MainActivity.mCs108Library4a.getInvMatchOffset() != invMatchOffset
+        if (MainActivity.csLibrary4A.getInvMatchEnable() != invMatchEnable
+                || MainActivity.csLibrary4A.getInvMatchType() != invMatchType
+                || MainActivity.csLibrary4A.getInvMatchOffset() != invMatchOffset
                 || dataMatched == false || sameCheck == false) {
             sameSetting = false;
-            if (MainActivity.mCs108Library4a.setPostMatchCriteria(invMatchEnable, invMatchType, invMatchOffset, invMatchData) == false)
+            if (MainActivity.csLibrary4A.setPostMatchCriteria(invMatchEnable, invMatchType, invMatchOffset, invMatchData) == false)
                 invalidRequest = true;
         }
         settingTask = new SettingTask(button, sameSetting, invalidRequest);

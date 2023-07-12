@@ -19,7 +19,7 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class UtraceFragment extends CommonFragment {
@@ -115,10 +115,10 @@ public class UtraceFragment extends CommonFragment {
         buttonUntrace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -127,7 +127,7 @@ public class UtraceFragment extends CommonFragment {
         });
 
         setupTagID();
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
@@ -143,10 +143,10 @@ public class UtraceFragment extends CommonFragment {
         if(getUserVisibleHint()) {
             setupTagID();
             userVisibleHint = true;
-            MainActivity.mCs108Library4a.appendToLog("UtraceFragment is now VISIBLE");
+            MainActivity.csLibrary4A.appendToLog("UtraceFragment is now VISIBLE");
         } else {
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("UtraceFragment is now INVISIBLE");
+            MainActivity.csLibrary4A.appendToLog("UtraceFragment is now INVISIBLE");
         }
     }
 
@@ -166,7 +166,7 @@ public class UtraceFragment extends CommonFragment {
                 int indexUser = stringDetail.indexOf("USER=");
                 if (indexUser != -1) {
                     String stringUser = stringDetail.substring(indexUser + 5);
-                    MainActivity.mCs108Library4a.appendToLog("stringUser = " + stringUser);
+                    MainActivity.csLibrary4A.appendToLog("stringUser = " + stringUser);
 
                     boolean bEnableBAPMode = false;
                     int number = Integer.valueOf(stringUser.substring(3, 4), 16);
@@ -177,7 +177,7 @@ public class UtraceFragment extends CommonFragment {
     }
 
     void startAccessTask() {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("startAccessTask()");
         if (updating == false) {
             updating = true;
             mHandler.removeCallbacks(updateRunnable);
@@ -190,16 +190,16 @@ public class UtraceFragment extends CommonFragment {
         public void run() {
             boolean rerunRequest = false; boolean taskRequest = false;
             if (accessTask == null) {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("updateRunnable(): NULL accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
             } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
                 rerunRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
                 taskRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("updateRunnable(): FINISHED accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): FINISHED accessReadWriteTask");
             }
-            if (processResult()) { MainActivity.mCs108Library4a.appendToLog("processResult is TRUE"); }
+            if (processResult()) { MainActivity.csLibrary4A.appendToLog("processResult is TRUE"); }
             else if (taskRequest) {
                 int rangeValue = 0;
                 if (checkBoxHideRange.isChecked()) {
@@ -216,10 +216,10 @@ public class UtraceFragment extends CommonFragment {
                 if (epcValue < 0 || epcValue > 31) {
                     epcValue = 6; editTextEpcSize.setText("6");
                 }
-                boolean invalid = (MainActivity.mCs108Library4a.setUntraceable(rangeValue, checkBoxHideUser.isChecked(), tidValue, epcValue, checkBoxHideEpc.isChecked(), checkBoxHideXpc.isChecked()) == false);
-                MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
+                boolean invalid = (MainActivity.csLibrary4A.setUntraceable(rangeValue, checkBoxHideUser.isChecked(), tidValue, epcValue, checkBoxHideEpc.isChecked(), checkBoxHideXpc.isChecked()) == false);
+                MainActivity.csLibrary4A.appendToLog("processTickItems, invalid = " + invalid);
 
-                Button button = null; int selectBank = memoryBankSpinner.getSelectedItemPosition() + 1; MainActivity.mCs108Library4a.appendToLog("selectBank = " + selectBank);
+                Button button = null; int selectBank = memoryBankSpinner.getSelectedItemPosition() + 1; MainActivity.csLibrary4A.appendToLog("selectBank = " + selectBank);
                 if (strUntraceButtonBackup == null) strUntraceButtonBackup = buttonUntrace.getText().toString(); buttonUntrace.setText("Show"); button = buttonUntrace;
                 accessTask = new AccessTask(
                         button, null,
@@ -227,19 +227,19 @@ public class UtraceFragment extends CommonFragment {
                         editTextRWTagID.getText().toString(), selectBank, (selectBank == 1 ? 32 : 0),
                         editTextAccessRWAccPassword.getText().toString(),
                         Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                        Cs108Connector.HostCommands.CMD_UNTRACEABLE,
+                        Cs108Library4A.HostCommands.CMD_UNTRACEABLE,
                         0, 0, true,
                         null, null, null, null, null);
                 accessTask.execute();
                 rerunRequest = true;
-                MainActivity.mCs108Library4a.appendToLog("accessTask is created");
+                MainActivity.csLibrary4A.appendToLog("accessTask is created");
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 500);
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("updateRunnable(): Restart");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): Restart");
             }
             else    updating = false;
-            MainActivity.mCs108Library4a.appendToLog("updateRunnable(): Ending with updating = " + updating);
+            MainActivity.csLibrary4A.appendToLog("updateRunnable(): Ending with updating = " + updating);
         }
     };
 

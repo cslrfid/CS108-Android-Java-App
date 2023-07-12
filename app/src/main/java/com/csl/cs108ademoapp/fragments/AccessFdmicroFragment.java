@@ -23,7 +23,7 @@ import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SaveList2ExternalTask;
 import com.csl.cs108ademoapp.SelectTag;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -212,13 +212,13 @@ public class AccessFdmicroFragment extends CommonFragment {
             }
         });
 
-        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        MainActivity.mCs108Library4a.appendToLog("AccessFdmicro onResume !!!");
+        MainActivity.csLibrary4A.appendToLog("AccessFdmicro onResume !!!");
     }
 
     @Override
@@ -228,8 +228,8 @@ public class AccessFdmicroFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
+        MainActivity.csLibrary4A.setSameCheck(true);
+        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 
@@ -240,10 +240,10 @@ public class AccessFdmicroFragment extends CommonFragment {
         if (getUserVisibleHint()) {
             userVisibleHint = true;
             selectTag.updateBankSelected();
-            MainActivity.mCs108Library4a.appendToLog("AccessFdmicroFragment is now VISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessFdmicroFragment is now VISIBLE");
         } else {
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessFdmicroFragment is now INVISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessFdmicroFragment is now INVISIBLE");
         }
     }
 
@@ -261,7 +261,7 @@ public class AccessFdmicroFragment extends CommonFragment {
 
     void commandSelected(int position) {
         if (position < 0 || position > 2) position = spinnerSelectCommand.getSelectedItemPosition();
-        MainActivity.mCs108Library4a.appendToLog("commandSelected position = " + position);
+        MainActivity.csLibrary4A.appendToLog("commandSelected position = " + position);
         switch (position) {
             case 0:
                 tableRowOffsetLength.setVisibility(View.VISIBLE);
@@ -368,7 +368,7 @@ public class AccessFdmicroFragment extends CommonFragment {
         return false;
     }
     void readWriteOperation() {
-        Cs108Connector.HostCommands hostCommand = null;
+        Cs108Library4A.HostCommands hostCommand = null;
         if (isOperationRunning()) return;
         iOtherFlowCount = 0; bLogging = false; iTimeNumber = 0; iTimeTotal = 0;
         if (operationReadTemperature || operationReadBattery || operationSetLogging || operationCheckLogging || operationGetLogging) {
@@ -377,10 +377,10 @@ public class AccessFdmicroFragment extends CommonFragment {
             buttonRead.setText(getResources().getString(R.string.start_title));
             buttonWrite.setVisibility(View.GONE);
 
-            MainActivity.mCs108Library4a.set_fdCmdCfg(0x0000);
-            hostCommand = Cs108Connector.HostCommands.CMD_FDM_OPMODE_CHECK;
+            MainActivity.csLibrary4A.set_fdCmdCfg(0x0000);
+            hostCommand = Cs108Library4A.HostCommands.CMD_FDM_OPMODE_CHECK;
         } else {
-            MainActivity.mCs108Library4a.appendToLog("Item Selected is " + spinnerSelectCommand.getSelectedItemPosition());
+            MainActivity.csLibrary4A.appendToLog("Item Selected is " + spinnerSelectCommand.getSelectedItemPosition());
             int position = spinnerSelectCommand.getSelectedItemPosition();
             if (operationStopLogging) {
                 position = 3; operationRead = false;
@@ -409,7 +409,7 @@ public class AccessFdmicroFragment extends CommonFragment {
 
                     if (operationRead) {
                         editTextMemoryValue.setText("");
-                        MainActivity.mCs108Library4a.set_fdReadMem(iMemoryOffset, iMemoryLength);
+                        MainActivity.csLibrary4A.set_fdReadMem(iMemoryOffset, iMemoryLength);
                     } else {
                         String strValue = editTextMemoryValue.getText().toString();
                         if (strValue.length() > 8)
@@ -424,10 +424,10 @@ public class AccessFdmicroFragment extends CommonFragment {
                         }
                         strValue = String.format("%X", iValue);
                         editTextMemoryValue.setText(strValue);
-                        MainActivity.mCs108Library4a.set_fdWriteMem(iMemoryOffset, iMemoryLength, iValue);
+                        MainActivity.csLibrary4A.set_fdWriteMem(iMemoryOffset, iMemoryLength, iValue);
                     }
 
-                    hostCommand = (operationRead ? Cs108Connector.HostCommands.CMD_FDM_RDMEM : Cs108Connector.HostCommands.CMD_FDM_WRMEM);
+                    hostCommand = (operationRead ? Cs108Library4A.HostCommands.CMD_FDM_RDMEM : Cs108Library4A.HostCommands.CMD_FDM_WRMEM);
                     break;
                 case 1:
                     int iConfig = spinnerSelectAuth.getSelectedItemPosition();
@@ -441,13 +441,13 @@ public class AccessFdmicroFragment extends CommonFragment {
                         default:
                             break;
                     }
-                    MainActivity.mCs108Library4a.set_fdCmdCfg(iConfig);    //0 (user area password), 3 (unlock password), 4 (stop logging password)
+                    MainActivity.csLibrary4A.set_fdCmdCfg(iConfig);    //0 (user area password), 3 (unlock password), 4 (stop logging password)
 
                     EditText editTextAuthPassword = (EditText) getActivity().findViewById(R.id.selectFDAuthPassword);
                     int iValue = getEditTextHexValue(editTextAuthPassword, 8);
-                    MainActivity.mCs108Library4a.set_fdPwd(iValue);
+                    MainActivity.csLibrary4A.set_fdPwd(iValue);
 
-                    hostCommand = Cs108Connector.HostCommands.CMD_FDM_AUTH;
+                    hostCommand = Cs108Library4A.HostCommands.CMD_FDM_AUTH;
                     break;
                 case 2:
                     iConfig = 0;
@@ -474,25 +474,25 @@ public class AccessFdmicroFragment extends CommonFragment {
                     if (checkBoxGetTemperatureCheckField.isChecked()) iConfig |= 2;
                     CheckBox checkBoxGetTemperatureStorageEnable = (CheckBox) getActivity().findViewById(R.id.accessFDGetTemperatureStorageEnable);
                     if (checkBoxGetTemperatureStorageEnable.isChecked()) iConfig |= 1;
-                    MainActivity.mCs108Library4a.set_fdCmdCfg(iConfig);
+                    MainActivity.csLibrary4A.set_fdCmdCfg(iConfig);
 
                     EditText editTextStoreOffset = (EditText) getActivity().findViewById(R.id.accessFDStoreOffset);
                     int iStoreOffset = getEditTextHexValue(editTextStoreOffset, 2);
-                    MainActivity.mCs108Library4a.set_fdBlockAddr4GetTemperature(iStoreOffset);
+                    MainActivity.csLibrary4A.set_fdBlockAddr4GetTemperature(iStoreOffset);
 
-                    hostCommand = Cs108Connector.HostCommands.CMD_FDM_GET_TEMPERATURE;
+                    hostCommand = Cs108Library4A.HostCommands.CMD_FDM_GET_TEMPERATURE;
                     break;
                 case 3:
-                    MainActivity.mCs108Library4a.set_fdCmdCfg(operationRead ? 0 : 80);
+                    MainActivity.csLibrary4A.set_fdCmdCfg(operationRead ? 0 : 80);
 
                     if (operationRead)
-                        hostCommand = Cs108Connector.HostCommands.CMD_FDM_START_LOGGING;
+                        hostCommand = Cs108Library4A.HostCommands.CMD_FDM_START_LOGGING;
                     else {
                         EditText editText = (EditText) getActivity().findViewById(R.id.selectFDLoggingPassword);
                         int iPassword = getEditTextHexValue(editText, 8);
-                        MainActivity.mCs108Library4a.set_fdPwd(iPassword);
+                        MainActivity.csLibrary4A.set_fdPwd(iPassword);
 
-                        hostCommand = Cs108Connector.HostCommands.CMD_FDM_STOP_LOGGING;
+                        hostCommand = Cs108Library4A.HostCommands.CMD_FDM_STOP_LOGGING;
                     }
                     break;
                 case 4:
@@ -504,12 +504,12 @@ public class AccessFdmicroFragment extends CommonFragment {
                     EditText editText1 = (EditText) getActivity().findViewById(R.id.accessFDRegValue);
                     if (operationRead) {
                         editText1.setText("");
-                        MainActivity.mCs108Library4a.set_fdRegAddr(iValue);
-                        hostCommand = Cs108Connector.HostCommands.CMD_FDM_RDREG;
+                        MainActivity.csLibrary4A.set_fdRegAddr(iValue);
+                        hostCommand = Cs108Library4A.HostCommands.CMD_FDM_RDREG;
                     } else {
                         int iValue1 = getEditTextHexValue(editText1, 4);
-                        MainActivity.mCs108Library4a.set_fdWrite(iValue, iValue1);
-                        hostCommand = Cs108Connector.HostCommands.CMD_FDM_WRREG;
+                        MainActivity.csLibrary4A.set_fdWrite(iValue, iValue1);
+                        hostCommand = Cs108Library4A.HostCommands.CMD_FDM_WRREG;
                     }
                     break;
                 case 5:
@@ -522,14 +522,14 @@ public class AccessFdmicroFragment extends CommonFragment {
                         if (position == 8) iValue = 2;
                         else if (position != 7) iValue = 1;
                     }
-                    MainActivity.mCs108Library4a.set_fdCmdCfg(iValue);
-                    if (position == 5) hostCommand = Cs108Connector.HostCommands.CMD_FDM_DEEP_SLEEP;
+                    MainActivity.csLibrary4A.set_fdCmdCfg(iValue);
+                    if (position == 5) hostCommand = Cs108Library4A.HostCommands.CMD_FDM_DEEP_SLEEP;
                     else if (position == 6)
-                        hostCommand = Cs108Connector.HostCommands.CMD_FDM_OPMODE_CHECK;
+                        hostCommand = Cs108Library4A.HostCommands.CMD_FDM_OPMODE_CHECK;
                     else if (position == 7)
-                        hostCommand = Cs108Connector.HostCommands.CMD_FDM_INIT_REGFILE;
+                        hostCommand = Cs108Library4A.HostCommands.CMD_FDM_INIT_REGFILE;
                     else if (position == 8)
-                        hostCommand = Cs108Connector.HostCommands.CMD_FDM_LED_CTRL;
+                        hostCommand = Cs108Library4A.HostCommands.CMD_FDM_LED_CTRL;
                     break;
                 default:
                     break;
@@ -538,17 +538,17 @@ public class AccessFdmicroFragment extends CommonFragment {
         doAccessTask(hostCommand);
     }
 
-    void doAccessTask(Cs108Connector.HostCommands hostCommand) {
+    void doAccessTask(Cs108Library4A.HostCommands hostCommand) {
         String selectMask = selectTag.editTextTagID.getText().toString();
         int selectBank = selectTag.spinnerSelectBank.getSelectedItemPosition() + 1;
-        int selectOffset = Integer.valueOf(selectTag.editTextRWSelectOffset.getText().toString());
+        int selectOffset = Integer.valueOf(selectTag.editTextSelectOffset.getText().toString());
         boolean invalid = false;
         accessTask = new AccessTask(
                 (operationRead ? buttonRead : buttonWrite), null,
                 invalid,
                 selectMask, selectBank, selectOffset,
-                selectTag.editTextAccessRWAccPassword.getText().toString(),
-                Integer.valueOf(selectTag.editTextaccessRWAntennaPower.getText().toString()),
+                selectTag.editTextAccessPassword.getText().toString(),
+                Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()),
                 hostCommand,
                 0, 0, true,
                 null, null, null, null, null);
@@ -562,22 +562,22 @@ public class AccessFdmicroFragment extends CommonFragment {
         @Override
         public void run() {
             if (accessTask == null) return;
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + "accessTask.status = " + accessTask.getStatus().toString());
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "accessTask.status = " + accessTask.getStatus().toString());
             if (accessTask.getStatus() == AsyncTask.Status.RUNNING) {
                 mHandler.postDelayed(updateRunnable, 100);
                 return;
             }
 
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + accessTask.accessResult + ": blogging with iOtherFlowCount = " + iOtherFlowCount);
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + accessTask.accessResult + ": blogging with iOtherFlowCount = " + iOtherFlowCount);
             if ((operationReadTemperature || operationReadBattery || operationSetLogging || operationCheckLogging || operationGetLogging) && (iOtherFlowCount == 0)) {
                 int iValue = 0;
                 try {
                     iValue = Integer.parseInt(accessTask.accessResult, 16);
-                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + accessTask.accessResult + ": blogging with iValue = " + iValue);
+                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + accessTask.accessResult + ": blogging with iValue = " + iValue);
                 } catch (Exception ex) { }
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + accessTask.accessResult + ": blogging with iValue after catch = " + iValue);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + accessTask.accessResult + ": blogging with iValue after catch = " + iValue);
                 if ((iValue & 0x1000) != 0) {
-                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + accessTask.accessResult + ": blogging A is true");
+                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + accessTask.accessResult + ": blogging A is true");
                     bLogging = true;
                     if (operationCheckLogging == false && operationGetLogging == false) {
                         iOtherFlowCount = 99;
@@ -592,11 +592,11 @@ public class AccessFdmicroFragment extends CommonFragment {
             if (operationGetLogging) {
                 switch (iOtherFlowCount) {
                     case 0:
-                        MainActivity.mCs108Library4a.set_fdReadMem(0, 12);
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_RDMEM);
+                        MainActivity.csLibrary4A.set_fdReadMem(0, 12);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_RDMEM);
                         break;
                     case 1:
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("case 1: bLogging = " + bLogging + ", accessTask.accessResult = " + accessTask.accessResult);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("case 1: bLogging = " + bLogging + ", accessTask.accessResult = " + accessTask.accessResult);
                         if (accessTask.accessResult != null) {
                             Date date = null;
                             long lDateTime = -1;
@@ -631,15 +631,15 @@ public class AccessFdmicroFragment extends CommonFragment {
                             }
                         }
                         if (bLogging) {
-                            MainActivity.mCs108Library4a.set_fdRegAddr(0xc094);
-                            doAccessTask(Cs108Connector.HostCommands.CMD_FDM_RDREG);
+                            MainActivity.csLibrary4A.set_fdRegAddr(0xc094);
+                            doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_RDREG);
                         } else {
-                            MainActivity.mCs108Library4a.set_fdReadMem(0xb188, 4);
-                            doAccessTask(Cs108Connector.HostCommands.CMD_FDM_RDMEM);
+                            MainActivity.csLibrary4A.set_fdReadMem(0xb188, 4);
+                            doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_RDMEM);
                         }
                         break;
                     case 2:
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("bLogging = " + bLogging + ", accessTask.accessResult = " + accessTask.accessResult);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("bLogging = " + bLogging + ", accessTask.accessResult = " + accessTask.accessResult);
                         if (bLogging) {
                             operationGetLogging = false;
                             int iValue = 0;
@@ -655,23 +655,23 @@ public class AccessFdmicroFragment extends CommonFragment {
                         } else {
                             String strTemp = accessTask.accessResult;
                             iTimeTotal = Integer.parseInt(strTemp.substring(2, 4) + strTemp.substring(0, 2), 16);
-                            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("iTimeTotal is set to " + iTimeTotal + ", with strTemp = " + strTemp);
+                            if (DEBUG) MainActivity.csLibrary4A.appendToLog("iTimeTotal is set to " + iTimeTotal + ", with strTemp = " + strTemp);
                             textViewLoggingValue1.append("status: " + accessTask.accessResult + "\n");
                             iTimeTotal++;
                         }
                         logData.iSampleSize = 0;
                     default:
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("iOtherFlowCount = " + iOtherFlowCount + ", accessTask.accessResult = " + accessTask.accessResult);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("iOtherFlowCount = " + iOtherFlowCount + ", accessTask.accessResult = " + accessTask.accessResult);
                         if (iOtherFlowCount != 2) {
                             String strMessage = ""; //accessTask.accessResult + ": ";
                             String strAccessResult = accessTask.accessResult.substring(6, 8) + accessTask.accessResult.substring(4, 6) + accessTask.accessResult.substring(2, 4) + accessTask.accessResult.substring(0, 2);
                             Long lValue = Long.parseLong(strAccessResult, 16);
                             int iOddBit = 0;
-                            if (DEBUG) MainActivity.mCs108Library4a.appendToLog(String.format("accessResult to lValue = %X", lValue));
+                            if (DEBUG) MainActivity.csLibrary4A.appendToLog(String.format("accessResult to lValue = %X", lValue));
                             for (int i = 0; i < 32; i++) {
                                 if ((lValue & 1) != 0) {
                                     iOddBit++;
-                                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult, i=" + i + ", iOddbit=" + iOddBit);
+                                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult, i=" + i + ", iOddbit=" + iOddBit);
                                 }
                                 lValue = lValue >> 1;
                             }
@@ -694,9 +694,9 @@ public class AccessFdmicroFragment extends CommonFragment {
                         }
                         else {
                             int iValue = 0x1000 + (iOtherFlowCount - 2) * 4;
-                            MainActivity.mCs108Library4a.set_fdReadMem(iValue, 4);
-                            if (DEBUG) MainActivity.mCs108Library4a.appendToLog(String.format("set_fdReadMem address = 0x%04x", iValue));
-                            doAccessTask(Cs108Connector.HostCommands.CMD_FDM_RDMEM);
+                            MainActivity.csLibrary4A.set_fdReadMem(iValue, 4);
+                            if (DEBUG) MainActivity.csLibrary4A.appendToLog(String.format("set_fdReadMem address = 0x%04x", iValue));
+                            doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_RDMEM);
                         }
                         break;
                 }
@@ -704,13 +704,13 @@ public class AccessFdmicroFragment extends CommonFragment {
             } else if (operationCheckLogging) {
                 switch (iOtherFlowCount) {
                     case 0:
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog(accessTask.accessResult + ": blogging B is " + bLogging);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog(accessTask.accessResult + ": blogging B is " + bLogging);
                         if (bLogging) {
-                            MainActivity.mCs108Library4a.set_fdRegAddr(0xc096);
-                            doAccessTask(Cs108Connector.HostCommands.CMD_FDM_RDREG);
+                            MainActivity.csLibrary4A.set_fdRegAddr(0xc096);
+                            doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_RDREG);
                         } else {
-                            MainActivity.mCs108Library4a.set_fdReadMem(0xb188, 4);
-                            doAccessTask(Cs108Connector.HostCommands.CMD_FDM_RDMEM);
+                            MainActivity.csLibrary4A.set_fdReadMem(0xb188, 4);
+                            doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_RDMEM);
                         }
                         break;
                     default:
@@ -721,7 +721,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                 }
                 iOtherFlowCount++;
             } else if (operationSetLogging) {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + "operationSetLogging: iOtherFlowCount = " + iOtherFlowCount + ", accessResult = " + accessTask.accessResult + ", resultError= " + accessTask.resultError);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "operationSetLogging: iOtherFlowCount = " + iOtherFlowCount + ", accessResult = " + accessTask.accessResult + ", resultError= " + accessTask.resultError);
                 switch (iOtherFlowCount) {
                     case 0: //0x4cb3,29d6
                         CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessFDenableLEDAutoFlash);
@@ -729,14 +729,14 @@ public class AccessFdmicroFragment extends CommonFragment {
                         if (checkBox.isChecked()) {
                             lValue |= 0x2000; lValue &= ~0x20;
                             lValue &= 0xFFFFFFFF;
-                            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + "lValue = " + String.format("%08x", lValue));
+                            if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "lValue = " + String.format("%08x", lValue));
                         } else {
                             lValue &= ~0x2000; lValue |= 0x20;
                             lValue &= 0xFFFFFFFF;
-                            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + "lValue1 = " + String.format("%08x", lValue));
+                            if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "lValue1 = " + String.format("%08x", lValue));
                         }
-                        MainActivity.mCs108Library4a.set_fdWriteMem(0xb040, 4, lValue); //~user_cfg1,user_cfg1,~user_cfg0,user_cfg0: default as 0xd629b34c
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRMEM);
+                        MainActivity.csLibrary4A.set_fdWriteMem(0xb040, 4, lValue); //~user_cfg1,user_cfg1,~user_cfg0,user_cfg0: default as 0xd629b34c
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);
                         logData = new LogData();
                         break;
                     case 1:
@@ -748,18 +748,18 @@ public class AccessFdmicroFragment extends CommonFragment {
                         editTextCntLimit.setText(String.valueOf(iValue0));
 
                         String string1 = String.format("%04X", iValue0);
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + "accessResult: string1 = " + string1);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "accessResult: string1 = " + string1);
                         String string2 = string1.substring(2, 4) + string1.substring(0, 2) + "0000";
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + "accessResult: string2 = " + string2);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "accessResult: string2 = " + string2);
                         int iValue = Integer.parseInt(string2, 16);
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + String.format("accessResult: iValue = %X, iValue1 = %X", iValue0, iValue));
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + String.format("accessResult: iValue = %X, iValue1 = %X", iValue0, iValue));
 
-                        MainActivity.mCs108Library4a.set_fdWriteMem(0xb094, 4, iValue); //rtc_cnt_limit: default as 0x00000003
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRMEM);
+                        MainActivity.csLibrary4A.set_fdWriteMem(0xb094, 4, iValue); //rtc_cnt_limit: default as 0x00000003
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);
                         break;
                     case 2:
-                        MainActivity.mCs108Library4a.set_fdWriteMem(0xb0a4, 4, 0x0A000100); //vdet_alarm_step_cfg, vdet_step_cfg: default as 0
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRMEM);
+                        MainActivity.csLibrary4A.set_fdWriteMem(0xb0a4, 4, 0x0A000100); //vdet_alarm_step_cfg, vdet_step_cfg: default as 0
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);
                         break;
                     case 3:
                         iValue = 1;
@@ -768,10 +768,10 @@ public class AccessFdmicroFragment extends CommonFragment {
                         } catch (Exception ex) { }
                         iDelayToStart = iValue;
                         editTextDelayStart.setText(String.valueOf(iValue));
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + String.format("accessResult: iValue = %X", iValue));
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + String.format("accessResult: iValue = %X", iValue));
 
-                        MainActivity.mCs108Library4a.set_fdWrite(0xc084, iValue); //vdet_delay_cfg: default as 0xffff in minute
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRREG);
+                        MainActivity.csLibrary4A.set_fdWrite(0xc084, iValue); //vdet_delay_cfg: default as 0xffff in minute
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRREG);
                         logData.minLogStartDelay = iValue;
                         break;
                     case 4:
@@ -780,23 +780,23 @@ public class AccessFdmicroFragment extends CommonFragment {
                             iValue = Integer.parseInt(editTextStep.getText().toString());
                         } catch (Exception ex) { }
                         editTextStep.setText(String.valueOf(iValue));
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + String.format("accessResult: iValue = %X", iValue));
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + String.format("accessResult: iValue = %X", iValue));
 
-                        MainActivity.mCs108Library4a.set_fdWrite(0xc085, iValue); //vdet_step_cfg: default as 0xffff in seconds
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRREG);
+                        MainActivity.csLibrary4A.set_fdWrite(0xc085, iValue); //vdet_step_cfg: default as 0xffff in seconds
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRREG);
                         logData.secLogSampleInterval = iValue;
                         break;
                     case 5:
-                        MainActivity.mCs108Library4a.set_fdWrite(0xc099, 0); //summary_min_temperature: default 0
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRREG);
+                        MainActivity.csLibrary4A.set_fdWrite(0xc099, 0); //summary_min_temperature: default 0
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRREG);
                         break;
                     case 6:
-                        MainActivity.mCs108Library4a.set_fdWrite(0xc098, 0x100); //summary_max_temperature: default 0
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRREG);
+                        MainActivity.csLibrary4A.set_fdWrite(0xc098, 0x100); //summary_max_temperature: default 0
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRREG);
                         break;
                     case 7:
-                        MainActivity.mCs108Library4a.set_fdRegAddr(0xc084);   //vdet_delay_cfg: default as 0xffff in minute
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_RDREG);
+                        MainActivity.csLibrary4A.set_fdRegAddr(0xc084);   //vdet_delay_cfg: default as 0xffff in minute
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_RDREG);
                         break;
                     case 8:
                         iValue = -1;
@@ -809,29 +809,29 @@ public class AccessFdmicroFragment extends CommonFragment {
                             textViewLoggingValue.setText(accessTask.accessResult);
                             break;
                         }
-                        MainActivity.mCs108Library4a.set_fdCmdCfg(0);
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_START_LOGGING);
+                        MainActivity.csLibrary4A.set_fdCmdCfg(0);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_START_LOGGING);
                         break;
                     case 9:
                         Date date = new Date();
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + "Current time is " + formatter.format(date));
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "Current time is " + formatter.format(date));
 
                         long longTemp = date.getTime() / 1000;
                         Long longValue = ((longTemp & 0xFF) << 24);
                         longValue |= ((longTemp & 0xFF00) << 8) ;
                         longValue |= ((longTemp & 0xFF0000) >> 8);
                         longValue |= ((longTemp & 0xFF000000) >> 24) ;
-                        MainActivity.mCs108Library4a.set_fdWriteMem(0, 4, longValue); //rtc_cnt_limit: default as 0x00000003
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRMEM);
+                        MainActivity.csLibrary4A.set_fdWriteMem(0, 4, longValue); //rtc_cnt_limit: default as 0x00000003
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);
                         break;
                     case 10:
                         longValue = (((long)logData.minLogStartDelay & 0xFF) << 24);
                         longValue |= ((logData.minLogStartDelay & 0xFF00) << 8) ;
                         longValue |= ((logData.secLogSampleInterval & 0XFF) << 8 );
                         longValue |= ((logData.secLogSampleInterval & 0xFF00) >> 8) ;
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AAA: " + String.format("longValue = %08x, minLogStartDelay = %04x, secLogSampleInterval = %04x", longValue, logData.minLogStartDelay, logData.secLogSampleInterval));
-                        MainActivity.mCs108Library4a.set_fdWriteMem(8, 4, longValue); //rtc_cnt_limit: default as 0x00000003
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRMEM);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + String.format("longValue = %08x, minLogStartDelay = %04x, secLogSampleInterval = %04x", longValue, logData.minLogStartDelay, logData.secLogSampleInterval));
+                        MainActivity.csLibrary4A.set_fdWriteMem(8, 4, longValue); //rtc_cnt_limit: default as 0x00000003
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);
                         break;
                     default:
                         operationSetLogging = false;
@@ -850,16 +850,16 @@ public class AccessFdmicroFragment extends CommonFragment {
             else if (operationReadBattery) {
                 switch(iOtherFlowCount) {
                     case 0:
-                        MainActivity.mCs108Library4a.set_fdWrite(0xc012, 0x0008);
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRREG);
+                        MainActivity.csLibrary4A.set_fdWrite(0xc012, 0x0008);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRREG);
                         break;
                     case 1:
-                        MainActivity.mCs108Library4a.set_fdCmdCfg(0x12);
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_GET_TEMPERATURE);
+                        MainActivity.csLibrary4A.set_fdCmdCfg(0x12);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_GET_TEMPERATURE);
                         break;
                     case 2:
-                        MainActivity.mCs108Library4a.set_fdCmdCfg(0x92);
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_GET_TEMPERATURE);
+                        MainActivity.csLibrary4A.set_fdCmdCfg(0x92);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_GET_TEMPERATURE);
                         break;
                     default:
                         operationReadBattery = false;
@@ -882,19 +882,19 @@ public class AccessFdmicroFragment extends CommonFragment {
                 switch(iOtherFlowCount) {
                     case 0:
                         /*MainActivity.mCs108Library4a.set_fdWriteMem(0xb040, 4, 0x4db209f6); //~user_cfg1,user_cfg1,~user_cfg0,user_cfg0: default as 0xd629b34c
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRMEM);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);
                         MainActivity.mCs108Library4a.set_fdWriteMem(0xb061, 1, 0x40);
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRMEM);*/
-                        MainActivity.mCs108Library4a.set_fdWrite(0xc012, 0x0000);
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRREG);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);*/
+                        MainActivity.csLibrary4A.set_fdWrite(0xc012, 0x0000);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRREG);
                         break;
                     case 1:
-                        MainActivity.mCs108Library4a.set_fdCmdCfg(0x06);
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_GET_TEMPERATURE);
+                        MainActivity.csLibrary4A.set_fdCmdCfg(0x06);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_GET_TEMPERATURE);
                         break;
                     case 2:
-                        MainActivity.mCs108Library4a.set_fdCmdCfg(0x86);
-                        doAccessTask(Cs108Connector.HostCommands.CMD_FDM_GET_TEMPERATURE);
+                        MainActivity.csLibrary4A.set_fdCmdCfg(0x86);
+                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_GET_TEMPERATURE);
                         break;
                     default:
                         operationReadTemperature = false;
@@ -946,7 +946,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                         customPopupWindow.popupStart(strMessage, false);
                         break;
                     case 2:
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessTask.accessResult);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessTask.accessResult);
                         strMessage = accessTask.accessResult;
                         CheckBox checkBoxGetTemperatureResultType = (CheckBox) getActivity().findViewById(R.id.accessFDGetTemperatureResultType);
                         if (operationRead) {
@@ -1023,8 +1023,8 @@ public class AccessFdmicroFragment extends CommonFragment {
                         }
                         if (position == 8 && iOtherFlowCount == 0) {
                             iOtherFlowCount++;
-                            MainActivity.mCs108Library4a.set_fdWriteMem(0xb040, 4, 0x4db229d6); //~user_cfg1,user_cfg1,~user_cfg0,user_cfg0: default as 0xd629b34c
-                            doAccessTask(Cs108Connector.HostCommands.CMD_FDM_WRMEM);
+                            MainActivity.csLibrary4A.set_fdWriteMem(0xb040, 4, 0x4db229d6); //~user_cfg1,user_cfg1,~user_cfg0,user_cfg0: default as 0xd629b34c
+                            doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);
                         }
                         break;
                     case 6:
@@ -1064,7 +1064,7 @@ public class AccessFdmicroFragment extends CommonFragment {
 
     int getEditTextHexValue(EditText editText, int iStrLen) {
         String strValue = editText.getText().toString().trim();
-        MainActivity.mCs108Library4a.appendToLog("getEditTextHexValue: editText.string=" + strValue + ", iStrLen=" + iStrLen);
+        MainActivity.csLibrary4A.appendToLog("getEditTextHexValue: editText.string=" + strValue + ", iStrLen=" + iStrLen);
         if (strValue.length() > iStrLen) strValue = strValue.substring(strValue.length() - iStrLen);
         int iValue = 0;
         try {
@@ -1073,7 +1073,7 @@ public class AccessFdmicroFragment extends CommonFragment {
         int iValue2 = 0;
         for (int i = 0; i < iStrLen; i++) { iValue2 <<= 4; iValue2 |= 0xFF; }
         strValue = String.format("%0" + String.valueOf(iStrLen) + "X", iValue & iValue2);
-        MainActivity.mCs108Library4a.appendToLog("getEditTextHexValue: exit string = " + strValue);
+        MainActivity.csLibrary4A.appendToLog("getEditTextHexValue: exit string = " + strValue);
         editText.setText(strValue);
         return iValue;
     }

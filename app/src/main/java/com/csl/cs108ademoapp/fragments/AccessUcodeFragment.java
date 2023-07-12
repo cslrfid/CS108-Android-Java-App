@@ -18,7 +18,7 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 import javax.crypto.Cipher;
@@ -131,10 +131,10 @@ public class AccessUcodeFragment extends CommonFragment {
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -146,10 +146,10 @@ public class AccessUcodeFragment extends CommonFragment {
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -161,10 +161,10 @@ public class AccessUcodeFragment extends CommonFragment {
         buttonReadBuffer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -176,10 +176,10 @@ public class AccessUcodeFragment extends CommonFragment {
         buttonTam1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -192,10 +192,10 @@ public class AccessUcodeFragment extends CommonFragment {
         buttonTam2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -217,10 +217,10 @@ public class AccessUcodeFragment extends CommonFragment {
         buttonUntrace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -234,10 +234,10 @@ public class AccessUcodeFragment extends CommonFragment {
         buttonShowEpc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -245,9 +245,9 @@ public class AccessUcodeFragment extends CommonFragment {
             }
         });
 
-        MainActivity.mCs108Library4a.getAuthenticateReplyLength();
-        MainActivity.mCs108Library4a.getUntraceableEpcLength();
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.getAuthenticateReplyLength();
+        MainActivity.csLibrary4A.getUntraceableEpcLength();
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
@@ -259,7 +259,7 @@ public class AccessUcodeFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
         //MainActivity.mCs108Library4a.appendToLog("onDestroy");
         super.onDestroy();
     }
@@ -270,12 +270,12 @@ public class AccessUcodeFragment extends CommonFragment {
         super.setUserVisibleHint(isVisibleToUser);
         if(getUserVisibleHint()) {
             userVisibleHint = true;
-            MainActivity.mCs108Library4a.appendToLog("AccessUcodeFragment is now VISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessUcodeFragment is now VISIBLE");
             setupTagID();
             //            setNotificationListener();
         } else {
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessUcodeFragment is now INVISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessUcodeFragment is now INVISIBLE");
 //            MainActivity.mCs108Library4a.setNotificationListener(null);
         }
     }
@@ -286,7 +286,7 @@ public class AccessUcodeFragment extends CommonFragment {
 
     void setupTagID() {
         ReaderDevice tagSelected = MainActivity.tagSelected;
-        MainActivity.mCs108Library4a.appendToLog("Start with tagSelected = " + (tagSelected == null ? "NULL" : (tagSelected.getSelected() + ", " + tagSelected.getAddress())));
+        MainActivity.csLibrary4A.appendToLog("Start with tagSelected = " + (tagSelected == null ? "NULL" : (tagSelected.getSelected() + ", " + tagSelected.getAddress())));
         boolean bSelected = false;
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
@@ -301,7 +301,7 @@ public class AccessUcodeFragment extends CommonFragment {
                 int indexUser = stringDetail.indexOf("USER=");
                 if (indexUser != -1) {
                     String stringUser = stringDetail.substring(indexUser + 5);
-                    MainActivity.mCs108Library4a.appendToLog("stringUser = " + stringUser);
+                    MainActivity.csLibrary4A.appendToLog("stringUser = " + stringUser);
 
                     boolean bEnableBAPMode = false;
                     int number = Integer.valueOf(stringUser.substring(3, 4), 16);
@@ -370,14 +370,14 @@ public class AccessUcodeFragment extends CommonFragment {
                 byte[] data2enc = {(byte) 0x96, (byte) 0xC5, 0x4F, (byte) 0xA8, 0x1D, 0x3C,
                         (byte) 0xFD, 0x5D, (byte) 0x80, (byte) 0x48, (byte) 0xF4, (byte) 0x8D, (byte) 0xD0, (byte) 0x9A, (byte) 0xAD, 0x22};
                 byte[] encValue = cipher.doFinal(data2enc);
-                textViewAuthResponseDecoded.setText(MainActivity.mCs108Library4a.byteArrayToString(encValue));
+                textViewAuthResponseDecoded.setText(MainActivity.csLibrary4A.byteArrayToString(encValue));
             } else {
                 byte[] data2dec = dataIn;
                 byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                 cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
                 byte[] decValue = cipher.doFinal(data2dec);
                 byte[] decValue16 = new byte[16]; System.arraycopy(decValue, 0, decValue16, 0, 16);
-                textViewAuthResponseDecoded.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue16));
+                textViewAuthResponseDecoded.setText(MainActivity.csLibrary4A.byteArrayToString(decValue16));
 
                 String strMatchResult = "Challenge";
                 String strMatching = textViewAuthResponseDecoded.getText().toString();
@@ -396,7 +396,7 @@ public class AccessUcodeFragment extends CommonFragment {
                         decValue16 = new byte[16];
                         System.arraycopy(decValue, 16, decValue16, 0, 16);
                     }
-                    textViewAuthResponseDecodedCustom.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue16));
+                    textViewAuthResponseDecodedCustom.setText(MainActivity.csLibrary4A.byteArrayToString(decValue16));
 
                     if (protMode >= 2) {
                         if (true) {
@@ -426,14 +426,14 @@ public class AccessUcodeFragment extends CommonFragment {
                             hmac.init(secretKey);
                             hmac.update(iv);
                             decValue = hmac.doFinal(dataIn);
-                            MainActivity.mCs108Library4a.appendToLog("decValue1.length = " + decValue.length);
+                            MainActivity.csLibrary4A.appendToLog("decValue1.length = " + decValue.length);
                         } else {
                             secretKey = new SecretKeySpec(key1, "AES");
                             cipher = Cipher.getInstance(strAlgo);
                             cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
                             decValue = cipher.doFinal(dataIn);
                         }
-                        String strMac = MainActivity.mCs108Library4a.byteArrayToString(decValue).substring(0, 24);
+                        String strMac = MainActivity.csLibrary4A.byteArrayToString(decValue).substring(0, 24);
                         editTextAuthResponseEncodedMac.setText(strMac);
 
                         strMatchResult += ", MAC";
@@ -461,12 +461,12 @@ public class AccessUcodeFragment extends CommonFragment {
                     hmac.init(secretKey);
                     hmac.update(iv);
                     byte[] decValue = hmac.doFinal(data2dec);
-                    MainActivity.mCs108Library4a.appendToLog("decValue.length = " + decValue.length);
-                    editTextAuthResponseEncodedMac.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue));
+                    MainActivity.csLibrary4A.appendToLog("decValue.length = " + decValue.length);
+                    editTextAuthResponseEncodedMac.setText(MainActivity.csLibrary4A.byteArrayToString(decValue));
                     if (false) {
                         byte[] decValue16 = new byte[16];
                         System.arraycopy(decValue, 0, decValue16, 0, 16);
-                        textViewAuthResponseDecoded.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue16));
+                        textViewAuthResponseDecoded.setText(MainActivity.csLibrary4A.byteArrayToString(decValue16));
                         if (protMode == 0 || protMode == 2) {
                             decValue16 = new byte[16];
                             System.arraycopy(data2dec, 16, decValue16, 0, 16);
@@ -474,22 +474,22 @@ public class AccessUcodeFragment extends CommonFragment {
                             decValue16 = new byte[16];
                             System.arraycopy(decValue, 16, decValue16, 0, 16);
                         }
-                        textViewAuthResponseDecodedCustom.setText(MainActivity.mCs108Library4a.byteArrayToString(decValue16));
+                        textViewAuthResponseDecodedCustom.setText(MainActivity.csLibrary4A.byteArrayToString(decValue16));
                         retValue = true;
                     }
                 } catch (Exception ex) {
-                    MainActivity.mCs108Library4a.appendToLog("Error while encrypting: " + ex.toString());
+                    MainActivity.csLibrary4A.appendToLog("Error while encrypting: " + ex.toString());
                 }
             }
         } catch (Exception ex) {
-            MainActivity.mCs108Library4a.appendToLog("Error while encrypting: " + ex.toString());
+            MainActivity.csLibrary4A.appendToLog("Error while encrypting: " + ex.toString());
         }
         return retValue;
     }
     void startAccessTask() {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
-        MainActivity.mCs108Library4a.setInvAlgo(false);
-        if (MainActivity.mCs108Library4a.getRetryCount() < 2) MainActivity.mCs108Library4a.setRetryCount(2);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("startAccessTask()");
+        MainActivity.csLibrary4A.setInvAlgo(false);
+        if (MainActivity.csLibrary4A.getRetryCount() < 2) MainActivity.csLibrary4A.setRetryCount(2);
         if (updating == false) {
             updating = true; bankProcessing = 0;
             mHandler.removeCallbacks(updateRunnable);
@@ -502,19 +502,19 @@ public class AccessUcodeFragment extends CommonFragment {
         public void run() {
             boolean rerunRequest = false; boolean taskRequest = false;
             if (accessTask == null) {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("updateRunnable(): NULL accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
             } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
                 rerunRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
                 taskRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("updateRunnable(): FINISHED accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): FINISHED accessReadWriteTask");
             }
-            if (processResult()) { rerunRequest = true; MainActivity.mCs108Library4a.appendToLog("processResult is TRUE"); }
+            if (processResult()) { rerunRequest = true; MainActivity.csLibrary4A.appendToLog("processResult is TRUE"); }
             else if (taskRequest) {
                 boolean invalid = processTickItems();
-                MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
+                MainActivity.csLibrary4A.appendToLog("processTickItems, invalid = " + invalid);
                 if (bankProcessing++ != 0 && invalid == true)   rerunRequest = false;
                 else {
                     Button button;
@@ -526,12 +526,12 @@ public class AccessUcodeFragment extends CommonFragment {
                     else if (operationRead) button = buttonRead;
                     else button = buttonWrite;
 
-                    Cs108Connector.HostCommands hostCommand;
-                    if (readBufferChecked) hostCommand = Cs108Connector.HostCommands.CMD_READBUFFER;
-                    else if (authenChecked) hostCommand = Cs108Connector.HostCommands.CMD_AUTHENTICATE;
-                    else if (untraceChecked || showEpcChecked) hostCommand = Cs108Connector.HostCommands.CMD_UNTRACEABLE;
-                    else if (operationRead) hostCommand = Cs108Connector.HostCommands.CMD_18K6CREAD;
-                    else hostCommand = Cs108Connector.HostCommands.CMD_18K6CWRITE;
+                    Cs108Library4A.HostCommands hostCommand;
+                    if (readBufferChecked) hostCommand = Cs108Library4A.HostCommands.CMD_READBUFFER;
+                    else if (authenChecked) hostCommand = Cs108Library4A.HostCommands.CMD_18K6CAUTHENTICATE;
+                    else if (untraceChecked || showEpcChecked) hostCommand = Cs108Library4A.HostCommands.CMD_UNTRACEABLE;
+                    else if (operationRead) hostCommand = Cs108Library4A.HostCommands.CMD_18K6CREAD;
+                    else hostCommand = Cs108Library4A.HostCommands.CMD_18K6CWRITE;
 
                     accessTask = new AccessTask(
                             button, null,
@@ -544,15 +544,15 @@ public class AccessUcodeFragment extends CommonFragment {
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;
-                    MainActivity.mCs108Library4a.appendToLog("accessTask is created");
+                    MainActivity.csLibrary4A.appendToLog("accessTask is created");
                 }
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 500);
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("updateRunnable(): Restart");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): Restart");
             }
             else    updating = false;
-            MainActivity.mCs108Library4a.appendToLog("updateRunnable(): Ending with updating = " + updating);
+            MainActivity.csLibrary4A.appendToLog("updateRunnable(): Ending with updating = " + updating);
         }
     };
 
@@ -619,7 +619,7 @@ public class AccessUcodeFragment extends CommonFragment {
                     textViewAesKey1Ok.setText("E"); checkBoxAesKey1.setChecked(false);
                 }
             } else {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.AESKEY0ACTIVATE) {
                     textViewAesKey0ActivateOk.setText("O"); checkBoxAesKey0Activate.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
                 } else if (readWriteTypes == ReadWriteTypes.AESKEY1ACTIVATE) {
@@ -645,18 +645,18 @@ public class AccessUcodeFragment extends CommonFragment {
             accOffset = 0; accSize = 1;
         } else if (authenChecked) {
             if (authenTam1) {
-                if (MainActivity.mCs108Library4a.setTam1Configuration(keyId, strChallenge) == false)
+                if (MainActivity.csLibrary4A.setTam1Configuration(keyId, strChallenge) == false)
                     invalidRequest1 = true;
-            } else if (MainActivity.mCs108Library4a.setTam2Configuration(keyId, strChallenge, profile, offset, blockId, protMode) == false)
+            } else if (MainActivity.csLibrary4A.setTam2Configuration(keyId, strChallenge, profile, offset, blockId, protMode) == false)
                 invalidRequest1 = true;
             if (invalidRequest1 == false) { editTextAuthResponse.setText(""); textViewAuthResponseDecoded.setText(""); textViewAuthResponseDecodedCustom.setText(""); editTextAuthResponseEncodedMac.setText(""); }
             return invalidRequest1;
         } else if (untraceChecked) {
-            if (MainActivity.mCs108Library4a.setUntraceable(checkBoxHideEpc.isChecked(), checkBoxHideEpc.isChecked() ? 2 : 6, checkBoxHideTid.isChecked() ? 1: 0, checkBoxHideUser.isChecked(), checkBoxHideRange.isChecked()) == false) invalidRequest1 = true;
+            if (MainActivity.csLibrary4A.setUntraceable(checkBoxHideEpc.isChecked(), checkBoxHideEpc.isChecked() ? 2 : 6, checkBoxHideTid.isChecked() ? 1: 0, checkBoxHideUser.isChecked(), checkBoxHideRange.isChecked()) == false) invalidRequest1 = true;
             return invalidRequest1;
         } else if (showEpcChecked) {
             try {
-                if (MainActivity.mCs108Library4a.setUntraceable(false, Integer.parseInt(editTextEpcSize.getText().toString()), 0, false, false) == false) invalidRequest1 = true;
+                if (MainActivity.csLibrary4A.setUntraceable(false, Integer.parseInt(editTextEpcSize.getText().toString()), 0, false, false) == false) invalidRequest1 = true;
             } catch (Exception ex) {
                 invalidRequest1 = true;
             }
@@ -682,25 +682,25 @@ public class AccessUcodeFragment extends CommonFragment {
         }
 
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(accBank) == false) {
+            if (MainActivity.csLibrary4A.setAccessBank(accBank) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessOffset(accOffset) == false) {
+            if (MainActivity.csLibrary4A.setAccessOffset(accOffset) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
             if (accSize == 0) {
                 invalidRequest1 = true;
-            } else if (MainActivity.mCs108Library4a.setAccessCount(accSize) == false) {
+            } else if (MainActivity.csLibrary4A.setAccessCount(accSize) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false && operationRead == false) {
             if (invalidRequest1 == false) {
-                if (MainActivity.mCs108Library4a.setAccessWriteData(writeData) == false) {
+                if (MainActivity.csLibrary4A.setAccessWriteData(writeData) == false) {
                     invalidRequest1 = true;
                 }
             }

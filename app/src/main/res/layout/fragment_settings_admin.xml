@@ -107,6 +107,7 @@
         </TableRow>
 
         <TableRow
+            android:id="@+id/settingAdminCycleDelayRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical">
@@ -566,6 +567,18 @@
                 android:layout_weight="3"
                 android:layout_height="wrap_content"
                 android:text="Reset to Default Setting" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/settingAdminDebugEnable"
+                android:layout_width="wrap_content"
+                style="@style/style_normal_font"
+                android:text="Enable debugging" />
         </TableRow>
     </LinearLayout>
     </ScrollView>

@@ -37,9 +37,9 @@ public class SettingTask extends AsyncTask<Void, String, String> {
     @Override
     protected String doInBackground(Void... a) {
         long timeMillis = System.currentTimeMillis();
-        int writeSize = MainActivity.mCs108Library4a.mrfidToWriteSize();
+        int writeSize = MainActivity.csLibrary4A.mrfidToWriteSize();
         while (true) {
-            int writeSizeN = MainActivity.mCs108Library4a.mrfidToWriteSize();
+            int writeSizeN = MainActivity.csLibrary4A.mrfidToWriteSize();
             if (writeSizeN == 0)   break;
             if (writeSizeN < writeSize) {
                 writeSize = writeSizeN;
@@ -58,7 +58,7 @@ public class SettingTask extends AsyncTask<Void, String, String> {
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("Setting0Fragment.SettingTask.onCancelled()");
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("Setting0Fragment.SettingTask.onCancelled()");
         if (taskCancelReason != null) {
             switch (taskCancelReason) {
                 case SAME_SETTING:
@@ -77,7 +77,7 @@ public class SettingTask extends AsyncTask<Void, String, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("Setting0Fragment.SettingTask.onPostExecute(): " + result);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("Setting0Fragment.SettingTask.onPostExecute(): " + result);
 
         Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
         button.setVisibility(View.VISIBLE);
