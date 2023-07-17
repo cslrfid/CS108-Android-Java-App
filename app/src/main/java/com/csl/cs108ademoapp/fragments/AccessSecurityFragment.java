@@ -86,8 +86,8 @@ public class AccessSecurityFragment extends CommonFragment {
     public void onDestroy() {
         mAdapter.fragment0.onDestroy();
         mAdapter.fragment1.onDestroy();
-        MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
+        MainActivity.csLibrary4A.setSameCheck(true);
+        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 

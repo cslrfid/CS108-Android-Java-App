@@ -24,14 +24,13 @@ import android.widget.Toast;
 import com.csl.cs108ademoapp.CustomMediaPlayer;
 import com.csl.cs108ademoapp.InventoryRfidTask;
 import com.csl.cs108ademoapp.SelectTag;
-import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class InventoryRfidSearchFragment extends CommonFragment {
-    double dBuV_dBm_constant = MainActivity.mCs108Library4a.dBuV_dBm_constant;
+    double dBuV_dBm_constant = MainActivity.csLibrary4A.dBuV_dBm_constant;
     final int labelMin = -90;
     final int labelMax = -10;
 
@@ -74,9 +73,9 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         TextView textViewProgressLabelMin = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMin);
         TextView textViewProgressLabelMid = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMid);
         TextView textViewProgressLabelMax = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMax);
-        textViewProgressLabelMin.setText(String.format("%.0f", MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0 ? labelMin : labelMin + dBuV_dBm_constant));
-        textViewProgressLabelMid.setText(String.format("%.0f", MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0 ? labelMin + (labelMax - labelMin) / 2 : labelMin + (labelMax - labelMin) / 2 + dBuV_dBm_constant));
-        textViewProgressLabelMax.setText(String.format("%.0f", MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0 ? labelMax : labelMax + dBuV_dBm_constant));
+        textViewProgressLabelMin.setText(String.format("%.0f", MainActivity.csLibrary4A.getRssiDisplaySetting() != 0 ? labelMin : labelMin + dBuV_dBm_constant));
+        textViewProgressLabelMid.setText(String.format("%.0f", MainActivity.csLibrary4A.getRssiDisplaySetting() != 0 ? labelMin + (labelMax - labelMin) / 2 : labelMin + (labelMax - labelMin) / 2 + dBuV_dBm_constant));
+        textViewProgressLabelMax.setText(String.format("%.0f", MainActivity.csLibrary4A.getRssiDisplaySetting() != 0 ? labelMax : labelMax + dBuV_dBm_constant));
 
         geigerProgress = (ProgressBar) getActivity().findViewById(R.id.geigerProgress);
         checkBoxGeigerTone = (CheckBox) getActivity().findViewById(R.id.geigerToneCheck);
@@ -94,7 +93,7 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (seekBar == seekGeiger && fromUser == true) {
                     thresholdValue = progress;
-                    geigerThresholdView.setText(String.format("%.2f", MainActivity.mCs108Library4a.getRssiDisplaySetting() == 0 ? thresholdValue : thresholdValue - dBuV_dBm_constant));
+                    geigerThresholdView.setText(String.format("%.2f", MainActivity.csLibrary4A.getRssiDisplaySetting() == 0 ? thresholdValue : thresholdValue - dBuV_dBm_constant));
                 }
             }
 
@@ -156,7 +155,7 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             public void afterTextChanged(Editable editable) {
                 if (alertRssiUpdateTime < 0) return;
                 double rssi = Double.parseDouble(geigerTagRssiView.getText().toString());
-                if (MainActivity.mCs108Library4a.getRssiDisplaySetting() != 0) rssi += dBuV_dBm_constant;
+                if (MainActivity.csLibrary4A.getRssiDisplaySetting() != 0) rssi += dBuV_dBm_constant;
 
                 double progressPos = geigerProgress.getMax() * ( rssi - labelMin - dBuV_dBm_constant) / (labelMax - labelMin);
                 if (progressPos < 0) progressPos = 0;
@@ -164,13 +163,13 @@ public class InventoryRfidSearchFragment extends CommonFragment {
                 geigerProgress.setProgress((int) (progressPos));
 
                 alertRssiUpdateTime = System.currentTimeMillis(); alertRssi = rssi;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("afterTextChanged(): alerting = " + alerting + ", alertRssi = " + alertRssi);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("afterTextChanged(): alerting = " + alerting + ", alertRssi = " + alertRssi);
                 if (rssi > thresholdValue && checkBoxGeigerTone.isChecked()) {
                     if (alerting == false)  {
                         alerting = true;
                         mHandler.removeCallbacks(mAlertRunnable);
                         mHandler.post(mAlertRunnable);
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("afterTextChanged(): mAlertRunnable starts");
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("afterTextChanged(): mAlertRunnable starts");
                     }
                 }
             }
@@ -199,17 +198,17 @@ public class InventoryRfidSearchFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        MainActivity.mCs108Library4a.setNotificationListener(null);
+        MainActivity.csLibrary4A.setNotificationListener(null);
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setNotificationListener(null);
+        MainActivity.csLibrary4A.setNotificationListener(null);
         if (geigerSearchTask != null) {
             geigerSearchTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.DESTORY;
         }
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
+        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 
@@ -230,9 +229,9 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             if (alertRssi < 20 || alertRssi < thresholdValue || checkBoxGeigerTone.isChecked() == false || alertRssiUpdateTime < 0 || System.currentTimeMillis() - alertRssiUpdateTime > 200) alerting1 = false;
             if (alerting1 == false) {
                 playerN.pause(); alerting = false;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("mAlertRunnable(): ENDS with new alerting1 = " + alerting1 + ", alertRssi = " + alertRssi);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("mAlertRunnable(): ENDS with new alerting1 = " + alerting1 + ", alertRssi = " + alertRssi);
             } else if (playerN.isPlaying() == false) {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("mAlertRunnable(): TONE starts");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("mAlertRunnable(): TONE starts");
                 mHandler.postDelayed(mAlertRunnable, toneLength);
                 playerN.start();
             } else {
@@ -243,15 +242,15 @@ public class InventoryRfidSearchFragment extends CommonFragment {
                 else if (alertRssi >= 30) tonePause = 1000 - toneLength;
                 else if (alertRssi >= 20) tonePause = 2000 - toneLength;
                 if (tonePause > 0) mHandler.postDelayed(mAlertRunnable, tonePause);
-                if (tonePause <= 0 || alertRssi < 60) { playerN.pause(); if (DEBUG) MainActivity.mCs108Library4a.appendToLog("Pause"); }
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("mAlertRunnable(): START with new alerting1 = " + alerting1 + ", alertRssi = " + alertRssi);
+                if (tonePause <= 0 || alertRssi < 60) { playerN.pause(); if (DEBUG) MainActivity.csLibrary4A.appendToLog("Pause"); }
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("mAlertRunnable(): START with new alerting1 = " + alerting1 + ", alertRssi = " + alertRssi);
                 alerting = tonePause > 0 ? true : false;
             }
         }
     };
 
     void setNotificationListener() {
-        MainActivity.mCs108Library4a.setNotificationListener(new Cs108Connector.NotificationListener() {
+        MainActivity.csLibrary4A.setNotificationListener(new Cs108Library4A.NotificationListener() {
             @Override
             public void onChange() {
                 startStopHandler(true);
@@ -265,16 +264,16 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             if (geigerSearchTask.getStatus() == AsyncTask.Status.RUNNING) started = true;
         }
         if (buttonTrigger == true &&
-                ((started && MainActivity.mCs108Library4a.getTriggerButtonStatus())
-                        || (started == false && MainActivity.mCs108Library4a.getTriggerButtonStatus() == false)))   return;
+                ((started && MainActivity.csLibrary4A.getTriggerButtonStatus())
+                        || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false)))   return;
         if (started == false) {
-            if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+            if (MainActivity.csLibrary4A.isBleConnected() == false) {
                 Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                 return;
-            } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+            } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                 Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                 return;
-            } else if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0) {
+            } else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
                 Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -292,10 +291,10 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         int memorybank = memoryBankSpinner.getSelectedItemPosition();
         int powerLevel = Integer.valueOf(editTextGeigerAntennaPower.getText().toString());
         if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
-        else if (MainActivity.mCs108Library4a.setSelectedTag(selectTag.editTextTagID.getText().toString(), memorybank+1, powerLevel) == false) {
+        else if (MainActivity.csLibrary4A.setSelectedTag(selectTag.editTextTagID.getText().toString(), memorybank+1, powerLevel) == false) {
             invalidRequest = true;
         } else {
-            MainActivity.mCs108Library4a.startOperation(Cs108Library4A.OperationTypes.TAG_SEARCHING);
+            MainActivity.csLibrary4A.startOperation(Cs108Library4A.OperationTypes.TAG_SEARCHING);
         }
         geigerSearchTask = new InventoryRfidTask(getContext(), -1,-1, 0, 0, 0, 0, invalidRequest, true,
                 null, null, geigerTagRssiView, null,

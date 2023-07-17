@@ -47,15 +47,15 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
         taskCancelReason = TaskCancelRReason.NULL;
         if (barcodeYieldView != null) barcodeYieldView.setText("");
 
-        MainActivity.mCs108Library4a.barcodeInventory(true);
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("InventoryBarcodeFragment.InventoryRfidTask.onPreExecute()");
-        if (MainActivity.mCs108Library4a.getInventoryVibrate() && bUseVibrateMode0 == false) MainActivity.mCs108Library4a.setVibrateOn(3);
+        MainActivity.csLibrary4A.barcodeInventory(true);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment.InventoryRfidTask.onPreExecute()");
+        if (MainActivity.csLibrary4A.getInventoryVibrate() && bUseVibrateMode0 == false) MainActivity.csLibrary4A.setVibrateOn(3);
     }
 
     @Override
     protected String doInBackground(Void... a) {
-        while (MainActivity.mCs108Library4a.isBleConnected() && isCancelled() == false) {
-            int batteryCount = MainActivity.mCs108Library4a.getBatteryCount();
+        while (MainActivity.csLibrary4A.isBleConnected() && isCancelled() == false) {
+            int batteryCount = MainActivity.csLibrary4A.getBatteryCount();
             if (batteryCountInventory_old != batteryCount) {
                 batteryCountInventory_old = batteryCount;
                 publishProgress("VV");
@@ -68,9 +68,9 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
                 timeMillisSound = System.currentTimeMillis();
                 requestSound = true;
             }
-            byte[] onBarcodeEvent = MainActivity.mCs108Library4a.onBarcodeEvent();
+            byte[] onBarcodeEvent = MainActivity.csLibrary4A.onBarcodeEvent();
             if (onBarcodeEvent != null) {
-                MainActivity.mCs108Library4a.appendToLog("BarStream: onBarcodeEvent= " + MainActivity.mCs108Library4a.byteArrayToString(onBarcodeEvent));
+                MainActivity.csLibrary4A.appendToLog("BarStream: onBarcodeEvent= " + MainActivity.csLibrary4A.byteArrayToString(onBarcodeEvent));
                 String stringBar = null;
                 if (true) stringBar = new String(onBarcodeEvent);
                 else if (onBarcodeEvent.length != 0) {
@@ -82,17 +82,17 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
                             byte[] arrayLetter = new byte[1];
                             arrayLetter[0] = onBarcodeEvent[i];
                             stringLetter = new String(arrayLetter);
-                            if (stringLetter.length() == 0) MainActivity.mCs108Library4a.appendToLog("Non-printable character = " + MainActivity.mCs108Library4a.byteArrayToString(arrayLetter));
+                            if (stringLetter.length() == 0) MainActivity.csLibrary4A.appendToLog("Non-printable character = " + MainActivity.csLibrary4A.byteArrayToString(arrayLetter));
                         }
                         if (stringBar == null) stringBar = stringLetter;
                         else stringBar += stringLetter;
                     }
                 }
-                MainActivity.mCs108Library4a.appendToLog("BarStream: onBarcodeEvent, stringBar= " + stringBar);
+                MainActivity.csLibrary4A.appendToLog("BarStream: onBarcodeEvent, stringBar= " + stringBar);
                 if (stringBar != null) { if (stringBar.length() != 0) { publishProgress(null, stringBar.trim()); } }
                 timeMillis = System.currentTimeMillis();
             } else if (System.currentTimeMillis() - timeMillis > 300) { if (taskCancelReason != TaskCancelRReason.NULL) cancel(true); }
-            if (MainActivity.mCs108Library4a.isBleConnected() == false) taskCancelReason = TaskCancelRReason.DESTORY;
+            if (MainActivity.csLibrary4A.isBleConnected() == false) taskCancelReason = TaskCancelRReason.DESTORY;
         }
         return "End of Asynctask()";
     }
@@ -107,7 +107,7 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
                         if (timePeriod > 0)
                             if (barcodeRunTime != null) barcodeRunTime.setText(String.format("Run time: %d sec", timePeriod));
                     } else if (taskCancelReason == TaskCancelRReason.NULL) {
-                        if (barcodeVoltageLevel != null) barcodeVoltageLevel.setText(MainActivity.mCs108Library4a.getBatteryDisplay(true));
+                        if (barcodeVoltageLevel != null) barcodeVoltageLevel.setText(MainActivity.csLibrary4A.getBatteryDisplay(true));
                     }
                 }
                 return;
@@ -115,11 +115,11 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
             if (registerBarValue != null) registerBarValue.setText(output[1]);
             boolean match = false;
             if (false || tagsList != null) {
-                MainActivity.mCs108Library4a.appendToLog("BarMatch: Matching bdata = " + output[1]);
+                MainActivity.csLibrary4A.appendToLog("BarMatch: Matching bdata = " + output[1]);
                 for (int i = 0; i < tagsList.size(); i++) {
                     String strInList = tagsList.get(i).getAddress();
                     if (output[1].length() == strInList.length() && output[1].indexOf(strInList) == 0) {
-                        MainActivity.mCs108Library4a.appendToLog("BarMatch: Matched stored bdata" + i + "= " + tagsList.get(i).getAddress());
+                        MainActivity.csLibrary4A.appendToLog("BarMatch: Matched stored bdata" + i + "= " + tagsList.get(i).getAddress());
                         ReaderDevice readerDevice = tagsList.get(i);
                         int count = readerDevice.getCount();
                         count++;
@@ -127,7 +127,7 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
                         tagsList.set(i, readerDevice);
                         match = true;
                         break;
-                    } else MainActivity.mCs108Library4a.appendToLog("BarMatch: NOT Matched stored bdata" + i + "= " + tagsList.get(i).getAddress());
+                    } else MainActivity.csLibrary4A.appendToLog("BarMatch: NOT Matched stored bdata" + i + "= " + tagsList.get(i).getAddress());
                 }
             }
             if (match == false) {
@@ -151,23 +151,23 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
                             bStartBeepWaiting = true;
                             handler.postDelayed(runnableStartBeep, 250);
                         }
-                        if (MainActivity.mCs108Library4a.getInventoryVibrate()) {
+                        if (MainActivity.csLibrary4A.getInventoryVibrate()) {
                             boolean validVibrate0 = false, validVibrate = false;
-                            if (MainActivity.mCs108Library4a.getVibrateModeSetting() == 0) {
+                            if (MainActivity.csLibrary4A.getVibrateModeSetting() == 0) {
                                 if (requestNewVibrate) validVibrate0 = true;
                             } else validVibrate0 = true;
                             requestNewVibrate = false;
 
                             if (bUseVibrateMode0 && validVibrate0 && bStartVibrateWaiting == false) {
-                                if (System.currentTimeMillis() - timeMillisNewVibrate > MainActivity.mCs108Library4a.getVibrateWindow() * 1000 ) {
+                                if (System.currentTimeMillis() - timeMillisNewVibrate > MainActivity.csLibrary4A.getVibrateWindow() * 1000 ) {
                                     timeMillisNewVibrate = System.currentTimeMillis();
                                     validVibrate = true;
                                 }
                             }
                             if (validVibrate) {
-                                MainActivity.mCs108Library4a.setVibrateOn(1);
+                                MainActivity.csLibrary4A.setVibrateOn(1);
                                 bStartVibrateWaiting = true;
-                                handler.postDelayed(runnableStartVibrate, MainActivity.mCs108Library4a.getVibrateTime());
+                                handler.postDelayed(runnableStartVibrate, MainActivity.csLibrary4A.getVibrateTime());
                             }
                         }
                     } else {
@@ -182,7 +182,7 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
                 }
             }
         } else {
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("InventoryBarcodeFragment with NULL data");
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment with NULL data");
         }
     }
 
@@ -212,14 +212,14 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("InventoryBarcodeFragment() onCancelled()");
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment() onCancelled()");
 
         DeviceConnectTask4InventoryEnding(taskCancelReason);
     }
 
     @Override
     protected void onPostExecute(String result) {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("InventoryBarcodeFragment() onPostExecute(): " + result);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment() onPostExecute(): " + result);
 
         DeviceConnectTask4InventoryEnding(taskCancelReason);
     }
@@ -253,8 +253,8 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
 
     void DeviceConnectTask4InventoryEnding(TaskCancelRReason taskCancelRReason) {
         if (readerListAdapter != null) readerListAdapter.notifyDataSetChanged();
-        MainActivity.mCs108Library4a.barcodeInventory(false);
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("DeviceConnectTask4InventoryEnding(): sent setBarcodeOn(false)");
+        MainActivity.csLibrary4A.barcodeInventory(false);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("DeviceConnectTask4InventoryEnding(): sent setBarcodeOn(false)");
         if (taskCancelReason == null) {
             new Handler().postDelayed(new Runnable() {
                 @Override
@@ -281,6 +281,6 @@ public class InventoryBarcodeTask extends AsyncTask<Void, String, String> {
             if (button1 != null) button1.setText(btextButton1);
         }
         MainActivity.sharedObjects.runningInventoryBarcodeTask = false;
-        MainActivity.mCs108Library4a.setVibrateOn(0);
+        MainActivity.csLibrary4A.setVibrateOn(0);
     }
 }

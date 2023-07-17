@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 
 public class AccessTask1 {
     Button button;
@@ -14,25 +14,25 @@ public class AccessTask1 {
     int selectBank, selectOffset;
     String strPassword;
     int powerLevel;
-    Cs108Connector.HostCommands hostCommand;
+    Cs108Library4A.HostCommands hostCommand;
     Runnable updateRunnable = null;
 
     AccessTask accessTask;
     public AccessTask1(Button button, boolean invalidRequest,
                        int accBank, int accOffset, int accSize, int accBlockCount, String accWriteData,
-                      String selectMask, int selectBank, int selectOffset,
-                      String strPassword, int powerLevel, Cs108Connector.HostCommands hostCommand, Runnable updateRunnable) {
+                       String selectMask, int selectBank, int selectOffset,
+                       String strPassword, int powerLevel, Cs108Library4A.HostCommands hostCommand, Runnable updateRunnable) {
         this.button = button;
         this.invalidRequest = invalidRequest;
-        MainActivity.mCs108Library4a.appendToLog("HelloK: invalidRequest=" + invalidRequest);
+        MainActivity.csLibrary4A.appendToLog("HelloK: invalidRequest=" + invalidRequest);
         this.accBank = accBank;
         this.accOffset = accOffset;
-        if (hostCommand == Cs108Connector.HostCommands.CMD_18K6CWRITE) { if (accBlockCount > 16) accBlockCount = 16; }
+        if (hostCommand == Cs108Library4A.HostCommands.CMD_18K6CWRITE) { if (accBlockCount > 16) accBlockCount = 16; }
         else if (accBlockCount > 255) accBlockCount = 255;
         this.accBlockCount = accBlockCount;
         if (accWriteData == null) accWriteData = "";
-        if (hostCommand == Cs108Connector.HostCommands.CMD_18K6CWRITE) {
-            MainActivity.mCs108Library4a.appendToLog("strOut: accWriteData=" + accWriteData);
+        if (hostCommand == Cs108Library4A.HostCommands.CMD_18K6CWRITE) {
+            MainActivity.csLibrary4A.appendToLog("strOut: accWriteData=" + accWriteData);
             accWriteData = deformatWriteAccessData(accWriteData);
             if (accWriteData.length() < accSize * 4) {
                 accSize = accWriteData.length()/4;
@@ -52,7 +52,7 @@ public class AccessTask1 {
         this.powerLevel = powerLevel;
         this.hostCommand = hostCommand;
         this.updateRunnable = updateRunnable;
-        MainActivity.mCs108Library4a.appendToLog("HelloA, AccessTask1");
+        MainActivity.csLibrary4A.appendToLog("HelloA, AccessTask1");
         CustomMediaPlayer playerN = MainActivity.sharedObjects.playerN;
         playerN.start();
         setup();
@@ -73,22 +73,22 @@ public class AccessTask1 {
     }
 
     public String deformatWriteAccessData(String strIn) {
-        MainActivity.mCs108Library4a.appendToLog("strOut: strIn=" + strIn);
+        MainActivity.csLibrary4A.appendToLog("strOut: strIn=" + strIn);
         String strOut = strIn.replaceAll("\\P{Print}", "");
-        MainActivity.mCs108Library4a.appendToLog("strOut=" + strOut);
+        MainActivity.csLibrary4A.appendToLog("strOut=" + strOut);
         while (strOut.indexOf(":") > 0) {
             int index = strOut.indexOf(":");
             String writeDataTemp = "";
             if (index > 4) writeDataTemp = strOut.substring(0, index - 3);
             writeDataTemp += strOut.substring(index + 1);
             strOut = writeDataTemp;
-            MainActivity.mCs108Library4a.appendToLog("strOut=" + strOut);
+            MainActivity.csLibrary4A.appendToLog("strOut=" + strOut);
         }
-        MainActivity.mCs108Library4a.appendToLog("strOut=" + strOut);
+        MainActivity.csLibrary4A.appendToLog("strOut=" + strOut);
         return strOut;
     }
 
-    boolean isResultReady = false; int tryCount = 0, tryCountMax = 20;
+    boolean isResultReady = false; int tryCount = 0, tryCountMax = 3;
     public boolean isResultReady() {
         boolean bValue = false;
         if (accessTask == null) { }
@@ -96,7 +96,7 @@ public class AccessTask1 {
         else if (button.getText().toString().indexOf("ING") > 0) { }
         else if (isResultReady == false) {
             String strAccessResult = "";
-            if (hostCommand != Cs108Connector.HostCommands.CMD_18K6CREAD || accBank != 3) strAccessResult = accessTask.accessResult;
+            if (hostCommand != Cs108Library4A.HostCommands.CMD_18K6CREAD || accBank != 3) strAccessResult = accessTask.accessResult;
             else {
                 int word4line = 7;
                 for (int i = 0; i < accSizeNow; i=i+word4line) {
@@ -112,13 +112,13 @@ public class AccessTask1 {
                             strAccessResult += accessTask.accessResult.substring(i * 4, (i + word4line) * 4);
                     }
                     strAccessResult += "\n";
-                    MainActivity.mCs108Library4a.appendToLog("i=" + i + ", formatted accessTask.accessResult=" + strAccessResult);
+                    MainActivity.csLibrary4A.appendToLog("i=" + i + ", formatted accessTask.accessResult=" + strAccessResult);
                     }
                }
             if (accessResult == null) accessResult = strAccessResult;
             else accessResult += strAccessResult;
 
-            MainActivity.mCs108Library4a.appendToLog("HelloA: accessResult=" + accessTask.accessResult);
+            MainActivity.csLibrary4A.appendToLog("HelloA: accessResult=" + accessTask.accessResult);
             if (accessTask.accessResult != null && accSizeNow >= accSize) {
                 bValue = true;
                 Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
@@ -129,21 +129,22 @@ public class AccessTask1 {
                     accSize -= accSizeNow;
                     if (accWriteData != null) { if (accWriteData.length() >= accSizeNow*4) accWriteData = accWriteData.substring(accSizeNow*4); }
                     tryCount = 0;
-                } else MainActivity.mCs108Library4a.appendToLog("HelloA: Going to retry with TryCount=" + tryCount);
+                }
+                MainActivity.csLibrary4A.appendToLog("HelloA: Going to retry with TryCount=" + tryCount + ", resultError = " + accessTask.resultError);
                 if (tryCount < tryCountMax) {
-                    MainActivity.mCs108Library4a.appendToLog("HelloA: re-setup");
+                    MainActivity.csLibrary4A.appendToLog("HelloA: re-setup");
                     setup();
                     execute();
                 } else bValue = true;
             }
         } else bValue = true;
-        MainActivity.mCs108Library4a.appendToLog("HelloA: bValue=" + bValue);
+        //MainActivity.csLibrary4A.appendToLog("HelloA: bValue=" + bValue);
         isResultReady = bValue;
         return bValue;
     }
     public String accessResult;
     public String getResult() {
-        MainActivity.mCs108Library4a.appendToLog("HelloA: accessResult=" + accessResult);
+        MainActivity.csLibrary4A.appendToLog("HelloA: accessResult=" + accessResult);
         if (accessTask == null) return null;
         if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return null;
         if (button.getText().toString().indexOf("ING") > 0) return null;
@@ -153,39 +154,39 @@ public class AccessTask1 {
     void setup() {
         tryCount++;
         if (invalidRequest == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(accBank) == false) {
-                MainActivity.mCs108Library4a.appendToLog("HelloK: accBank, invalidRequest=" + invalidRequest);
+            if (MainActivity.csLibrary4A.setAccessBank(accBank) == false) {
+                MainActivity.csLibrary4A.appendToLog("HelloK: accBank, invalidRequest=" + invalidRequest);
                 invalidRequest = true;
             }
         }
         if (invalidRequest == false) {
-            if (MainActivity.mCs108Library4a.setAccessOffset(accOffset) == false) {
-                MainActivity.mCs108Library4a.appendToLog("HelloK: accOffset, invalidRequest=" + invalidRequest);
+            if (MainActivity.csLibrary4A.setAccessOffset(accOffset) == false) {
+                MainActivity.csLibrary4A.appendToLog("HelloK: accOffset, invalidRequest=" + invalidRequest);
                 invalidRequest = true;
             }
         }
         if (invalidRequest == false) {
             if (accSize == 0) {
-                MainActivity.mCs108Library4a.appendToLog("HelloK: accSize0, invalidRequest=" + invalidRequest);
+                MainActivity.csLibrary4A.appendToLog("HelloK: accSize0, invalidRequest=" + invalidRequest);
                 invalidRequest = true;
             } else {
                 if (accSize > accBlockCount) accSizeNow = accBlockCount;
                 else accSizeNow = accSize;
-                MainActivity.mCs108Library4a.appendToLog("HelloA: accSize=" + accSize + ", accSizeNow=" + accSizeNow);
-                if (MainActivity.mCs108Library4a.setAccessCount(accSizeNow) == false) {
+                MainActivity.csLibrary4A.appendToLog("HelloA: accSize=" + accSize + ", accSizeNow=" + accSizeNow);
+                if (MainActivity.csLibrary4A.setAccessCount(accSizeNow) == false) {
                     invalidRequest = true;
                 }
             }
         }
-        if (invalidRequest == false && hostCommand == Cs108Connector.HostCommands.CMD_18K6CWRITE) {
+        if (invalidRequest == false && hostCommand == Cs108Library4A.HostCommands.CMD_18K6CWRITE) {
             if (accWriteData.length() > accSizeNow * 4) accWriteDataNow = accWriteData.substring(0, accSizeNow*4);
             else accWriteDataNow = accWriteData;
-            if (MainActivity.mCs108Library4a.setAccessWriteData(accWriteDataNow) == false) {
+            if (MainActivity.csLibrary4A.setAccessWriteData(accWriteDataNow) == false) {
                 invalidRequest = true;
             }
         }
-        MainActivity.mCs108Library4a.appendToLog("HelloA: accOffset=" + accOffset + ", accSizeNow=" + accSizeNow + ", accSize=" + accSize);
-        MainActivity.mCs108Library4a.appendToLog("HelloK: invalidRequest=" + invalidRequest);
+        MainActivity.csLibrary4A.appendToLog("HelloA: accOffset=" + accOffset + ", accSizeNow=" + accSizeNow + ", accSize=" + accSize);
+        MainActivity.csLibrary4A.appendToLog("HelloK: invalidRequest=" + invalidRequest);
         accessTask = new AccessTask(button, invalidRequest,
                 selectMask, selectBank, selectOffset,
                 strPassword, powerLevel, hostCommand, tryCount==tryCountMax, updateRunnable);

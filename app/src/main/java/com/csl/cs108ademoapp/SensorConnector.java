@@ -36,10 +36,10 @@ public class SensorConnector {
 
     private Sensor mAccelerometer;
     private Sensor mMagnetometer;
-    private Cs108Library4A mCs108Library4a = MainActivity.mCs108Library4a;
+    private Cs108Library4A mCsLibrary4A = MainActivity.csLibrary4A;
 
     SensorConnector(Context context) {
-        mCs108Library4a = MainActivity.mCs108Library4a;
+        mCsLibrary4A = MainActivity.csLibrary4A;
         mLocationDevice = new LocationDevice(context);
         mSensorDevice = new SensorDevice(context);
     }
@@ -65,27 +65,27 @@ public class SensorConnector {
             PackageManager mPackageManager;
             mPackageManager = (PackageManager) context.getPackageManager();
             if (!(mPackageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION))) {
-                if (DEBUG) mCs108Library4a.appendToLog("Cs108Connector(): there is NO Feature_Location");
+                if (DEBUG) mCsLibrary4A.appendToLog("there is NO Feature_Location");
                 Toast.makeText(context.getApplicationContext(), "there is NO LOCATION_FEATURE in this phone !!! Please use another phone.", Toast.LENGTH_LONG).show();
             } else locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
         }
 
         public void turnOn(boolean onStatus) {
             if (locationManager != null) {
-                if (true) mCs108Library4a.appendToLog("permission.ACCESS_FINE_LOCATION = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION));
-                if (true) mCs108Library4a.appendToLog("permission.ACCESS_COARSE_LOCATION = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION));
+                if (true) mCsLibrary4A.appendToLog("permission.ACCESS_FINE_LOCATION = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION));
+                if (true) mCsLibrary4A.appendToLog("permission.ACCESS_COARSE_LOCATION = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION));
                 if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(mContext.getApplicationContext(), "LOCATION_FEATURE permission is NOT GRANTED in this phone !!! Please go to Phone Setup and enable Location Services and Relaunch.", Toast.LENGTH_SHORT).show();
                 } else if (onStatus && this.onStatus == false) {
                     this.onStatus = onStatus;
-                    if (true) mCs108Library4a.appendToLog("LocationDevice.setRfidOn(): ON with LocationManager: ON");
-                    if (true) mCs108Library4a.appendToLog("LocationManager.PASSIVE_PROVIDER = " + LocationManager.PASSIVE_PROVIDER);
+                    if (true) mCsLibrary4A.appendToLog("LocationDevice.setRfidOn(): ON with LocationManager: ON");
+                    if (true) mCsLibrary4A.appendToLog("LocationManager.PASSIVE_PROVIDER = " + LocationManager.PASSIVE_PROVIDER);
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 //                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListener);
                 } else if (onStatus == false && this.onStatus) {
                     this.onStatus = onStatus;
-                    if (DEBUG) mCs108Library4a.appendToLog("LocationDevice.setRfidOn(): OFF");
+                    if (DEBUG) mCsLibrary4A.appendToLog("LocationDevice.setRfidOn(): OFF");
                     locationManager.removeUpdates(locationListener);
                 }
             }
@@ -94,7 +94,7 @@ public class SensorConnector {
         private LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                if (true) mCs108Library4a.appendToLog("onLocationChanged(): " + location.getProvider());
+                if (true) mCsLibrary4A.appendToLog("onLocationChanged(): " + location.getProvider());
                 location = location;
             }
 
@@ -124,15 +124,6 @@ public class SensorConnector {
                 if (azimuthInRadians == 0) return null;
                 float azimuthInDegress = (float) (Math.toDegrees(azimuthInRadians) + 360) % 360;
                 s0 = String.format("%.1f", azimuthInDegress);
-/*
-            azimuthInRadians = mCs108ConnectorData.mOrientation[1];
-            azimuthInDegress = (float)(Math.toDegrees(azimuthInRadians)+360)%360;
-            s1 = String.format("%.1f", azimuthInDegress);
-
-            azimuthInRadians = mCs108ConnectorData.mOrientation[2];
-            azimuthInDegress = (float)(Math.toDegrees(azimuthInRadians)+360)%360;
-            s2 = String.format("%.1f", azimuthInDegress);
-*/
             }
             return s0;  // + ", " + s1 + ", " + s2;
         }
@@ -144,9 +135,9 @@ public class SensorConnector {
 
             mSensorManager = (SensorManager) mContext.getSystemService(SENSOR_SERVICE);
             List<Sensor> deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-            if (DEBUG) mCs108Library4a.appendToLog("Cs108Connector.SensorDevice(): List of sensors");
+            if (DEBUG) mCsLibrary4A.appendToLog("SensorDevice(): List of sensors");
             for (int i = 0; i < deviceSensors.size(); i++) {
-                if (DEBUG) mCs108Library4a.appendToLog(deviceSensors.get(i).getType() + "," + deviceSensors.get(i).getName());
+                if (DEBUG) mCsLibrary4A.appendToLog(deviceSensors.get(i).getType() + "," + deviceSensors.get(i).getName());
             }
         }
 
@@ -166,11 +157,11 @@ public class SensorConnector {
                     mSensorManager.unregisterListener(sensorEventListener);
                 } else {
                     this.onStatus = onStatus;
-                    if (DEBUG) mCs108Library4a.appendToLog("SensorDevice.setRfidOn(): ON");
+                    if (DEBUG) mCsLibrary4A.appendToLog("SensorDevice.setRfidOn(): ON");
                 }
             } else if (this.onStatus && onStatus == false) {
                 this.onStatus = onStatus;
-                if (DEBUG) mCs108Library4a.appendToLog("SensorDevice.setRfidOn(): OFF");
+                if (DEBUG) mCsLibrary4A.appendToLog("SensorDevice.setRfidOn(): OFF");
                 mSensorManager.unregisterListener(sensorEventListener);
             }
         }
@@ -191,7 +182,7 @@ public class SensorConnector {
                         mLastAccelerometerSet = true;
 //                    appendToLog("onSensorChanged(): updated mAccelerometer");
                     } else {
-                        if (DEBUG) mCs108Library4a.appendToLog("onSensorChanged(): mAccelerometer: " + event.values.length);
+                        if (DEBUG) mCsLibrary4A.appendToLog("onSensorChanged(): mAccelerometer: " + event.values.length);
                     }
                 } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
                     if (event.values.length == mLastMagnetometer.length) {
@@ -199,10 +190,10 @@ public class SensorConnector {
                         mLastMagnetometerSet = true;
 //                    appendToLog("onSensorChanged(): updated mMagnetometer");
                     } else {
-                        if (DEBUG) mCs108Library4a.appendToLog("onSensorChanged(): mMagnetometer: " + event.values.length);
+                        if (DEBUG) mCsLibrary4A.appendToLog("onSensorChanged(): mMagnetometer: " + event.values.length);
                     }
                 } else {
-                    if (DEBUG) mCs108Library4a.appendToLog("onSensorChanged(): " + event.sensor.getType() + "," + event.sensor.getName());
+                    if (DEBUG) mCsLibrary4A.appendToLog("onSensorChanged(): " + event.sensor.getType() + "," + event.sensor.getName());
                 }
 
                 if (mLastAccelerometerSet && mLastMagnetometerSet) {
@@ -212,7 +203,7 @@ public class SensorConnector {
                     }
                     mLastAccelerometerSet = false;
                     mLastMagnetometerSet = false;
-                    if (DEBUG) mCs108Library4a.appendToLog("onSensorChanged(): updated mOrientation with mOrientation=" + mOrientation[0]);
+                    if (DEBUG) mCsLibrary4A.appendToLog("onSensorChanged(): updated mOrientation with mOrientation=" + mOrientation[0]);
                 }
             }
 

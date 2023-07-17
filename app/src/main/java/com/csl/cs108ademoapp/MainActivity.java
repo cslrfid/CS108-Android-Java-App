@@ -26,9 +26,17 @@ import com.csl.cs108ademoapp.fragments.*;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 public class MainActivity extends AppCompatActivity {
     final boolean DEBUG = false; final String TAG = "Hello";
     public static boolean activityActive = false;
+    public static DrawerPositions drawerPositionsDefault = DrawerPositions.MAIN;
 
     //Tag to identify the currently displayed fragment
     Fragment fragment = null;
@@ -40,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private CharSequence mTitle;
 
     public static Context mContext;
-    public static Cs108Library4A mCs108Library4a;
+    public static Cs108Library4A csLibrary4A;
     public static SharedObjects sharedObjects;
     public static SensorConnector mSensorConnector;
     public static ReaderDevice tagSelected;
@@ -58,8 +66,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (savedInstanceState == null) Log.i(TAG, "MainActivity.onCreate: NULL savedInstanceState");
-        else Log.i(TAG, "MainActivity.onCreate: VALID savedInstanceState");
+        if (DEBUG) {
+            if (savedInstanceState == null) Log.i(TAG, "MainActivity.onCreate: NULL savedInstanceState");
+            else Log.i(TAG, "MainActivity.onCreate: VALID savedInstanceState");
+        }
 
         setContentView(R.layout.activity_main);
 
@@ -75,51 +85,52 @@ public class MainActivity extends AppCompatActivity {
 
         mContext = this;
         sharedObjects = new SharedObjects(mContext);
-        mCs108Library4a = new Cs108Library4A(mContext, mLogView);
+        csLibrary4A = new Cs108Library4A(mContext, mLogView);
         mSensorConnector = new SensorConnector(mContext);
 
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null) selectItem(DrawerPositions.MAIN);
-        Log.i(TAG, "MainActivity.onCreate.onCreate: END");
+        if (savedInstanceState == null) selectItem(drawerPositionsDefault);
+        if (DEBUG) Log.i(TAG, "MainActivity.onCreate.onCreate: END");
+        loadWedgeSettingFile();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        MainActivity.mCs108Library4a.connect(null);
-        if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onRestart()");
+        MainActivity.csLibrary4A.connect(null);
+        if (DEBUG) csLibrary4A.appendToLog("MainActivity.onRestart()");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onStart()");
+        if (DEBUG) csLibrary4A.appendToLog("MainActivity.onStart()");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         activityActive = true; wedged = false;
-        if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onResume()");
+        if (DEBUG) csLibrary4A.appendToLog("MainActivity.onResume()");
     }
 
     @Override
     protected void onPause() {
-        if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onPause()");
+        if (DEBUG) csLibrary4A.appendToLog("MainActivity.onPause()");
         activityActive = false;
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onStop()");
+        if (DEBUG) csLibrary4A.appendToLog("MainActivity.onStop()");
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        if (DEBUG) mCs108Library4a.appendToLog("MainActivity.onDestroy()");
-        if (true) { mCs108Library4a.disconnect(true); }
+        if (DEBUG) csLibrary4A.appendToLog("MainActivity.onDestroy()");
+        if (true) { csLibrary4A.disconnect(true); }
         super.onDestroy();
     }
 
@@ -128,9 +139,9 @@ public class MainActivity extends AppCompatActivity {
     private final Runnable configureRunnable = new Runnable() {
         @Override
         public void run() {
-            MainActivity.mCs108Library4a.appendToLog("AAA: mrfidToWriteSize = " + mCs108Library4a.mrfidToWriteSize());
-            if (mCs108Library4a.mrfidToWriteSize() != 0) {
-                MainActivity.mCs108Library4a.mrfidToWritePrint();
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: mrfidToWriteSize = " + csLibrary4A.mrfidToWriteSize());
+            if (csLibrary4A.mrfidToWriteSize() != 0) {
+                MainActivity.csLibrary4A.mrfidToWritePrint();
                 configureDisplaying = true;
                 mHandler.postDelayed(configureRunnable, 500);
             } else {
@@ -142,8 +153,11 @@ public class MainActivity extends AppCompatActivity {
 
     CustomProgressDialog progressDialog;
     private void selectItem(DrawerPositions position) {
-        Log.i(TAG, "MainActivity.selectItem: position = " + position);
-        if (true && position != DrawerPositions.MAIN && position != DrawerPositions.ABOUT && position != DrawerPositions.CONNECT && mCs108Library4a.isBleConnected() == false) {
+        if (DEBUG) Log.i(TAG, "MainActivity.selectItem: position = " + position);
+        if (position != DrawerPositions.MAIN
+                && position != DrawerPositions.ABOUT
+                && position != DrawerPositions.CONNECT
+                && position != DrawerPositions.DIRECTWEDGE && csLibrary4A.isBleConnected() == false) {
             Toast.makeText(MainActivity.mContext, "Bluetooth Disconnected.  Please Connect.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -154,7 +168,9 @@ public class MainActivity extends AppCompatActivity {
             case SPECIAL:
                 fragment = new HomeSpecialFragment();
                 break;
+
             case ABOUT:
+                //fragment = new Test1Fragment();
                 fragment = new AboutFragment();
                 break;
             case CONNECT:
@@ -169,6 +185,9 @@ public class MainActivity extends AppCompatActivity {
             case MULTIBANK:
                 fragment = InventoryRfidiMultiFragment.newInstance(true, null);
                 break;
+            case SIMINVENTORY:
+                fragment = InventoryRfidSimpleFragment.newInstance(false, null);
+                break;
             case SETTING:
                 fragment = new SettingFragment();
                 break;
@@ -181,8 +200,30 @@ public class MainActivity extends AppCompatActivity {
             case SECURITY:
                 fragment = new AccessSecurityFragment();
                 break;
+
+            case IMPINVENTORY:
+                fragment = new ImpinjFragment();
+                break;
+            case IMP775:
+                fragment = new ImpinjM775Fragment();
+                break;
+            case IMPAUTOTUNE:
+                fragment = new ImpinjAutoTuneFragment();
+                break;
+            case UCODE8:
+                fragment = new Ucode8Fragment();
+                break;
+            case UCODEDNA:
+                fragment = new UcodeFragment();
+                break;
+            case BAPCARD:
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "E200B0");
+                break;
             case COLDCHAIN:
                 fragment = new ColdChainFragment();
+                break;
+            case AURASENSE:
+                fragment = new AuraSenseFragment();
                 break;
             case AXZON:
                 fragment = AxzonSelectorFragment.newInstance(true);
@@ -190,27 +231,19 @@ public class MainActivity extends AppCompatActivity {
             case RFMICRON:
                 fragment = AxzonSelectorFragment.newInstance(false);
                 break;
-            case CTESIUS:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "E203510");
-                break;
             case FDMICRO:
                 fragment = new FdmicroFragment();
                 break;
-            case UCODE:
-                fragment = new UcodeFragment();
+            case CTESIUS:
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "E203510");
                 break;
-            case UCODE8:
-                fragment = new Ucode8Fragment();
+            case ASYGNTAG:
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "E283A");
                 break;
-            case BAPCARD:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "E200B0");
+            case LEDTAG:
+                fragment = new LedTagFragment();
                 break;
-            case IMPINVENTORY:
-                fragment = new ImpinjFragment();
-                break;
-            case AURASENSE:
-                fragment = new AuraSenseFragment();
-                break;
+
             case REGISTER:
                 fragment = new AccessRegisterFragment();
                 break;
@@ -220,14 +253,17 @@ public class MainActivity extends AppCompatActivity {
             case WEDGE:
                 fragment = new HomeSpecialFragment();
                 break;
+            case DIRECTWEDGE:
+                fragment = new DirectWedgeFragment();
+                break;
             case BLANK:
-//                fragment = new BlankFragment();
+                fragment = new TestFragment();
                 break;
         }
 
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        if (position == DrawerPositions.MAIN) {
+        if (position == drawerPositionsDefault) {
             //Pop the back stack since we want to maintain only one level of the back stack
             //Don't add the transaction to back stack since we are navigating to the first fragment
             //being displayed and adding the same to the backstack will result in redundancy
@@ -250,22 +286,23 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (drawerPositionsDefault != DrawerPositions.MAIN) return;
         mDrawerList.setItemChecked(0, true);
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_CONTENT_FRAGMENT);
-        MainActivity.mCs108Library4a.appendToLog("MainActivity super.onBackPressed");
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("MainActivity super.onBackPressed");
         super.onBackPressed();
     }
 
     public static boolean permissionRequesting;
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        MainActivity.mCs108Library4a.appendToLog("permissionRequesting: requestCode = " + requestCode + ", permissions is " + (permissions == null ? "null" : "valid") + ", grantResults is " + (grantResults == null ? "null" : "valid") );
-        MainActivity.mCs108Library4a.appendToLog("permissionRequesting: permissions[" + permissions.length + "] = " + (permissions != null && permissions.length > 0 ? permissions[0] : ""));
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("permissionRequesting: requestCode = " + requestCode + ", permissions is " + (permissions == null ? "null" : "valid") + ", grantResults is " + (grantResults == null ? "null" : "valid") );
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("permissionRequesting: permissions[" + permissions.length + "] = " + (permissions != null && permissions.length > 0 ? permissions[0] : ""));
         if (grantResults != null && grantResults.length != 0) {
             boolean bNegative = false;
             for (int i = 0; i < grantResults.length; i++) {
                 if (grantResults[i] < 0) bNegative = true;
-                mCs108Library4a.appendToLog("permissionRequesting: grantResults[" + i + "] = " + grantResults[i] );
+                if (DEBUG) csLibrary4A.appendToLog("permissionRequesting: grantResults[" + i + "] = " + grantResults[i] );
             }
             if (bNegative) {
                 Toast toast = Toast.makeText(this, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT);
@@ -289,58 +326,22 @@ public class MainActivity extends AppCompatActivity {
         intent.setData(Uri.parse("https://www.convergence.com.hk/apps-privacy-policy"));
         startActivity(intent);
     }
-    public void aboutClicked(View view) {
-//        MainActivity.mCs108Library4a.macRead(8);
 
-//        MainActivity.mCs108Library4a.setRfidOn(false);
-
-//        MainActivity.mCs108Library4a.barcodeSendCommandTrigger();
-//        MainActivity.mCs108Library4a.setVibrateOn(1);
-//        MainActivity.mCs108Library4a.barcodeReadTriggerStart();
-//        MainActivity.mCs108Library4a.setBarcodeOn(false);
-
-//        MainActivity.mCs108Library4a.getAutoBarStartSTop();
-//        MainActivity.mCs108Library4a.setAutoBarStartSTop(false);
-//        MainActivity.mCs108Library4a.getAutoRFIDAbort();
-//        MainActivity.mCs108Library4a.setAutoRFIDAbort(false);
-//        MainActivity.mCs108Library4a.setBatteryAutoReport(true);
-//        MainActivity.mCs108Library4a.triggerButtoneStatusRequest();
-//        MainActivity.mCs108Library4a.batteryLevelRequest();
-
-//        MainActivity.mCs108Library4a.resetSiliconLab();
-//        MainActivity.mCs108Library4a.getModelName();
-//        MainActivity.mCs108Library4a.getHostProcessorICSerialNumber();
-//        MainActivity.mCs108Library4a.hostProcessorICGetFirmwareVersion();
-
-//        MainActivity.mCs108Library4a.forceBTdisconnect();
-//        MainActivity.mCs108Library4a.getBluetoothICFirmwareName();
-//        MainActivity.mCs108Library4a.setBluetoothICFirmwareName("CS109 Reader TT");
-//        MainActivity.mCs108Library4a.getBluetoothICFirmwareVersion();
-
-        selectItem(DrawerPositions.ABOUT);
-    }
-    public void connectClicked(View view) {
-        selectItem(DrawerPositions.CONNECT);
-    }
-
+    public void aboutClicked(View view) { selectItem(DrawerPositions.ABOUT); }
+    public void connectClicked(View view) { selectItem(DrawerPositions.CONNECT); }
     public void invClicked(View view) { selectItem(DrawerPositions.INVENTORY); }
-
     public void locateClicked(View view) {
         selectItem(DrawerPositions.SEARCH);
     }
-
     public void multiBankClicked(View view) {
         selectItem(DrawerPositions.MULTIBANK);
     }
-
     public void settClicked(View view) {
         selectItem(DrawerPositions.SETTING);
     }
-
     public void filterClicked(View view) {
         selectItem(DrawerPositions.FILTER);
     }
-
     public void rrClicked(View view) {
         selectItem(DrawerPositions.READWRITE);
     }
@@ -350,25 +351,25 @@ public class MainActivity extends AppCompatActivity {
         selectItem(DrawerPositions.SECURITY);
     }
 
+    public void impInventoryClicked(View view) { selectItem(DrawerPositions.IMPINVENTORY); }
+    public void m775Clicked(View view) { selectItem(DrawerPositions.IMP775); }
+    public void autoTuneClicked(View view) { selectItem(DrawerPositions.IMPAUTOTUNE); }
+    public void uCode8Clicked(View view) { selectItem(DrawerPositions.UCODE8); }
+    public void uCodeClicked(View view) { selectItem(DrawerPositions.UCODEDNA); }
+    public void bapCardClicked(View view) { selectItem(DrawerPositions.BAPCARD); }
+    public void coldChainClicked(View view) { selectItem(DrawerPositions.COLDCHAIN); }
+    public void aurasenseClicked(View view) { selectItem(DrawerPositions.AURASENSE); }
+    public void axzonClicked(View view) { selectItem(DrawerPositions.AXZON); }
+    public void rfMicronClicked(View view) { selectItem(DrawerPositions.RFMICRON); }
+    public void fdmicroClicked(View view) { selectItem(DrawerPositions.FDMICRO); }
+    public void ctesiusClicked(View view) { selectItem(DrawerPositions.CTESIUS); }
+    public void asygnClicked(View view) { selectItem(DrawerPositions.ASYGNTAG); }
+    public void ledInventoryClicked(View view) { selectItem(DrawerPositions.LEDTAG); }
+
     public void regClicked(View view) {
         selectItem(DrawerPositions.REGISTER);
     }
-
-    public void coldChainClicked(View view) { selectItem(DrawerPositions.COLDCHAIN); }
-    public void bapCardClicked(View view) { selectItem(DrawerPositions.BAPCARD); }
-    public void ctesiusClicked(View view) { selectItem(DrawerPositions.CTESIUS); }
-    public void fdmicroClicked(View view) { selectItem(DrawerPositions.FDMICRO); }
-
-    public void axzonClicked(View view) { selectItem(DrawerPositions.AXZON); }
-    public void rfMicronClicked(View view) { selectItem(DrawerPositions.RFMICRON); }
-
-    public void uCodeClicked(View view) { selectItem(DrawerPositions.UCODE); }
-    public void uCode8Clicked(View view) { selectItem(DrawerPositions.UCODE8); }
-
-    public void impInventoryClicked(View view) { selectItem(DrawerPositions.IMPINVENTORY); }
-    public void aurasenseClicked(View view) { selectItem(DrawerPositions.AURASENSE); }
-
-    static boolean wedged = false;
+    public static boolean wedged = false;
     public void wedgeClicked(View view) {
         if (true) {
             wedged = true;
@@ -377,16 +378,19 @@ public class MainActivity extends AppCompatActivity {
             startActivity(i);
         }
     }
-
-    public void blankClicked(View view) {
-//        selectItem(DrawerPositions.BLANK);
+    public void directWedgeClicked(View view) {
+        selectItem(DrawerPositions.DIRECTWEDGE);
     }
+
+    public void simpleInventoryClicked(View view) { selectItem(DrawerPositions.SIMINVENTORY); }
+
+    public void blankClicked(View view) { if (false) selectItem(DrawerPositions.BLANK); }
 
     // The click listener for ListView in the navigation drawer
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Log.i(TAG, "MainActivity.onItemClick: position = " + position + ", id = " + id);
+            if (DEBUG) Log.i(TAG, "MainActivity.onItemClick: position = " + position + ", id = " + id);
             selectItem(DrawerListContent.DrawerPositions.toDrawerPosition(position));
         }
     }
@@ -394,11 +398,50 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        mCs108Library4a.appendToLog("onNewIntent !!! intent.getAction = " + intent.getAction());
+        if (DEBUG) csLibrary4A.appendToLog("onNewIntent !!! intent.getAction = " + intent.getAction());
         readFromIntent(intent);
     }
     private void readFromIntent(Intent intent) {
-        mCs108Library4a.appendToLog("onNewIntent !!! readFromIntent entry");
+        if (DEBUG) csLibrary4A.appendToLog("onNewIntent !!! readFromIntent entry");
         String action = intent.getAction();
+    }
+
+    public static String fileName = "SimpleWedgeSettings";
+    public static String wedgePrefix = null, wedgeSuffix = null;
+    public static int wedgeDelimiter = 0x0a, wedgePower = 300;
+    void loadWedgeSettingFile() {
+        File path = this.getFilesDir();
+        File file = new File(path, fileName);
+        boolean bNeedDefault = true, DEBUG = false;
+        if (file.exists()) {
+            int length = (int) file.length();
+            byte[] bytes = new byte[length];
+            try {
+                InputStream instream = new FileInputStream(file);
+                if (instream != null) {
+                    InputStreamReader inputStreamReader = new InputStreamReader(instream);
+                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        if (true) csLibrary4A.appendToLog("Data read = " + line);
+                        String[] dataArray = line.split(",");
+                        if (dataArray.length == 2) {
+                            if (dataArray[0].matches("wedgePower")) {
+                                wedgePower = Integer.valueOf(dataArray[1]);
+                            } else if (dataArray[0].matches("wedgePrefix")) {
+                                wedgePrefix = dataArray[1];
+                            } else if (dataArray[0].matches("wedgeSuffix")) {
+                                wedgeSuffix = dataArray[1];
+                            } else if (dataArray[0].matches("wedgeDelimiter")) {
+                                wedgeDelimiter = Integer.valueOf(dataArray[1]);
+                            }
+                        }
+                    }
+                }
+                instream.close();
+            } catch (Exception ex) {
+                //
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class AccessXerxesLoggerFragment extends CommonFragment {
@@ -88,8 +88,8 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i != iUserCode2UnitPosition) {
                     String strValue = editTextUserCode2.getText().toString();
-                    if (iUserCode2UnitPosition == 0 && i == 1) strValue = MainActivity.mCs108Library4a.temperatureC2F(strValue);
-                    else if (iUserCode2UnitPosition == 1 && i == 0) strValue = MainActivity.mCs108Library4a.temperatureF2C(strValue);
+                    if (iUserCode2UnitPosition == 0 && i == 1) strValue = MainActivity.csLibrary4A.temperatureC2F(strValue);
+                    else if (iUserCode2UnitPosition == 1 && i == 0) strValue = MainActivity.csLibrary4A.temperatureF2C(strValue);
                     editTextUserCode2.setText(strValue);
                 }
                 iUserCode2UnitPosition = i;
@@ -108,8 +108,8 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i != iUserCode3UnitPosition) {
                     String strValue = editTextUserCode3.getText().toString();
-                    if (iUserCode3UnitPosition == 0 && i == 1) strValue = MainActivity.mCs108Library4a.temperatureC2F(strValue);
-                    else if (iUserCode3UnitPosition == 1 && i == 0) strValue = MainActivity.mCs108Library4a.temperatureF2C(strValue);
+                    if (iUserCode3UnitPosition == 0 && i == 1) strValue = MainActivity.csLibrary4A.temperatureC2F(strValue);
+                    else if (iUserCode3UnitPosition == 1 && i == 0) strValue = MainActivity.csLibrary4A.temperatureF2C(strValue);
                     editTextUserCode3.setText(strValue);
                 }
                 iUserCode3UnitPosition = i;
@@ -127,10 +127,10 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -142,10 +142,10 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -153,7 +153,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
             }
         });
 
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
@@ -165,7 +165,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
         super.onDestroy();
     }
 
@@ -218,7 +218,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                 indexUser = stringDetail.indexOf("USER=");
                 if (indexUser != -1) {
                     String stringUser = stringDetail.substring(indexUser + 5);
-                    MainActivity.mCs108Library4a.appendToLog("stringUser = " + stringUser);
+                    MainActivity.csLibrary4A.appendToLog("stringUser = " + stringUser);
 
                     boolean bEnableBAPMode = false;
                     int number = Integer.valueOf(stringUser.substring(3, 4), 16);
@@ -229,7 +229,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
     }
 
     void startAccessTask() {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("startAccessTask()");
         if (updating == false) {
             updating = true; bankProcessing = 0;
             checkProcessing = 0;
@@ -244,19 +244,19 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
         public void run() {
             boolean rerunRequest = false; boolean taskRequest = false;
             if (accessTask == null) {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): NULL accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
             } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
                 rerunRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
                 taskRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): FINISHED accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): FINISHED accessReadWriteTask");
             }
-            if (processResult()) { rerunRequest = true; MainActivity.mCs108Library4a.appendToLog("processResult is TRUE");}
+            if (processResult()) { rerunRequest = true; MainActivity.csLibrary4A.appendToLog("processResult is TRUE");}
             else if (taskRequest) {
                 boolean invalid = processTickItems();
-                MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
+                MainActivity.csLibrary4A.appendToLog("processTickItems, invalid = " + invalid);
                 if (bankProcessing++ != 0 && invalid == true)   rerunRequest = false;
                 else {
                     int selectBank = 1;
@@ -268,20 +268,20 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                             selectMask, selectBank, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                            (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE),
+                            (operationRead ? Cs108Library4A.HostCommands.CMD_18K6CREAD: Cs108Library4A.HostCommands.CMD_18K6CWRITE),
                             0, 0, true,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;
-                    MainActivity.mCs108Library4a.appendToLog("accessTask is created with selectBank = " + selectBank);
+                    MainActivity.csLibrary4A.appendToLog("accessTask is created with selectBank = " + selectBank);
                 }
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 500);
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): Restart");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): Restart");
             }
             else    updating = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): Ending with updating = " + updating);
+            MainActivity.csLibrary4A.appendToLog("AccessXerxesLoggerFragment().updateRunnable(): Ending with updating = " + updating);
         }
     };
 
@@ -289,12 +289,12 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
         if (strData == null)    return false;
         if (strData.length() < 4) return false;
 
-        String strValue = MainActivity.mCs108Library4a.strFloat16toFloat32(strData);
+        String strValue = MainActivity.csLibrary4A.strFloat16toFloat32(strData);
         if (strValue == null) return false;
         else {
             if ( (iTempIndex == 0 && spinnerUserCode2Unit.getSelectedItemPosition() == 1)
             || (iTempIndex == 1 && spinnerUserCode3Unit.getSelectedItemPosition() == 1) )
-                strValue = MainActivity.mCs108Library4a.temperatureC2F(strValue);
+                strValue = MainActivity.csLibrary4A.temperatureC2F(strValue);
             if (iTempIndex == 0)    editTextUserCode2.setText(strValue);
             else    editTextUserCode3.setText(strValue);
             }
@@ -308,8 +308,8 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
         else {
             if (changedSelectIndex) {
                 changedSelectIndex = false; MainActivity.selectFor = 0;
-                MainActivity.mCs108Library4a.setSelectCriteriaDisable(2);
-                MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
+                MainActivity.csLibrary4A.setSelectCriteriaDisable(2);
+                MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
             }
             accessResult = accessTask.accessResult;
             if (accessResult == null) {
@@ -330,7 +330,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                     //checkBoxUserCode5.setChecked(false);
                 }
             } else {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.USERCODE1) {
                     textViewUserCode1OK.setText("O");
                     //checkBoxUserCode1.setChecked(false);
@@ -404,8 +404,8 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                 String strValue = editTextUserCode2.getText().toString();
                 if (strValue.length() == 0) invalidRequest1 = true;
                 else {
-                    if (spinnerUserCode2Unit.getSelectedItemPosition() == 1)    strValue =  MainActivity.mCs108Library4a.temperatureF2C(strValue);
-                    strValue = MainActivity.mCs108Library4a.str2float16(strValue);
+                    if (spinnerUserCode2Unit.getSelectedItemPosition() == 1)    strValue =  MainActivity.csLibrary4A.temperatureF2C(strValue);
+                    strValue = MainActivity.csLibrary4A.str2float16(strValue);
                     if (strValue.length() != 4) invalidRequest1 = true;
                     else writeData = strValue;
                 }
@@ -419,8 +419,8 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                 String strValue = editTextUserCode3.getText().toString();
                 if (strValue.length() == 0) invalidRequest1 = true;
                 else {
-                    if (spinnerUserCode3Unit.getSelectedItemPosition() == 1)    strValue =  MainActivity.mCs108Library4a.temperatureF2C(strValue);
-                    strValue = MainActivity.mCs108Library4a.str2float16(strValue);
+                    if (spinnerUserCode3Unit.getSelectedItemPosition() == 1)    strValue =  MainActivity.csLibrary4A.temperatureF2C(strValue);
+                    strValue = MainActivity.csLibrary4A.str2float16(strValue);
                     if (strValue.length() != 4) invalidRequest1 = true;
                     else writeData = strValue;
                 }
@@ -458,25 +458,25 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
         }
 
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(accBank) == false) {
+            if (MainActivity.csLibrary4A.setAccessBank(accBank) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessOffset(accOffset) == false) {
+            if (MainActivity.csLibrary4A.setAccessOffset(accOffset) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
             if (accSize == 0) {
                 invalidRequest1 = true;
-            } else if (MainActivity.mCs108Library4a.setAccessCount(accSize) == false) {
+            } else if (MainActivity.csLibrary4A.setAccessCount(accSize) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false && operationRead == false) {
             if (invalidRequest1 == false) {
-                if (MainActivity.mCs108Library4a.setAccessWriteData(writeData) == false) {
+                if (MainActivity.csLibrary4A.setAccessWriteData(writeData) == false) {
                     invalidRequest1 = true;
                 }
             }

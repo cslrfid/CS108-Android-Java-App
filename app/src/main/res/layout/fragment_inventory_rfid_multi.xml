@@ -135,7 +135,7 @@
         android:orientation="vertical" >
 
         <CheckBox
-            android:id="@+id/accessInventoryFilterFdTag"
+            android:id="@+id/accessInventoryFilterByTid"
             android:layout_width="wrap_content"
             style="@style/style_normal_font"
             android:checked="true"

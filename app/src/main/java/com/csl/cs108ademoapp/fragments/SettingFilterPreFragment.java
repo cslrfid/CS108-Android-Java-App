@@ -62,7 +62,7 @@ public class SettingFilterPreFragment extends CommonFragment {
 
         actionSpinner = (Spinner) getActivity().findViewById(R.id.preFilterAction);
         ArrayAdapter<CharSequence> actionAdapter;
-        if (true) { //MainActivity.mCs108Library4a.getQuerySelect() >= 2) {
+        if (true) { //MainActivity.csLibrary4A.getQuerySelect() >= 2) {
             actionAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.filterPre_SLaction_options, R.layout.custom_spinner_layout);
         } else {
             actionAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.filterPre_SessionAction_options, R.layout.custom_spinner_layout);
@@ -107,10 +107,10 @@ public class SettingFilterPreFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 boolean validValue = false;
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -130,14 +130,14 @@ public class SettingFilterPreFragment extends CommonFragment {
             }
         });
 
-        if (sameCheck == false) MainActivity.mCs108Library4a.setSameCheck(false);
+        if (sameCheck == false) MainActivity.csLibrary4A.setSameCheck(false);
         mHandler.post(updateRunnable);
     }
 
     @Override
     public void onDestroy() {
         if (settingTask != null) settingTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
         mHandler.removeCallbacks(updateRunnable);
         super.onDestroy();
     }
@@ -153,11 +153,11 @@ public class SettingFilterPreFragment extends CommonFragment {
             long lValue;
             boolean updating = false;
 
-            if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0)   updating = true;
+            if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0)   updating = true;
             else {
                 if (updating == false && editTextFilterPreSelectIndex.getText().length() == 0) {
-                    lValue = MainActivity.mCs108Library4a.getInvSelectIndex();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getInvSelectIndex = " + lValue);
+                    lValue = MainActivity.csLibrary4A.getInvSelectIndex();
+                    MainActivity.csLibrary4A.appendToLog("updateRunnable getInvSelectIndex = " + lValue);
                     if (lValue < 0) {
                         updating = true;
                     } else {
@@ -165,13 +165,13 @@ public class SettingFilterPreFragment extends CommonFragment {
                     }
                 }
                 if (updating == false) {
-                    boolean bValue = MainActivity.mCs108Library4a.getSelectEnable();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectEnable = " + bValue);
+                    boolean bValue = MainActivity.csLibrary4A.getSelectEnable();
+                    MainActivity.csLibrary4A.appendToLog("updateRunnable getSelectEnable = " + bValue);
                     checkBoxEnable.setChecked(bValue);
                 }
                 if (updating == false) {
-                    int iValue1 = MainActivity.mCs108Library4a.getSelectTarget();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectTarget = " + iValue1);
+                    int iValue1 = MainActivity.csLibrary4A.getSelectTarget();
+                    MainActivity.csLibrary4A.appendToLog("updateRunnable getSelectTarget = " + iValue1);
                     if (iValue1 < 0) {
                         updating = true;
                     } else {
@@ -181,8 +181,8 @@ public class SettingFilterPreFragment extends CommonFragment {
                     }
                 }
                 if (updating == false) {
-                    int iValue1 = MainActivity.mCs108Library4a.getSelectAction();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectAction = " + iValue1);
+                    int iValue1 = MainActivity.csLibrary4A.getSelectAction();
+                    MainActivity.csLibrary4A.appendToLog("updateRunnable getSelectAction = " + iValue1);
                     if (iValue1 < 0) {
                         updating = true;
                     } else {
@@ -190,8 +190,8 @@ public class SettingFilterPreFragment extends CommonFragment {
                     }
                 }
                 if (updating == false) {
-                    int iValue1 = MainActivity.mCs108Library4a.getSelectMaskBank();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectMaskBank = " + iValue1);
+                    int iValue1 = MainActivity.csLibrary4A.getSelectMaskBank();
+                    MainActivity.csLibrary4A.appendToLog("updateRunnable getSelectMaskBank = " + iValue1);
                     if (iValue1 < 0) {
                         updating = true;
                     } else {
@@ -201,8 +201,8 @@ public class SettingFilterPreFragment extends CommonFragment {
                     }
                 }
                 if (updating == false) {
-                    int iValue1 = MainActivity.mCs108Library4a.getSelectMaskOffset();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectMaskOffset = " + iValue1);
+                    int iValue1 = MainActivity.csLibrary4A.getSelectMaskOffset();
+                    MainActivity.csLibrary4A.appendToLog("updateRunnable getSelectMaskOffset = " + iValue1);
                     if (iValue1 < 0) {
                         updating = true;
                     } else {
@@ -212,8 +212,8 @@ public class SettingFilterPreFragment extends CommonFragment {
                     }
                 }
                 if (updating == false) {
-                    String strValue = MainActivity.mCs108Library4a.getSelectMaskData();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectMaskData = " + strValue);
+                    String strValue = MainActivity.csLibrary4A.getSelectMaskData();
+                    MainActivity.csLibrary4A.appendToLog("updateRunnable getSelectMaskData = " + strValue);
                     if (strValue == null) {
                         updating = true;
                     } else {
@@ -232,9 +232,9 @@ public class SettingFilterPreFragment extends CommonFragment {
         boolean sameSetting = true;
         boolean invalidRequest = false;
 
-        if (MainActivity.mCs108Library4a.getInvSelectIndex() != invSelectIndex) {
+        if (MainActivity.csLibrary4A.getInvSelectIndex() != invSelectIndex) {
             sameSetting = false;
-            if (MainActivity.mCs108Library4a.setInvSelectIndex(invSelectIndex) == false)
+            if (MainActivity.csLibrary4A.setInvSelectIndex(invSelectIndex) == false)
                 invalidRequest = true;
             else {
                 mHandler.removeCallbacks(updateRunnable);
@@ -248,18 +248,18 @@ public class SettingFilterPreFragment extends CommonFragment {
                 boolean maskbit = (spinnerMaskDataType.getSelectedItemPosition() == 0 ? false : true);
                 if (maskbit) invSelectMaskData = filterPreMaskDataBit.getText().toString();
                 else invSelectMaskData = filterPreMaskDataHex.getText().toString();
-                String strValue = MainActivity.mCs108Library4a.getSelectMaskData();
+                String strValue = MainActivity.csLibrary4A.getSelectMaskData();
                 if (invSelectMaskData.length() != strValue.length()) { }
                 else if (invSelectMaskData.length() == 0 && strValue.length() == 0) { dataMatched = true; }
                 else dataMatched = invSelectMaskData.matches(strValue);
-                if (MainActivity.mCs108Library4a.getSelectEnable() !=  invSelectEnable
-                        || MainActivity.mCs108Library4a.getSelectTarget() != invSelectTarget
-                        || MainActivity.mCs108Library4a.getSelectAction() != invSelectAction
-                        || MainActivity.mCs108Library4a.getSelectMaskBank() != invSelectMaskBank
-                        || MainActivity.mCs108Library4a.getSelectMaskOffset() != invSelectMaskOffset
+                if (MainActivity.csLibrary4A.getSelectEnable() !=  invSelectEnable
+                        || MainActivity.csLibrary4A.getSelectTarget() != invSelectTarget
+                        || MainActivity.csLibrary4A.getSelectAction() != invSelectAction
+                        || MainActivity.csLibrary4A.getSelectMaskBank() != invSelectMaskBank
+                        || MainActivity.csLibrary4A.getSelectMaskOffset() != invSelectMaskOffset
                         || dataMatched == false  || sameCheck == false) {
                     sameSetting = false;
-                    if (MainActivity.mCs108Library4a.setSelectCriteria(0, invSelectEnable, invSelectTarget, invSelectAction, invSelectMaskBank, invSelectMaskOffset, invSelectMaskData, maskbit) == false)
+                    if (MainActivity.csLibrary4A.setSelectCriteria(0, invSelectEnable, invSelectTarget, invSelectAction, invSelectMaskBank, invSelectMaskOffset, invSelectMaskData, maskbit) == false)
                         invalidRequest = true;
                 }
             }
@@ -267,7 +267,7 @@ public class SettingFilterPreFragment extends CommonFragment {
 
         settingTask = new SettingTask(button, sameSetting, invalidRequest);
         settingTask.execute();
-        MainActivity.mCs108Library4a.saveSetting2File();
+        MainActivity.csLibrary4A.saveSetting2File();
     }
 }
 

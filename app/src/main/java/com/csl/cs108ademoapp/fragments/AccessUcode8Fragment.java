@@ -28,7 +28,7 @@ public class AccessUcode8Fragment extends CommonFragment {
         radioButtonSelectEpcBrand = (RadioButton) getActivity().findViewById(R.id.accessUC8SelectEpcBrand); radioButtonSelectEpcBrand.setChecked(true);
         radioButtonSelectEpcBrandTidCheck = (RadioButton) getActivity().findViewById(R.id.accessUC8SelectEpcBrandTidCheck);
 
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
@@ -42,29 +42,29 @@ public class AccessUcode8Fragment extends CommonFragment {
         super.setUserVisibleHint(isVisibleToUser);
         if(getUserVisibleHint()) {
             userVisibleHint = true;
-            MainActivity.mCs108Library4a.appendToLog("AccessUcode8Fragment is now VISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessUcode8Fragment is now VISIBLE");
             //            setNotificationListener();
         } else {
             if (radioButtonSelectEpc != null && radioButtonSelectEpcTid != null && radioButtonSelectEpcBrand != null && radioButtonSelectEpcBrandTidCheck != null) {
                 if (radioButtonSelectEpc.isChecked()) {
-                    MainActivity.mCs108Library4a.appendToLog("Selected EPC");
+                    MainActivity.csLibrary4A.appendToLog("Selected EPC");
                     MainActivity.mDid = "E2806894A";
                 }
                 if (radioButtonSelectEpcTid.isChecked()) {
-                    MainActivity.mCs108Library4a.appendToLog("Selected EPC+TID");
+                    MainActivity.csLibrary4A.appendToLog("Selected EPC+TID");
                     MainActivity.mDid = "E2806894B";
                 }
                 if (radioButtonSelectEpcBrand.isChecked()) {
-                    MainActivity.mCs108Library4a.appendToLog("Selected EPC+BRAND");
+                    MainActivity.csLibrary4A.appendToLog("Selected EPC+BRAND");
                     MainActivity.mDid = "E2806894C";
                 }
                 if (radioButtonSelectEpcBrandTidCheck.isChecked()) {
-                    MainActivity.mCs108Library4a.appendToLog("Selected EPC+BRAND");
+                    MainActivity.csLibrary4A.appendToLog("Selected EPC+BRAND");
                     MainActivity.mDid = "E2806894d";
                 }
             }
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessUcode8Fragment is now INVISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessUcode8Fragment is now INVISIBLE");
         }
     }
 

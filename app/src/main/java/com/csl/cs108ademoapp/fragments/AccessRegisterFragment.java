@@ -29,7 +29,6 @@ import com.csl.cs108ademoapp.InventoryBarcodeTask;
 import com.csl.cs108ademoapp.InventoryRfidTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
@@ -150,8 +149,8 @@ public class AccessRegisterFragment extends CommonFragment {
 
                 if (inventoryBarcodeTask != null) {
                     if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) {
-                        barcodeReadDone = true; MainActivity.mCs108Library4a.appendToLog("barcodeReadDone = true in textChanged");
-                        MainActivity.mCs108Library4a.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(false);
+                        barcodeReadDone = true; MainActivity.csLibrary4A.appendToLog("barcodeReadDone = true in textChanged");
+                        MainActivity.csLibrary4A.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(false);
                     }
                 }
                 if (checkBoxWriteLengthEnable.isChecked() == false) {
@@ -197,6 +196,7 @@ public class AccessRegisterFragment extends CommonFragment {
                     mHandler.removeCallbacks(runnableSelect);
                     textViewSelectedTags.setText("");
                     for (int i = 0; i < epcArrayList.size(); i++) {
+                        MainActivity.csLibrary4A.appendToLog("epcArrayList.get[" + i + "] = " + epcArrayList.get(i));
                         textViewSelectedTags.append(epcArrayList.get(i) + "\n");
                     }
                     if (textViewSelectedTags.getText().toString().trim().length() == 0)  {
@@ -213,8 +213,9 @@ public class AccessRegisterFragment extends CommonFragment {
                     String strTagId = editTextSelectMask.getText().toString();
                     int selectBank = spinnerSelectBank.getSelectedItemPosition() + 1;
                     long pwrlevel = Integer.parseInt(editTextAntennaPower.getText().toString());
-                    MainActivity.mCs108Library4a.setSelectedTag(strTagId, selectBank, pwrlevel);
-                    MainActivity.mCs108Library4a.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY);
+                    MainActivity.csLibrary4A.setTagRead(0);
+                    MainActivity.csLibrary4A.setSelectedTag(strTagId, selectBank, pwrlevel);
+                    MainActivity.csLibrary4A.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY);
                     inventoryRfidTask = new InventoryRfidTask();
                     inventoryRfidTask.execute();
                     MainActivity.sharedObjects.serviceArrayList.clear(); epcArrayList.clear();
@@ -227,7 +228,7 @@ public class AccessRegisterFragment extends CommonFragment {
         buttonReadBar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.mCs108Library4a.appendToLog("going to startStopBarcodeHandler 2"); startStopBarcodeHandler(false);
+                MainActivity.csLibrary4A.appendToLog("going to startStopBarcodeHandler 2"); startStopBarcodeHandler(false);
             }
         });
 
@@ -286,7 +287,7 @@ public class AccessRegisterFragment extends CommonFragment {
             }
         });
 
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
@@ -297,20 +298,20 @@ public class AccessRegisterFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        MainActivity.mCs108Library4a.setNotificationListener(null);
+        MainActivity.csLibrary4A.setNotificationListener(null);
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        MainActivity.mCs108Library4a.setNotificationListener(null);
+        MainActivity.csLibrary4A.setNotificationListener(null);
         mHandler.removeCallbacks(runnableSelect);
         mHandler.removeCallbacks(runnableAuto123);
         if (inventoryBarcodeTask != null) inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.DESTORY;
         if (accessTask != null) accessTask.taskCancelReason = AccessTask.TaskCancelRReason.DESTORY;
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AcccessRegisterFragment().onDestory(): onDestory()");
-        MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AcccessRegisterFragment().onDestory(): onDestory()");
+        MainActivity.csLibrary4A.setSameCheck(true);
+        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 
@@ -319,15 +320,15 @@ public class AccessRegisterFragment extends CommonFragment {
     }
 
     void setNotificationListener() {
-        MainActivity.mCs108Library4a.setNotificationListener(new Cs108Connector.NotificationListener() {
+        MainActivity.csLibrary4A.setNotificationListener(new Cs108Library4A.NotificationListener() {
             @Override
             public void onChange() {
-                MainActivity.mCs108Library4a.appendToLog("TRIGGER key is pressed.");
+                MainActivity.csLibrary4A.appendToLog("TRIGGER key is pressed.");
                 if (barcodeReadRequesting) {
                     if (customPopupWindow.popupWindow.isShowing()) {
                         customPopupWindow.popupWindow.dismiss();
-                        barcodeReadRequesting = false; MainActivity.mCs108Library4a.appendToLog("barcodeReadRequesting = false");
-                        ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun 1 = true after popup");
+                        barcodeReadRequesting = false; MainActivity.csLibrary4A.appendToLog("barcodeReadRequesting = false");
+                        ready2nextRun = true; MainActivity.csLibrary4A.appendToLog("ready2nextRun 1 = true after popup");
                     }
                 }
             }
@@ -340,6 +341,7 @@ public class AccessRegisterFragment extends CommonFragment {
         public void run() {
             while (MainActivity.sharedObjects.serviceArrayList.size() != 0) {
                 String strEpc = MainActivity.sharedObjects.serviceArrayList.get(0); MainActivity.sharedObjects.serviceArrayList.remove(0);
+                MainActivity.csLibrary4A.appendToLog("epcArrayList.add[" + epcArrayList.size() + "] = " + strEpc);
                 boolean matched = false;
                 for (int i = 0; i < epcArrayList.size(); i++) {
                     if (epcArrayList.get(i).matches(strEpc)) {
@@ -362,19 +364,19 @@ public class AccessRegisterFragment extends CommonFragment {
         @Override
         public void run() {
             boolean running = false;
-            MainActivity.mCs108Library4a.appendToLog("found barcodeReadRequesting as " + barcodeReadRequesting );
+            MainActivity.csLibrary4A.appendToLog("found barcodeReadRequesting as " + barcodeReadRequesting );
             if (barcodeReadRequesting) {
                 if (customPopupWindow.popupWindow.isShowing()) running = true;
                 else {
-                    barcodeReadRequesting = false; MainActivity.mCs108Library4a.appendToLog("barcodeReadRequesting = false");
-                    ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun 1 = true after popup");
+                    barcodeReadRequesting = false; MainActivity.csLibrary4A.appendToLog("barcodeReadRequesting = false");
+                    ready2nextRun = true; MainActivity.csLibrary4A.appendToLog("ready2nextRun 1 = true after popup");
                 }
             }
-            MainActivity.mCs108Library4a.appendToLog("runnableAuto123: runningAuto123 = " + runningAuto123 + ", inventoryBarcodeTask = " + (inventoryBarcodeTask != null ? "valid" : "null"));
+            MainActivity.csLibrary4A.appendToLog("runnableAuto123: runningAuto123 = " + runningAuto123 + ", inventoryBarcodeTask = " + (inventoryBarcodeTask != null ? "valid" : "null"));
             if (runningAuto123 == 2 && inventoryBarcodeTask != null) { if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) running = true; }
-            MainActivity.mCs108Library4a.appendToLog("runnableAuto123: accessTask = " + (accessTask != null ? "valid" : "null"));
+            MainActivity.csLibrary4A.appendToLog("runnableAuto123: accessTask = " + (accessTask != null ? "valid" : "null"));
             if (accessTask != null) { if (accessTask.getStatus() == AsyncTask.Status.RUNNING) running = true; }
-            MainActivity.mCs108Library4a.appendToLog("runnableAuto123: running = " + running);
+            MainActivity.csLibrary4A.appendToLog("runnableAuto123: running = " + running);
             if (running == false) {
                 int totalTagNew = getTotalTag();
                 if (runningAccessTask) {
@@ -382,7 +384,7 @@ public class AccessRegisterFragment extends CommonFragment {
                         if (spinnerWriteDataType.getSelectedItemPosition() == 2) editTextWriteData.setText(incrementString(editTextWriteData.getText().toString()));
                     } else runningAuto123 = 0;
                 }
-                MainActivity.mCs108Library4a.appendToLog("runnableAuto123: totalTagNew = " + totalTagNew + ", totalTag = " + totalTag + ", runningAuto123 = " + runningAuto123 + ", runningAccessTask = " + runningAccessTask);
+                MainActivity.csLibrary4A.appendToLog("runnableAuto123: totalTagNew = " + totalTagNew + ", totalTag = " + totalTag + ", runningAuto123 = " + runningAuto123 + ", runningAccessTask = " + runningAccessTask);
                 runningAccessTask = false;
 
                 boolean bcontinue = true;
@@ -392,8 +394,8 @@ public class AccessRegisterFragment extends CommonFragment {
                     }
                     if (bcontinue) {
                         customPopupWindow.popupStart("Next barcode.", false);
-                        barcodeReadRequesting = true; MainActivity.mCs108Library4a.appendToLog("barcodeReadRequesting = true");
-                        barcodeReadDone = false; MainActivity.mCs108Library4a.appendToLog("barcodeReadDone = false as popup");
+                        barcodeReadRequesting = true; MainActivity.csLibrary4A.appendToLog("barcodeReadRequesting = true");
+                        barcodeReadDone = false; MainActivity.csLibrary4A.appendToLog("barcodeReadDone = false as popup");
                         bcontinue = false;
                         running = true;
                     }
@@ -402,10 +404,10 @@ public class AccessRegisterFragment extends CommonFragment {
                     if (ready2nextRun == false) {
                         if (buttonSelect.getText().toString().contains("Clear")) {
                             if (textViewSelectedTags.getText().toString().trim().length() != 0) {
-                                ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun = true as valid selected tag in textview");
+                                ready2nextRun = true; MainActivity.csLibrary4A.appendToLog("ready2nextRun = true as valid selected tag in textview");
                             }
                         } else {
-                            ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun = true as not clear");
+                            ready2nextRun = true; MainActivity.csLibrary4A.appendToLog("ready2nextRun = true as not clear");
                         }
                     }
                     if (ready2nextRun) {
@@ -415,8 +417,8 @@ public class AccessRegisterFragment extends CommonFragment {
             }
             if (running && runningAuto123 == 2) mHandler.postDelayed(runnableAuto123, 250);
             else {
-                ready2nextRun = true; MainActivity.mCs108Library4a.appendToLog("ready2nextRun = true at the runnable end");
-                barcodeReadRequesting = false; barcodeReadDone = false; MainActivity.mCs108Library4a.appendToLog("barcodeReadDone = false at the runnable end");
+                ready2nextRun = true; MainActivity.csLibrary4A.appendToLog("ready2nextRun = true at the runnable end");
+                barcodeReadRequesting = false; barcodeReadDone = false; MainActivity.csLibrary4A.appendToLog("barcodeReadDone = false at the runnable end");
             }
         }
     };
@@ -430,7 +432,7 @@ public class AccessRegisterFragment extends CommonFragment {
             String stringB = String.format("%X", iValue);
             String stringC = null;
             if (i > 0) stringC = string1.substring(string1.length() - i, string1.length());
-            MainActivity.mCs108Library4a.appendToLog("stringABC = " + stringA + "," + stringB + "," + stringC);
+            MainActivity.csLibrary4A.appendToLog("stringABC = " + stringA + "," + stringB + "," + stringC);
             String stringABC = (stringA != null ? stringA : "") + stringB + (stringC != null ? stringC : "");
             string1 = stringABC;
             if (iValue != 0) break;
@@ -446,7 +448,7 @@ public class AccessRegisterFragment extends CommonFragment {
             iValue = Integer.parseInt(stringTotalTag);
         } catch (Exception ex) {
         }
-        MainActivity.mCs108Library4a.appendToLog("totalTag = " + iValue);
+        MainActivity.csLibrary4A.appendToLog("totalTag = " + iValue);
         return iValue;
     }
 
@@ -458,14 +460,14 @@ public class AccessRegisterFragment extends CommonFragment {
 
         boolean started = false;
         if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) started = true;
-        if (buttonTrigger && ((started && MainActivity.mCs108Library4a.getTriggerButtonStatus()) || (started == false && MainActivity.mCs108Library4a.getTriggerButtonStatus() == false))) return;
+        if (buttonTrigger && ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) return;
         if (started == false) {
-            if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+            if (MainActivity.csLibrary4A.isBleConnected() == false) {
                 Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (MainActivity.mCs108Library4a.isBarcodeFailure()) {
-                MainActivity.mCs108Library4a.appendToLog("Toasted 'Barcode is disable'");
+            if (MainActivity.csLibrary4A.isBarcodeFailure()) {
+                MainActivity.csLibrary4A.appendToLog("Toasted 'Barcode is disable'");
                 Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -479,14 +481,14 @@ public class AccessRegisterFragment extends CommonFragment {
         boolean runningBarcode = false;
         if (inventoryBarcodeTask != null) {
             if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) {
-                MainActivity.mCs108Library4a.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(buttonTrigger);
+                MainActivity.csLibrary4A.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(buttonTrigger);
                 runningBarcode = true;
             }
         }
 
         boolean runningAccessTask = false;
         if (accessTask != null) { if (accessTask.getStatus() == AsyncTask.Status.RUNNING) runningAccessTask = true; }
-        if (buttonTrigger && ((runningAccessTask && MainActivity.mCs108Library4a.getTriggerButtonStatus()) || (runningAccessTask == false && MainActivity.mCs108Library4a.getTriggerButtonStatus() == false))) {
+        if (buttonTrigger && ((runningAccessTask && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (runningAccessTask == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) {
             return true;
         }
 
@@ -496,29 +498,29 @@ public class AccessRegisterFragment extends CommonFragment {
             if (buttonTrigger) accessTask.taskCancelReason = AccessTask.TaskCancelRReason.BUTTON_RELEASE;
             else accessTask.taskCancelReason = AccessTask.TaskCancelRReason.STOP;
         } else {
-            if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+            if (MainActivity.csLibrary4A.isBleConnected() == false) {
                 Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                 validResult = false;
-            } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+            } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                 Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                 validResult = false;
-            } else if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0) {
+            } else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
                 Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
                 validResult = false;
             }
 
             if (validResult) {
                 if (barcodeReadDone == false && spinnerWriteDataType.getSelectedItemPosition() == 1) {
-                    MainActivity.mCs108Library4a.appendToLog("going to startStopBarcodeHandler 2");
+                    MainActivity.csLibrary4A.appendToLog("going to startStopBarcodeHandler 2");
                     startStopBarcodeHandler(buttonTrigger);
                 } else {
                     totalTag = getTotalTag();
                     if (startAccessTask()) validResult = false;
                     else if (runningAuto123 == 2) this.runningAccessTask = true;
-                    MainActivity.mCs108Library4a.appendToLog("runningAccessTask = " + this.runningAccessTask);
+                    MainActivity.csLibrary4A.appendToLog("runningAccessTask = " + this.runningAccessTask);
                     resetOldValue();
                     ready2nextRun = false;
-                    MainActivity.mCs108Library4a.appendToLog("ready2nextRun = false after startStopAccessHandler");
+                    MainActivity.csLibrary4A.appendToLog("ready2nextRun = false after startStopAccessHandler");
                 }
             }
         }
@@ -544,10 +546,10 @@ public class AccessRegisterFragment extends CommonFragment {
         if (selectPopulation < 0) invalidRequest1 = true;
         else if (selectPopulation <= getTotalTag()) invalidRequest1 = true;
         else {
-            selectQValue = MainActivity.mCs108Library4a.getPopulation2Q(selectPopulation);
+            selectQValue = MainActivity.csLibrary4A.getPopulation2Q(selectPopulation);
             if (selectQValue < 0) invalidRequest1 = true;
         }
-        MainActivity.mCs108Library4a.appendToLog("selectQValue = " + selectQValue + ", selectPopulation = " + selectPopulation);
+        MainActivity.csLibrary4A.appendToLog("selectQValue = " + selectQValue + ", selectPopulation = " + selectPopulation);
 
         String selectMask = "";
         int selectBank1 = -1;
@@ -587,9 +589,9 @@ public class AccessRegisterFragment extends CommonFragment {
         if (antennaPower < 0) invalidRequest1 = true;
 
         int accessBank = spinnerAccessBank.getSelectedItemPosition() == 0 ? 1 : 3;
-        MainActivity.mCs108Library4a.appendToLog("accessBank = " + accessBank);
+        MainActivity.csLibrary4A.appendToLog("accessBank = " + accessBank);
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(accessBank) == false) invalidRequest1 = true;
+            if (MainActivity.csLibrary4A.setAccessBank(accessBank) == false) invalidRequest1 = true;
         }
 
         int writeOffset = -1;
@@ -599,9 +601,9 @@ public class AccessRegisterFragment extends CommonFragment {
             if (spinnerAccessBank.getSelectedItemPosition() == 0) writeOffset += 2;
         } catch (Exception ex) { }
         if (writeOffset < 0) invalidRequest1 = true;
-        MainActivity.mCs108Library4a.appendToLog("writeOffset = " + writeOffset);
+        MainActivity.csLibrary4A.appendToLog("writeOffset = " + writeOffset);
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessOffset(writeOffset) == false) invalidRequest1 = true;
+            if (MainActivity.csLibrary4A.setAccessOffset(writeOffset) == false) invalidRequest1 = true;
         }
 
         int writeLength = -1;
@@ -609,19 +611,19 @@ public class AccessRegisterFragment extends CommonFragment {
             writeLength = Integer.parseInt(editTextWriteLength.getText().toString());
         } catch (Exception ex) { }
         if (writeLength < 0) invalidRequest1 = true;
-        MainActivity.mCs108Library4a.appendToLog("writeLength = " + writeLength);
+        MainActivity.csLibrary4A.appendToLog("writeLength = " + writeLength);
         if (invalidRequest1 == false) {
             if (writeLength == 0) invalidRequest1 = true;
-            else if (MainActivity.mCs108Library4a.setAccessCount(writeLength) == false) {
+            else if (MainActivity.csLibrary4A.setAccessCount(writeLength) == false) {
                 invalidRequest1 = true;
             }
         }
 
         String writeData = editTextWriteData.getText().toString().trim();
         if (writeData.length() == 0) invalidRequest1 = true;
-        MainActivity.mCs108Library4a.appendToLog("writeData = " + writeData);
+        MainActivity.csLibrary4A.appendToLog("writeData = " + writeData);
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessWriteData(writeData) == false) {
+            if (MainActivity.csLibrary4A.setAccessWriteData(writeData) == false) {
                 invalidRequest1 = true;
             }
         }
@@ -629,12 +631,12 @@ public class AccessRegisterFragment extends CommonFragment {
         int repeatCount = 0;
         if (runningAuto123 == 1) repeatCount = selectPopulation;
 
-        MainActivity.mCs108Library4a.appendToLog("invalidRequest1 = " + invalidRequest1
+        MainActivity.csLibrary4A.appendToLog("invalidRequest1 = " + invalidRequest1
                 + ", selectMask = " + selectMask + ", selectBank1 = " + selectBank1 + ", selectOffset1 = " + selectOffset1
                 + ", password = " + password + ", power = " + antennaPower + ", repeatCount = " + repeatCount + ", resetCount = " + resetCount);
         accessTask = new AccessTask(buttonWrite, textViewWriteCount, invalidRequest1,
                 selectMask, selectBank1, selectOffset1,
-                password, antennaPower, Cs108Connector.HostCommands.CMD_18K6CWRITE, selectQValue, repeatCount, resetCount,
+                password, antennaPower, Cs108Library4A.HostCommands.CMD_18K6CWRITE, selectQValue, repeatCount, resetCount,
                 textViewRunTime, textViewTagGot, textViewVoltageLevel,
                 textViewYield, textViewTotal);
         accessTask.execute();
