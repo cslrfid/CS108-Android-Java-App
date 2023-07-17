@@ -105,7 +105,7 @@ public class SettingFragment extends CommonFragment {
     public void onStop() {
         mAdapter.fragment0.onStop();
         mAdapter.fragment1.onStop();
-        MainActivity.mCs108Library4a.setAntennaSelect(0);
+        MainActivity.csLibrary4A.setAntennaSelect(0);
         super.onStop();
     }
 

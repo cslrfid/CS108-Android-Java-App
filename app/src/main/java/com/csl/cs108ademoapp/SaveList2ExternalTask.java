@@ -49,7 +49,7 @@ import javax.net.ssl.X509TrustManager;
 import static android.content.Context.WIFI_SERVICE;
 import static androidx.core.app.ActivityCompat.requestPermissions;
 import static com.csl.cs108ademoapp.MainActivity.mContext;
-import static com.csl.cs108ademoapp.MainActivity.mCs108Library4a;
+import static com.csl.cs108ademoapp.MainActivity.csLibrary4A;
 
 public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
     String messageStr;
@@ -67,21 +67,22 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         this.tagsList = tagsList;
 
         stringBluetoothMAC = BluetoothAdapter.getDefaultAdapter().getAddress().replaceAll(":", "");
-        mCs108Library4a.appendToLog("stringBluetoothMac from getMacAddress = " + stringBluetoothMAC);
-        if (stringBluetoothMAC.contains("020000000000")) {
+        csLibrary4A.appendToLog("stringBluetoothMac from getMacAddress = " + stringBluetoothMAC);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) { }
+        else if (stringBluetoothMAC.contains("020000000000")) {
             final String SECURE_SETTINGS_BLUETOOTH_ADDRESS = "bluetooth_address";
-            String macAddress = Settings.Secure.getString(mContext.getContentResolver(), SECURE_SETTINGS_BLUETOOTH_ADDRESS); //Not OK in android 8
-            mCs108Library4a.appendToLog("stringBluetoothMac from Settings.Secure.getString = " + macAddress);
+            String macAddress = Settings.Secure.getString(mContext.getContentResolver(), SECURE_SETTINGS_BLUETOOTH_ADDRESS); //Not OK in android 8, >= 32
+            csLibrary4A.appendToLog("stringBluetoothMac from Settings.Secure.getString = " + macAddress);
             stringBluetoothMAC = macAddress;
         }
 
         stringWifiMac = ((WifiManager) MainActivity.mContext.getSystemService(WIFI_SERVICE)).getConnectionInfo().getMacAddress().replaceAll(":", "");
-        mCs108Library4a.appendToLog("stringWifMac from getMacAddress = " + stringWifiMac);
+        csLibrary4A.appendToLog("stringWifMac from getMacAddress = " + stringWifiMac);
         if (stringWifiMac.contains("020000000000")) {
             try {
                 List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
                 for (NetworkInterface nif : all) {
-                    mCs108Library4a.appendToLog("nif.getName = " + nif.getName() + ", macByts = " + mCs108Library4a.byteArrayToString(nif.getHardwareAddress()));
+                    csLibrary4A.appendToLog("nif.getName = " + nif.getName() + ", macByts = " + csLibrary4A.byteArrayToString(nif.getHardwareAddress()));
                 }
 
                 WifiManager wifiMan = (WifiManager) mContext.getSystemService(WIFI_SERVICE);
@@ -95,14 +96,14 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
                     builder.append((char) ch);
                 }
                 String fileMAC = builder.toString();
-                mCs108Library4a.appendToLog("getName: file content = " + fileMAC);
+                csLibrary4A.appendToLog("getName: file content = " + fileMAC);
                 fin.close();
 
                 stringWifiMac = fileMAC;
                 //boolean enabled = WifiManager.WIFI_STATE_ENABLED == wifiState;
                 //wifiMan.setWifiEnabled(enabled);
             } catch (Exception ex) {
-                mCs108Library4a.appendToLog("Exception : " + ex.getCause());
+                csLibrary4A.appendToLog("Exception : " + ex.getCause());
             }
         }
     }
@@ -112,25 +113,25 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
     protected void onPreExecute() {
         if (tagsList == null) cancel(true);
 
-        if (MainActivity.mCs108Library4a.getSavingFormatSetting() == 0) messageStr = createJSON(tagsList, null).toString();
+        if (MainActivity.csLibrary4A.getSavingFormatSetting() == 0) messageStr = createJSON(tagsList, null).toString();
         else messageStr = createCSV(tagsList, null);
         resultDisplay = save2File(messageStr, true);
         customPopupWindow = new CustomPopupWindow(mContext);
-        mCs108Library4a.appendToLog("SaveList2ExternalTask: resultDisplay = " + resultDisplay);
+        csLibrary4A.appendToLog("SaveList2ExternalTask: resultDisplay = " + resultDisplay);
         if (resultDisplay == null) resultDisplay = "";
         else {
             resultDisplay += "\n";
             savedFile = true;
             customPopupWindow.popupStart(resultDisplay + "Connecting server. Please wait.", true);
-            mCs108Library4a.appendToLog("SaveList2ExternalTask: popupStart is done");
+            csLibrary4A.appendToLog("SaveList2ExternalTask: popupStart is done");
         }
     }
 
     protected String doInBackground(Void... params) {
-        if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+        if (MainActivity.csLibrary4A.isBleConnected() == false) {
             resultDisplay += "Error in sending data to server as the reader is not connected";
             return null;
-        } else if (MainActivity.mCs108Library4a.getSaveCloudEnable() == false) {
+        } else if (MainActivity.csLibrary4A.getSaveCloudEnable() == false) {
             resultDisplay += "No saving to cloud as it is disabled";
             return null;
         }
@@ -155,13 +156,13 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
                         } catch (Exception ex) { }
                     }
                 }
-                if (validLocation == false) resultDisplay += "Error in creating server location from " + mCs108Library4a.getServerLocation() + " !!!";
+                if (validLocation == false) resultDisplay += "Error in creating server location from " + csLibrary4A.getServerLocation() + " !!!";
                 else {
                     DatagramSocket udpSocket = new DatagramSocket();
                     byte[] buf = messageStr.getBytes();
                     DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, serverPort);
                     udpSocket.send(packet);
-                    resultDisplay += "Success in sending data to " + mCs108Library4a.getServerLocation();
+                    resultDisplay += "Success in sending data to " + csLibrary4A.getServerLocation();
                 }
             }
         } catch (Exception e) {
@@ -250,9 +251,9 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
 
             object.put("userDescription","this is example tag data");
 
-            object.put("rfidReaderName", MainActivity.mCs108Library4a.getBluetoothICFirmwareName());
-            object.put("rfidReaderSerialNumber", MainActivity.mCs108Library4a.getHostProcessorICSerialNumber());
-            object.put("rfidReaderInternalSerialNumber", MainActivity.mCs108Library4a.getRadioSerial());
+            object.put("rfidReaderName", MainActivity.csLibrary4A.getBluetoothICFirmwareName());
+            object.put("rfidReaderSerialNumber", MainActivity.csLibrary4A.getHostProcessorICSerialNumber());
+            object.put("rfidReaderInternalSerialNumber", MainActivity.csLibrary4A.getRadioSerial());
 
             object.put("smartPhoneName", Build.MODEL);
             String strPhoneSerial = null;
@@ -281,7 +282,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
 
     public String createCSV(ArrayList<ReaderDevice> tagsList0, ReaderDevice tagDevice0) {
         String object = "";
-        int csvColumnSelect = MainActivity.mCs108Library4a.getCsvColumnSelectSetting();
+        int csvColumnSelect = MainActivity.csLibrary4A.getCsvColumnSelectSetting();
         try {
             if (tagsList0 != null || tagDevice0 != null) {
                 JSONArray jsonArray = new JSONArray();
@@ -319,13 +320,13 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
                         epcBankData = tagDevice.getEpc();
                         tidBankData = tagDevice.getTid();
                         userBankData = tagDevice.getUser();
-                        timeOfRead = tagDevice.getTimeOfRead(); MainActivity.mCs108Library4a.appendToLog("timeOfRead = " + timeOfRead );
+                        timeOfRead = tagDevice.getTimeOfRead(); MainActivity.csLibrary4A.appendToLog("timeOfRead = " + timeOfRead );
                         if (false) {
                             int index = timeOfRead.indexOf(".");
                             if (index >= 0) {
                                 String string1 = timeOfRead.substring(0, index);
                                 timeOfRead = string1;
-                                MainActivity.mCs108Library4a.appendToLog("index = " + index + ", revised timeOfRead = " + timeOfRead );
+                                MainActivity.csLibrary4A.appendToLog("index = " + index + ", revised timeOfRead = " + timeOfRead );
                             }
                         }
                         timeZone = tagDevice.getTimeZone();
@@ -356,12 +357,12 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
                 if ((csvColumnSelect & (0x01 << Cs108Library4A.CsvColumn.OTHERS.ordinal())) != 0) {
                     object += "\nUser Description,this is example tag data\n";
 
-                    object += String.format("RFID Reader Name,=\"%s\"\n", MainActivity.mCs108Library4a.getBluetoothICFirmwareName());
-                    object += String.format("RFID Reader Serial Number,=\"%s\"\n", MainActivity.mCs108Library4a.getHostProcessorICSerialNumber());
-                    object += String.format("RFID Reader Radio Serial Number,=\"%s\"\n", MainActivity.mCs108Library4a.getRadioSerial());
+                    object += String.format("RFID Reader Name,=\"%s\"\n", MainActivity.csLibrary4A.getBluetoothICFirmwareName());
+                    object += String.format("RFID Reader Serial Number,=\"%s\"\n", MainActivity.csLibrary4A.getHostProcessorICSerialNumber());
+                    object += String.format("RFID Reader Radio Serial Number,=\"%s\"\n", MainActivity.csLibrary4A.getRadioSerial());
                     if (true) {
-                        object += String.format("RFID Reader Barcode Serial Number,=\"%s\"\n", MainActivity.mCs108Library4a.getBarcodeSerial());
-                        object += String.format("RFID Reader Bluetooth MAC address,=\"%s\"\n", MainActivity.mCs108Library4a.getBluetoothDeviceAddress());
+                        object += String.format("RFID Reader Barcode Serial Number,=\"%s\"\n", MainActivity.csLibrary4A.getBarcodeSerial());
+                        object += String.format("RFID Reader Bluetooth MAC address,=\"%s\"\n", MainActivity.csLibrary4A.getBluetoothDeviceAddress());
                     }
                     object += String.format("Smart Phone Name,=\"%s\"\n", Build.MODEL);
                 }
@@ -372,19 +373,19 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
 
     public String save2File(String messageStr, boolean requestPermission) {
         String resultDisplay = "";
-        if (MainActivity.mCs108Library4a.getSaveFileEnable() == false) return "No saving file as it is disabled";
+        if (MainActivity.csLibrary4A.getSaveFileEnable() == false) return "No saving file as it is disabled";
         boolean writeExtPermission = true;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                mCs108Library4a.appendToLog("WRITE_EXTERNAL_STORAGE Permission is required !!!");
+                csLibrary4A.appendToLog("WRITE_EXTERNAL_STORAGE Permission is required !!!");
                 writeExtPermission = false;
                 if (requestPermission) {
-                    mCs108Library4a.appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
+                    csLibrary4A.appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
                     MainActivity.permissionRequesting = true; requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                    if (false) Toast.makeText(mContext, com.csl.cs108library4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
+                    if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
                     return null;
                 }
-            } else mCs108Library4a.appendToLog("WRITE_EXTERNAL_STORAGE Permission is GRANTED !!!");
+            } else csLibrary4A.appendToLog("WRITE_EXTERNAL_STORAGE Permission is GRANTED !!!");
         }
 
         errorDisplay = null;
@@ -397,7 +398,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
             if (path.exists() == false) errorDisplay = "Error in making directory !!!";
             else {
                 String dateTime = new SimpleDateFormat("yyMMdd_HHmmss").format(new Date());
-                String fileName = "cs108Java_" + dateTime + (mCs108Library4a.getSavingFormatSetting() == 0 ? ".txt" : ".csv");
+                String fileName = "cs108Java_" + dateTime + (csLibrary4A.getSavingFormatSetting() == 0 ? ".txt" : ".csv");
                 File file = new File(path, fileName);
                 if (file == null) errorDisplay = "Error in making directory !!!";
                 else {
@@ -426,7 +427,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
             url += "192.168.25.21:";
             url += "29090/WebServiceRESTs/1.0/req/";
         } else if (false) url = "http://ptsv2.com/t/10i1t-1519143332/post";
-        else url = mCs108Library4a.getServerLocation();
+        else url = csLibrary4A.getServerLocation();
 
         errorDisplay = "Error in SSLContext.getInstance()"; SSLContext sc = SSLContext.getInstance("TLS");
         errorDisplay = "Error in SSLContext.init()"; sc.init(null, new TrustManager[]{
@@ -467,7 +468,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         if (isHttps) {
             con = (HttpsURLConnection) obj.openConnection();
         }
-        errorDisplay = "Error in setConnectTimeout()"; con.setConnectTimeout(MainActivity.mCs108Library4a.getServerTimeout() * 1000);
+        errorDisplay = "Error in setConnectTimeout()"; con.setConnectTimeout(MainActivity.csLibrary4A.getServerTimeout() * 1000);
         errorDisplay = "Error in setRequestMethod()"; con.setRequestMethod("POST");
         errorDisplay = "Error in setRequestProperty(User-Agent)"; con.setRequestProperty("User-Agent", "Mozilla/5.0");
         errorDisplay = "Error in setRequestProperty(Accept-Languag)"; con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
@@ -486,27 +487,27 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
             errorDisplay = "Error in close(os)"; os.close();
             serverWritten = true;
         } catch (Exception ex) {
-            MainActivity.mCs108Library4a.appendToLog("errorDisplay = " + errorDisplay + ", execpetion = " + ex.getMessage());
+            MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay + ", execpetion = " + ex.getMessage());
         }
     }
     public void closeServer() throws Exception {
         if (serverWritten) {
             errorDisplay = "Error in getResponseCode()";
             int responseCode = con.getResponseCode();
-            MainActivity.mCs108Library4a.appendToLog("errorDisplay = " + errorDisplay);
-            MainActivity.mCs108Library4a.appendToLog("responseCode = " + responseCode);
+            MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay);
+            MainActivity.csLibrary4A.appendToLog("responseCode = " + responseCode);
             if (responseCode != 200)
                 errorDisplay = "Error in response code = " + responseCode;
             else {
                 BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                MainActivity.mCs108Library4a.appendToLog("errorDisplay = " + errorDisplay);
+                MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay);
                 String inputLine;
                 String response = "";
                 while ((inputLine = in.readLine()) != null) {
                     response += inputLine;
                 }
                 in.close();
-                MainActivity.mCs108Library4a.appendToLog("errorDisplay = " + errorDisplay);
+                MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay);
                 resultDisplay += "Success in sending data to server with response = " + response;
                 errorDisplay = null;
             }

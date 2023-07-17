@@ -17,7 +17,7 @@ public class ImpinjAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = null;
         switch (index) {
             case 0:
-                fragment = new AccessImpinjFragment();
+                fragment = new AccessImpinjFragment(false);
                 fragment0 = fragment;
                 break;
             case 1:

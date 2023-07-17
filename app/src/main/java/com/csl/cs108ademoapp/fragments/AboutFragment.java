@@ -34,7 +34,7 @@ public class AboutFragment extends CommonFragment {
         TextView appVersionView = (TextView) getActivity().findViewById(R.id.appVersion);
         appVersionView.setText(BuildConfig.VERSION_NAME);
         TextView libVersionView = (TextView) getActivity().findViewById(R.id.libVersion);
-        libVersionView.setText(MainActivity.mCs108Library4a.getlibraryVersion());
+        libVersionView.setText(MainActivity.csLibrary4A.getlibraryVersion());
 
         MainActivity.mSensorConnector.mLocationDevice.turnOn(true);
         MainActivity.mSensorConnector.mSensorDevice.turnOn(true);
@@ -82,32 +82,32 @@ public class AboutFragment extends CommonFragment {
             timeStampView.setText(MainActivity.mSensorConnector.getTimeStamp());
             locationView.setText(MainActivity.mSensorConnector.mLocationDevice.getLocation());
             eCompassView.setText(MainActivity.mSensorConnector.mSensorDevice.getEcompass());
-            if (MainActivity.mCs108Library4a.isBleConnected()) {
+            if (MainActivity.csLibrary4A.isBleConnected()) {
                 if (System.currentTimeMillis() - timeMillis > 5000) {
                     timeMillis = System.currentTimeMillis();
-                    radioVersion.setText(MainActivity.mCs108Library4a.getMacVer());
-                    modelVersion.setText(MainActivity.mCs108Library4a.getModelNumber());
-                    moduleVersion.setText(MainActivity.mCs108Library4a.hostProcessorICGetFirmwareVersion());
-                    bluetoothVersion.setText(MainActivity.mCs108Library4a.getBluetoothICFirmwareVersion());
-                    MainActivity.mCs108Library4a.batteryLevelRequest();
+                    radioVersion.setText(MainActivity.csLibrary4A.getMacVer());
+                    modelVersion.setText(MainActivity.csLibrary4A.getModelNumber());
+                    moduleVersion.setText(MainActivity.csLibrary4A.hostProcessorICGetFirmwareVersion());
+                    bluetoothVersion.setText(MainActivity.csLibrary4A.getBluetoothICFirmwareVersion());
+                    MainActivity.csLibrary4A.batteryLevelRequest();
                 }
-                moduleRfidOnStatus.setText(MainActivity.mCs108Library4a.getRfidOnStatus() ? "on" : "off");
-                triggerOnStatus.setText(MainActivity.mCs108Library4a.getTriggerButtonStatus() ? "pressed" : "released");
-                moduleBarOnStatus.setText(MainActivity.mCs108Library4a.getBarcodeOnStatus() ? "on" : "off");
-                moduleBattery.setText(MainActivity.mCs108Library4a.getBatteryDisplay(true));
-                if (MainActivity.mCs108Library4a.isRfidFailure()) radioSerial.setText("Not available");
-                else radioSerial.setText(MainActivity.mCs108Library4a.getRadioSerial());
-                radioBoardVersion.setText(MainActivity.mCs108Library4a.getRadioBoardVersion());
-                productSerial.setText(MainActivity.mCs108Library4a.getHostProcessorICSerialNumber());
-                boardVersion.setText(MainActivity.mCs108Library4a.getHostProcessorICBoardVersion());
-                if (MainActivity.mCs108Library4a.isBarcodeFailure()) barcodeSerial.setText("Not available");
+                moduleRfidOnStatus.setText(MainActivity.csLibrary4A.getRfidOnStatus() ? "on" : "off");
+                triggerOnStatus.setText(MainActivity.csLibrary4A.getTriggerButtonStatus() ? "pressed" : "released");
+                moduleBarOnStatus.setText(MainActivity.csLibrary4A.getBarcodeOnStatus() ? "on" : "off");
+                moduleBattery.setText(MainActivity.csLibrary4A.getBatteryDisplay(true));
+                if (MainActivity.csLibrary4A.isRfidFailure()) radioSerial.setText("Not available");
+                else radioSerial.setText(MainActivity.csLibrary4A.getRadioSerial());
+                radioBoardVersion.setText(MainActivity.csLibrary4A.getRadioBoardVersion());
+                productSerial.setText(MainActivity.csLibrary4A.getHostProcessorICSerialNumber());
+                boardVersion.setText(MainActivity.csLibrary4A.getHostProcessorICBoardVersion());
+                if (MainActivity.csLibrary4A.isBarcodeFailure()) barcodeSerial.setText("Not available");
                 else {
-                    barcodeSerial.setText(MainActivity.mCs108Library4a.getBarcodeSerial());
-                    barcodeDate.setText(MainActivity.mCs108Library4a.getBarcodeDate());
-                    barcodeVersion.setText(MainActivity.mCs108Library4a.getBarcodeVersion());
+                    barcodeSerial.setText(MainActivity.csLibrary4A.getBarcodeSerial());
+                    barcodeDate.setText(MainActivity.csLibrary4A.getBarcodeDate());
+                    barcodeVersion.setText(MainActivity.csLibrary4A.getBarcodeVersion());
                 }
-                bluetoothAddress.setText(MainActivity.mCs108Library4a.getBluetoothDeviceAddress());
-                bluetoothRssi.setText(String.valueOf(MainActivity.mCs108Library4a.getRssi()));
+                bluetoothAddress.setText(MainActivity.csLibrary4A.getBluetoothDeviceAddress());
+                bluetoothRssi.setText(String.valueOf(MainActivity.csLibrary4A.getRssi()));
             } else {
                 radioVersion.setText("");
                 moduleRfidOnStatus.setText("");

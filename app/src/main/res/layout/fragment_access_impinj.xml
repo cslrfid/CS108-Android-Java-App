@@ -21,7 +21,7 @@
                 android:paddingLeft="@dimen/default_left_padding">
 
                 <CheckBox
-                    android:id="@+id/accessIMPINJTagFocus"
+                    android:id="@+id/accessImpinjTagFocus"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     style="@style/style_normal_font"
@@ -34,7 +34,7 @@
                 android:paddingLeft="@dimen/default_left_padding">
 
                 <CheckBox
-                    android:id="@+id/accessIMPINJFastId"
+                    android:id="@+id/accessImpinjFastId"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     style="@style/style_normal_font"
@@ -43,9 +43,222 @@
 
             <TableRow
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/accessImpinjTagSecurity"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Select impinj tags with security" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/accessImpinjTagAutotune"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Select impinj tags with autotune" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:layout_gravity="center_vertical" />
-            </LinearLayout>
+
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/custom_select" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    style="@style/style_button_font"
+                    android:layout_gravity="center"
+                    android:textAlignment="center"
+                    android:background="#808080"
+                    android:text="Authentication"/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Authenticated result: " />
+
+                <TextView
+                    android:id="@+id/accessImpinjAuthenticatedResult"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_padding"
+                android:paddingRight="@dimen/default_padding"
+                android:paddingBottom="@dimen/default_padding">
+
+                <Button
+                    android:id="@+id/accessImpinjAuthenticateButton"
+                    android:layout_width="match_parent"
+                    style="@style/style_button_font"
+                    android:text="Authenticated Read" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    style="@style/style_button_font"
+                    android:layout_gravity="center"
+                    android:textAlignment="center"
+                    android:background="#808080"
+                    android:text="AutoTune"/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="AutoTune Value: " />
+
+                <TextView
+                    android:id="@+id/accessImpinjAutoTuneValue"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:paddingLeft="@dimen/default_padding"
+                android:paddingRight="@dimen/default_padding">
+
+                <Button
+                    android:id="@+id/accessImpinjAutotuneValueButton"
+                    android:layout_width="match_parent"
+                    style="@style/style_button_font"
+                    android:text="Autotune Value Read" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/accessImpinjAutoTuneShortRange"
+                    android:enabled="false"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Short Range AutoTune" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/accessImpinjAutoTuneDisable"
+                    android:enabled="false"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Disable AutoTune" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="AutoTune Configuration: " />
+
+                <TextView
+                    android:id="@+id/accessImpinjAutoTuneConfiguration"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="Note: Configuration write need non-zero access password" />
+            </TableRow>
+        </LinearLayout>
     </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <Button
+                android:id="@+id/accessImpinjReadButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="Config. Read" />
+
+            <Button
+                android:id="@+id/accessImpinjWriteButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="Config. Write" />
+        </TableRow>
+    </LinearLayout>
 </LinearLayout>

@@ -56,7 +56,7 @@ public class SettingFilterRssiFragment extends CommonFragment {
         filterOptionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerFilterOption.setAdapter(filterOptionAdapter);
 
-        String strUnit = MainActivity.mCs108Library4a.getRssiDisplaySetting() > 0 ? "(dBm)" : "(dBuV)";
+        String strUnit = MainActivity.csLibrary4A.getRssiDisplaySetting() > 0 ? "(dBm)" : "(dBuV)";
         TextView textViewThreshold1 = (TextView) getActivity().findViewById(R.id.filterRssiThreshold1Label);
         textViewThreshold1.setText(textViewThreshold1.getText().toString() + strUnit);
         TextView textViewThreshold2 = (TextView) getActivity().findViewById(R.id.filterRssiThreshold2Label);
@@ -71,10 +71,10 @@ public class SettingFilterRssiFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 boolean validValue = false;
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -84,9 +84,9 @@ public class SettingFilterRssiFragment extends CommonFragment {
                         invSelectFilterType = spinnerFilterType.getSelectedItemPosition();
                         invSelectFilterOption = spinnerFilterOption.getSelectedItemPosition();
                         invSelectFilterThreshold1 = Float.parseFloat(editTextFilterThreshold1.getText().toString());
-                        if (MainActivity.mCs108Library4a.getRssiDisplaySetting() > 0) invSelectFilterThreshold1 += MainActivity.mCs108Library4a.dBuV_dBm_constant;
+                        if (MainActivity.csLibrary4A.getRssiDisplaySetting() > 0) invSelectFilterThreshold1 += MainActivity.csLibrary4A.dBuV_dBm_constant;
                         invSelectFilterThreshold2 = Float.parseFloat(editTextFilterThreshold2.getText().toString());
-                        if (MainActivity.mCs108Library4a.getRssiDisplaySetting() > 0) invSelectFilterThreshold2 += MainActivity.mCs108Library4a.dBuV_dBm_constant;
+                        if (MainActivity.csLibrary4A.getRssiDisplaySetting() > 0) invSelectFilterThreshold2 += MainActivity.csLibrary4A.dBuV_dBm_constant;
                         invSelectFilterCount = Integer.parseInt(editTextFilterCount.getText().toString());
                         bValid = true;
                     } catch (Exception ex) {
@@ -97,14 +97,14 @@ public class SettingFilterRssiFragment extends CommonFragment {
             }
         });
 
-        if (sameCheck == false) MainActivity.mCs108Library4a.setSameCheck(false);
+        if (sameCheck == false) MainActivity.csLibrary4A.setSameCheck(false);
         mHandler.post(updateRunnable);
     }
 
     @Override
     public void onDestroy() {
         if (settingTask != null) settingTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
         mHandler.removeCallbacks(updateRunnable);
         super.onDestroy();
     }
@@ -120,44 +120,47 @@ public class SettingFilterRssiFragment extends CommonFragment {
             long lValue;
             String updating = null;
 
-            if (MainActivity.mCs108Library4a.mrfidToWriteSize() != 0)   updating = "waiting empty buffer";
+            if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0)   updating = "waiting empty buffer";
             else {
                 if (updating == null) {
-                    boolean bValue = MainActivity.mCs108Library4a.getRssiFilterEnable();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectEnable = " + bValue);
+                    boolean bValue = MainActivity.csLibrary4A.getRssiFilterEnable();
+                    MainActivity.csLibrary4A.appendToLog("0 updateRunnable getSelectEnable = " + bValue);
                     checkBoxEnable.setChecked(bValue);
                 }
                 if (updating == null) {
-                    int iValue1 = MainActivity.mCs108Library4a.getRssiFilterType();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectAction = " + iValue1);
+                    int iValue1 = MainActivity.csLibrary4A.getRssiFilterType();
+                    MainActivity.csLibrary4A.appendToLog("1 updateRunnable getSelectAction = " + iValue1);
                     if (iValue1 < 0) updating = "getting filter type";
                     else spinnerFilterType.setSelection(iValue1);
                 }
                 if (updating == null) {
-                    int iValue1 = MainActivity.mCs108Library4a.getRssiFilterOption();
-                    MainActivity.mCs108Library4a.appendToLog("updateRunnable getSelectAction = " + iValue1);
+                    int iValue1 = MainActivity.csLibrary4A.getRssiFilterOption();
+                    MainActivity.csLibrary4A.appendToLog("2 updateRunnable getSelectAction = " + iValue1);
                     if (iValue1 < 0) updating = "getting filter option";
                     else spinnerFilterOption.setSelection(iValue1);
                 }
                 if (updating == null) {
-                    double dValue = MainActivity.mCs108Library4a.getRssiFilterThreshold1();
-                    if (dValue < 0) updating = "updating threshold 1";
-                    else editTextFilterThreshold1.setText(String.format("%.1f", (MainActivity.mCs108Library4a.getRssiDisplaySetting() > 0 ? dValue -= MainActivity.mCs108Library4a.dBuV_dBm_constant : dValue)));
+                    double dValue = MainActivity.csLibrary4A.getRssiFilterThreshold1();
+                    MainActivity.csLibrary4A.appendToLog(String.format("3 updateRunnable getRssiFilterThreshold1 = %f", dValue));
+                    if (dValue < 0 && false) updating = "updating threshold 1";
+                    else editTextFilterThreshold1.setText(String.format("%.1f", (MainActivity.csLibrary4A.getRssiDisplaySetting() > 0 ? dValue -= MainActivity.csLibrary4A.dBuV_dBm_constant : dValue)));
                 }
                 if (updating == null) {
-                    double dValue = MainActivity.mCs108Library4a.getRssiFilterThreshold2();
-                    if (dValue < 0) updating = "updating threshold 2";
-                    else editTextFilterThreshold2.setText(String.format("%.1f", (MainActivity.mCs108Library4a.getRssiDisplaySetting() > 0 ? dValue -= MainActivity.mCs108Library4a.dBuV_dBm_constant : dValue)));
+                    double dValue = MainActivity.csLibrary4A.getRssiFilterThreshold2();
+                    MainActivity.csLibrary4A.appendToLog(String.format("4 updateRunnable getRssiFilterThreshold2 = %f", dValue));
+                    if (dValue < 0 && false) updating = "updating threshold 2";
+                    else editTextFilterThreshold2.setText(String.format("%.1f", (MainActivity.csLibrary4A.getRssiDisplaySetting() > 0 ? dValue -= MainActivity.csLibrary4A.dBuV_dBm_constant : dValue)));
                 }
                 if (updating == null) {
-                    long lValue1 = MainActivity.mCs108Library4a.getRssiFilterCount();
+                    long lValue1 = MainActivity.csLibrary4A.getRssiFilterCount();
+                    MainActivity.csLibrary4A.appendToLog(String.format("5 updateRunnable getRssiFilterCount = %d", lValue1));
                     if (lValue1 < 0) updating = "updating count";
                     else editTextFilterCount.setText(String.valueOf(lValue1));
                 }
             }
             if (updating != null) {
                 mHandler.postDelayed(updateRunnable, 1000);
-                MainActivity.mCs108Library4a.appendToLog("Updating in " + updating);
+                MainActivity.csLibrary4A.appendToLogView("Updating in " + updating);
             }
         }
     };
@@ -167,20 +170,22 @@ public class SettingFilterRssiFragment extends CommonFragment {
         String invalidRequest = null;
 
         if (sameSetting == true && invalidRequest == null) {
-            if (MainActivity.mCs108Library4a.getRssiFilterEnable() != invSelectEnable
-                    || MainActivity.mCs108Library4a.getRssiFilterType() != invSelectFilterType
-                    || MainActivity.mCs108Library4a.getRssiFilterOption() != invSelectFilterOption) {
+            if (MainActivity.csLibrary4A.getRssiFilterEnable() != invSelectEnable
+                    || MainActivity.csLibrary4A.getRssiFilterType() != invSelectFilterType
+                    || MainActivity.csLibrary4A.getRssiFilterOption() != invSelectFilterOption) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setRssiFilterConfig(invSelectEnable, invSelectFilterType, invSelectFilterOption) == false) invalidRequest = "setting filter type";
+                if (MainActivity.csLibrary4A.setRssiFilterConfig(invSelectEnable, invSelectFilterType, invSelectFilterOption) == false) invalidRequest = "setting filter type";
             }
-            if (MainActivity.mCs108Library4a.getRssiFilterThreshold1() != invSelectFilterThreshold1 || MainActivity.mCs108Library4a.getRssiFilterThreshold2() != invSelectFilterThreshold2) {
+            if (MainActivity.csLibrary4A.getRssiFilterThreshold1() != invSelectFilterThreshold1 || MainActivity.csLibrary4A.getRssiFilterThreshold2() != invSelectFilterThreshold2) {
                 sameSetting = false;
-                if (MainActivity.mCs108Library4a.setRssiFilterThreshold(invSelectFilterThreshold1, invSelectFilterThreshold2) == false) invalidRequest = "setting filter threshold";
+                MainActivity.csLibrary4A.appendToLog(String.format("updateRunnable: getRssiFilterThreshold2 = %f, invSelectFilterThreshold2 = %f", MainActivity.csLibrary4A.getRssiFilterThreshold2(), invSelectFilterThreshold2));
+                invSelectFilterThreshold2 = 0;
+                if (MainActivity.csLibrary4A.setRssiFilterThreshold(invSelectFilterThreshold1, invSelectFilterThreshold2) == false) invalidRequest = "setting filter threshold";
             }
-            if (MainActivity.mCs108Library4a.getRssiFilterCount() != invSelectFilterCount) {
+            if (MainActivity.csLibrary4A.getRssiFilterCount() != invSelectFilterCount) {
                 sameSetting = false;
-                MainActivity.mCs108Library4a.appendToLog("rssiFilterCount = " + invSelectFilterCount);
-                if (MainActivity.mCs108Library4a.setRssiFilterCount(invSelectFilterCount) == false) invalidRequest = "setting filter count";
+                MainActivity.csLibrary4A.appendToLog("rssiFilterCount = " + invSelectFilterCount);
+                if (MainActivity.csLibrary4A.setRssiFilterCount(invSelectFilterCount) == false) invalidRequest = "setting filter count";
             }
         }
 
@@ -191,7 +196,7 @@ public class SettingFilterRssiFragment extends CommonFragment {
         } else {
             settingTask = new SettingTask(button, sameSetting, false);
             settingTask.execute();
-            MainActivity.mCs108Library4a.saveSetting2File();
+            MainActivity.csLibrary4A.saveSetting2File();
         }
     }
 }

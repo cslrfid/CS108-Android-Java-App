@@ -23,9 +23,9 @@ import com.csl.cs108ademoapp.AccessTask1;
 import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.SelectTag;
-import com.csl.cs108library4a.Cs108Connector;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 import static com.csl.cs108ademoapp.MainActivity.mContext;
@@ -151,10 +151,10 @@ public class AccessReadWriteUserFragment extends CommonFragment {
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -166,10 +166,10 @@ public class AccessReadWriteUserFragment extends CommonFragment {
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -188,14 +188,14 @@ public class AccessReadWriteUserFragment extends CommonFragment {
                 updatePCEpc(strPCValueRef, strEpcValue);
             }
         }
-        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
     }
 
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
+        MainActivity.csLibrary4A.setSameCheck(true);
+        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 
@@ -267,7 +267,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
         checkBox.setChecked(true);
         if (updating == false) {
             msStartTime = SystemClock.elapsedRealtime();
-            textViewRunTime.setText(""); MainActivity.mCs108Library4a.appendToLog("StreamOut: Start of running time");
+            textViewRunTime.setText(""); MainActivity.csLibrary4A.appendToLog("StreamOut: Start of running time");
             updating = true; bankProcessing = 0; restartAccessBank = -1;
 //            MainActivity.mCs108Library4a.
             mHandler.removeCallbacks(updateRunnable);
@@ -290,7 +290,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
                         restartAccessBank = accessBank;
                         restartCounter = 3;
                     }
-                    if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteUserFragment().InventoryRfidTask(): tagID=" + selectTag.editTextTagID.getText() + ", operationrRead=" + operationRead + ", accessBank=" + accessBank + ", accOffset=" + accOffset + ", accSize=" + accSize);
+                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessReadWriteUserFragment().InventoryRfidTask(): tagID=" + selectTag.editTextTagID.getText() + ", operationrRead=" + operationRead + ", accessBank=" + accessBank + ", accOffset=" + accOffset + ", accSize=" + accSize);
                     int selectOffset = 0;
                     selectOffset = Integer.parseInt(editTextRWSelectOffset.getText().toString());
                     EditText editTextBlockCount = (EditText) getActivity().findViewById(R.id.accessRWBlockCount);
@@ -298,21 +298,21 @@ public class AccessReadWriteUserFragment extends CommonFragment {
                     try {
                         accBlockCount = Integer.parseInt(editTextBlockCount.getText().toString());
                     } catch (Exception ex) { }
-                    MainActivity.mCs108Library4a.appendToLog("strOut: accWriteData=" + accWriteData);
+                    MainActivity.csLibrary4A.appendToLog("strOut: accWriteData=" + accWriteData);
                     accessTask = new AccessTask1(
                             (operationRead ? buttonRead : buttonWrite), invalid,
                             accessBank, accOffset, accSize, accBlockCount, accWriteData,
                             selectTag.editTextTagID.getText().toString(), spinnerSelectBank.getSelectedItemPosition() + 1, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                            (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE), updateRunnable);
+                            (operationRead ? Cs108Library4A.HostCommands.CMD_18K6CREAD: Cs108Library4A.HostCommands.CMD_18K6CWRITE), updateRunnable);
                     accessTask.execute();
                     rerunRequest = true;
                 }
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 100);
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWriteUserFragment().updateRunnable(): Restart");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessReadWriteUserFragment().updateRunnable(): Restart");
             }
             else {
                 if (bankProcessing == 0 && bcheckBoxAll) {
@@ -333,9 +333,9 @@ public class AccessReadWriteUserFragment extends CommonFragment {
         if (accessTask.isResultReady() == false) return false;
         else {
             long duration = SystemClock.elapsedRealtime() - msStartTime;
-            textViewRunTime.setText(String.format("Run time: %.2f sec", ((float) duration / 1000))); MainActivity.mCs108Library4a.appendToLog("StreamOut: End of running time");
+            textViewRunTime.setText(String.format("Run time: %.2f sec", ((float) duration / 1000))); MainActivity.csLibrary4A.appendToLog("StreamOut: End of running time");
             accessResult = accessTask.getResult();
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("processResult(): accessResult = " + accessResult);
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("processResult(): accessResult = " + accessResult);
             if (accessResult == null) {
                 if (readWriteTypes == ReadWriteTypes.USER) {
                     textViewUserOk.setText("E"); checkBoxUser.setChecked(false);
@@ -344,15 +344,15 @@ public class AccessReadWriteUserFragment extends CommonFragment {
                     textViewBankOk.setText("E"); checkBoxBank.setChecked(false);
                 }
             } else {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.USER) {
                     textViewUserOk.setText("O"); checkBoxUser.setChecked(false);
                     readWriteTypes = ReadWriteTypes.NULL;
                     if (operationRead) {
-                        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessReadWrite(). DATA with accessBank = " + accessBank);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessReadWrite(). DATA with accessBank = " + accessBank);
                         if (accessTask != null) {
                             int iLength = accessTask.deformatWriteAccessData(accessResult).length();
-                            MainActivity.mCs108Library4a.appendToLog("endingMessage length=" + iLength);
+                            MainActivity.csLibrary4A.appendToLog("endingMessage length=" + iLength);
                             if (iLength < accSize*4) textViewUserOk.setText("H");
                         }
                         editTextUserValue.setText(accessResult);
@@ -390,7 +390,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
         if (checkBoxUser.isChecked() == true) {
             textViewUserOk.setText("");
             accessBank = 3; accOffset = 0; accSize = 0; readWriteTypes = ReadWriteTypes.USER;
-            if (DEBUG) MainActivity.mCs108Library4a.appendToLog("processTickItems(): start USER operation");
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("processTickItems(): start USER operation");
             int iValue = 0;
             try {
                 EditText editTextTidOffset = (EditText) getActivity().findViewById(R.id.accessRWUserOffset);
@@ -409,7 +409,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
                 editTextUserValue.setText("");
             } else {
                 String strValue = editTextUserValue.getText().toString();
-                MainActivity.mCs108Library4a.appendToLog("strOut: strValue=" + strValue + ", strValue.length=" + strValue.length() + ", accUserValue=" + accUserValue + ", accUserValue.lengt=" + accUserValue.length());
+                MainActivity.csLibrary4A.appendToLog("strOut: strValue=" + strValue + ", strValue.length=" + strValue.length() + ", accUserValue=" + accUserValue + ", accUserValue.lengt=" + accUserValue.length());
                 if (strValue.length() >= 4 && accUserValue.matches(strValue) == false) {
                     writeData = strValue;
                 }

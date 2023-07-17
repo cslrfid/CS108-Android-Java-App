@@ -33,13 +33,16 @@ public class ImpinjFragment extends CommonFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) mAdapter.fragment1;
         switch (item.getItemId()) {
-            case R.id.menuAction_1:
+            case R.id.menuAction_clear:
                 fragment1.clearTagsList();
                 return true;
-            case R.id.menuAction_2:
+            case R.id.menuAction_sortRssi:
+                fragment1.sortTagsListByRssi();
+                return true;
+            case R.id.menuAction_sort:
                 fragment1.sortTagsList();
                 return true;
-            case R.id.menuAction_3:
+            case R.id.menuAction_save:
                 fragment1.saveTagsList();
                 return true;
             default:
@@ -81,8 +84,8 @@ public class ImpinjFragment extends CommonFragment {
             }
         });
 
-        iTargetOld = MainActivity.mCs108Library4a.getQueryTarget();
-        iSessionOld = MainActivity.mCs108Library4a.getQuerySession();
+        iTargetOld = MainActivity.csLibrary4A.getQueryTarget();
+        iSessionOld = MainActivity.csLibrary4A.getQuerySession();
     }
 
     @Override
@@ -110,7 +113,7 @@ public class ImpinjFragment extends CommonFragment {
     public void onDestroy() {
         mAdapter.fragment0.onDestroy();
         mAdapter.fragment1.onDestroy();
-        MainActivity.mCs108Library4a.setTagGroup(MainActivity.mCs108Library4a.getQuerySelect(), iSessionOld, iTargetOld);
+        MainActivity.csLibrary4A.setTagGroup(MainActivity.csLibrary4A.getQuerySelect(), iSessionOld, iTargetOld);
         //MainActivity.mCs108Library4a.macWrite(0x203, 0);
         super.onDestroy();
     }

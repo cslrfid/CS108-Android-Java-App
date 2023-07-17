@@ -7,13 +7,15 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 class BluetoothConnector {
+    boolean DEBUG_PKDATA;
     final boolean DEBUG = false;
+    boolean userDebugEnable = false;
 
-    Context mContext; TextView mLogView;
+    Context context; TextView mLogView;
     BluetoothConnector(Context context, TextView mLogView) {
-        mContext = context;
+        this.context = context;
         this.mLogView = mLogView;
-        utility = new Utility(context, mLogView);
+        utility = new Utility(context, mLogView); DEBUG_PKDATA = utility.DEBUG_PKDATA;
         mBluetoothIcDevice = new BluetoothIcDevice();
     }
 
@@ -42,8 +44,9 @@ class BluetoothConnector {
         private byte[] mBluetoothIcVersion = new byte[]{-1, -1, -1};
         private boolean mBluetoothIcVersionUpdated = false;
         String getBluetoothIcVersion() {
+            boolean DEBUG = false;
             if (mBluetoothIcVersionUpdated == false) {
-                appendToLog("mBluetoothIcVersionUpdated is false");
+                if (DEBUG) appendToLog("mBluetoothIcVersionUpdated is false");
                 boolean repeatRequest = false;
                 if (mBluetoothIcToWrite.size() != 0) {
                     if (mBluetoothIcToWrite.get(mBluetoothIcToWrite.size() - 1).bluetoothIcPayloadEvent == BluetoothIcPayloadEvents.GET_VERSION) {
@@ -54,28 +57,34 @@ class BluetoothConnector {
                     Cs108BluetoothIcData cs108BluetoothIcData = new Cs108BluetoothIcData();
                     cs108BluetoothIcData.bluetoothIcPayloadEvent = BluetoothIcPayloadEvents.GET_VERSION;
                     mBluetoothIcToWrite.add(cs108BluetoothIcData);
+                    if (DEBUG_PKDATA) appendToLog("add " + cs108BluetoothIcData.bluetoothIcPayloadEvent.toString() + " to mBluetoothIcToWrite with length = " + mBluetoothIcToWrite.size());
                 }
                 return "";
             } else {
                 String retValue = String.valueOf(mBluetoothIcVersion[0]) + "." + String.valueOf(mBluetoothIcVersion[1]) + "." + String.valueOf(mBluetoothIcVersion[2]);
-                appendToLog("mBluetoothIcVersionUpdated is true with data = " + byteArrayToString(mBluetoothIcVersion) + ", icsModel = " + icsModel);
+                if (DEBUG) appendToLog("mBluetoothIcVersionUpdated is true with data = " + byteArrayToString(mBluetoothIcVersion) + ", icsModel = " + icsModel);
                 return retValue;
             }
         }
 
         byte[] deviceName = null;
         String getBluetoothIcName() {
+            boolean DEBBUG = false;
+            if (DEBBUG) appendToLog("3 deviceName = " + (deviceName == null ? "null" : byteArrayToString(deviceName)));
             if (deviceName == null) {
                 boolean repeatRequest = false;
+                if (DEBBUG) appendToLog("3A mBluetoothIcToWrite.size = " + mBluetoothIcToWrite.size());
                 if (mBluetoothIcToWrite.size() != 0) {
                     if (mBluetoothIcToWrite.get(mBluetoothIcToWrite.size() - 1).bluetoothIcPayloadEvent == BluetoothIcPayloadEvents.GET_DEVICE_NAME) {
                         repeatRequest = true;
                     }
                 }
+                if (DEBBUG) appendToLog("3b repeatRequest = " + repeatRequest);
                 if (repeatRequest == false) {
                     Cs108BluetoothIcData cs108BluetoothIcData = new Cs108BluetoothIcData();
                     cs108BluetoothIcData.bluetoothIcPayloadEvent = BluetoothIcPayloadEvents.GET_DEVICE_NAME;
                     mBluetoothIcToWrite.add(cs108BluetoothIcData);
+                    if (DEBUG_PKDATA) appendToLog("add " + cs108BluetoothIcData.bluetoothIcPayloadEvent.toString() + " to mBluetoothIcToWrite with length = " + mBluetoothIcToWrite.size());
                 }
                 return "";
             } else {
@@ -154,12 +163,11 @@ class BluetoothConnector {
 
         boolean isMatchBluetoothIcToWrite(Cs108Connector.Cs108ReadData cs108ReadData) {
             boolean match = false;
-            if (mBluetoothIcToWrite.size() != 0) {
-                appendToLog(" mBluetoothIcToWrite.size = " + mBluetoothIcToWrite.size());
+            if (mBluetoothIcToWrite.size() != 0 && cs108ReadData.dataValues[0] == (byte)0xC0) {
                 byte[] dataInCompare = new byte[]{(byte) 0xC0, 0};
                 if (arrayTypeSet(dataInCompare, 1, mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent) && (cs108ReadData.dataValues.length >= dataInCompare.length + 1)) {
                     if (match = compareArray(cs108ReadData.dataValues, dataInCompare, dataInCompare.length)) {
-                        if (true) appendToLog("found BluetoothIc.read data = " + byteArrayToString(cs108ReadData.dataValues) + ", bluetoothIcPayloadEvent = " + mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent);
+                        if (DEBUG_PKDATA) appendToLog("PkData: matched BluetoothIc.Reply with payload = " + byteArrayToString(cs108ReadData.dataValues) + " for writeData BluetoothIc." + mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent.toString());
                         if (mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent == BluetoothIcPayloadEvents.GET_VERSION) {
                             if (cs108ReadData.dataValues.length > 2) {
                                 int length = mBluetoothIcVersion.length;
@@ -168,36 +176,35 @@ class BluetoothConnector {
                                 if (mBluetoothIcVersion[0] == 3) icsModel = 463;
                                 else if (mBluetoothIcVersion[0] == 1) icsModel = 108;
                                 mBluetoothIcVersionUpdated = true;
-                                if (true) appendToLog("mBluetoothIcVersionUpdated is true");
+                                if (DEBUG) appendToLog("mBluetoothIcVersionUpdated is true");
                             }
-                            if (DEBUG) appendToLog("matched mBluetoothIc.GetVersion.Reply data is found with version=" + byteArrayToString(mBluetoothIcVersion));
-                            if (DEBUG) if (mBluetoothIcVersion[0] == -1) appendToLog("mBluetoothIcVersion[0] == -1");
-                            if (DEBUG) appendToLog("the value is " + String.valueOf(mBluetoothIcVersion[0]));
+                            if (DEBUG_PKDATA) appendToLog("PkData: matched BluetoothIc.Reply.GetVersion with version = " + byteArrayToString(mBluetoothIcVersion));
                         } else if (mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent == BluetoothIcPayloadEvents.GET_DEVICE_NAME) {
                             if (cs108ReadData.dataValues.length > 2) {
                                 byte[] deviceName1 = new byte[cs108ReadData.dataValues.length - 2];
                                 System.arraycopy(cs108ReadData.dataValues, 2, deviceName1, 0, cs108ReadData.dataValues.length - 2);
                                 deviceName = deviceName1;
                             }
-                            if (true) appendToLog("matched mBluetoothIc.SetDeviceName.Reply data is found with name=" + byteArrayToString(deviceName) + ", dataValues.length=" + cs108ReadData.dataValues.length + ", deviceName.length=" + deviceName.length);
+                            if (DEBUG_PKDATA) appendToLog("PkData: matched mBluetoothIc.GetDeviceName.Reply data is found with name=" + byteArrayToString(deviceName) + ", dataValues.length=" + cs108ReadData.dataValues.length + ", deviceName.length=" + deviceName.length);
                         } else if (mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent == BluetoothIcPayloadEvents.SET_DEVICE_NAME) {
                             if (cs108ReadData.dataValues.length >= 3) {
                                 if (cs108ReadData.dataValues[2] != 0) {
                                     //do if false
                                 }
                             }
-                            if (DEBUG) appendToLog("matched mBluetoothIc/.SetDeviceName.Reply data is found.");
+                            if (DEBUG_PKDATA) appendToLog("PkData: matched mBluetoothIc.SetDeviceName.Reply data is found.");
                         } else if (mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent == BluetoothIcPayloadEvents.FORCE_BT_DISCONNECT) {
                             if (cs108ReadData.dataValues.length >= 3) {
                                 if (cs108ReadData.dataValues[2] != 0) {
                                     //do if false
                                 }
                             }
-                            if (DEBUG) appendToLog("matched mBluetoothIc.ForceBTDisconnect.Reply data is found.");
+                            if (DEBUG_PKDATA) appendToLog("PkData: matched mBluetoothIc.ForceBTDisconnect.Reply data is found.");
                         } else {
                             if (DEBUG) appendToLog("matched mBluetoothIc.Other.Reply data is found.");
                         }
                         mBluetoothIcToWrite.remove(0); sendDataToWriteSent = 0;
+                        if (DEBUG_PKDATA) appendToLog("PkData: new mBluetoothIcToWrite size = " + mBluetoothIcToWrite.size());
                     }
                 }
             }
@@ -211,7 +218,9 @@ class BluetoothConnector {
                 mBluetoothIcToWrite.remove(0); sendDataToWriteSent = 0;
                 if (DEBUG) appendToLog("Removed after sending count-out with oldSize = " + oldSize + ", updated mBluetoothIcToWrite.size() = " + mBluetoothIcToWrite.size());
                 if (DEBUG) appendToLog("Removed after sending count-out.");
-                Toast.makeText(mContext, "Problem in sending data to Bluetooth Module. Removed data sending after count-out", Toast.LENGTH_SHORT).show();
+                String string = "Problem in sending data to Bluetooth Module. Removed data sending after count-out";
+                if (userDebugEnable) Toast.makeText(context, string, Toast.LENGTH_SHORT).show();
+                else appendToLogView(string);
             } else {
                 if (DEBUG) appendToLog("size = " + mBluetoothIcToWrite.size() + ", PayloadEvents = " + mBluetoothIcToWrite.get(0).bluetoothIcPayloadEvent.toString());
                 return writeBluetoothIc(mBluetoothIcToWrite.get(0));
@@ -237,6 +246,8 @@ class BluetoothConnector {
             }
             if (repeatRequest == false) {
                 mBluetoothIcDevice.mBluetoothIcToWrite.add(cs108BluetoothIcData);
+                appendToLog("2b GET_DEVICE_NAME");
+                if (DEBUG_PKDATA) appendToLog("add " + cs108BluetoothIcData.bluetoothIcPayloadEvent.toString() + " to mBluetoothIcToWrite with length = " + mBluetoothIcToWrite.size());
             }
         }
     }

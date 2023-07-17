@@ -19,7 +19,7 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class AccessColdChainFragment extends CommonFragment {
@@ -190,14 +190,14 @@ public class AccessColdChainFragment extends CommonFragment {
         });
 
         setupTagID();
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
+        MainActivity.csLibrary4A.setSameCheck(true);
+        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 
@@ -207,12 +207,12 @@ public class AccessColdChainFragment extends CommonFragment {
         super.setUserVisibleHint(isVisibleToUser);
         if(getUserVisibleHint()) {
             userVisibleHint = true;
-            MainActivity.mCs108Library4a.appendToLog("AccessColdChainFragment is now VISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment is now VISIBLE");
             setupTagID();
             //            setNotificationListener();
         } else {
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessColdChainFragment is now INVISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment is now INVISIBLE");
 //            MainActivity.mCs108Library4a.setNotificationListener(null);
         }
     }
@@ -233,7 +233,7 @@ public class AccessColdChainFragment extends CommonFragment {
                 int indexUser = stringDetail.indexOf("USER=");
                 if (indexUser != -1) {
                     String stringUser = stringDetail.substring(indexUser + 5);
-                    MainActivity.mCs108Library4a.appendToLog("stringUser = " + stringUser);
+                    MainActivity.csLibrary4A.appendToLog("stringUser = " + stringUser);
 
                     boolean bEnableBAPMode = false;
                     int number = Integer.valueOf(stringUser.substring(3, 4), 16);
@@ -246,10 +246,10 @@ public class AccessColdChainFragment extends CommonFragment {
     }
 
     boolean isOperationRunning() {
-        if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+        if (MainActivity.csLibrary4A.isBleConnected() == false) {
             Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
             return true;
-        } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+        } else if (MainActivity.csLibrary4A.isRfidFailure()) {
             Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
             return true;
         } else if (accessTask != null) {
@@ -262,7 +262,7 @@ public class AccessColdChainFragment extends CommonFragment {
     }
 
     void startAccessTask() {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("startAccessTask()");
         if (updating == false) {
             updating = true; bankProcessing = 0;
             mHandler.removeCallbacks(updateRunnable);
@@ -275,25 +275,25 @@ public class AccessColdChainFragment extends CommonFragment {
         public void run() {
             boolean rerunRequest = false; boolean taskRequest = false;
             if (accessTask == null) {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessColdChainFragment().updateRunnable(): NULL accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
             } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
                 rerunRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessColdChainFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
                 taskRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessColdChainFragment().updateRunnable(): FINISHED accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment().updateRunnable(): FINISHED accessReadWriteTask");
             }
-            if (processResult()) { rerunRequest = true; MainActivity.mCs108Library4a.appendToLog("processResult is TRUE");}
+            if (processResult()) { rerunRequest = true; MainActivity.csLibrary4A.appendToLog("processResult is TRUE");}
             else if (taskRequest) {
                 boolean invalid = processTickItems();
-                MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
+                MainActivity.csLibrary4A.appendToLog("processTickItems, invalid = " + invalid);
                 if (bankProcessing++ != 0 && invalid) rerunRequest = false;
                 else  {
-                    Cs108Connector.HostCommands hostCommand;
-                    if (readWriteTypes == ReadWriteTypes.TEMPERATURE) hostCommand = Cs108Connector.HostCommands.CMD_GETSENSORDATA;
-                    else if (operationRead) hostCommand = Cs108Connector.HostCommands.CMD_18K6CREAD;
-                    else hostCommand = Cs108Connector.HostCommands.CMD_18K6CWRITE;
+                    Cs108Library4A.HostCommands hostCommand;
+                    if (readWriteTypes == ReadWriteTypes.TEMPERATURE) hostCommand = Cs108Library4A.HostCommands.CMD_GETSENSORDATA;
+                    else if (operationRead) hostCommand = Cs108Library4A.HostCommands.CMD_18K6CREAD;
+                    else hostCommand = Cs108Library4A.HostCommands.CMD_18K6CWRITE;
                     accessTask = new AccessTask(
                             (operationRead ? buttonRead : buttonWrite), null,
                             invalid,
@@ -305,15 +305,15 @@ public class AccessColdChainFragment extends CommonFragment {
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;
-                    MainActivity.mCs108Library4a.appendToLog("accessTask is created");
+                    MainActivity.csLibrary4A.appendToLog("accessTask is created");
                 }
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 500);
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessColdChainFragment().updateRunnable(): Restart");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment().updateRunnable(): Restart");
             }
             else    updating = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessColdChainFragment().updateRunnable(): Ending with updating = " + updating);
+            MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment().updateRunnable(): Ending with updating = " + updating);
         }
     };
 
@@ -356,7 +356,7 @@ public class AccessColdChainFragment extends CommonFragment {
         else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
-            MainActivity.mCs108Library4a.appendToLog("accessResult 2 bankProcewssing = " + bankProcessing + ", accessResult = " + accessTask.accessResult );
+            MainActivity.csLibrary4A.appendToLog("accessResult 2 bankProcewssing = " + bankProcessing + ", accessResult = " + accessTask.accessResult );
             if (readWriteTypes == ReadWriteTypes.STARTLOGGING) textViewStartLoggingStatus.setText(accessResult);
             else if (readWriteTypes == ReadWriteTypes.STOPLOGGING) textViewStopLoggingStatus.setText(accessResult);
             else if (readWriteTypes == ReadWriteTypes.CHECKLOGGING) textViewCheckAlaramStatus.setText(accessResult);
@@ -370,7 +370,7 @@ public class AccessColdChainFragment extends CommonFragment {
                     textViewEnableOk.setText("E"); checkBoxEnable.setChecked(false);
                 }
             } else {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.CONFIGURATION) {
                     textViewConfigOk.setText("O"); checkBoxConfig.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
                     if (accessResult.length() == 12 && operationRead) { // 43 60 42 FC 04 06
@@ -397,12 +397,12 @@ public class AccessColdChainFragment extends CommonFragment {
                     }
                 } else if (readWriteTypes == ReadWriteTypes.TEMPERATURE && operationRead) {
                     textViewTemperatureOk.setText("O"); checkBoxTemperature.setChecked(false); readWriteTypes = ReadWriteTypes.NULL;
-                    MainActivity.mCs108Library4a.appendToLog("accessResult of Temperature = " + accessResult);
+                    MainActivity.csLibrary4A.appendToLog("accessResult of Temperature = " + accessResult);
 
                     if (accessResult.length() >= 16) {
                         int indexBegin = accessResult.length() - 16;
                         String stringValue = accessResult.substring(indexBegin, indexBegin + 4);
-                        MainActivity.mCs108Library4a.appendToLog("temperature part of Temperature accessResult = " + stringValue);
+                        MainActivity.csLibrary4A.appendToLog("temperature part of Temperature accessResult = " + stringValue);
                         accessResult = stringValue;
                     }
                     if (accessResult.length() == 4) {
@@ -440,7 +440,7 @@ public class AccessColdChainFragment extends CommonFragment {
         String writeData = "";
 
         if (readWriteTypes == ReadWriteTypes.STARTLOGGING || readWriteTypes == ReadWriteTypes.STOPLOGGING || readWriteTypes == ReadWriteTypes.CHECKLOGGING || readWriteTypes == ReadWriteTypes.GETLOGGING) {
-            MainActivity.mCs108Library4a.appendToLog("accessResult 1 bankProcewssing = " + bankProcessing );
+            MainActivity.csLibrary4A.appendToLog("accessResult 1 bankProcewssing = " + bankProcessing );
             accOffset = 0xF0; accSize = 1; operationRead = true;
             if (readWriteTypes == ReadWriteTypes.STARTLOGGING) {
                 switch(bankProcessing) {
@@ -459,7 +459,7 @@ public class AccessColdChainFragment extends CommonFragment {
                         short sTemp = (short) fTemp;
                         writeData += String.format("%04X", sTemp);
                         operationRead = false;
-                        MainActivity.mCs108Library4a.appendToLog("accessResult: UTC seconds = " + seconds + ", writedata = " + writeData);
+                        MainActivity.csLibrary4A.appendToLog("accessResult: UTC seconds = " + seconds + ", writedata = " + writeData);
                         break;
                     case 2:
                         float overTemperature = 20;
@@ -474,17 +474,17 @@ public class AccessColdChainFragment extends CommonFragment {
                         writeData += String.format("%04X", sTemp);
                         writeData += "0000";    //clear Alarm status
                         operationRead = false;
-                        MainActivity.mCs108Library4a.appendToLog("accessResult: temperature alarm: writeData = " + writeData);
+                        MainActivity.csLibrary4A.appendToLog("accessResult: temperature alarm: writeData = " + writeData);
                         break;
                     case 3:
                         accOffset = 0x104; accSize = 1; writeData = "0001";
                         operationRead = false;
-                        MainActivity.mCs108Library4a.appendToLog("accessResult: status: writeData = " + writeData);
+                        MainActivity.csLibrary4A.appendToLog("accessResult: status: writeData = " + writeData);
                         break;
                     case 4:
                         accOffset = 0xF0; accSize = 1; writeData = "A000";
                         operationRead = false;
-                        MainActivity.mCs108Library4a.appendToLog("accessResult: control: writeData = " + writeData);
+                        MainActivity.csLibrary4A.appendToLog("accessResult: control: writeData = " + writeData);
                         break;
                     default:
                         invalidRequest1 = true; readWriteTypes = ReadWriteTypes.NULL;
@@ -498,13 +498,13 @@ public class AccessColdChainFragment extends CommonFragment {
                     case 1:
                         accOffset = 0x104; accSize = 1; writeData = "0002";
                         operationRead = false;
-                        MainActivity.mCs108Library4a.appendToLog("accessResult: status: writeData = " + writeData);
+                        MainActivity.csLibrary4A.appendToLog("accessResult: status: writeData = " + writeData);
                         break;
                     case 2:
                     case 3:
                         accOffset = 0xF0; accSize = 1; writeData = "A600";
                         operationRead = false;
-                        MainActivity.mCs108Library4a.appendToLog("accessResult: control: writeData = " + writeData);
+                        MainActivity.csLibrary4A.appendToLog("accessResult: control: writeData = " + writeData);
                         break;
                     default:
                         invalidRequest1 = true; readWriteTypes = ReadWriteTypes.NULL;
@@ -529,7 +529,7 @@ public class AccessColdChainFragment extends CommonFragment {
                             iValue &= 0x3; iValue |= 1;
                             writeData = String.format("%04X", iValue);
                             operationRead = false;
-                            MainActivity.mCs108Library4a.appendToLog("accessResult: writeData = " + writeData);
+                            MainActivity.csLibrary4A.appendToLog("accessResult: writeData = " + writeData);
                             break;
                         }
                     default:
@@ -592,10 +592,10 @@ public class AccessColdChainFragment extends CommonFragment {
                     bValue = Byte.parseByte(editTextSamplingInterval.getText().toString());
                     tempBytes[5] |= (bValue & 0x3F);
 
-                    writeData = MainActivity.mCs108Library4a.byteArrayToString(tempBytes);
-                    MainActivity.mCs108Library4a.appendToLog("editTextTempCountUnder = " + MainActivity.mCs108Library4a.byteArrayToString(tempBytes));
+                    writeData = MainActivity.csLibrary4A.byteArrayToString(tempBytes);
+                    MainActivity.csLibrary4A.appendToLog("editTextTempCountUnder = " + MainActivity.csLibrary4A.byteArrayToString(tempBytes));
                 } catch (Exception ex) {
-                    MainActivity.mCs108Library4a.appendToLog("Invalid String.parse !!!");
+                    MainActivity.csLibrary4A.appendToLog("Invalid String.parse !!!");
                     invalidRequest1 = true;
                 }
             }
@@ -613,7 +613,7 @@ public class AccessColdChainFragment extends CommonFragment {
                     textViewBatteryAlarm.setVisibility(View.INVISIBLE);
                     textViewTemperatureOk.setText("");
                     if (true) {
-                        MainActivity.mCs108Library4a.macWrite(0x11F, 3);
+                        MainActivity.csLibrary4A.macWrite(0x11F, 3);
                         return false;
                     }
                     accOffset = 0x100; accSize = 1; operationRead = false;
@@ -636,25 +636,25 @@ public class AccessColdChainFragment extends CommonFragment {
         }
 
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(3) == false) {
+            if (MainActivity.csLibrary4A.setAccessBank(3) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessOffset(accOffset) == false) {
+            if (MainActivity.csLibrary4A.setAccessOffset(accOffset) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
             if (accSize == 0) {
                 invalidRequest1 = true;
-            } else if (MainActivity.mCs108Library4a.setAccessCount(accSize) == false) {
+            } else if (MainActivity.csLibrary4A.setAccessCount(accSize) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false && operationRead == false) {
             if (invalidRequest1 == false) {
-                if (MainActivity.mCs108Library4a.setAccessWriteData(writeData) == false) {
+                if (MainActivity.csLibrary4A.setAccessWriteData(writeData) == false) {
                     invalidRequest1 = true;
                 }
             }

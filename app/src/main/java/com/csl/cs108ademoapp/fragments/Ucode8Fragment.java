@@ -31,13 +31,16 @@ public class Ucode8Fragment extends CommonFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) mAdapter.fragment1;
         switch (item.getItemId()) {
-            case R.id.menuAction_1:
+            case R.id.menuAction_clear:
                 fragment1.clearTagsList();
                 return true;
-            case R.id.menuAction_2:
+            case R.id.menuAction_sortRssi:
+                fragment1.sortTagsListByRssi();
+                return true;
+            case R.id.menuAction_sort:
                 fragment1.sortTagsList();
                 return true;
-            case R.id.menuAction_3:
+            case R.id.menuAction_save:
                 fragment1.saveTagsList();
                 return true;
             default:
@@ -105,8 +108,8 @@ public class Ucode8Fragment extends CommonFragment {
     public void onDestroy() {
         mAdapter.fragment0.onDestroy();
         mAdapter.fragment1.onDestroy();
-        MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
+        MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
+        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 

@@ -21,7 +21,7 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class AccessMicronFragment extends CommonFragment {
@@ -226,10 +226,10 @@ public class AccessMicronFragment extends CommonFragment {
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+                if (MainActivity.csLibrary4A.isBleConnected() == false) {
                     Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
-                } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -238,7 +238,7 @@ public class AccessMicronFragment extends CommonFragment {
             }
         });
 
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
@@ -250,7 +250,7 @@ public class AccessMicronFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
         super.onDestroy();
     }
 
@@ -349,7 +349,7 @@ public class AccessMicronFragment extends CommonFragment {
                 indexUser = stringDetail.indexOf("USER=");
                 if (indexUser != -1) {
                     String stringUser = stringDetail.substring(indexUser + 5);
-                    MainActivity.mCs108Library4a.appendToLog("stringUser = " + stringUser);
+                    MainActivity.csLibrary4A.appendToLog("stringUser = " + stringUser);
 
                     boolean bEnableBAPMode = false;
                     int number = Integer.valueOf(stringUser.substring(3, 4), 16);
@@ -360,7 +360,7 @@ public class AccessMicronFragment extends CommonFragment {
     }
 
     void startAccessTask() {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("startAccessTask()");
         if (updating == false) {
             updating = true; bankProcessing = 0;
             checkProcessing = 0;
@@ -375,19 +375,19 @@ public class AccessMicronFragment extends CommonFragment {
         public void run() {
             boolean rerunRequest = false; boolean taskRequest = false;
             if (accessTask == null) {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessMicronFragment().updateRunnable(): NULL accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessMicronFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
             } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
                 rerunRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessMicronFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessMicronFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
                 taskRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessMicronFragment().updateRunnable(): FINISHED accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessMicronFragment().updateRunnable(): FINISHED accessReadWriteTask");
             }
-            if (processResult()) { rerunRequest = true; MainActivity.mCs108Library4a.appendToLog("processResult is TRUE");}
+            if (processResult()) { rerunRequest = true; MainActivity.csLibrary4A.appendToLog("processResult is TRUE");}
             else if (taskRequest) {
                 boolean invalid = processTickItems();
-                MainActivity.mCs108Library4a.appendToLog("processTickItems, invalid = " + invalid);
+                MainActivity.csLibrary4A.appendToLog("processTickItems, invalid = " + invalid);
                 if (bankProcessing++ != 0 && invalid == true)   rerunRequest = false;
                 else {
                     int selectBank = 1;
@@ -399,20 +399,20 @@ public class AccessMicronFragment extends CommonFragment {
                             selectMask, selectBank, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                            (operationRead ? Cs108Connector.HostCommands.CMD_18K6CREAD: Cs108Connector.HostCommands.CMD_18K6CWRITE),
+                            (operationRead ? Cs108Library4A.HostCommands.CMD_18K6CREAD: Cs108Library4A.HostCommands.CMD_18K6CWRITE),
                             0, 0, true,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;
-                    MainActivity.mCs108Library4a.appendToLog("accessTask is created with selectBank = " + selectBank);
+                    MainActivity.csLibrary4A.appendToLog("accessTask is created with selectBank = " + selectBank);
                 }
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 500);
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessMicronFragment().updateRunnable(): Restart");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessMicronFragment().updateRunnable(): Restart");
             }
             else    updating = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessMicronFragment().updateRunnable(): Ending with updating = " + updating);
+            MainActivity.csLibrary4A.appendToLog("AccessMicronFragment().updateRunnable(): Ending with updating = " + updating);
         }
     };
 
@@ -431,7 +431,7 @@ public class AccessMicronFragment extends CommonFragment {
         return false;
     }
     boolean setCalibrationVersion(String strUser) {
-        MainActivity.mCs108Library4a.appendToLog("strUser = " + strUser);
+        MainActivity.csLibrary4A.appendToLog("strUser = " + strUser);
         textViewCalibrationVersion.setText("");
         if (strUser == null) return false;
         if (strUser.length() < 16) return false;
@@ -449,7 +449,7 @@ public class AccessMicronFragment extends CommonFragment {
             calVer = Integer.parseInt(strUser.substring(15, 16), 16);
             calVer &= 0x3;
             if (DEBUG)
-                MainActivity.mCs108Library4a.appendToLog("crc = " + crc + ", code1 = " + calCode1 + ", temp1 = " + calTemp1 + ", code2 = " + calCode2 + ", temp2 = " + calTemp2 + ", ver = " + calVer);
+                MainActivity.csLibrary4A.appendToLog("crc = " + crc + ", code1 = " + calCode1 + ", temp1 = " + calTemp1 + ", code2 = " + calCode2 + ", temp2 = " + calTemp2 + ", ver = " + calVer);
             strUser += String.format(", v%d", calVer);
         }
         textViewCalibrationVersion.setText(strUser);
@@ -490,7 +490,7 @@ public class AccessMicronFragment extends CommonFragment {
             if (true) {
                 EditText editText = (EditText) getActivity().findViewById(R.id.accessMNHumidityThreshold);
                 int iValue = Integer.parseInt(editText.getText().toString());
-                MainActivity.mCs108Library4a.appendToLog("iValue for Dry/Wet comparision = " + iValue);
+                MainActivity.csLibrary4A.appendToLog("iValue for Dry/Wet comparision = " + iValue);
                 if (fValue >=  iValue) strData = "dry";
                 else strData = "wet";
             } else {
@@ -521,7 +521,7 @@ public class AccessMicronFragment extends CommonFragment {
             fTemperature /= 10;
         } else if (modelCode == 5) {
             String strCalData = textViewCalibrationVersion.getText().toString();
-            if (strCalData != null) fTemperature = MainActivity.mCs108Library4a.decodeMicronTemperature(5, strData, strCalData);
+            if (strCalData != null) fTemperature = MainActivity.csLibrary4A.decodeMicronTemperature(5, strData, strCalData);
         }
         if (fTemperature != -500) {
             if (spinnerTemperatureUnit.getSelectedItemPosition() == 1) {
@@ -545,8 +545,8 @@ public class AccessMicronFragment extends CommonFragment {
         else {
             if (changedSelectIndex) {
                 changedSelectIndex = false; MainActivity.selectFor = 0;
-                MainActivity.mCs108Library4a.setSelectCriteriaDisable(2);
-                MainActivity.mCs108Library4a.setSelectCriteriaDisable(1);
+                MainActivity.csLibrary4A.setSelectCriteriaDisable(2);
+                MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
             }
             accessResult = accessTask.accessResult;
             if (accessResult == null) {
@@ -567,7 +567,7 @@ public class AccessMicronFragment extends CommonFragment {
                     //checkBoxTemperatureCode.setChecked(false);
                 }
             } else {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.MODELCODE) {
                     textViewConfigOk.setText("O");
                     //checkBoxConfig.setChecked(false);
@@ -626,14 +626,14 @@ public class AccessMicronFragment extends CommonFragment {
             int offset = 0xA0;
             if (modelCode == 3) offset = 0xD0;
             else if (modelCode == 5) offset = 0x3D0;
-            MainActivity.mCs108Library4a.setSelectCriteria(1, true, 4, 5, selectHold,3, offset, "3F");
+            MainActivity.csLibrary4A.setSelectCriteria(1, true, 4, 5, selectHold,3, offset, "3F");
             changedSelectIndex = true;
             accBank = 0; accOffset = 13; if (modelCode == 1) { accBank = 3; accOffset = 9; }
             accSize = 1; readWriteTypes = ReadWriteTypes.RSSICODE; checkProcessing = 4;
             textViewRssiCodeOk.setText(""); textViewRssiCode.setText("");
         } else if (checkBoxTemperatureCode.isChecked() == true && (modelCode == 3 || modelCode == 5) && checkProcessing < 5 && operationRead) {
-            if (modelCode == 3) MainActivity.mCs108Library4a.setSelectCriteria(1, true, 4, 2, 0,3, 0xE0, "");
-            else MainActivity.mCs108Library4a.setSelectCriteria(1, true, 4, 5, selectHold,3, 0x3B0, "00");
+            if (modelCode == 3) MainActivity.csLibrary4A.setSelectCriteria(1, true, 4, 2, 0,3, 0xE0, "");
+            else MainActivity.csLibrary4A.setSelectCriteria(1, true, 4, 5, selectHold,3, 0x3B0, "00");
             changedSelectIndex = true;
             accBank = 0; accOffset = 14; accSize = 1; readWriteTypes = ReadWriteTypes.TEMPERATURECODE; checkProcessing = 5;
             textViewTemperatureCodeOk.setText(""); textViewTemperatureCode.setText("");
@@ -642,25 +642,25 @@ public class AccessMicronFragment extends CommonFragment {
         }
 
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(accBank) == false) {
+            if (MainActivity.csLibrary4A.setAccessBank(accBank) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessOffset(accOffset) == false) {
+            if (MainActivity.csLibrary4A.setAccessOffset(accOffset) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
             if (accSize == 0) {
                 invalidRequest1 = true;
-            } else if (MainActivity.mCs108Library4a.setAccessCount(accSize) == false) {
+            } else if (MainActivity.csLibrary4A.setAccessCount(accSize) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false && operationRead == false) {
             if (invalidRequest1 == false) {
-                if (MainActivity.mCs108Library4a.setAccessWriteData(writeData) == false) {
+                if (MainActivity.csLibrary4A.setAccessWriteData(writeData) == false) {
                     invalidRequest1 = true;
                 }
             }

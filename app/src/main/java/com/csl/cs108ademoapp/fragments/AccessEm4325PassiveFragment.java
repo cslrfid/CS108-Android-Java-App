@@ -14,7 +14,7 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Connector;
+import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cs108library4a.ReaderDevice;
 
 public class AccessEm4325PassiveFragment extends CommonFragment {
@@ -64,14 +64,14 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
         });
 
         setupTagID();
-        MainActivity.mCs108Library4a.setSameCheck(false);
+        MainActivity.csLibrary4A.setSameCheck(false);
     }
 
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.mCs108Library4a.setSameCheck(true);
-        MainActivity.mCs108Library4a.restoreAfterTagSelect();
+        MainActivity.csLibrary4A.setSameCheck(true);
+        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 
@@ -81,12 +81,12 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
         super.setUserVisibleHint(isVisibleToUser);
         if(getUserVisibleHint()) {
             userVisibleHint = true;
-            MainActivity.mCs108Library4a.appendToLog("AccessEm4325PassiveFragment is now VISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment is now VISIBLE");
             setupTagID();
             //            setNotificationListener();
         } else {
             userVisibleHint = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessEm4325PassiveFragment is now INVISIBLE");
+            MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment is now INVISIBLE");
 //            MainActivity.mCs108Library4a.setNotificationListener(null);
         }
     }
@@ -105,10 +105,10 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
     }
 
     boolean isOperationRunning() {
-        if (MainActivity.mCs108Library4a.isBleConnected() == false) {
+        if (MainActivity.csLibrary4A.isBleConnected() == false) {
             Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
             return true;
-        } else if (MainActivity.mCs108Library4a.isRfidFailure()) {
+        } else if (MainActivity.csLibrary4A.isRfidFailure()) {
             Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
             return true;
         } else if (accessTask != null) {
@@ -121,7 +121,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
     }
 
     void startAccessTask() {
-        if (DEBUG) MainActivity.mCs108Library4a.appendToLog("startAccessTask()");
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("startAccessTask()");
         if (updating == false) {
             updating = true; bankProcessing = 0;
             mHandler.removeCallbacks(updateRunnable);
@@ -134,25 +134,25 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
         public void run() {
             boolean rerunRequest = false; boolean taskRequest = false;
             if (accessTask == null) {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): NULL accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
             } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
                 rerunRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
                 taskRequest = true;
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): FINISHED accessReadWriteTask");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): FINISHED accessReadWriteTask");
             }
-            if (processResult()) { rerunRequest = true; MainActivity.mCs108Library4a.appendToLog("updateRunnable: processResult is TRUE with bankprocessing = " + bankProcessing);}
+            if (processResult()) { rerunRequest = true; MainActivity.csLibrary4A.appendToLog("updateRunnable: processResult is TRUE with bankprocessing = " + bankProcessing);}
             else if (taskRequest) {
                 boolean invalid = processTickItems();
-                MainActivity.mCs108Library4a.appendToLog("updateRunnable: processTickItems Result = " + invalid + ", bankprocessing = " + bankProcessing);
+                MainActivity.csLibrary4A.appendToLog("updateRunnable: processTickItems Result = " + invalid + ", bankprocessing = " + bankProcessing);
                 if (bankProcessing++ != 0 && invalid) rerunRequest = false;
                 else  {
-                    Cs108Connector.HostCommands hostCommand;
-                    if (readWriteTypes == ReadWriteTypes.TEMPERATURE && operationRead) hostCommand = Cs108Connector.HostCommands.CMD_GETSENSORDATA;
-                    else if (operationRead) hostCommand = Cs108Connector.HostCommands.CMD_18K6CREAD;
-                    else hostCommand = Cs108Connector.HostCommands.CMD_18K6CWRITE;
+                    Cs108Library4A.HostCommands hostCommand;
+                    if (readWriteTypes == ReadWriteTypes.TEMPERATURE && operationRead) hostCommand = Cs108Library4A.HostCommands.CMD_GETSENSORDATA;
+                    else if (operationRead) hostCommand = Cs108Library4A.HostCommands.CMD_18K6CREAD;
+                    else hostCommand = Cs108Library4A.HostCommands.CMD_18K6CWRITE;
                     accessTask = new AccessTask(
                             buttonRead, null,
                             invalid,
@@ -164,15 +164,15 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;
-                    MainActivity.mCs108Library4a.appendToLog("accessTask is created");
+                    MainActivity.csLibrary4A.appendToLog("accessTask is created");
                 }
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 500);
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): Restart");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): Restart");
             }
             else    updating = false;
-            MainActivity.mCs108Library4a.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): Ending with updating = " + updating);
+            MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): Ending with updating = " + updating);
         }
     };
 
@@ -215,22 +215,22 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
         else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
-            MainActivity.mCs108Library4a.appendToLog("accessResult 2 bankProcessing = " + bankProcessing + ", accessResult = " + accessTask.accessResult );
+            MainActivity.csLibrary4A.appendToLog("accessResult 2 bankProcessing = " + bankProcessing + ", accessResult = " + accessTask.accessResult );
             if (accessResult == null) {
                 if (readWriteTypes == ReadWriteTypes.TEMPERATURE && operationRead) {
                     bRequestCheck = false;
                 }
             } else {
-                if (DEBUG) MainActivity.mCs108Library4a.appendToLog("accessResult = " + accessResult);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessResult);
                 if (readWriteTypes == ReadWriteTypes.TEMPERATURE && operationRead == false) {
                 } else if (readWriteTypes == ReadWriteTypes.TEMPERATURE && operationRead) {
                     bRequestCheck = false; readWriteTypes = ReadWriteTypes.NULL;
-                    MainActivity.mCs108Library4a.appendToLog("accessResult of Temperature = " + accessResult);
+                    MainActivity.csLibrary4A.appendToLog("accessResult of Temperature = " + accessResult);
 
                     if (accessResult.length() >= 16) {
                         int indexBegin = accessResult.length() - 16;
                         String stringValue = accessResult.substring(indexBegin, indexBegin + 4);
-                        MainActivity.mCs108Library4a.appendToLog("temperature part of Temperature accessResult = " + stringValue);
+                        MainActivity.csLibrary4A.appendToLog("temperature part of Temperature accessResult = " + stringValue);
                         accessResult = stringValue; //"00B5"; //stringValue;
                     }
                     if (accessResult.length() == 4) {
@@ -265,7 +265,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
                 } else invalidRequest1 = true;
             } else {
                 operationRead = true;
-                MainActivity.mCs108Library4a.macWrite(0x11F, 3);
+                MainActivity.csLibrary4A.macWrite(0x11F, 3);
                 return false;
             }
         } else {
@@ -273,25 +273,25 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
         }
 
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessBank(3) == false) {
+            if (MainActivity.csLibrary4A.setAccessBank(3) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
-            if (MainActivity.mCs108Library4a.setAccessOffset(accOffset) == false) {
+            if (MainActivity.csLibrary4A.setAccessOffset(accOffset) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false) {
             if (accSize == 0) {
                 invalidRequest1 = true;
-            } else if (MainActivity.mCs108Library4a.setAccessCount(accSize) == false) {
+            } else if (MainActivity.csLibrary4A.setAccessCount(accSize) == false) {
                 invalidRequest1 = true;
             }
         }
         if (invalidRequest1 == false && operationRead == false) {
             if (invalidRequest1 == false) {
-                if (MainActivity.mCs108Library4a.setAccessWriteData(writeData) == false) {
+                if (MainActivity.csLibrary4A.setAccessWriteData(writeData) == false) {
                     invalidRequest1 = true;
                 }
             }

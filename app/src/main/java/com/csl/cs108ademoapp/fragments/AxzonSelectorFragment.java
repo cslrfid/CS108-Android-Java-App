@@ -90,9 +90,9 @@ public class AxzonSelectorFragment extends CommonFragment {
                 MainActivity.mDid = "E28240";
                 break;
         }
-        MainActivity.mCs108Library4a.appendToLog("HelloABC: gotoAxzonFragment with tagType = " + tagType + ", MainActivity.mDid = " + MainActivity.mDid);
+        MainActivity.csLibrary4A.appendToLog("HelloABC: gotoAxzonFragment with tagType = " + tagType + ", MainActivity.mDid = " + MainActivity.mDid);
 
-        MainActivity.mCs108Library4a.appendToLog("HelloABC: config is " + (MainActivity.config == null ? "null" : "Valid"));
+        MainActivity.csLibrary4A.appendToLog("HelloABC: config is " + (MainActivity.config == null ? "null" : "Valid"));
         MainActivity.config.configPassword = "00000000";
         MainActivity.config.configPower = Integer.toString(300);
         MainActivity.config.config0 = Integer.toString(9);

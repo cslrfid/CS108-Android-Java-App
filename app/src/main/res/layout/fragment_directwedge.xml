@@ -1,0 +1,97 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="@color/material_dynamic_neutral_variant0"
+    android:orientation="vertical">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/directWedgeButtonSetup"
+            android:layout_width="match_parent"
+            style="@style/DashboardButton"
+            android:textColor="#FFFFFF"
+            android:text="Configuration"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            style="@style/DashboardButton"
+            android:text="Select Reader"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FFFFFF">
+
+        <ListView
+            android:id="@+id/directWedgeListView"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="0.25dp" />
+
+        <TextView
+            android:id="@+id/directWedgeTextViewEmpty"
+            style="@style/style_medium_font"
+            android:text="@string/nodevice_found"
+            android:visibility="gone" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/directWedgeButtonConnect"
+            android:layout_width="match_parent"
+            style="@style/DashboardButton"
+            android:textColor="#FFFFFF"
+            android:text="Connect"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/directWedgeButtonStart"
+            android:layout_width="wrap_content"
+            style="@style/DashboardButton"
+            android:text="Start Wedge"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/directWedgeButtonInfo"
+            android:layout_width="match_parent"
+            style="@style/DashboardButton"
+            android:textColor="#FFFFFF"
+            android:text="Instructions"/>
+    </TableRow>
+</LinearLayout>

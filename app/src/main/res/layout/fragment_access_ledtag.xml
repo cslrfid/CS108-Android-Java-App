@@ -1,0 +1,114 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:gravity="right"
+                    style="@style/style_normal_font"
+                    android:text="Select mask" />
+
+                <include
+                    android:id="@+id/accessLEDTagID"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/settingAntennaPower_title" />
+
+                <EditText
+                    android:id="@+id/accessLEDAntennaPower"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font"
+                    android:inputType="numberDecimal"
+                    android:text="300" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessLedTagResultOK"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessLedTagResultTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:visibility="visible"
+                    style="@style/style_normal_font"
+                    android:checked="true"
+                    android:text="Read data:" />
+
+                <TextView
+                    android:id="@+id/accessLedTagResult"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+            </TableRow>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/default_left_padding">
+
+            <CheckBox
+                android:id="@+id/accessLedTagRepeat"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:visibility="visible"
+                style="@style/style_normal_font"
+                android:checked="true"
+                android:text="Repeat" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/accessMNReadButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                style="@style/style_button_font"
+                android:text="@string/read_title" />
+        </TableRow>
+    </LinearLayout>
+</LinearLayout>

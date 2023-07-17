@@ -8,16 +8,5 @@
         <item>3: Maximum throughput</item>
     </string-array>
 
-    <string-array name="profile3_options">
-        <item>1: Miller 2 640kHz Tari 7.5us</item>
-        <item>3: Miller 2 320kHz Tari 20us</item>
-        <item>5: Miller 4 320kHz Tari 20us</item>
-        <item>7: Miller 4 250kHz Tari 20us</item>
-        <item>11: Miller 1 640kHz Tari 7.5us</item>
-        <item>12: Miller 2 320kHz Tari 15us</item>
-        <item>13: Miller 8 160kHz Tari 20us</item>
-        <item>15: Miller 4 640kHz Tari 7.5us</item>
-    </string-array>
-
     <string name="toast_permission_not_granted">"Permissions are not granted. Please allow them in system setting."</string>
 </resources>

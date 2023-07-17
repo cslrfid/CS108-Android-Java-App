@@ -32,59 +32,14 @@ public class InventoryFragment extends CommonFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        MainActivity.mCs108Library4a.appendToLog("InventoryFragment: onOptionsItemSelected");
+        MainActivity.csLibrary4A.appendToLog("InventoryFragment: onOptionsItemSelected with viewPager as " + viewPager.getCurrentItem());
         InventoryRfidiMultiFragment fragment0 = (InventoryRfidiMultiFragment) mAdapter.fragment0;
         InventoryBarcodeFragment fragment1 = (InventoryBarcodeFragment) mAdapter.fragment1;
-        switch (item.getItemId()) {
-            case R.id.menuAction_1:
-                MainActivity.mCs108Library4a.appendToLog("InventoryFragment: onOptionsItemSelected: clearTagsList");
-                switch (viewPager.getCurrentItem()) {
-                    case 0:
-                        fragment0.clearTagsList();
-                        break;
-                    case 1:
-                        fragment1.clearTagsList();
-                        break;
-                    default:
-                        break;
-                }
-                return true;
-            case R.id.menuAction_2:
-                switch (viewPager.getCurrentItem()) {
-                    case 0:
-                        fragment0.sortTagsList();
-                        break;
-                    case 1:
-                        fragment1.sortTagsList();
-                        break;
-                    default:
-                        break;
-                }
-                return true;
-            case R.id.menuAction_3:
-                switch (viewPager.getCurrentItem()) {
-                    case 0:
-                        fragment0.saveTagsList();
-                        break;
-                    case 1:
-                        fragment1.saveTagsList();
-                        break;
-                    default:
-                        break;
-                }
-                return true;
-            case R.id.menuAction_4:
-                switch (viewPager.getCurrentItem()) {
-                    case 0:
-                        fragment0.shareTagsList();
-                        break;
-                    case 1:
-                        fragment1.shareTagsList();
-                        break;
-                    default:
-                        break;
-                }
-                return true;
+        switch (viewPager.getCurrentItem()) {
+            case 0:
+                return fragment0.onOptionsItemSelected(item);
+            case 1:
+                return fragment1.onOptionsItemSelected(item);
             default:
                 return super.onOptionsItemSelected(item);
         }
