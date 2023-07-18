@@ -5,7 +5,7 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 33
-        buildConfigField 'String', 'VERSION_NAME', "\"2.8.5\""
+        buildConfigField 'String', 'VERSION_NAME', "\"2.9.0\""
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
