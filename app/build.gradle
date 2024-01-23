@@ -7,7 +7,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 33
         versionCode 38
-        versionName "2.8.22"
+        versionName "2.8.23"
     }
 }
 
