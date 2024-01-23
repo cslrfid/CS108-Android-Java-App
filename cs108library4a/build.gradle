@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion 33
@@ -17,6 +18,32 @@ android {
         release {
             shrinkResources false
             minifyEnabled false
+        }
+    }
+}
+
+def getVersionName = { ->
+    return "1.0.0"
+}
+
+def getArtifactId = { ->
+    return "sled_machine"
+}
+
+tasks.register('sourceJar', Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier "sources"
+}
+
+afterEvaluate{
+    publishing{
+        publications{
+            release(MavenPublication){
+                from components.release
+                groupId='com.csl.cs108library4a'
+                artifactId = 'sled_machine'
+                version = getVersionName()
+            }
         }
     }
 }
