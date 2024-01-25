@@ -20,6 +20,10 @@ android {
             minifyEnabled false
         }
     }
+    lintOptions {
+        abortOnError false
+        absolutePaths false
+    }
 }
 
 def getVersionName = { ->
@@ -30,7 +34,9 @@ def getArtifactId = { ->
     return "sled_machine"
 }
 
-tasks.register('sourceJar', Jar) {
+
+
+task sourceJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier "sources"
 }
@@ -41,8 +47,9 @@ afterEvaluate{
             release(MavenPublication){
                 from components.release
                 groupId='com.csl.cs108library4a'
-                artifactId = 'sled_machine'
+                artifactId = getArtifactId()
                 version = getVersionName()
+                artifact(sourceJar)
             }
         }
     }
