@@ -17,11 +17,11 @@ public class ColdChainAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int index) {
         Fragment fragment = null;
         switch (index) {
-            case 1:
+            case 2:
                 fragment = new AccessEm4325PassiveFragment();
                 fragment1 = fragment;
                 break;
-            case 2:
+            case 1:
                 fragment = new AccessColdChainFragment();
                 fragment2 = fragment;
                 break;

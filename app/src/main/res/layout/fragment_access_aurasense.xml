@@ -5,6 +5,25 @@
     android:paddingRight="0dp"
     android:orientation="vertical">
 
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Select tags" />
+
+        <Spinner
+            android:id="@+id/accessEmicroTagSelect"
+            android:layout_margin="0dp"
+            android:layout_weight="2"
+            style="@style/style_default_spinner" />
+    </TableRow>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -13,7 +32,35 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center|bottom"
             android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/accessEmicroSelectLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center|bottom"
+                android:orientation="vertical" >
+
+                <include
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_select" />
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/accessEmMicroAuroSenseLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center|bottom"
+                android:layout_marginLeft="5dp"
+                android:orientation="vertical" >
 
             <TableRow
                 android:layout_width="match_parent"
@@ -45,11 +92,6 @@
                         android:text="Sensing at select" />
                 </RadioGroup>
             </TableRow>
-
-            <include
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                layout="@layout/custom_select" />
 
             <TableRow
                 android:layout_width="match_parent"
@@ -241,6 +283,334 @@
                     android:layout_height="wrap_content"
                     layout="@layout/custom_edittext" />
             </TableRow>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/accessEmMicroColdChainLayout"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center|bottom"
+                android:layout_marginLeft="5dp"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/accessEmMicroColdChainLoggingLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center|bottom"
+                    android:orientation="vertical" >
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/accessCCConfigOK"
+                            android:layout_width="wrap_content" />
+
+                        <CheckBox
+                            android:id="@+id/accessCCConfigTitle"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            style="@style/style_normal_font"
+                            android:text="Configuration" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="Under" />
+
+                        <EditText
+                            android:id="@+id/accessCCTempThresUnder"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            style="@style/style_normal_font" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="Over" />
+
+                        <EditText
+                            android:id="@+id/accessCCTempThresOver"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            style="@style/style_normal_font" />
+
+                        <TextView
+                            android:id="@+id/accessCCDegreeC"
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="temperature threshold(+/-63" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="Under" />
+
+                        <EditText
+                            android:id="@+id/accessCCTempCountUnder"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:inputType="number"
+                            style="@style/style_normal_font" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="Over" />
+
+                        <EditText
+                            android:id="@+id/accessCCTempCountOver"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:inputType="number"
+                            style="@style/style_normal_font" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="samples for alarm(0-31)" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="Monitor delay(0-63)" />
+
+                        <EditText
+                            android:id="@+id/accessCCMonitorDelay"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:inputType="number"
+                            style="@style/style_normal_font" />
+
+                        <Spinner
+                            android:id="@+id/accessCCMonitorUnit"
+                            android:layout_width="wrap_content"
+                            android:gravity="right"/>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="Sampling interval(0-63)" />
+
+                        <EditText
+                            android:id="@+id/accessCCSamplingInverval"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:inputType="number"
+                            style="@style/style_normal_font" />
+
+                        <Spinner
+                            android:id="@+id/accessCCSamplingIntervalUnit"
+                            android:layout_width="wrap_content"
+                            android:gravity="right"/>
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/accessEmicroCCTemperature"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/accessCCTemperatureOK"
+                            android:layout_width="wrap_content" />
+
+                        <CheckBox
+                            android:id="@+id/accessCCTemperatureTitle"
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="Temperature: " />
+
+                        <TextView
+                            android:id="@+id/accessCCTemperature"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="left" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:gravity="left|center_vertical"
+                            style="@style/style_normal_font"
+                            android:text="Alarm: " />
+
+                        <TextView
+                            android:id="@+id/accessCCUnderTempAlarm"
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:visibility="invisible"
+                            android:text="Under, " />
+
+                        <TextView
+                            android:id="@+id/accessCCOverTempAlarm"
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:visibility="invisible"
+                            android:text="Over, " />
+
+                        <TextView
+                            android:id="@+id/accessCCBatteryAlarm"
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:visibility="invisible"
+                            android:text="Battery" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/accessCCEnableOK"
+                            android:layout_width="wrap_content" />
+
+                        <CheckBox
+                            android:id="@+id/accessCCEnableTitle"
+                            android:layout_width="wrap_content"
+                            style="@style/style_normal_font"
+                            android:text="BAP mode: " />
+
+                        <Spinner
+                            android:id="@+id/accessCCEnable"
+                            android:layout_width="wrap_content"
+                            android:gravity="right"/>
+                    </TableRow>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@android:color/darker_gray"/>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            style="@style/style_normal_font"
+                            android:text="Custom Tag found" />
+
+                        <TextView
+                            android:id="@+id/accessCustomTagFound"
+                            android:layout_width="0dp"
+                            android:layout_weight="1" />
+                    </TableRow>
+
+                    <LinearLayout
+                        android:id="@+id/accessEmicroCS8304Layout"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center|bottom"
+                        android:orientation="vertical" >
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <Button
+                                android:id="@+id/accessCs8304StartLogging"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                style="@style/style_normal_font"
+                                android:text="Start logging" />
+
+                            <TextView
+                                android:id="@+id/accessCs8304StartLoggingStatus"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:textAlignment="center"
+                                layout="@layout/custom_edittext" />
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <Button
+                                android:id="@+id/accessCs8304StopLogging"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                style="@style/style_normal_font"
+                                android:text="Stop logging" />
+
+                            <TextView
+                                android:id="@+id/accessCs8304StopLoggingStatus"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:textAlignment="center"
+                                layout="@layout/custom_edittext" />
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <Button
+                                android:id="@+id/accessCs8304CheckAlarm"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                style="@style/style_normal_font"
+                                android:text="Check Alarm" />
+
+                            <TextView
+                                android:id="@+id/accessCs8304CheckAlarmStatus"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:textAlignment="center"
+                                layout="@layout/custom_edittext" />
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <Button
+                                android:id="@+id/accessCs8304GetLogging"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                style="@style/style_normal_font"
+                                android:text="Get logging" />
+
+                            <TextView
+                                android:id="@+id/accessCs8304GetLoggingStatus"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:textAlignment="center"
+                                layout="@layout/custom_edittext" />
+                        </TableRow>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

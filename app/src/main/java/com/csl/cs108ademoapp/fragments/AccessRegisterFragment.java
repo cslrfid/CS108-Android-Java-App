@@ -30,7 +30,9 @@ import com.csl.cs108ademoapp.InventoryRfidTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.NotificationController;
+import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.Utility;
 
 import java.util.ArrayList;
 
@@ -38,7 +40,7 @@ public class AccessRegisterFragment extends CommonFragment {
     CustomPopupWindow customPopupWindow;
 
     TableRow tableRowSelectMask, tableRowSelectBank;
-    Spinner spinnerSelectBank, spinnerAccessBank, spinnerWriteDataType;
+    Spinner spinnerSelectBank, spinnerAccessBank, spinnerWriteEpcClass, spinnerWriteDataType;
     EditText editTextSelectMask, editTextSelectPopulation, editTextPassword, editTextAntennaPower, editTextWriteData, editTextWriteLength;
     CheckBox checkBoxWriteLengthEnable;
     TextView textViewSelectedTags, textViewWriteCount, textViewRunTime, textViewTagGot, textViewVoltageLevel;
@@ -105,6 +107,12 @@ public class AccessRegisterFragment extends CommonFragment {
         targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.write_memoryBank_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerAccessBank.setAdapter(targetAdapter);
+
+        spinnerWriteEpcClass = (Spinner) getActivity().findViewById(R.id.registerWriteEpcClass);
+        targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.write_Epc_options, R.layout.custom_spinner_layout);
+        targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerWriteEpcClass.setAdapter(targetAdapter);
+        spinnerWriteEpcClass.setEnabled(false);
 
         spinnerWriteDataType = (Spinner) getActivity().findViewById(R.id.registerWriteDataType);
         targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.write_data_options, R.layout.custom_spinner_layout);
@@ -224,6 +232,25 @@ public class AccessRegisterFragment extends CommonFragment {
             }
         });
 
+        Button buttonConvert = (Button) getActivity().findViewById(R.id.registerWriteConvert);
+        buttonConvert.setOnClickListener(new View.OnClickListener() {
+            EditText editTextWriteEpcFilter = (EditText)  getActivity().findViewById(R.id.registerWriteEpcFilter);
+            EditText editTextWriteEpcCompanyPrefix = (EditText)  getActivity().findViewById(R.id.registerWriteEpcCompanyPrefix);
+            EditText editTextWriteEpcItemReference = (EditText)  getActivity().findViewById(R.id.registerWriteEpcItemReference);
+            EditText editTextWriteEpcSerial = (EditText)  getActivity().findViewById(R.id.registerWriteEpcSerial);
+            @Override
+            public void onClick(View view) {
+                String strValue = MainActivity.csLibrary4A.getEpc4upcSerial(
+                        Utility.EpcClass.values()[spinnerWriteEpcClass.getSelectedItemPosition()],
+                        editTextWriteEpcFilter.getText().toString(),
+                        editTextWriteEpcCompanyPrefix.getText().toString(),
+                        editTextWriteEpcItemReference.getText().toString(),
+                        editTextWriteEpcSerial.getText().toString()
+                        );
+                if (strValue != null) editTextWriteData.setText(strValue);
+            }
+        });
+
         buttonReadBar = (Button) getActivity().findViewById(R.id.registerReadBarButton);
         buttonReadBar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -320,7 +347,7 @@ public class AccessRegisterFragment extends CommonFragment {
     }
 
     void setNotificationListener() {
-        MainActivity.csLibrary4A.setNotificationListener(new Cs108Library4A.NotificationListener() {
+        MainActivity.csLibrary4A.setNotificationListener(new NotificationController.NotificationListener() {
             @Override
             public void onChange() {
                 MainActivity.csLibrary4A.appendToLog("TRIGGER key is pressed.");
@@ -636,9 +663,9 @@ public class AccessRegisterFragment extends CommonFragment {
                 + ", password = " + password + ", power = " + antennaPower + ", repeatCount = " + repeatCount + ", resetCount = " + resetCount);
         accessTask = new AccessTask(buttonWrite, textViewWriteCount, invalidRequest1,
                 selectMask, selectBank1, selectOffset1,
-                password, antennaPower, Cs108Library4A.HostCommands.CMD_18K6CWRITE, selectQValue, repeatCount, resetCount,
-                textViewRunTime, textViewTagGot, textViewVoltageLevel,
-                textViewYield, textViewTotal);
+                password, antennaPower, Cs108Library4A.HostCommands.CMD_18K6CWRITE,
+                selectQValue, repeatCount, resetCount, false,
+                textViewRunTime, textViewTagGot, textViewVoltageLevel, textViewYield, textViewTotal);
         accessTask.execute();
         resetCount = false;
         return invalidRequest1;

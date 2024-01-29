@@ -107,24 +107,6 @@
                 style="@style/style_normal_font"
                 android:text="2" />
         </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <CheckBox
-                android:id="@+id/accessInventoryDupElim"
-                android:layout_width="wrap_content"
-                style="@style/style_normal_font"
-                android:checked="true"
-                android:text="duplicate elimination"/>
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/default_left_padding">
-        </TableRow>
     </LinearLayout>
 
     <LinearLayout
@@ -134,13 +116,58 @@
         android:gravity="center|bottom"
         android:orientation="vertical" >
 
-        <CheckBox
-            android:id="@+id/accessInventoryFilterByTid"
-            android:layout_width="wrap_content"
-            style="@style/style_normal_font"
-            android:checked="true"
-            android:visibility="gone"
-            android:text="filter FM13DT160 only"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center|bottom"
+            android:orientation="horizontal" >
+
+            <CheckBox
+                android:id="@+id/accessInventoryDupElim"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                style="@style/style_normal_font"
+                android:checked="true"
+                android:text="duplicate elimination"/>
+
+            <CheckBox
+                android:id="@+id/accessInventoryFilterByTid"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                style="@style/style_normal_font"
+                android:checked="true"
+                android:text="FM13DT160 only"/>
+
+            <CheckBox
+                android:id="@+id/accessInventoryFilterByEpc"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                style="@style/style_normal_font"
+                android:text="sgtin only"/>
+
+            <CheckBox
+                android:id="@+id/accessInventoryFilterByProtect"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                style="@style/style_normal_font"
+                android:text="protected only with password"/>
+
+            <include
+                android:id="@+id/accessInventoryProtectPassword"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                layout="@layout/custom_edittext_password"/>
+        </LinearLayout>
 
         <ListView
             android:id="@+id/inventoryRfidList1"

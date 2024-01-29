@@ -5,51 +5,65 @@
     android:paddingRight="0dp"
     android:orientation="vertical">
 
-    <ScrollView
+    <TableRow
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
 
-        <LinearLayout
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Select tags" />
+
+        <Spinner
+            android:id="@+id/accessNxpTagSelect"
+            android:layout_margin="0dp"
+            android:layout_weight="1"
+            style="@style/style_default_spinner" />
+    </TableRow>
+
+    <LinearLayout
+        android:id="@+id/accessNxpUcode8Select"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:paddingLeft="@dimen/default_left_padding">
 
-            <TableRow
+            <RadioGroup
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/default_left_padding">
+                android:layout_height="wrap_content" >
 
-                <RadioGroup
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
+                <RadioButton
+                    android:id="@+id/accessUC8SelectEpc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EPC"
+                    android:checked="true"/>
 
-                    <RadioButton
-                        android:id="@+id/accessUC8SelectEpc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="EPC"
-                        android:checked="true"/>
+                <RadioButton
+                    android:id="@+id/accessUC8SelectEpcTid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EPC + TID" />
 
-                    <RadioButton
-                        android:id="@+id/accessUC8SelectEpcTid"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="EPC + TID" />
+                <RadioButton
+                    android:id="@+id/accessUC8SelectEpcBrand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EPC + Brand identifier" />
 
-                    <RadioButton
-                        android:id="@+id/accessUC8SelectEpcBrand"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="EPC + Brand identifier" />
-
-                    <RadioButton
-                        android:id="@+id/accessUC8SelectEpcBrandTidCheck"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="EPC + Brand identifier + Tid Check" />
-                </RadioGroup>
-            </TableRow>
-        </LinearLayout>
-    </ScrollView>
+                <RadioButton
+                    android:id="@+id/accessUC8SelectEpcBrandTidCheck"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EPC + Brand identifier + Tid Check" />
+            </RadioGroup>
+        </TableRow>
+    </LinearLayout>
 </LinearLayout>

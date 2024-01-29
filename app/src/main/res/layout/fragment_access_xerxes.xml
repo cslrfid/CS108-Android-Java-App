@@ -212,23 +212,9 @@
         android:gravity="center|bottom"
         android:orientation="vertical" >
 
-        <TableRow
+        <include
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/accessXXReadButton"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_button_font"
-                android:text="@string/read_title" />
-
-            <Button
-                android:id="@+id/accessXXWriteButton"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_button_font"
-                android:text="@string/write_title" />
-        </TableRow>
+            android:layout_height="wrap_content"
+            layout="@layout/custom_readwrite" />
     </LinearLayout>
 </LinearLayout>

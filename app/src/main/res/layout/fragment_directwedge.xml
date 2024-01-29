@@ -23,18 +23,21 @@
     </TableRow>
 
     <TableRow
+        android:id="@+id/directWedgeRow1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:visibility="gone">
+        android:background="#ADD8E6"
+        android:gravity="center">
 
         <TextView
             android:layout_width="wrap_content"
             style="@style/DashboardButton"
-            android:text="Select Reader"/>
+            android:textColor="#FFFFFF"
+            android:text="Tick box to select reader"/>
     </TableRow>
 
     <TableRow
+        android:id="@+id/directWedgeRow2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -53,6 +56,7 @@
     </TableRow>
 
     <TableRow
+        android:id="@+id/directWedgeRow3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
@@ -68,20 +72,7 @@
     </TableRow>
 
     <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
-        android:gravity="center"
-        android:visibility="gone">
-
-        <Button
-            android:id="@+id/directWedgeButtonStart"
-            android:layout_width="wrap_content"
-            style="@style/DashboardButton"
-            android:text="Start Wedge"/>
-    </TableRow>
-
-    <TableRow
+        android:id="@+id/directWedgeRow4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
@@ -93,5 +84,21 @@
             style="@style/DashboardButton"
             android:textColor="#FFFFFF"
             android:text="Instructions"/>
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/directWedgeRowStart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/directWedgeButtonStart"
+            android:layout_width="match_parent"
+            style="@style/DashboardButton"
+            android:textColor="#FFFFFF"
+            android:text="Start Wedge"/>
     </TableRow>
 </LinearLayout>

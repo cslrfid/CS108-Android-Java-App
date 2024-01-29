@@ -1,1 +1,3 @@
 include ':app', 'cs108library4a'
+include ':cslibrary4a'
+include ':epctagcoder'

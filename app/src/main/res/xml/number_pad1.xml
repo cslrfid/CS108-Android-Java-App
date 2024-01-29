@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
+    android:keyWidth="20%p"
+    android:horizontalGap="5dp"
+    android:verticalGap="5dp"
+    android:keyHeight="6dp">
+
+    <Row>
+        <Key android:codes="49" android:keyLabel=""/>
+        <Key android:codes="50" android:keyLabel=""/>
+        <Key android:codes="51" android:keyLabel=""/>
+        <Key android:codes="52" android:keyLabel=""/>
+        <Key android:codes="53" android:keyLabel=""/>
+    </Row>
+</Keyboard>

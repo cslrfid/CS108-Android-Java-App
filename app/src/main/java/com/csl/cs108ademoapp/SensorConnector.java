@@ -82,7 +82,7 @@ public class SensorConnector {
                     if (true) mCsLibrary4A.appendToLog("LocationManager.PASSIVE_PROVIDER = " + LocationManager.PASSIVE_PROVIDER);
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 //                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
-                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListener);
+                      if (true) locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListener); //not working in iData2S phone
                 } else if (onStatus == false && this.onStatus) {
                     this.onStatus = onStatus;
                     if (DEBUG) mCsLibrary4A.appendToLog("LocationDevice.setRfidOn(): OFF");

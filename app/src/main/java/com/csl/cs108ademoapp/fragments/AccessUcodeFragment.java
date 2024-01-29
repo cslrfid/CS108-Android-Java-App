@@ -1,5 +1,7 @@
+
 package com.csl.cs108ademoapp.fragments;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -18,8 +21,9 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
+import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -28,7 +32,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class AccessUcodeFragment extends CommonFragment {
     final boolean DEBUG = true; int iTagType = -1;
-	EditText editTextRWTagID, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
+    SelectTag selectTag;
     TextView textViewAesKey0ActivateOk, textViewAesKey1ActivateOk, textViewAesKey0Ok, textViewAesKey1Ok;
     Spinner spinnerHideTid;
     CheckBox checkBoxAuthEncryptMode, checkBoxAuthValidMode;
@@ -49,6 +53,7 @@ public class AccessUcodeFragment extends CommonFragment {
     boolean untraceChecked = false;
     boolean showEpcChecked = false;
     ReadWriteTypes readWriteTypes;
+    boolean bImpinJTag = false;
 
     private AccessTask accessTask;
 
@@ -63,10 +68,8 @@ public class AccessUcodeFragment extends CommonFragment {
         super.onActivityCreated(savedInstanceState);
         if (MainActivity.mDid != null) if (MainActivity.mDid.contains("E28240")) iTagType = 5;
 
-        editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessUCTagID);
-        editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessUCAccPasswordValue);
-        editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
-        editTextAccessRWAccPassword.setText("00000000");
+        selectTag = new SelectTag((Activity)getActivity(), 1);
+        if (MainActivity.mDid != null && MainActivity.mDid.indexOf("E2801") == 0) bImpinJTag = true;
 
         spinnerHideTid = (Spinner) getActivity().findViewById(R.id.accessUCHideTid);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.hideTid_options, R.layout.custom_spinner_layout);
@@ -92,7 +95,7 @@ public class AccessUcodeFragment extends CommonFragment {
         editTextAuthKeyId = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId);
         editTextAuthKeyId.setText(String.valueOf(0));
         editTextAuthMsg = (EditText) getActivity().findViewById(R.id.accessUCAuthMsg);
-        editTextAuthMsg.addTextChangedListener(new GenericTextWatcher(editTextAuthMsg, 20));
+        editTextAuthMsg.addTextChangedListener(new GenericTextWatcher(editTextAuthMsg, bImpinJTag ? 12 : 20));
         editTextAuthProfile = (EditText) getActivity().findViewById(R.id.accessUCAuthProfile);
         editTextAuthProfile.setText(String.valueOf(0));
         editTextAuthOffset = (EditText) getActivity().findViewById(R.id.accessUCAuthOffset);
@@ -122,9 +125,6 @@ public class AccessUcodeFragment extends CommonFragment {
         editTextAesKey0.addTextChangedListener(new GenericTextWatcher(editTextAesKey0, 32));
         editTextAesKey1 = (EditText) getActivity().findViewById(R.id.accessUCAesKey1);
         editTextAesKey1.addTextChangedListener(new GenericTextWatcher(editTextAesKey1, 32));
-
-        editTextaccessRWAntennaPower = (EditText) getActivity().findViewById(R.id.accessUCAntennaPower);
-        editTextaccessRWAntennaPower.setText(String.valueOf(300));
 
         buttonRead = (Button) getActivity().findViewById(R.id.accessUCReadButton);
         if (iTagType == 5) buttonRead.setVisibility(View.GONE);
@@ -183,6 +183,7 @@ public class AccessUcodeFragment extends CommonFragment {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                MainActivity.csLibrary4A.appendToLog("buttonTam1 is pressed");
                 authenTam1 = true; authenChecked = true; keyId = Integer.parseInt(editTextAuthKeyId.getText().toString()); strChallenge = editTextAuthMsg.getText().toString();
                 startAccessTask();
             }
@@ -199,6 +200,7 @@ public class AccessUcodeFragment extends CommonFragment {
                     Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                MainActivity.csLibrary4A.appendToLog("buttonTam2 is pressed");
                 authenTam1 = false; authenChecked = true; keyId = Integer.parseInt(editTextAuthKeyId.getText().toString()); strChallenge = editTextAuthMsg.getText().toString();
                 profile = Integer.parseInt(editTextAuthProfile.getText().toString());
                 offset = Integer.parseInt(editTextAuthOffset.getText().toString());
@@ -245,9 +247,26 @@ public class AccessUcodeFragment extends CommonFragment {
             }
         });
 
+        TextView textViewWarning = (TextView) getActivity().findViewById(R.id.accessUCWarning);
+        if (iTagType == 5) textViewWarning.setText("Notice: Xerxes assumes Key0 for Tam1 and Tam 2");
+        else textViewWarning.setText("Notice: Ucode assumes Key1 for Tam2");
+
         MainActivity.csLibrary4A.getAuthenticateReplyLength();
         MainActivity.csLibrary4A.getUntraceableEpcLength();
         MainActivity.csLibrary4A.setSameCheck(false);
+
+        MainActivity.csLibrary4A.appendToLog("mDid in AccessUcodeFragment = " + MainActivity.mDid);
+        if (bImpinJTag) {
+            if (MainActivity.csLibrary4A.get98XX() == 0) {
+                //Button button = (Button) getActivity().findViewById(R.id.accessUCTam1AuthButton); button.setVisibility(View.GONE);
+            }
+            TextView textView = (TextView) getActivity().findViewById(R.id.accessUCAuthKeyIdLabel); textView.setVisibility(View.GONE);
+            EditText editText = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId); editText.setVisibility(View.GONE);
+            editTextAuthMsg.setText("049CA53E55EA");
+            TableRow tableRow1 = (TableRow) getActivity().findViewById(R.id.accessUCAuthProfileRow); tableRow1.setVisibility(View.GONE);
+            LinearLayout layout1 = (LinearLayout) getActivity().findViewById(R.id.accessUCKeyLayout); layout1.setVisibility(View.GONE);
+            LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessUCButtons); layout.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -285,16 +304,18 @@ public class AccessUcodeFragment extends CommonFragment {
     }
 
     void setupTagID() {
+        if (selectTag == null) return;
         ReaderDevice tagSelected = MainActivity.tagSelected;
         MainActivity.csLibrary4A.appendToLog("Start with tagSelected = " + (tagSelected == null ? "NULL" : (tagSelected.getSelected() + ", " + tagSelected.getAddress())));
         boolean bSelected = false;
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
                 bSelected = true;
-                //MainActivity.mCs108Library4a.appendToLog("editTextRWTagID = " + (editTextRWTagID == null ? "NULL" : "VALID"));
-                if (editTextRWTagID != null) {
-                    //MainActivity.mCs108Library4a.appendToLog("editTextRWTagID.setTTEXT " + tagSelected.getAddress());
-                    editTextRWTagID.setText(tagSelected.getAddress());
+                MainActivity.csLibrary4A.appendToLog("selectTag is " + (selectTag == null ? "NULL" : "valid"));
+                if (selectTag != null) MainActivity.csLibrary4A.appendToLog("selectTag.editTextTag is " + (selectTag.editTextTagID == null ? "NULL" : "valid"));
+                if (selectTag.editTextTagID != null) {
+                    MainActivity.csLibrary4A.appendToLog("editTextRWTagID.setTTEXT " + tagSelected.getAddress());
+                    selectTag.editTextTagID.setText(tagSelected.getAddress());
                 }
 
                 String stringDetail = tagSelected.getDetails();
@@ -534,13 +555,10 @@ public class AccessUcodeFragment extends CommonFragment {
                     else hostCommand = Cs108Library4A.HostCommands.CMD_18K6CWRITE;
 
                     accessTask = new AccessTask(
-                            button, null,
-                            invalid,
-                            editTextRWTagID.getText().toString(), 1, 32,
-                            editTextAccessRWAccPassword.getText().toString(),
-                            Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                            hostCommand,
-                            0, 0, true,
+                            button, null, invalid,
+                            selectTag.editTextTagID.getText().toString(), 1, 32,
+                            selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), hostCommand,
+                            0, 0, true, false,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;
@@ -603,7 +621,7 @@ public class AccessUcodeFragment extends CommonFragment {
                         strValue += accessResult.substring(i, i_end);
                     }
                     editTextAuthResponse.setText(strValue);
-                    processAESdata(accessResult);
+                    if (bImpinJTag == false) processAESdata(accessResult);
                 }
             }
             else if (untraceChecked) untraceChecked = false;
@@ -645,7 +663,13 @@ public class AccessUcodeFragment extends CommonFragment {
             accOffset = 0; accSize = 1;
         } else if (authenChecked) {
             if (authenTam1) {
-                if (MainActivity.csLibrary4A.setTam1Configuration(keyId, strChallenge) == false)
+                if (bImpinJTag) {
+                    if (MainActivity.csLibrary4A.setTamConfiguration(false, strChallenge) == false)
+                        invalidRequest1 = true;
+                } else if (MainActivity.csLibrary4A.setTam1Configuration(keyId, strChallenge) == false)
+                    invalidRequest1 = true;
+            } else if (bImpinJTag) {
+                if (MainActivity.csLibrary4A.setTamConfiguration(true, strChallenge) == false)
                     invalidRequest1 = true;
             } else if (MainActivity.csLibrary4A.setTam2Configuration(keyId, strChallenge, profile, offset, blockId, protMode) == false)
                 invalidRequest1 = true;

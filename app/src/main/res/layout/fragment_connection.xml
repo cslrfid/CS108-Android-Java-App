@@ -38,5 +38,5 @@
         android:layout_height="wrap_content"
         style="@style/style_normal_font"
         android:visibility="gone"
-        android:text="For CS108, Please use Bluetooth 4.0 or 5.0 Phone.\nFor CS710S, Please use Only Bluetooth 5.0 Phone" />
+        android:text="For CS710S, Please use Only Bluetooth 5.0 Phone" />
 </LinearLayout>

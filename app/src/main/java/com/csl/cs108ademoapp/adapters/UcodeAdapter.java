@@ -17,12 +17,12 @@ public class UcodeAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = null;
         switch (index) {
             case 0:
-                fragment = new AccessUcodeFragment();
-                fragment0 = fragment;
-                break;
-            case 1:
                 fragment = InventoryRfidiMultiFragment.newInstance(true,"E2C06");
                 fragment1 = fragment;
+                break;
+            case 1:
+                fragment = new AccessUcodeFragment();
+                fragment0 = fragment;
                 break;
             default:
                 fragment = null;

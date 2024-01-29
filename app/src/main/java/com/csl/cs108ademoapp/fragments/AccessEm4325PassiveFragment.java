@@ -15,7 +15,7 @@ import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
 
 public class AccessEm4325PassiveFragment extends CommonFragment {
     final boolean DEBUG = true;
@@ -153,6 +153,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
                     if (readWriteTypes == ReadWriteTypes.TEMPERATURE && operationRead) hostCommand = Cs108Library4A.HostCommands.CMD_GETSENSORDATA;
                     else if (operationRead) hostCommand = Cs108Library4A.HostCommands.CMD_18K6CREAD;
                     else hostCommand = Cs108Library4A.HostCommands.CMD_18K6CWRITE;
+                    MainActivity.csLibrary4A.appendToLog("hostCommand = " + hostCommand.toString());
                     accessTask = new AccessTask(
                             buttonRead, null,
                             invalid,
@@ -160,7 +161,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             hostCommand,
-                            0, 0, true,
+                            0, 0, true, false,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;

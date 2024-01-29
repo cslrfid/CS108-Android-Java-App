@@ -6,10 +6,11 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 
 import com.csl.cs108ademoapp.fragments.AccessImpinjFragment;
+import com.csl.cs108ademoapp.fragments.AccessUcodeFragment;
 import com.csl.cs108ademoapp.fragments.InventoryRfidiMultiFragment;
 
 public class ImpinjAdapter extends FragmentStatePagerAdapter {
-    private final int NO_OF_TABS = 2;
+    private final int NO_OF_TABS = 3;
     public Fragment fragment0, fragment1;
 
     @Override
@@ -23,6 +24,10 @@ public class ImpinjAdapter extends FragmentStatePagerAdapter {
             case 1:
                 fragment = InventoryRfidiMultiFragment.newInstance(true,"");
                 fragment1 = fragment;
+                break;
+            case 2:
+                fragment = new AccessUcodeFragment();
+                fragment0 = fragment;
                 break;
             default:
                 fragment = null;
