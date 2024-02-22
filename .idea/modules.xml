@@ -2,9 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CslCs108AndroidJavaApp.iml" filepath="$PROJECT_DIR$/CslCs108AndroidJavaApp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/CslCs108AndroidJavaApp.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/CslCs108AndroidJavaApp.app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs108library4a/CslCs108AndroidJavaApp.cs108library4a.iml" filepath="$PROJECT_DIR$/.idea/modules/cs108library4a/CslCs108AndroidJavaApp.cs108library4a.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CS108-Android-Java-App.iml" filepath="$PROJECT_DIR$/.idea/modules/CS108-Android-Java-App.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/CS108-Android-Java-App.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/CS108-Android-Java-App.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/CS108-Android-Java-App.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/CS108-Android-Java-App.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/CS108-Android-Java-App.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/CS108-Android-Java-App.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/CS108-Android-Java-App.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/CS108-Android-Java-App.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs108library4a/CS108-Android-Java-App.cs108library4a.iml" filepath="$PROJECT_DIR$/.idea/modules/cs108library4a/CS108-Android-Java-App.cs108library4a.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs108library4a/CS108-Android-Java-App.cs108library4a.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/cs108library4a/CS108-Android-Java-App.cs108library4a.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs108library4a/CS108-Android-Java-App.cs108library4a.main.iml" filepath="$PROJECT_DIR$/.idea/modules/cs108library4a/CS108-Android-Java-App.cs108library4a.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs108library4a/CS108-Android-Java-App.cs108library4a.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/cs108library4a/CS108-Android-Java-App.cs108library4a.unitTest.iml" />
     </modules>
   </component>
 </project>
