@@ -41,9 +41,13 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
 import static androidx.core.app.ActivityCompat.requestPermissions;
 
+import com.csl.cslibrary4a.CustomAlertDialog;
+import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.Utility;
+
 class BleConnector extends BluetoothGattCallback {
     boolean DEBUG_PKDATA, DEBUG_APDATA;
-    final boolean DEBUG_SCAN = false, DEBUG_CONNECT = false, DEBUG_BTDATA = false, DEBUG_FILE = false;
+    final boolean DEBUG_SCAN = false, DEBUG_CONNECT = false, DEBUG_BTDATA = true, DEBUG_FILE = false;
     final boolean DEBUG = true, DEBUG_BTOP = false;
     static final String TAG = "Hello";
 
@@ -411,7 +415,8 @@ class BleConnector extends BluetoothGattCallback {
             if (bValue == false) writeBleFailure++;
             else {
                 writeBleFailure = 0;
-                if (DEBUG_BTDATA || true) appendToLogView("BtData: " + byteArrayToString(value));
+                if (DEBUG_BTDATA || true) appendToLogView("BtDataOut: " + byteArrayToString(value));
+                writeDebug2File("Down " + byteArrayToString(value));
                 _writeCharacteristic_in_progress = true;
                 mStreamWriteCountOld = mStreamWriteCount;
                 mStreamWriteCount += value.length;
@@ -434,16 +439,19 @@ class BleConnector extends BluetoothGattCallback {
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
         if (gatt != mBluetoothGatt) {
+            utility.writeDebug2File("Up1  Error, mismatched gatt");
             if (DEBUG) {
                 byte[] v = characteristic.getValue();
                 utility.appendToLogRunnable("onCharacteristicChanged(): INVALID mBluetoothGatt, with address = " + gatt.getDevice().getAddress() + ", values =" + byteArrayToString(v));
             }
         } else if (!characteristic.equals(mReaderStreamInCharacteristic)) {
+            utility.writeDebug2File("Up1  Error, mismatched characteristic");
             if (DEBUG) utility.appendToLogRunnable("onCharacteristicChanged(): characteristic is not ReaderSteamIn");
         } else if (mBluetoothConnectionState == BluetoothProfile.STATE_DISCONNECTED) {
-                streamInBufferHead = 0;
-                streamInBufferTail = 0;
-                streamInBufferSize = 0;
+            utility.writeDebug2File("Up1  Error, disconnected bluetoothConnectionState");
+            streamInBufferHead = 0;
+            streamInBufferTail = 0;
+            streamInBufferSize = 0;
         } else {
             byte[] v = characteristic.getValue();
             if (false) utility.appendToLogRunnable("onCharacteristicChanged(): VALID mBluetoothGatt, values =" + byteArrayToString(v));
@@ -458,15 +466,15 @@ class BleConnector extends BluetoothGattCallback {
                     streamInBytesMissing = 0;
                 }
                 if (streamInBufferSize + v.length > streamInBuffer.length) {
-                    utility.writeDebug2File("A, " + System.currentTimeMillis() + ", Overflow");
+                    utility.writeDebug2File("Up1  Error, insufficient buffer. missed " + byteArrayToString(v));
                     Log.i(TAG, ".Hello: missing data  = " + byteArrayToString(v));
                     if (streamInBytesMissing == 0) {
                         streamInOverflowTime = utility.getReferencedCurrentTimeMs();
                     }
                     streamInBytesMissing += v.length;
                 } else {
-                    utility.writeDebug2File("A, " + System.currentTimeMillis());
-                    if (DEBUG_BTDATA) Log.i(TAG, "BtData = " + byteArrayToString(v));
+                    if (true) utility.writeDebug2File("Up1  " + byteArrayToString(v));
+                    if (DEBUG_BTDATA) Log.i(TAG, "BtDataIn= " + byteArrayToString(v));
                     if (isStreamInBufferRing) {
                         streamInBufferPush(v, 0, v.length);
                     } else {
@@ -755,7 +763,7 @@ class BleConnector extends BluetoothGattCallback {
             } else if (!mBluetoothAdapter.isEnabled()) {
                 if (DEBUG) appendToLog("connectBle[" + address + "] with DISABLED mBluetoothAdapter");
             } else {
-                utility.debugFileSetup();
+                utility.debugFileSetup(); utility.debugFileEnable(true);
                 utility.setReferenceTimeMs();
                 if (DEBUG_CONNECT) appendToLog("connectBle[" + address + "]: connectGatt starts");
                 mBluetoothConnectionState = -1;
@@ -930,6 +938,7 @@ class BleConnector extends BluetoothGattCallback {
             if (totalTemp > 17 && timeDifference > 1000) {
                 totalReceived = totalTemp;
                 totalTime = timeDifference;
+                appendToLog("BtDataIn: totalReceived = " + totalReceived + ", totalTime = " + totalTime);
                 firstTime = System.currentTimeMillis();
                 totalTemp = 0;
             }

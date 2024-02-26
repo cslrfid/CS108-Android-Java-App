@@ -27,7 +27,8 @@ import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.NotificationController;
+import com.csl.cslibrary4a.ReaderDevice;
 
 public class InventoryRfidSearchFragment extends CommonFragment {
     double dBuV_dBm_constant = MainActivity.csLibrary4A.dBuV_dBm_constant;
@@ -68,7 +69,7 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_loc);
         actionBar.setTitle(R.string.title_activity_geiger);
 
-        selectTag = new SelectTag((Activity)getActivity ());
+        selectTag = new SelectTag((Activity)getActivity(), 0);
         TableRow tableRowProgressLabel;
         TextView textViewProgressLabelMin = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMin);
         TextView textViewProgressLabelMid = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMid);
@@ -250,7 +251,7 @@ public class InventoryRfidSearchFragment extends CommonFragment {
     };
 
     void setNotificationListener() {
-        MainActivity.csLibrary4A.setNotificationListener(new Cs108Library4A.NotificationListener() {
+        MainActivity.csLibrary4A.setNotificationListener(new NotificationController.NotificationListener() {
             @Override
             public void onChange() {
                 startStopHandler(true);
@@ -290,12 +291,16 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         started = true; boolean invalidRequest = false;
         int memorybank = memoryBankSpinner.getSelectedItemPosition();
         int powerLevel = Integer.valueOf(editTextGeigerAntennaPower.getText().toString());
-        if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
-        else if (MainActivity.csLibrary4A.setSelectedTag(selectTag.editTextTagID.getText().toString(), memorybank+1, powerLevel) == false) {
+        if (powerLevel < 0 || powerLevel > 330) {
+            MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest + ", with powerLevel = " + powerLevel);
             invalidRequest = true;
+        } else if (MainActivity.csLibrary4A.setSelectedTag(selectTag.editTextTagID.getText().toString(), memorybank+1, powerLevel) == false) {
+            invalidRequest = true;
+            MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest + ", with setSelectedTag as false, string = " + selectTag.editTextTagID.getText().toString() + ", bank = " + memorybank+1 + ", power = " + powerLevel);
         } else {
             MainActivity.csLibrary4A.startOperation(Cs108Library4A.OperationTypes.TAG_SEARCHING);
         }
+        MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest);
         geigerSearchTask = new InventoryRfidTask(getContext(), -1,-1, 0, 0, 0, 0, invalidRequest, true,
                 null, null, geigerTagRssiView, null,
                 geigerRunTime, geigerTagGotView, geigerVoltageLevelView, null, button, rfidRateView);

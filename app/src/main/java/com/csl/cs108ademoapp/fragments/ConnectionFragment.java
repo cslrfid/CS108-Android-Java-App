@@ -26,7 +26,7 @@ import com.csl.cs108ademoapp.CustomProgressDialog;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 
 import java.util.ArrayList;

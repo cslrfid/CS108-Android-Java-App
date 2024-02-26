@@ -29,7 +29,8 @@ public class HomeFragment extends CommonFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState, true);
-        return inflater.inflate(R.layout.home_layout, container, false);
+        if (getActivity().getPackageName().contains("com.csl.cs710ademoapp")) return inflater.inflate(R.layout.home_layout710, container, false);
+        else return inflater.inflate(R.layout.home_layout, container, false);
     }
 
     @Override
@@ -39,7 +40,9 @@ public class HomeFragment extends CommonFragment {
         if (true && ((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             actionBar.setIcon(android.R.drawable.ic_menu_save);
-            actionBar.setTitle(R.string.title_activity_home);
+            if (getActivity().getPackageName().contains("cs710awedgeapp")) actionBar.setTitle(R.string.title_activity_newhome1);
+            else if (getActivity().getPackageName().contains("cs710ademoapp")) actionBar.setTitle(R.string.title_activity_newhome);
+            else actionBar.setTitle(R.string.title_activity_home);
         }
         MainActivity.mDid = null;
         if (true || MainActivity.sharedObjects.versioinWarningShown == false)

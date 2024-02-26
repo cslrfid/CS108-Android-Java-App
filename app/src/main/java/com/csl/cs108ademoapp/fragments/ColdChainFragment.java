@@ -1,6 +1,8 @@
 package com.csl.cs108ademoapp.fragments;
 
 import android.os.Bundle;
+
+import com.csl.cs108ademoapp.MainActivity;
 import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
@@ -18,7 +20,7 @@ public class ColdChainFragment extends CommonFragment {
     private ViewPager viewPager;
     ColdChainAdapter mAdapter;
 
-    private String[] tabs = {"Select Tag", "One-shot", "Logging"};
+    private String[] tabs = {"Select Tag", "Logging", "One-shot"};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -29,22 +31,22 @@ public class ColdChainFragment extends CommonFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) mAdapter.fragment0;
-        switch (item.getItemId()) {
-            case R.id.menuAction_clear:
-                fragment1.clearTagsList();
-                return true;
-            case R.id.menuAction_sortRssi:
-                fragment1.sortTagsListByRssi();
-                return true;
-            case R.id.menuAction_sort:
-                fragment1.sortTagsList();
-                return true;
-            case R.id.menuAction_save:
-                fragment1.saveTagsList();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        if (item.getItemId() == R.id.menuAction_clear) {
+            fragment1.clearTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_sortRssi) {
+            fragment1.sortTagsListByRssi();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_sort) {
+            fragment1.sortTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_save) {
+            fragment1.saveTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_share) {
+            fragment1.shareTagsList();
+            return true;
+        } else return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -62,7 +64,9 @@ public class ColdChainFragment extends CommonFragment {
         viewPager.setAdapter(mAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
-        for (String tab_name : tabs) {
+        for (int i = 0; i < tabs.length; i++) {
+            if (MainActivity.csLibrary4A.get98XX() == 2 && i == tabs.length -1) break;;
+            String tab_name = tabs[i];
             tabLayout.addTab(tabLayout.newTab().setText(tab_name));
         }
 

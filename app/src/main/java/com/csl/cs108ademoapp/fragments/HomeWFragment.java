@@ -35,22 +35,22 @@ public class HomeWFragment extends CommonFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) adapter.fragment1;
-        switch (item.getItemId()) {
-            case R.id.menuAction_clear:
-                fragment1.clearTagsList();
-                return true;
-            case R.id.menuAction_sortRssi:
-                fragment1.sortTagsListByRssi();
-                return true;
-            case R.id.menuAction_sort:
-                fragment1.sortTagsList();
-                return true;
-            case R.id.menuAction_save:
-                fragment1.saveTagsList();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        if (item.getItemId() == R.id.menuAction_clear) {
+            fragment1.clearTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_sortRssi) {
+            fragment1.sortTagsListByRssi();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_sort) {
+            fragment1.sortTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_save) {
+            fragment1.saveTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_share) {
+            fragment1.shareTagsList();
+            return true;
+        } else return super.onOptionsItemSelected(item);
     }
 
     @Override

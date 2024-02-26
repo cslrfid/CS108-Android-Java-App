@@ -57,6 +57,7 @@
                     android:id="@+id/registerSelectedTags"
                     android:layout_width="0dp"
                     android:layout_weight="1"
+                    android:layout_gravity="center"
                     style="@style/style_normal_font" />
 
                 <Button
@@ -220,6 +221,103 @@
                     style="@style/style_normal_font"
                     android:text="0" />
             </TableRow>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="20dp"
+                android:orientation="vertical" >
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:text="Epc Class" />
+
+                    <Spinner
+                        android:id="@+id/registerWriteEpcClass"
+                        android:layout_width="wrap_content"
+                        android:layout_weight="1"
+                        style="@style/style_default_spinner" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:text="Filter" />
+
+                    <EditText
+                        android:id="@+id/registerWriteEpcFilter"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:inputType="numberDecimal"
+                        style="@style/style_normal_font"
+                        android:text="0" />
+
+                    <Button
+                        android:id="@+id/registerWriteConvert"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Convert Epc to Data" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:text="Company Prefix" />
+
+                    <EditText
+                        android:id="@+id/registerWriteEpcCompanyPrefix"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:inputType="numberDecimal"
+                        style="@style/style_normal_font"
+                        android:text="221856" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:text="Item Reference" />
+
+                    <EditText
+                        android:id="@+id/registerWriteEpcItemReference"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:inputType="numberDecimal"
+                        style="@style/style_normal_font"
+                        android:text="0053168" />
+                </TableRow>
+
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:text="Serial Number" />
+
+                    <EditText
+                        android:id="@+id/registerWriteEpcSerial"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:inputType="numberDecimal"
+                        style="@style/style_normal_font"
+                        android:text="2600958174" />
+                </TableRow>
+            </LinearLayout>
 
             <TableRow
                 android:layout_width="match_parent"

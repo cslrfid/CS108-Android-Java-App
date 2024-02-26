@@ -2,14 +2,18 @@
 <resources>
 
     <string name="app_newname1">CSL Wedge</string>
-    <string name="app_newname">CS710S CS108</string>
-    <string name="app_name">CS108 Java Demo</string>
-    <string name="app_ime1">CSL Java Simple Wedge</string>
+    <string name="app_newname">CS710S Java</string>
+    <string name="app_name">CS108 Java</string>
+    <string name="app_newime1">CSL Java Simple Wedge</string>
+    <string name="app_newime">CSL Java Wedge</string>
     <string name="app_ime">CS108 Java Wedge</string>
     <string name="subtype_en_US">English (US)</string>
 
     <!-- Strings for Fragment actionBar title -->
+    <string name="title_activity_newhome1">CSL Wedge</string>
+    <string name="title_activity_newhome">CSL Java</string>
     <string name="title_activity_home">Convergence Systems</string>
+
     <string name="title_activity_special">Special Functions</string>
 
     <string name="title_activity_about">About</string>
@@ -22,10 +26,10 @@
     <string name="title_activity_readwrite">Read / Write</string>
     <string name="title_activity_security">Security</string>
 
-    <string name="title_activity_impinj">ImpinJ</string>
+    <string name="title_activity_impinj">Impinj</string>
     <string name="title_activity_m775">ImpinJ M775</string>
     <string name="title_activity_autotune">ImpinJ Autotune</string>
-    <string name="title_activity_ucode8">UCODE 8</string>
+    <string name="title_activity_ucode8">NXP UCODE 8</string>
     <string name="title_activity_ucodeDNA">UCODE DNA</string>
     <string name="title_activity_bap">BAP</string>
     <string name="title_activity_coldChain">Cold Chain</string>
@@ -38,7 +42,8 @@
 
     <string name="title_activity_fdMicro">FM13DT160</string>
     <string name="title_activity_ctesisu">CTESIUS</string>
-    <string name="title_activity_ledTag">LEDTAG</string>
+    <string name="title_activity_kiloway">KX2005X-BL</string>
+    <string name="title_activity_longjing">EL-N2ESL</string>
 
     <string name="title_activity_registertag">Register tag</string>
     <string name="title_activity_readWriteUser">Long Read / Write</string>
@@ -73,6 +78,19 @@
     <string-array name="write_memoryBank_options">
         <item>EPC</item>
         <item>User</item>
+    </string-array>
+
+    <string-array name="write_Epc_options">
+        <item>SGTIN - Serialized Global Trade Item Number</item>
+        <item>SSCC - Serial Shipping Container Code</item>
+        <item>SGLN - Serialized Global Location Number</item>
+        <item>GRAI - Global Returnable Asset Identifier</item>
+        <item>GIAI - Global Individual Asset Identifier</item>
+        <item>GSRN - Global Service Relation Number, Recipient</item>
+        <item>GSRNP - Global Service Relation Number, Provider</item>
+        <item>GDTI - Global Document Type Identifier</item>
+        <item>CPI - Component Part Identifier</item>
+        <item>SGCN - Serialized Globald Coupon Number</item>
     </string-array>
 
     <string-array name="write_data_options">
@@ -275,6 +293,7 @@
     </string-array>
 
     <string-array name="coldChain_tagtype_options">
+        <item>CS8300</item>
         <item>CS8304 Cold Chain</item>
         <item>Avery Maxdura</item>
     </string-array>
@@ -315,6 +334,31 @@
         <item>None</item>
     </string-array>
 
+    <string-array name="impinj_options">
+        <item>M775</item>
+        <item>M780/M781</item>
+        <item>M830/M850</item>
+        <item>M770</item>
+        <item>M730/M750</item>
+        <item>Monza R6-A/B </item>
+        <item>Monza R6-P </item>
+        <item>Monza X8K</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="nxp_options">
+        <item>ucode 8</item>
+        <item>ucode dna</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="emicro_options">
+        <item>em4152 aura-sense</item>
+        <item>em4325 custom cold-chain</item>
+        <item>CS9010 BAP</item>
+        <item>Others</item>
+    </string-array>
+
     <!-- Strings for StartStopTrigger Fragment -->
     <!-- Strings for start trigger Selection -->
     <!-- Strings for stop trigger Selection -->
@@ -349,6 +393,7 @@
     <string name="toast_same_setting">Same setting. Need no update. Operation is cancelled.</string>
     <string name="toast_saved">Saved new setting.</string>
     <string name="toast_select_reader_first">Please select reader first</string>
+    <string name="toast_permission_not_granted">"Permissions are not granted. Please allow them in system setting."</string>
 
     <!-- Titles in connection settings -->
     <string name="start_title">START</string>
@@ -414,6 +459,16 @@
     <string name="home_connect">Connect</string>
     <string name="home_access">Security</string>
     <string name="home_activity_special">Special Functions</string>
+
+    <string name="home_read_write710">Read/Write\n</string>
+    <string name="home_inventory710">Inventory\n</string>
+    <string name="home_regTag710">Register Tag\n</string>
+    <string name="home_settings710">Settings\n</string>
+    <string name="home_locate710">Geiger Search\n</string>
+    <string name="home_filter710">Filters\n</string>
+    <string name="home_access710">Security\n</string>
+    <string name="home_activity_special710">Special Functions\n</string>
+
     <string name="error_bluetooth_connection_failed">Unable to connect device</string>
     <string name="colon">:</string>
 

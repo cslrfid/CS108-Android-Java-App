@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -27,7 +26,7 @@ public class SettingWedgeFragment extends DialogFragment {
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_directwedge_settings, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Simple Wedge Settings");
+        builder.setTitle("Wedge Settings");
         //builder.setMessage("simple wedge setttings");
         builder.setView(view);
         builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {

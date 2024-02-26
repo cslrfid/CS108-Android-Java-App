@@ -1,12 +1,16 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 33
-    defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 33
-        buildConfigField 'String', 'VERSION_NAME', "\"2.8.5\""
+    namespace 'com.csl.cs108library4a'
+    buildFeatures {
+        buildConfig true
+    }
 
+    compileSdk 34
+    defaultConfig {
+        minSdk 21
+        targetSdk 34
+        buildConfigField 'String', 'VERSION_NAME', "\"2.10.2\""
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
@@ -24,9 +28,10 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.3.0', {
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.5.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.11.0'
     testImplementation 'junit:junit:4.13.2'
+    implementation project(':cslibrary4a')
 }

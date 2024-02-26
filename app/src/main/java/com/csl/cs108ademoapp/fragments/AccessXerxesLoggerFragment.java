@@ -21,7 +21,7 @@ import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
 
 public class AccessXerxesLoggerFragment extends CommonFragment {
     final boolean DEBUG = true;
@@ -123,7 +123,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
         editTextaccessRWAntennaPower = (EditText) getActivity().findViewById(R.id.accessXXAntennaPower);
         editTextaccessRWAntennaPower.setText(String.valueOf(300));
 
-        buttonRead = (Button) getActivity().findViewById(R.id.accessXXReadButton);
+        buttonRead = (Button) getActivity().findViewById(R.id.accessRWReadButton);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -138,7 +138,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
             }
         });
 
-        buttonWrite = (Button) getActivity().findViewById(R.id.accessXXWriteButton);
+        buttonWrite = (Button) getActivity().findViewById(R.id.accessRWWriteButton);
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -263,13 +263,10 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                     int selectOffset = 32;
                     String selectMask = editTextRWTagID.getText().toString();
                     accessTask = new AccessTask(
-                            (operationRead ? buttonRead : buttonWrite), null,
-                            invalid,
+                            (operationRead ? buttonRead : buttonWrite), null, invalid,
                             selectMask, selectBank, selectOffset,
-                            editTextAccessRWAccPassword.getText().toString(),
-                            Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                            (operationRead ? Cs108Library4A.HostCommands.CMD_18K6CREAD: Cs108Library4A.HostCommands.CMD_18K6CWRITE),
-                            0, 0, true,
+                            editTextAccessRWAccPassword.getText().toString(), Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()), (operationRead ? Cs108Library4A.HostCommands.CMD_18K6CREAD: Cs108Library4A.HostCommands.CMD_18K6CWRITE),
+                            0, 0, true, false,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;
@@ -308,8 +305,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
         else {
             if (changedSelectIndex) {
                 changedSelectIndex = false; MainActivity.selectFor = 0;
-                MainActivity.csLibrary4A.setSelectCriteriaDisable(2);
-                MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
+                MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
             }
             accessResult = accessTask.accessResult;
             if (accessResult == null) {

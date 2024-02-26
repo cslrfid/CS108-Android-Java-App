@@ -144,10 +144,19 @@ public class AccessTask1 {
     }
     public String accessResult;
     public String getResult() {
-        MainActivity.csLibrary4A.appendToLog("HelloA: accessResult=" + accessResult);
-        if (accessTask == null) return null;
-        if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return null;
-        if (button.getText().toString().indexOf("ING") > 0) return null;
+        MainActivity.csLibrary4A.appendToLog("HelloA: accessResult = " + accessResult);
+        if (accessTask == null) {
+            MainActivity.csLibrary4A.appendToLog("accessTask is null");
+            return null;
+        }
+        if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
+            MainActivity.csLibrary4A.appendToLog("accessTask.getStatus is not finished");
+            return null;
+        }
+        if (button.getText().toString().indexOf("ING") > 0) {
+            MainActivity.csLibrary4A.appendToLog("button is still ing");
+            return null;
+        }
         return accessResult;
     }
 

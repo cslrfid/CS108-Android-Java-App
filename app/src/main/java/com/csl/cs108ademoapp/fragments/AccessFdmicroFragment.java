@@ -55,7 +55,7 @@ public class AccessFdmicroFragment extends CommonFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        selectTag = new SelectTag((Activity) getActivity());
+        selectTag = new SelectTag((Activity)getActivity(), 0);
 
         tableRowOffsetLength = (TableRow) getActivity().findViewById(R.id.accessFDOffsetLengthRow);
         tableRowValue = (TableRow) getActivity().findViewById(R.id.accessFDValueRow);
@@ -192,7 +192,7 @@ public class AccessFdmicroFragment extends CommonFragment {
             }
         });
 
-        buttonRead = (Button) getActivity().findViewById(R.id.accessCCReadButton);
+        buttonRead = (Button) getActivity().findViewById(R.id.accessRWReadButton);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -202,7 +202,7 @@ public class AccessFdmicroFragment extends CommonFragment {
             }
         });
 
-        buttonWrite = (Button) getActivity().findViewById(R.id.accessCCWriteButton);
+        buttonWrite = (Button) getActivity().findViewById(R.id.accessRWWriteButton);
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -550,7 +550,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                 selectTag.editTextAccessPassword.getText().toString(),
                 Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()),
                 hostCommand,
-                0, 0, true,
+                0, 0, true, false,
                 null, null, null, null, null);
         accessTask.setRunnable(updateRunnable);
         accessTask.execute();
@@ -881,10 +881,6 @@ public class AccessFdmicroFragment extends CommonFragment {
             else if (operationReadTemperature) {
                 switch(iOtherFlowCount) {
                     case 0:
-                        /*MainActivity.mCs108Library4a.set_fdWriteMem(0xb040, 4, 0x4db209f6); //~user_cfg1,user_cfg1,~user_cfg0,user_cfg0: default as 0xd629b34c
-                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);
-                        MainActivity.mCs108Library4a.set_fdWriteMem(0xb061, 1, 0x40);
-                        doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRMEM);*/
                         MainActivity.csLibrary4A.set_fdWrite(0xc012, 0x0000);
                         doAccessTask(Cs108Library4A.HostCommands.CMD_FDM_WRREG);
                         break;

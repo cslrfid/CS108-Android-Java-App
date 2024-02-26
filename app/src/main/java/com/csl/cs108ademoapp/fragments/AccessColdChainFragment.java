@@ -20,7 +20,7 @@ import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
 
 public class AccessColdChainFragment extends CommonFragment {
     final boolean DEBUG = true;
@@ -301,7 +301,7 @@ public class AccessColdChainFragment extends CommonFragment {
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             hostCommand,
-                            0, 0, true,
+                            0, 0, true, false,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;

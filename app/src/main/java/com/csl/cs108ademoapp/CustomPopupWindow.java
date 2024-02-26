@@ -25,8 +25,8 @@ public class CustomPopupWindow {
         popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
         TextView textViewDismiss = (TextView)popupView.findViewById(R.id.dismissMessage);
-        int iLenghtMax = 300;
-        if (message.length() > iLenghtMax) message = message.substring(0, iLenghtMax) + " .....";
+        //int iLenghtMax = 300;
+        //if (message.length() > iLenghtMax) message = message.substring(0, iLenghtMax) + " .....";
         csLibrary4A.appendToLog("SaveList2ExternalTask: popupStart message = " + message);
         textViewDismiss.setText(message);
         Button btnDismiss = (Button)popupView.findViewById(R.id.dismiss);
