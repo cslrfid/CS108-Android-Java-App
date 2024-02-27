@@ -313,10 +313,10 @@ public class NotificationController {
         }
     Context context; TextView mLogView;
     Utility utility;
-    public NotificationController(Context context, TextView mLogView) {
+    public NotificationController(Context context, TextView mLogView, Utility utility) {
         this.context = context;
         this.mLogView = mLogView;
-        utility = new Utility(context, mLogView); DEBUG_PKDATA = utility.DEBUG_PKDATA;
+        this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
     }
     private void appendToLog(String s) { utility.appendToLog(s); }
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }

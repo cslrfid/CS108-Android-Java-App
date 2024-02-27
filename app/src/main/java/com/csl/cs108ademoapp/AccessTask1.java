@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.csl.cs108library4a.Cs108Library4A;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessTask1 {
     Button button;
@@ -14,24 +14,24 @@ public class AccessTask1 {
     int selectBank, selectOffset;
     String strPassword;
     int powerLevel;
-    Cs108Library4A.HostCommands hostCommand;
+    RfidReaderChipData.HostCommands hostCommand;
     Runnable updateRunnable = null;
 
     AccessTask accessTask;
     public AccessTask1(Button button, boolean invalidRequest,
                        int accBank, int accOffset, int accSize, int accBlockCount, String accWriteData,
                        String selectMask, int selectBank, int selectOffset,
-                       String strPassword, int powerLevel, Cs108Library4A.HostCommands hostCommand, Runnable updateRunnable) {
+                       String strPassword, int powerLevel, RfidReaderChipData.HostCommands hostCommand, Runnable updateRunnable) {
         this.button = button;
         this.invalidRequest = invalidRequest;
         MainActivity.csLibrary4A.appendToLog("HelloK: invalidRequest=" + invalidRequest);
         this.accBank = accBank;
         this.accOffset = accOffset;
-        if (hostCommand == Cs108Library4A.HostCommands.CMD_18K6CWRITE) { if (accBlockCount > 16) accBlockCount = 16; }
+        if (hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CWRITE) { if (accBlockCount > 16) accBlockCount = 16; }
         else if (accBlockCount > 255) accBlockCount = 255;
         this.accBlockCount = accBlockCount;
         if (accWriteData == null) accWriteData = "";
-        if (hostCommand == Cs108Library4A.HostCommands.CMD_18K6CWRITE) {
+        if (hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CWRITE) {
             MainActivity.csLibrary4A.appendToLog("strOut: accWriteData=" + accWriteData);
             accWriteData = deformatWriteAccessData(accWriteData);
             if (accWriteData.length() < accSize * 4) {
@@ -96,7 +96,7 @@ public class AccessTask1 {
         else if (button.getText().toString().indexOf("ING") > 0) { }
         else if (isResultReady == false) {
             String strAccessResult = "";
-            if (hostCommand != Cs108Library4A.HostCommands.CMD_18K6CREAD || accBank != 3) strAccessResult = accessTask.accessResult;
+            if (hostCommand != RfidReaderChipData.HostCommands.CMD_18K6CREAD || accBank != 3) strAccessResult = accessTask.accessResult;
             else {
                 int word4line = 7;
                 for (int i = 0; i < accSizeNow; i=i+word4line) {
@@ -187,7 +187,7 @@ public class AccessTask1 {
                 }
             }
         }
-        if (invalidRequest == false && hostCommand == Cs108Library4A.HostCommands.CMD_18K6CWRITE) {
+        if (invalidRequest == false && hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CWRITE) {
             if (accWriteData.length() > accSizeNow * 4) accWriteDataNow = accWriteData.substring(0, accSizeNow*4);
             else accWriteDataNow = accWriteData;
             if (MainActivity.csLibrary4A.setAccessWriteData(accWriteDataNow) == false) {

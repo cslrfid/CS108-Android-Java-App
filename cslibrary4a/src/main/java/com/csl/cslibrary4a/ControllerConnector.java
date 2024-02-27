@@ -12,10 +12,10 @@ public class ControllerConnector {
     boolean userDebugEnableDefault = false, userDebugEnable = userDebugEnableDefault;
 
     Context context; TextView mLogView;
-    public ControllerConnector(Context context, TextView mLogView) {
+    public ControllerConnector(Context context, TextView mLogView, Utility utility) {
         this.context = context;
         this.mLogView = mLogView;
-        utility = new Utility(context, mLogView); DEBUG_PKDATA = utility.DEBUG_PKDATA;
+        this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
     }
 
     Utility utility;

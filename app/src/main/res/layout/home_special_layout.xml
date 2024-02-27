@@ -130,7 +130,7 @@
                 android:layout_marginTop="@dimen/home_icon_margin_1"
                 android:background="@drawable/btn_back"
                 android:gravity="center"
-                android:text="Longjing EL-N2ESL(CS6861)"
+                android:text="@string/special_N2ESL_1"
                 android:onClick="longjingClicked"/>
 
             <Button

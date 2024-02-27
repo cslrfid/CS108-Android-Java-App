@@ -6,7 +6,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.csl.cs108library4a.Cs108Library4A;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.util.ArrayList;
 
@@ -28,7 +28,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     boolean invalidRequest;
     String selectMask; int selectBank, selectOffset;
     String strPassword; int powerLevel;
-    Cs108Library4A.HostCommands hostCommand;
+    RfidReaderChipData.HostCommands hostCommand;
 
     CustomMediaPlayer playerO, playerN;
 
@@ -51,7 +51,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
 
     public AccessTask(Button button, boolean invalidRequest,
                       String selectMask, int selectBank, int selectOffset,
-                      String strPassword, int powerLevel, Cs108Library4A.HostCommands hostCommand,
+                      String strPassword, int powerLevel, RfidReaderChipData.HostCommands hostCommand,
                       boolean bEnableErrorPopWindow, Runnable updateRunnable) {
         this.button = button;
         this.registerTagGot = registerTagGot;
@@ -74,7 +74,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     }
     public AccessTask(Button button, TextView textViewWriteCount, boolean invalidRequest,
                       String selectMask, int selectBank, int selectOffset,
-                      String strPassword, int powerLevel, Cs108Library4A.HostCommands hostCommand,
+                      String strPassword, int powerLevel, RfidReaderChipData.HostCommands hostCommand,
                       int qValue, int repeat, boolean resetCount, boolean bSkipClearFilter,
                       TextView registerRunTime, TextView registerTagGot, TextView registerVoltageLevel, TextView registerYieldView, TextView registerTotalView) {
         this.button = button;
@@ -137,7 +137,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
 
         if (invalidRequest == false) {
             if (strPassword.length() != 8) { invalidRequest = true; MainActivity.csLibrary4A.appendToLog("strPassword.length = " + strPassword.length() + " (not 8)."); }
-            else if (hostCommand == Cs108Library4A.HostCommands.CMD_18K6CKILL) {
+            else if (hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CKILL) {
                 if (MainActivity.csLibrary4A.setRx000KillPassword(strPassword) == false) {
                     invalidRequest = true; MainActivity.csLibrary4A.appendToLog("setRx000KillPassword is failed");
                 }
@@ -201,12 +201,12 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 publishProgress("WW");
             }
             byte[] notificationData = MainActivity.csLibrary4A.onNotificationEvent();
-            Cs108Library4A.Rx000pkgData rx000pkgData = MainActivity.csLibrary4A.onRFIDEvent();
+            RfidReaderChipData.Rx000pkgData rx000pkgData = MainActivity.csLibrary4A.onRFIDEvent();
             if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0)   timeMillis = System.currentTimeMillis();
             else if (rx000pkgData != null) {
                 if (rx000pkgData.responseType == null) {
                     publishProgress("null response");
-                } else if (rx000pkgData.responseType == Cs108Library4A.HostCmdResponseTypes.TYPE_18K6C_TAG_ACCESS) {
+                } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_18K6C_TAG_ACCESS) {
                     accessCompleteReceived = true;
                     MainActivity.csLibrary4A.appendToLog("rx000pkgData.dataValues = " + MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.dataValues));
                     if (rx000pkgData.decodedError == null) {
@@ -220,8 +220,8 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                         done = true;
                     } else publishProgress(rx000pkgData.decodedError);
                     iTimeOut = 1000;
-                } else if (rx000pkgData.responseType == Cs108Library4A.HostCmdResponseTypes.TYPE_COMMAND_END) {
-                    if (hostCommand == Cs108Library4A.HostCommands.CMD_18K6CKILL && accessCompleteReceived == false) accessResult = "";
+                } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_COMMAND_END) {
+                    if (hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CKILL && accessCompleteReceived == false) accessResult = "";
                     MainActivity.csLibrary4A.appendToLog("BtData: repeat = " + repeat + ", decodedError = " + rx000pkgData.decodedError + ", resultError = " + resultError);
                     if (rx000pkgData.decodedError != null) { endingMessaage = rx000pkgData.decodedError; ending = true; }
                     else if (repeat > 0 && resultError.length() == 0) {
@@ -232,7 +232,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                         endingMessaage = "";
                         ending = true;
                     }
-                } else if (rx000pkgData.responseType == Cs108Library4A.HostCmdResponseTypes.TYPE_18K6C_INVENTORY) {
+                } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_18K6C_INVENTORY) {
                     accessTagEpc = MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.decodedEpc);
                     done = false;
                     publishProgress("TT", MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.decodedEpc));

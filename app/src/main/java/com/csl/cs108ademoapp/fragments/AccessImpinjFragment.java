@@ -23,8 +23,8 @@ import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SelectTag;
-import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 import com.google.android.material.tabs.TabLayout;
 
 public class AccessImpinjFragment extends CommonFragment {
@@ -167,7 +167,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     boolean invalidRequest = MainActivity.csLibrary4A.setAuthenticateConfiguration();
                     accessTask = new AccessTask(button, null, false,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
-                            selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), Cs108Library4A.HostCommands.CMD_18K6CAUTHENTICATE,
+                            selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CAUTHENTICATE,
                             -1, -1, false, false,
                             null, null, null, null, null);
                     accessTask.execute();
@@ -201,7 +201,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     if (set_before_access(0, itagSelect, 1) == false) invalidRequest = true;
                     accessTask = new AccessTask(buttonAutoTuneValueRead, null, invalidRequest,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
-                            selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), Cs108Library4A.HostCommands.CMD_18K6CREAD,
+                            selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                             -1, -1, false, checkProtectedBoxBeforeAccess(),
                             null, null, null, null, null);
                     accessTask.execute();
@@ -225,7 +225,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     if (set_before_access(1, 2, 6) == false) invalidRequest = true;
                     accessTask = new AccessTask(buttonProtectValueRead, null, invalidRequest,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
-                            selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), Cs108Library4A.HostCommands.CMD_18K6CREAD,
+                            selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                             -1, -1, false, checkProtectedBoxBeforeAccess(),
                             null, null, null, null, null);
                     MainActivity.csLibrary4A.appendToLog("setSelectCriteria: before execute");
@@ -276,7 +276,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     if (set_before_access(1, 2, 8) == false) invalidRequest = true;
                     accessTask = new AccessTask(buttonEpc128ValueRead, null, invalidRequest,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
-                            selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), Cs108Library4A.HostCommands.CMD_18K6CREAD,
+                            selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                             -1, -1, false, checkProtectedBoxBeforeAccess(),
                             null, null, null, null, null);
                     accessTask.execute();
@@ -401,7 +401,7 @@ public class AccessImpinjFragment extends CommonFragment {
                 selectTag.editTextTagID.getText().toString(), iSelectBank, iSelectOffset,
                 selectTag.editTextAccessPassword.getText().toString(),
                 Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()),
-                (operationRead ? Cs108Library4A.HostCommands.CMD_18K6CREAD: Cs108Library4A.HostCommands.CMD_18K6CWRITE), updateRunnable);
+                (operationRead ? RfidReaderChipData.HostCommands.CMD_18K6CREAD: RfidReaderChipData.HostCommands.CMD_18K6CWRITE), updateRunnable);
         accessTask1.execute();
         iRunType = 7;
     }
@@ -414,7 +414,7 @@ public class AccessImpinjFragment extends CommonFragment {
         if (iSelectBank != 1) iSelectOffset = 0;
         accessTask = new AccessTask(buttonRead, null, invalidRequest,
                 selectTag.editTextTagID.getText().toString(), iSelectBank, iSelectOffset,
-                selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), Cs108Library4A.HostCommands.CMD_18K6CREAD,
+                selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                 -1, -1, false, checkProtectedBoxBeforeAccess(),
                 null, null, null, null, null);
         accessTask.execute();
@@ -480,7 +480,7 @@ public class AccessImpinjFragment extends CommonFragment {
 
         accessTask = new AccessTask(buttonWrite, null, invalidRequest,
                 selectTag.editTextTagID.getText().toString(), 1, 32,
-                selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), Cs108Library4A.HostCommands.CMD_18K6CWRITE,
+                selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CWRITE,
                 -1, -1, false, checkProtectedBoxBeforeAccess(),
                 null, null, null, null, null);
         accessTask.execute();

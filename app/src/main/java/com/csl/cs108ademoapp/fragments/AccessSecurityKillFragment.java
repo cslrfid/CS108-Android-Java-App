@@ -16,6 +16,7 @@ import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cslibrary4a.NotificationController;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessSecurityKillFragment extends CommonFragment {
     private EditText editTextTagID, editTextPassword, editTextAntennaPower;
@@ -124,7 +125,7 @@ public class AccessSecurityKillFragment extends CommonFragment {
         int powerLevel = Integer.valueOf(editTextAntennaPower.getText().toString());
         accessTask = new AccessTask(button, null, invalidRequest,
                 strTagID, 1, 32,
-                strPassword, powerLevel, Cs108Library4A.HostCommands.CMD_18K6CKILL,
+                strPassword, powerLevel, RfidReaderChipData.HostCommands.CMD_18K6CKILL,
                 0, 0, true, false,
                 null, null, null, null, null);
         accessTask.execute();

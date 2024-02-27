@@ -26,6 +26,7 @@ import com.csl.cs108ademoapp.CustomProgressDialog;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108library4a.Cs108Library4A;
+import com.csl.cslibrary4a.BluetoothGattConnector;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 
@@ -39,7 +40,7 @@ public class ConnectionFragment extends CommonFragment {
     private ArrayList<ReaderDevice> readersList = MainActivity.sharedObjects.readersList;
     private Cs108Library4A mCsLibrary4A = MainActivity.csLibrary4A;
 
-    private ArrayList<Cs108Library4A.Cs108ScanData> mScanResultList = new ArrayList<>();
+    private ArrayList<BluetoothGattConnector.Cs108ScanData> mScanResultList = new ArrayList<>();
     private Handler mHandler = new Handler();
     private DeviceConnectTask deviceConnectTask;
 
@@ -181,7 +182,7 @@ public class ConnectionFragment extends CommonFragment {
         protected String doInBackground(Void... a) {
             while (isCancelled() == false) {
                 if (wait4process == false) {
-                    Cs108Library4A.Cs108ScanData cs108ScanData = mCsLibrary4A.getNewDeviceScanned();
+                    BluetoothGattConnector.Cs108ScanData cs108ScanData = mCsLibrary4A.getNewDeviceScanned();
                     if (cs108ScanData != null) mScanResultList.add(cs108ScanData);
                     if (scanning == false || mScanResultList.size() != 0 || System.currentTimeMillis() - timeMillisUpdate > 10000) {
                         wait4process = true; publishProgress("");
@@ -200,7 +201,7 @@ public class ConnectionFragment extends CommonFragment {
             }
             boolean listUpdated = false;
             while (mScanResultList.size() != 0) {
-                Cs108Library4A.Cs108ScanData scanResultA = mScanResultList.get(0);
+                BluetoothGattConnector.Cs108ScanData scanResultA = mScanResultList.get(0);
                 mScanResultList.remove(0);
                 if (getActivity() == null) continue;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

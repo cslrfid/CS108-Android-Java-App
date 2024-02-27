@@ -15,8 +15,8 @@ import android.widget.Toast;
 import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessKilowayFragment extends CommonFragment {
     final boolean DEBUG = true;
@@ -140,13 +140,13 @@ public class AccessKilowayFragment extends CommonFragment {
                     if (bankProcessing++ != 0 && invalid == true)   {
                         CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessKilowayRepeat);
                         rerunRequest = true;
-                        if (checkBox.isChecked()) { bankProcessing = 0; checkProcessing = 0; }
+                        if (checkBox != null && checkBox.isChecked()) { bankProcessing = 0; checkProcessing = 0; }
                         else rerunRequest = false;
                     } else {
                         accessTask = new AccessTask(
                                 buttonRead, invalid,
                                 editTextRWTagID.getText().toString(), 1, 32,
-                                "00000000", Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()), Cs108Library4A.HostCommands.CMD_18K6CREAD,
+                                "00000000", Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                                 false, null);
                         accessTask.execute();
                         rerunRequest = true;

@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputConnection;
 
-import com.csl.cs108library4a.Cs108Library4A;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.util.ArrayList;
 
@@ -125,7 +125,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
         if ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false)) return;
         if (started == false) {
             appendToLog("CustomIME Debug 11");
-            MainActivity.csLibrary4A.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY);
+            MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY);
             inventoryRfidTask = new InventoryRfidTask();
             inventoryRfidTask.execute();
         }

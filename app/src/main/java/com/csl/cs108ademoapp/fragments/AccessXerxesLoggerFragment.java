@@ -20,8 +20,8 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessXerxesLoggerFragment extends CommonFragment {
     final boolean DEBUG = true;
@@ -265,7 +265,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                     accessTask = new AccessTask(
                             (operationRead ? buttonRead : buttonWrite), null, invalid,
                             selectMask, selectBank, selectOffset,
-                            editTextAccessRWAccPassword.getText().toString(), Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()), (operationRead ? Cs108Library4A.HostCommands.CMD_18K6CREAD: Cs108Library4A.HostCommands.CMD_18K6CWRITE),
+                            editTextAccessRWAccPassword.getText().toString(), Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()), (operationRead ? RfidReaderChipData.HostCommands.CMD_18K6CREAD: RfidReaderChipData.HostCommands.CMD_18K6CWRITE),
                             0, 0, true, false,
                             null, null, null, null, null);
                     accessTask.execute();

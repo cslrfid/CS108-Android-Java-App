@@ -8,8 +8,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
-import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
 
     boolean requestSound = false; boolean requestNewSound = false; boolean requestNewVibrate = false; long timeMillisNewVibrate;
     String strEpcOld = "";
-    private ArrayList<Cs108Library4A.Rx000pkgData> rx000pkgDataArrary = new ArrayList<Cs108Library4A.Rx000pkgData>();
+    private ArrayList<RfidReaderChipData.Rx000pkgData> rx000pkgDataArrary = new ArrayList<RfidReaderChipData.Rx000pkgData>();
     private String endingMessaage;
 
     SaveList2ExternalTask saveExternalTask;
@@ -124,7 +124,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     @Override
     protected String doInBackground(Void... a) {
         boolean ending = false, triggerReleased = false; long triggerReleaseTime = 0;
-        Cs108Library4A.Rx000pkgData rx000pkgData = null;
+        RfidReaderChipData.Rx000pkgData rx000pkgData = null;
         while (MainActivity.csLibrary4A.onRFIDEvent() != null) { } //clear up possible message before operation
         while (MainActivity.csLibrary4A.isBleConnected() && isCancelled() == false && ending == false && MainActivity.csLibrary4A.isRfidFailure() == false) {
             int batteryCount = MainActivity.csLibrary4A.getBatteryCount();
@@ -142,7 +142,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
             if (rx000pkgData != null && MainActivity.csLibrary4A.mrfidToWriteSize() == 0) {
                 if (rx000pkgData.responseType == null) {
                     publishProgress("null response");
-                } else if (rx000pkgData.responseType == Cs108Library4A.HostCmdResponseTypes.TYPE_18K6C_INVENTORY) {
+                } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_18K6C_INVENTORY) {
                     {
                         if (rx000pkgData.decodedError != null)  publishProgress(rx000pkgData.decodedError);
                         else {
@@ -151,7 +151,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             rx000pkgDataArrary.add(rx000pkgData); publishProgress(null, "", "");
                         }
                     }
-                } else if (rx000pkgData.responseType == Cs108Library4A.HostCmdResponseTypes.TYPE_18K6C_INVENTORY_COMPACT) {
+                } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_18K6C_INVENTORY_COMPACT) {
                     {
                         if (rx000pkgData.decodedError != null)  publishProgress(rx000pkgData.decodedError);
                         else {
@@ -159,16 +159,16 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             rx000pkgDataArrary.add(rx000pkgData); publishProgress(null, "", "");
                         }
                     }
-                } else if (rx000pkgData.responseType == Cs108Library4A.HostCmdResponseTypes.TYPE_ANTENNA_CYCLE_END) {
+                } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_ANTENNA_CYCLE_END) {
                     timeMillis = System.currentTimeMillis();
-                } else if (rx000pkgData.responseType == Cs108Library4A.HostCmdResponseTypes.TYPE_COMMAND_ABORT_RETURN) {
+                } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_COMMAND_ABORT_RETURN) {
                     MainActivity.csLibrary4A.appendToLog("AAA: Abort return is received !!!");
                     ending = true;
-                } else if (rx000pkgData.responseType == Cs108Library4A.HostCmdResponseTypes.TYPE_COMMAND_END) {
+                } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_COMMAND_END) {
                     if (rx000pkgData.decodedError != null) endingMessaage = rx000pkgData.decodedError;
                     if (continousRequest) {
                         MainActivity.csLibrary4A.batteryLevelRequest();
-                        MainActivity.csLibrary4A.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY_COMPACT);
+                        MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
                     } else  ending = true;
                 }
             } else if (false && notificationData != null) {
@@ -280,7 +280,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
             long currentTime = 0;
             {
                 while (rx000pkgDataArrary.size() != 0) {
-                    Cs108Library4A.Rx000pkgData rx000pkgData = rx000pkgDataArrary.get(0);
+                    RfidReaderChipData.Rx000pkgData rx000pkgData = rx000pkgDataArrary.get(0);
                     rx000pkgDataArrary.remove(0);
                     if (rx000pkgData == null) {
                         if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryRfidTask: null rx000pkgData !!!");

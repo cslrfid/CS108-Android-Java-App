@@ -469,6 +469,9 @@
     <string name="home_access710">Security\n</string>
     <string name="home_activity_special710">Special Functions\n</string>
 
+    <string name="special_N2ESL">Longjing EL-N2ESL\nCS6861</string>
+    <string name="special_N2ESL_1">EL-N2ESL CS6861</string>
+
     <string name="error_bluetooth_connection_failed">Unable to connect device</string>
     <string name="colon">:</string>
 

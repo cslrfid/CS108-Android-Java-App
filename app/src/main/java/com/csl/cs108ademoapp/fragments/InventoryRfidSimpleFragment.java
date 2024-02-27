@@ -25,6 +25,7 @@ import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cslibrary4a.NotificationController;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +49,7 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
         rfidYieldView.setText("");
         rfidRateView.setText("");
         MainActivity.tagSelected = null;
-        MainActivity.sharedObjects.tagsList.clear();
+        MainActivity.sharedObjects.tagsList.clear(); MainActivity.sharedObjects.tagsIndexList.clear();
         readerListAdapter.notifyDataSetChanged();
         MainActivity.mLogView.setText("");
     }
@@ -268,13 +269,13 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
                 iTagTarget = Integer.valueOf(editText.getText().toString());
                 iTagGot = 0;
 
-                uplinkPacketList.clear(); MainActivity.sharedObjects.tagsIndexList.clear();
+                uplinkPacketList.clear();
 
                 timeMillis = System.currentTimeMillis(); startTimeMillis = timeMillis; runTimeMillis = timeMillis;
                 total = 0;
             }
 
-            MainActivity.sharedObjects.tagsList.clear();
+            MainActivity.sharedObjects.tagsList.clear(); MainActivity.sharedObjects.tagsIndexList.clear();
             rfidYieldView.setText("");
             rfidRateView.setText("");
             button.setText("Stop");
@@ -300,11 +301,11 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
     long timeMillis, startTimeMillis, runTimeMillis, rateTimeMillis;
     int iTagTarget, iTagGot;
     Handler myHandler = new Handler(Looper.getMainLooper());
-    ArrayList<Cs108Library4A.Rx000pkgData> uplinkPacketList = new ArrayList<>();
+    ArrayList<RfidReaderChipData.Rx000pkgData> uplinkPacketList = new ArrayList<>();
     Runnable runnableSimpleInentory = new Runnable() {
         @Override
         public void run() {
-            Cs108Library4A.Rx000pkgData uplinkPacket;
+            RfidReaderChipData.Rx000pkgData uplinkPacket;
             if (MainActivity.csLibrary4A.isBleConnected() && bRunningInventory) {
                 while (MainActivity.csLibrary4A.mrfidToWriteSize() == 0 && (iTagTarget == 0 || iTagGot < iTagTarget)) {
                     if (System.currentTimeMillis() > runTimeMillis + 1000) {
@@ -360,9 +361,9 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
         int total = 0;
 
         while (uplinkPacketList.size() != 0) {
-            Cs108Library4A.Rx000pkgData uplinkPacket = uplinkPacketList.get(0);
+            RfidReaderChipData.Rx000pkgData uplinkPacket = uplinkPacketList.get(0);
             uplinkPacketList.remove(0);
-            Cs108Library4A.Rx000pkgData tagData = uplinkPacket;
+            RfidReaderChipData.Rx000pkgData tagData = uplinkPacket;
 
             boolean match = false;
             total++;
@@ -392,8 +393,7 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
                 match = true;
             }
             if (match == false) {
-                deviceTag = new ReaderDevice(MainActivity.csLibrary4A.byteArrayToString(uplinkPacket.decodedEpc),
-                        null, false, null,
+                deviceTag = new ReaderDevice("", MainActivity.csLibrary4A.byteArrayToString(uplinkPacket.decodedEpc), false, null,
                         MainActivity.csLibrary4A.byteArrayToString(uplinkPacket.decodedPc),
                         null,
                         (uplinkPacket.decodedCrc != null ? MainActivity.csLibrary4A.byteArrayToString(uplinkPacket.decodedCrc) : null),
@@ -424,7 +424,7 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
     void startInventoryTask() {
         MainActivity.csLibrary4A.appendToLog("startInventoryTask");
         MainActivity.csLibrary4A.restoreAfterTagSelect();
-        MainActivity.csLibrary4A.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY_COMPACT);
+        MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
     }
 
     private final Runnable runnableCheckReady = new Runnable() {

@@ -19,8 +19,8 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SelectTag;
-import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class UtraceFragment extends CommonFragment {
     final boolean DEBUG = true;
@@ -231,7 +231,7 @@ public class UtraceFragment extends CommonFragment {
                 accessTask = new AccessTask(
                         button, null, invalid,
                         selectTag.editTextTagID.getText().toString(), selectBank, (selectBank == 1 ? 32 : 0),
-                        selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), Cs108Library4A.HostCommands.CMD_UNTRACEABLE,
+                        selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_UNTRACEABLE,
                         0, 0, true, false,
                         null, null, null, null, null);
                 MainActivity.csLibrary4A.appendToLog("setSelectCriteria: going to execute accessTask");

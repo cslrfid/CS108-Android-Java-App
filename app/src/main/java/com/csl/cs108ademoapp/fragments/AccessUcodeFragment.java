@@ -22,8 +22,8 @@ import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SelectTag;
-import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -547,12 +547,12 @@ public class AccessUcodeFragment extends CommonFragment {
                     else if (operationRead) button = buttonRead;
                     else button = buttonWrite;
 
-                    Cs108Library4A.HostCommands hostCommand;
-                    if (readBufferChecked) hostCommand = Cs108Library4A.HostCommands.CMD_READBUFFER;
-                    else if (authenChecked) hostCommand = Cs108Library4A.HostCommands.CMD_18K6CAUTHENTICATE;
-                    else if (untraceChecked || showEpcChecked) hostCommand = Cs108Library4A.HostCommands.CMD_UNTRACEABLE;
-                    else if (operationRead) hostCommand = Cs108Library4A.HostCommands.CMD_18K6CREAD;
-                    else hostCommand = Cs108Library4A.HostCommands.CMD_18K6CWRITE;
+                    RfidReaderChipData.HostCommands hostCommand;
+                    if (readBufferChecked) hostCommand = RfidReaderChipData.HostCommands.CMD_READBUFFER;
+                    else if (authenChecked) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CAUTHENTICATE;
+                    else if (untraceChecked || showEpcChecked) hostCommand = RfidReaderChipData.HostCommands.CMD_UNTRACEABLE;
+                    else if (operationRead) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CREAD;
+                    else hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CWRITE;
 
                     accessTask = new AccessTask(
                             button, null, invalid,

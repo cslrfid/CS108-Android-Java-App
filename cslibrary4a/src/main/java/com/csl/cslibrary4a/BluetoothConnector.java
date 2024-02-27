@@ -13,10 +13,10 @@ public class BluetoothConnector {
     public boolean userDebugEnable = userDebugEnableDefault;
 
     Context context; TextView mLogView;
-    public BluetoothConnector(Context context, TextView mLogView) {
+    public BluetoothConnector(Context context, TextView mLogView, Utility utility) {
         this.context = context;
         this.mLogView = mLogView;
-        utility = new Utility(context, mLogView); DEBUG_PKDATA = utility.DEBUG_PKDATA;
+        this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
     }
 
     Utility utility;
