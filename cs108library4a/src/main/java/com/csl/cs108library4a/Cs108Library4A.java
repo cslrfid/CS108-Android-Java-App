@@ -23,7 +23,6 @@ import com.csl.cslibrary4a.ControllerConnector;
 import com.csl.cslibrary4a.CsReaderConnector108;
 import com.csl.cslibrary4a.NotificationConnector;
 import com.csl.cslibrary4a.ReaderDevice;
-import com.csl.cslibrary4a.RfidConnector;
 import com.csl.cslibrary4a.RfidReaderChipData;
 import com.csl.cslibrary4a.RfidReaderChipR2000;
 import com.csl.cslibrary4a.Utility;
@@ -410,7 +409,7 @@ public class Cs108Library4A {
                 if (DEBUG_CONNECT) appendToLog("Newly connected");
 
                 csReaderConnector108.cs108ConnectorDataInit();
-                rfidReaderChip = csReaderConnector108.rfidReaderChip; //rfidConnector = csReaderConnector108.rfidConnector;
+                rfidReaderChip = csReaderConnector108.rfidReaderChipR2000; //rfidConnector = csReaderConnector108.rfidConnector;
                 barcodeNewland = csReaderConnector108.barcodeNewland; barcodeConnector = csReaderConnector108.barcodeConnector;
                 notificationConnector = csReaderConnector108.notificationConnector;
                 controllerConnector = csReaderConnector108.controllerConnector;
@@ -3910,7 +3909,7 @@ public class Cs108Library4A {
         return true;
     }
     //String serverImpinjLocationDefault = "https://h9tqczg9-7275.asse.devtunnels.ms", serverImpinjLocation = serverImpinjLocationDefault;
-    String serverImpinjLocationDefault = "https://www.democloud.convergence.com.hk/ias", serverImpinjLocation = serverImpinjLocationDefault;
+    String serverImpinjLocationDefault = "https://democloud.convergence.com.hk/ias", serverImpinjLocation = serverImpinjLocationDefault;
     public String getServerImpinjLocation() {
         return serverImpinjLocation;
     }

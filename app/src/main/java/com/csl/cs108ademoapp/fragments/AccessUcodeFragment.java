@@ -284,11 +284,21 @@ public class AccessUcodeFragment extends CommonFragment {
         });
 
         editTextAccessUCserverImpinj = (EditText) getActivity().findViewById(R.id.accessUCserverImpinj);
-        editTextAccessUCserverImpinj.setText(csLibrary4A.getServerImpinjLocation());
         editTextAccessUCemail = (EditText) getActivity().findViewById(R.id.accessUCemail);
-        editTextAccessUCemail.setText(csLibrary4A.getServerImpinjName()); //"wallace.sit@cne.com.hk");
         editTextAccessUCpassword = (EditText) getActivity().findViewById(R.id.accessUCpassword);
-        editTextAccessUCpassword.setText(csLibrary4A.getServerImpinjPassword()); //"Cne12345678?");
+        if (true) {
+            editTextAccessUCserverImpinj.setText(csLibrary4A.getServerImpinjLocation());
+            editTextAccessUCemail.setText(csLibrary4A.getServerImpinjName());
+            editTextAccessUCpassword.setText(csLibrary4A.getServerImpinjPassword());
+        } else if (false) {
+            editTextAccessUCserverImpinj.setText("https://h9tqczg9-7275.asse.devtunnels.ms");
+            editTextAccessUCemail.setText("wallace.sit@cne.com.hk");
+            editTextAccessUCpassword.setText("Cne12345678?");
+        } else {
+            editTextAccessUCserverImpinj.setText("https://democloud.convergence.com.hk/ias");
+            editTextAccessUCemail.setText("wallace.sit@cne.com.hk");
+            editTextAccessUCpassword.setText("Cne12345678?");
+        }
     }
 
     SaveList2ExternalTask saveExternalTask; boolean bRunning = false; int bStep = 0; String strBearer = null;

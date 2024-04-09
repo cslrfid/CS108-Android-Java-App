@@ -478,9 +478,9 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         }
         errorDisplay = "Error in setConnectTimeout()"; con.setConnectTimeout(MainActivity.csLibrary4A.getServerTimeout() * 1000);
         errorDisplay = "Error in setRequestMethod()"; con.setRequestMethod("POST");
-        errorDisplay = "Error in setRequestProperty(User-Agent)"; con.setRequestProperty("User-Agent", "Mozilla/5.0");
-        errorDisplay = "Error in setRequestProperty(text/plain)"; con.setRequestProperty("text/plain", "text/plain");
-        errorDisplay = "Error in setRequestProperty(Accept-Language)"; con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        //errorDisplay = "Error in setRequestProperty(User-Agent)"; con.setRequestProperty("User-Agent", "Mozilla/5.0");
+        //errorDisplay = "Error in setRequestProperty(text/plain)"; con.setRequestProperty("text/plain", "text/plain");
+        //errorDisplay = "Error in setRequestProperty(Accept-Language)"; con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
         MainActivity.csLibrary4A.appendToLog("authenticate in url position : " + url.indexOf("authenticate"));
         if (url.indexOf("authenticate") >= 0) {
             String string = strBearer;
