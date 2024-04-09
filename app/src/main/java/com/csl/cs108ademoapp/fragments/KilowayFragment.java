@@ -20,7 +20,7 @@ public class KilowayFragment extends CommonFragment {
     private ViewPager viewPager;
     KilowayAdapter mAdapter;
 
-    private String[] tabs = {"Scan", "Configuration"};
+    private String[] tabs = {"Scan", "Access"};
     int iTargetOld, iSessionOld;
 
     @Override

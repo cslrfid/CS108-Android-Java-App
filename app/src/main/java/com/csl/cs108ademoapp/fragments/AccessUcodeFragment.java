@@ -1,6 +1,8 @@
 
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cs108ademoapp.MainActivity.csLibrary4A;
+
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,9 +23,14 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
+import com.csl.cs108ademoapp.SaveList2ExternalTask;
 import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -39,8 +46,9 @@ public class AccessUcodeFragment extends CommonFragment {
     CheckBox checkBoxHideEpc, checkBoxHideTid, checkBoxHideUser, checkBoxHideRange;
     CheckBox checkBoxAesKey0Activate, checkBoxAesKey1Activate, checkBoxAesKey0, checkBoxAesKey1;
 
-    EditText editTextAuthKeyId, editTextAuthMsg, editTextAuthProfile, editTextAuthOffset, editTextAuthBlockId, editTextAuthProtMode, editTextEpcSize, editTextAesKey0, editTextAesKey1;
-    TextView editTextAuthResponse, textViewAuthResponseDecoded, textViewAuthResponseDecodedCustom, editTextAuthResponseEncodedMac;
+    EditText editTextAuthKeyId, editTextAuthMsg, editTextAuthProfile, editTextAuthOffset, editTextAuthBlockId, editTextAuthProtMode, editTextEpcSize, editTextAesKey0, editTextAesKey1, editTextAuthResponse;
+    TextView textViewAuthResponseDecoded, textViewAuthResponseDecodedCustom, editTextAuthResponseEncodedMac, textViewImpinjResponse;
+    EditText editTextAccessUCTid, editTextAccessUCserverImpinj, editTextAccessUCemail, editTextAccessUCpassword;
     private Button buttonRead, buttonWrite;
     private Button buttonReadBuffer, buttonTam1, buttonTam2, buttonUntrace, buttonShowEpc; String strShowEpcButtonBackup;
 
@@ -116,10 +124,11 @@ public class AccessUcodeFragment extends CommonFragment {
             editTextAuthProtMode.setText(String.valueOf(1));
         }
 
-        editTextAuthResponse = (TextView) getActivity().findViewById(R.id.accessUCAuthResponse);
+        editTextAuthResponse = (EditText) getActivity().findViewById(R.id.accessUCAuthResponse);
         textViewAuthResponseDecoded = (TextView) getActivity().findViewById(R.id.accessUCAuthResponseDecoded);
         textViewAuthResponseDecodedCustom = (TextView) getActivity().findViewById(R.id.accessUCAuthResponseDecodedCustom);
         editTextAuthResponseEncodedMac = (TextView) getActivity().findViewById(R.id.accessUCAuthResponseEecodedMac);
+        textViewImpinjResponse = (TextView) getActivity().findViewById(R.id.accessUCImpinjResponse);
         editTextEpcSize = (EditText) getActivity().findViewById(R.id.accessUCEpcSize);
         editTextAesKey0 = (EditText) getActivity().findViewById(R.id.accessUCAesKey0);
         editTextAesKey0.addTextChangedListener(new GenericTextWatcher(editTextAesKey0, 32));
@@ -256,18 +265,119 @@ public class AccessUcodeFragment extends CommonFragment {
         MainActivity.csLibrary4A.setSameCheck(false);
 
         MainActivity.csLibrary4A.appendToLog("mDid in AccessUcodeFragment = " + MainActivity.mDid);
-        if (bImpinJTag) {
-            if (MainActivity.csLibrary4A.get98XX() == 0) {
-                //Button button = (Button) getActivity().findViewById(R.id.accessUCTam1AuthButton); button.setVisibility(View.GONE);
+        TextView textView = (TextView) getActivity().findViewById(R.id.accessUCAuthKeyIdLabel); textView.setVisibility(View.GONE);
+        EditText editText = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId); editText.setVisibility(View.GONE);
+        editTextAuthMsg.setText("049CA53E55EA");
+        TableRow tableRow1 = (TableRow) getActivity().findViewById(R.id.accessUCAuthProfileRow); tableRow1.setVisibility(View.GONE);
+        LinearLayout layout1 = (LinearLayout) getActivity().findViewById(R.id.accessUCKeyLayout); layout1.setVisibility(View.GONE);
+        LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessUCButtons); layout.setVisibility(View.GONE);
+
+        Button buttonImpinjCheck = (Button) getActivity().findViewById(R.id.accessUCImpinjCheck);
+        buttonImpinjCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!bRunning) {
+                    textViewImpinjResponse.setText("");
+                    mHandler.post(runnable);
+                }
             }
-            TextView textView = (TextView) getActivity().findViewById(R.id.accessUCAuthKeyIdLabel); textView.setVisibility(View.GONE);
-            EditText editText = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId); editText.setVisibility(View.GONE);
-            editTextAuthMsg.setText("049CA53E55EA");
-            TableRow tableRow1 = (TableRow) getActivity().findViewById(R.id.accessUCAuthProfileRow); tableRow1.setVisibility(View.GONE);
-            LinearLayout layout1 = (LinearLayout) getActivity().findViewById(R.id.accessUCKeyLayout); layout1.setVisibility(View.GONE);
-            LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessUCButtons); layout.setVisibility(View.GONE);
-        }
+        });
+
+        editTextAccessUCserverImpinj = (EditText) getActivity().findViewById(R.id.accessUCserverImpinj);
+        editTextAccessUCserverImpinj.setText(csLibrary4A.getServerImpinjLocation());
+        editTextAccessUCemail = (EditText) getActivity().findViewById(R.id.accessUCemail);
+        editTextAccessUCemail.setText(csLibrary4A.getServerImpinjName()); //"wallace.sit@cne.com.hk");
+        editTextAccessUCpassword = (EditText) getActivity().findViewById(R.id.accessUCpassword);
+        editTextAccessUCpassword.setText(csLibrary4A.getServerImpinjPassword()); //"Cne12345678?");
     }
+
+    SaveList2ExternalTask saveExternalTask; boolean bRunning = false; int bStep = 0; String strBearer = null;
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            csLibrary4A.appendToLog("0 bRunning = " + bRunning + ", bStep = " + bStep);
+            if (saveExternalTask != null && saveExternalTask.getStatus() == AsyncTask.Status.FINISHED) {
+                bStep++;
+                if (saveExternalTask.responseCode != 200) bStep++;
+                else {
+                    if (bStep == 1) strBearer = saveExternalTask.response;
+                    else {
+                        String strTid = null, strResult = null;
+                        JSONObject obj = null;
+                        try {
+                            obj = new JSONObject(saveExternalTask.response);
+                            JSONArray jsonArray = obj.getJSONArray("tagValidity");
+                            MainActivity.csLibrary4A.appendToLog("Json tagValidity is " + (jsonArray == null ? "null" : "valid"));
+                            strTid = jsonArray.getJSONObject(0).getString("tid");
+                            strResult = jsonArray.getJSONObject(0).getString("tagValid");
+                        } catch (JSONException e) {
+                            csLibrary4A.appendToLog("Json exception = " + e.toString());
+                        }
+                        if (strTid != null && strResult != null) {
+                            //textViewImpinjResponse.setText(strResult + " " + strTid);
+                            textViewImpinjResponse.setText((strResult.matches("true") ? "Valid" : "Invalid"));
+                        }
+                    }
+                }
+                MainActivity.csLibrary4A.appendToLog("responseCode = " + saveExternalTask.responseCode + ", response = " + saveExternalTask.response);
+                saveExternalTask = null;
+            }
+            csLibrary4A.appendToLog("bRunning = " + bRunning + ", bStep = " + bStep);
+            if (bStep < 2) {
+                if (saveExternalTask == null || saveExternalTask.getStatus() != AsyncTask.Status.RUNNING) {
+                    csLibrary4A.appendToLog("1 bRunning = " + bRunning + ", bStep = " + bStep);
+                    bRunning = true;
+                    if (bStep == 0) {
+                        bStep = 0;
+                        saveExternalTask = new SaveList2ExternalTask(true);
+
+                        JSONObject object = new JSONObject();
+                        try {
+                            //object.put("Username", "CslAuth2047#$");
+                            //object.put("Password", "Sheungwan123#$");
+                            object.put("email", editTextAccessUCemail.getText().toString()); //"wallace.sit@cne.com.hk");
+                            object.put("password", editTextAccessUCpassword.getText().toString()); //"Cne12345678?");
+                        } catch (Exception ex) {
+                            MainActivity.csLibrary4A.appendToLog("Error in creating Json");
+                        }
+                        saveExternalTask.messageStr = object.toString();
+                        //saveExternalTask.url = "https://ias.authenticate.impinj.io/external/jwt/authenticate";
+                        saveExternalTask.url = editTextAccessUCserverImpinj.getText().toString() + "/api/Auth/login"; // "https://h9tqczg9-7275.asse.devtunnels.ms/api/Auth/login";
+                        MainActivity.csLibrary4A.appendToLog("Adddress: " + saveExternalTask.url + ", json message:" + saveExternalTask.messageStr);
+                        saveExternalTask.execute();
+                        MainActivity.csLibrary4A.appendToLog("responseCode = " + saveExternalTask.responseCode + ", response = " + saveExternalTask.response);
+                    } else {
+                        saveExternalTask = new SaveList2ExternalTask(true);
+
+                        JSONObject object = new JSONObject();
+                        try {
+                            JSONArray jsonArray = new JSONArray();
+                            JSONObject object1 = new JSONObject();
+                            object1.put("tid", editTextAccessUCTid.getText().toString()); //tagSelected.getTid()); //"E2C011A21234123412341234"); //
+                            object1.put("challenge", editTextAuthMsg.getText().toString());
+                            object1.put("tagResponse", editTextAuthResponse.getText().toString());
+                            jsonArray.put(object1);
+                            object.put("tagVerify", jsonArray);
+                            object.put("sendSignature", true);
+                            object.put("sendSalt", true);
+                            object.put("sendTime", true);
+                        } catch (Exception ex) {
+                            MainActivity.csLibrary4A.appendToLog("Error in creating Json");
+                        }
+                        saveExternalTask.messageStr = object.toString();
+                        saveExternalTask.url = editTextAccessUCserverImpinj.getText().toString() + "/api/ImpinjAuthentication/authenticate"; //"https://h9tqczg9-7275.asse.devtunnels.ms/api/ImpinjAuthentication/authenticate";
+                        saveExternalTask.strBearer = "Bearer " + strBearer;
+                        MainActivity.csLibrary4A.appendToLog("Adddress: " + saveExternalTask.url + ", json message:" + saveExternalTask.messageStr);
+                        saveExternalTask.execute();
+                        MainActivity.csLibrary4A.appendToLog("responseCode = " + saveExternalTask.responseCode + ", response = " + saveExternalTask.response);
+                    }
+                }
+                mHandler.postDelayed(runnable, 100);
+            } else {
+                bRunning = false; bStep = 0;
+            }
+        }
+    };
 
     @Override
     public void onResume() {
@@ -330,6 +440,9 @@ public class AccessUcodeFragment extends CommonFragment {
 //                    CheckBox checkBoxBAP = (CheckBox) getActivity().findViewById(R.id.coldChainEnableBAP);
 //                    checkBoxBAP.setChecked(bEnableBAPMode);
                 }
+
+                editTextAccessUCTid = (EditText) getActivity().findViewById(R.id.accessUCTid);
+                editTextAccessUCTid.setText(tagSelected.getTid());
             }
         }
     }
@@ -621,7 +734,11 @@ public class AccessUcodeFragment extends CommonFragment {
                         strValue += accessResult.substring(i, i_end);
                     }
                     editTextAuthResponse.setText(strValue);
-                    if (bImpinJTag == false) processAESdata(accessResult);
+                    if (bImpinJTag) {
+                        LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessUCImpinjLayout);
+                        if (authenTam1) layout.setVisibility(View.VISIBLE);
+                        else layout.setVisibility(View.GONE);
+                    } else processAESdata(accessResult);
                 }
             }
             else if (untraceChecked) untraceChecked = false;

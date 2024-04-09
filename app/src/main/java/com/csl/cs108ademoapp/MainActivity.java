@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new InventoryFragment();
                 break;
             case SEARCH:
-                fragment = new InventoryRfidSearchFragment();
+                fragment = new InventoryRfidSearchFragment(false);
                 break;
             case MULTIBANK:
                 fragment = InventoryRfidiMultiFragment.newInstance(true, null);

@@ -8,14 +8,11 @@ import java.util.ArrayList;
 
 public class RfidConnector {
     boolean DEBUG_PKDATA;
-    Context context; TextView mLogView;
-    public RfidConnector(Context context, TextView mLogView, Utility utility) {
+    Context context; Utility utility;
+    public RfidConnector(Context context, Utility utility) {
         this.context = context;
-        this.mLogView = mLogView;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
     }
-
-    Utility utility;
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
     private void appendToLog(String s) { utility.appendToLog(s); }
@@ -94,16 +91,16 @@ public class RfidConnector {
         return null;
     }
     public int rfidPowerOnTimeOut = 0; //int barcodePowerOnTimeOut = 0;
-    public boolean isMatchRfidToWrite(CsReaderData csReaderData) {
+    public boolean isMatchRfidToWrite(ConnectorData connectorData) {
         boolean match = false, DEBUG = false;
-        if (mRfidToWrite.size() != 0 && csReaderData.dataValues[0] == (byte)0x80) {
+        if (mRfidToWrite.size() != 0 && connectorData.dataValues[0] == (byte)0x80) {
             byte[] dataInCompare = new byte[]{(byte) 0x80, 0};
-            if (arrayTypeSet(dataInCompare, 1, mRfidToWrite.get(0).rfidPayloadEvent) && (csReaderData.dataValues.length == dataInCompare.length + 1)) {
-                if (match = compareArray(csReaderData.dataValues, dataInCompare, dataInCompare.length)) {
+            if (arrayTypeSet(dataInCompare, 1, mRfidToWrite.get(0).rfidPayloadEvent) && (connectorData.dataValues.length == dataInCompare.length + 1)) {
+                if (match = compareArray(connectorData.dataValues, dataInCompare, dataInCompare.length)) {
                     boolean bprocessed = false;
-                    byte[] data1 = new byte[csReaderData.dataValues.length - 2]; System.arraycopy(csReaderData.dataValues, 2, data1, 0, data1.length);
-                    if (DEBUG_PKDATA) appendToLog("PkData: matched Rfid.Reply with payload = " + byteArrayToString(csReaderData.dataValues) + " for writeData Rfid." + mRfidToWrite.get(0).rfidPayloadEvent.toString() + "." + byteArrayToString(mRfidToWrite.get(0).dataValues));
-                    if (csReaderData.dataValues[2] != 0) {
+                    byte[] data1 = new byte[connectorData.dataValues.length - 2]; System.arraycopy(connectorData.dataValues, 2, data1, 0, data1.length);
+                    if (DEBUG_PKDATA) appendToLog("PkData: matched Rfid.Reply with payload = " + byteArrayToString(connectorData.dataValues) + " for writeData Rfid." + mRfidToWrite.get(0).rfidPayloadEvent.toString() + "." + byteArrayToString(mRfidToWrite.get(0).dataValues));
+                    if (connectorData.dataValues[2] != 0) {
                         if (DEBUG) appendToLog("Rfid.reply data is found with error");
                     } else {
                         if (mRfidToWrite.get(0).rfidPayloadEvent == RfidConnector.RfidPayloadEvents.RFID_POWER_ON) {
@@ -194,31 +191,31 @@ public class RfidConnector {
 
     public boolean found;
     public int invalidUpdata;
-    public boolean isRfidToRead(CsReaderData csReaderData) {
+    public boolean isRfidToRead(ConnectorData connectorData) {
         boolean DEBUG = false;
         found = false;
-        if (csReaderData.dataValues[0] == (byte) 0x81) {
-            if (DEBUG_PKDATA) appendToLog("PkData: found Rfid.Uplink with payload = " + byteArrayToString(csReaderData.dataValues));
+        if (connectorData.dataValues[0] == (byte) 0x81) {
+            if (DEBUG_PKDATA) appendToLog("PkData: found Rfid.Uplink with payload = " + byteArrayToString(connectorData.dataValues));
             RfidConnector.CsReaderRfidData cs108RfidReadData = new RfidConnector.CsReaderRfidData();
-            byte[] dataValues = new byte[csReaderData.dataValues.length - 2];
-            System.arraycopy(csReaderData.dataValues, 2, dataValues, 0, dataValues.length);
+            byte[] dataValues = new byte[connectorData.dataValues.length - 2];
+            System.arraycopy(connectorData.dataValues, 2, dataValues, 0, dataValues.length);
             if (DEBUG_PKDATA) appendToLog("PkData: found Rfid.Uplink.DataRead with payload = " + byteArrayToString(dataValues));
-            switch (csReaderData.dataValues[1]) {
+            switch (connectorData.dataValues[1]) {
                 case 0:
                     if (rfidConnectorCallback != null) {
                         if (rfidConnectorCallback.callbackMethod(dataValues)) break;
                     }
                     cs108RfidReadData.rfidPayloadEvent = RfidConnector.RfidPayloadEvents.RFID_DATA_READ;
                     cs108RfidReadData.dataValues = dataValues;
-                    cs108RfidReadData.invalidSequence = csReaderData.invalidSequence;
-                    cs108RfidReadData.milliseconds = csReaderData.milliseconds;
+                    cs108RfidReadData.invalidSequence = connectorData.invalidSequence;
+                    cs108RfidReadData.milliseconds = connectorData.milliseconds;
                     mRfidToRead.add(cs108RfidReadData);
                     if (DEBUG_PKDATA) appendToLog("PkData: uplink data Rfid.Uplink.DataRead is uploaded to mRfidToRead");
                     found = true;
                     break;
                 default:
                     invalidUpdata++;
-                    appendToLog("!!! found INVALID Rfid.Uplink with payload = " + byteArrayToString(csReaderData.dataValues));
+                    appendToLog("!!! found INVALID Rfid.Uplink with payload = " + byteArrayToString(connectorData.dataValues));
                     break;
             }
             if (found) {

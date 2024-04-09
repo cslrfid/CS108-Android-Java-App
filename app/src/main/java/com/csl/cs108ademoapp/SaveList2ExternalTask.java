@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.csl.cslibrary4a.ReaderDevice;
@@ -52,14 +53,15 @@ import static com.csl.cs108ademoapp.MainActivity.mContext;
 import static com.csl.cs108ademoapp.MainActivity.csLibrary4A;
 
 public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
-    String messageStr;
-    String resultDisplay = "", errorDisplay;
+    public String messageStr;
+    String resultDisplay = "";
+    public String errorDisplay;
     ArrayList<ReaderDevice> tagsList; ReaderDevice tagDevice1;
     CustomPopupWindow customPopupWindow;
     boolean savedFile = false;
     int fileFormat = 0;
 
-    String url = null;
+    public String url = null, strBearer = null;
     HttpURLConnection con;
     String stringBluetoothMAC, stringWifiMac;
 
@@ -107,15 +109,21 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
             }
         }
     }
-    public SaveList2ExternalTask() { }
+    boolean bImpinjServer = false;
+    public SaveList2ExternalTask(boolean bImpinjServer) {
+        csLibrary4A.appendToLog("bImpinjServer = " + bImpinjServer);
+        this.bImpinjServer = bImpinjServer;
+    }
 
     @Override
     protected void onPreExecute() {
-        if (tagsList == null) cancel(true);
-
-        if (MainActivity.csLibrary4A.getSavingFormatSetting() == 0) messageStr = createJSON(tagsList, null).toString();
-        else messageStr = createCSV(tagsList, null);
-        resultDisplay = save2File(messageStr, true);
+        if (!bImpinjServer) {
+            if (tagsList == null) cancel(true);
+            if (MainActivity.csLibrary4A.getSavingFormatSetting() == 0)
+                messageStr = createJSON(tagsList, null).toString();
+            else messageStr = createCSV(tagsList, null);
+            resultDisplay = save2File(messageStr, true);
+        }
         customPopupWindow = new CustomPopupWindow(mContext);
         csLibrary4A.appendToLog("SaveList2ExternalTask: resultDisplay = " + resultDisplay);
         if (resultDisplay == null) resultDisplay = "";
@@ -128,18 +136,20 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
     }
 
     protected String doInBackground(Void... params) {
+        Log.i("Hello", "bImpinjServer: doInBackground starts");
         if (MainActivity.csLibrary4A.isBleConnected() == false) {
             resultDisplay += "Error in sending data to server as the reader is not connected";
             return null;
-        } else if (MainActivity.csLibrary4A.getSaveCloudEnable() == false) {
+        } else if (MainActivity.csLibrary4A.getSaveCloudEnable() == false && bImpinjServer == false) {
             resultDisplay += "No saving to cloud as it is disabled";
             return null;
         }
         try {
             if (true) {
-                openServer();
-                write2Server(messageStr);
-                closeServer();
+                csLibrary4A.appendToLog("bImpinjServer: doInBackground starts doing");
+                openServer(bImpinjServer); csLibrary4A.appendToLog("bImpinjServer: doInBackground after openServer");
+                write2Server(messageStr); csLibrary4A.appendToLog("bImpinjServer: doInBackground after write2Server");
+                closeServer(); csLibrary4A.appendToLog("bImpinjServer: doInBackground after closeServer");
             } else if (true) {
                 String serverAddress = "192.168.25.119:21";
                 String addressPort[];
@@ -176,7 +186,11 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
     protected void onCancelled() { }
     protected void onPostExecute(String output) {
         if (savedFile == false) resultDisplay += "\n" + save2File(messageStr, false);
-        customPopupWindow.popupWindow.dismiss(); customPopupWindow.popupStart(resultDisplay, false);
+        customPopupWindow.popupWindow.dismiss();
+        csLibrary4A.appendToLog("bImpinjServer = " + bImpinjServer + ", responseCode = " + responseCode + ", resultDisplay = " + resultDisplay);
+        if (resultDisplay != null && resultDisplay.length() != 0) {
+            if (!bImpinjServer || responseCode != 200) customPopupWindow.popupStart(resultDisplay, false);
+        }
     }
 
     public String createStrEpcList() {
@@ -414,12 +428,13 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         return resultDisplay;
     }
 
-    public void openServer() throws Exception {
+    public void openServer(boolean bImpinjServer) throws Exception {
         if (false) {
             url = "https://";
             url += "192.168.25.21:";
             url += "29090/WebServiceRESTs/1.0/req/";
         } else if (false) url = "http://ptsv2.com/t/10i1t-1519143332/post";
+        else if (bImpinjServer) { } //url = "https://h9tqczg9-7275.asse.devtunnels.ms/api/Auth/login"; //"https://142.251.220.110"; //
         else url = csLibrary4A.getServerLocation();
 
         errorDisplay = "Error in SSLContext.getInstance()"; SSLContext sc = SSLContext.getInstance("TLS");
@@ -451,7 +466,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         }
         HttpsURLConnection.setFollowRedirects(false);
 
-        errorDisplay = "Error in URL()"; URL obj = new URL(url);
+        errorDisplay = "Error in URL()"; URL obj = new URL(url); MainActivity.csLibrary4A.appendToLog("obj is " + (obj != null ? "valid" : "NULL") + " with url = " + url);
         errorDisplay = "Error in openConnection()";
         boolean isHttps = false;
         if (url.length() >= 6) {
@@ -464,12 +479,23 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         errorDisplay = "Error in setConnectTimeout()"; con.setConnectTimeout(MainActivity.csLibrary4A.getServerTimeout() * 1000);
         errorDisplay = "Error in setRequestMethod()"; con.setRequestMethod("POST");
         errorDisplay = "Error in setRequestProperty(User-Agent)"; con.setRequestProperty("User-Agent", "Mozilla/5.0");
-        errorDisplay = "Error in setRequestProperty(Accept-Languag)"; con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        errorDisplay = "Error in setRequestProperty(text/plain)"; con.setRequestProperty("text/plain", "text/plain");
+        errorDisplay = "Error in setRequestProperty(Accept-Language)"; con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        MainActivity.csLibrary4A.appendToLog("authenticate in url position : " + url.indexOf("authenticate"));
+        if (url.indexOf("authenticate") >= 0) {
+            String string = strBearer;
+            MainActivity.csLibrary4A.appendToLog("Authorization value = " + string);
+            errorDisplay = "Error in setRequestProperty(Authorization)"; con.setRequestProperty("Authorization", string);
+        }
+        errorDisplay = "Error in setRequestProperty(Content)"; con.setRequestProperty("Content-Type", "application/json); //; charset=utf8");
         errorDisplay = "Error in setDoOutput()"; con.setDoOutput(true);
+        errorDisplay = "Error in setDoInput()"; con.setDoInput(true);
     }
     boolean serverWritten = false;
     public void write2Server(String messageStr0) {
+        csLibrary4A.appendToLog("messageStr0 = " + messageStr0);
         try {
+            //InputStream is = con.getInputStream(); DataInputStream ir = new DataInputStream(is);
             errorDisplay = "Error in getOutputStream()"; OutputStream os = con.getOutputStream();
             errorDisplay = "Error in DataOutputStream()"; DataOutputStream wr = new DataOutputStream(os);
 
@@ -479,29 +505,32 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
             errorDisplay = "Error in close(wr)"; wr.close();
             errorDisplay = "Error in close(os)"; os.close();
             serverWritten = true;
+            //csLibrary4A.appendToLog("inputStream = " + ir.readUTF());
         } catch (Exception ex) {
             MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay + ", execpetion = " + ex.getMessage());
         }
     }
+    public int responseCode; public String response = null;
     public void closeServer() throws Exception {
         if (serverWritten) {
             errorDisplay = "Error in getResponseCode()";
-            int responseCode = con.getResponseCode();
-            MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay);
+            responseCode = con.getResponseCode();
+            //MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay);
             MainActivity.csLibrary4A.appendToLog("responseCode = " + responseCode);
             if (responseCode != 200)
                 errorDisplay = "Error in response code = " + responseCode;
             else {
                 BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay);
+                //MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay);
                 String inputLine;
-                String response = "";
+                response = "";
                 while ((inputLine = in.readLine()) != null) {
                     response += inputLine;
                 }
                 in.close();
-                MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay);
+                //MainActivity.csLibrary4A.appendToLog("errorDisplay = " + errorDisplay);
                 resultDisplay += "Success in sending data to server with response = " + response;
+                MainActivity.csLibrary4A.appendToLog("response = " + response);
                 errorDisplay = null;
             }
         }

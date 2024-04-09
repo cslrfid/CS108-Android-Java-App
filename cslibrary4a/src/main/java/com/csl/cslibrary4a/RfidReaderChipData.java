@@ -56,6 +56,4 @@ public class RfidReaderChipData {
         LOCATION, DIRECTION,
         OTHERS
     }
-
-    public int invalidata, invalidUpdata, validata; //123
 }

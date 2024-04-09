@@ -28,8 +28,7 @@ import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SaveList2ExternalTask;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
-import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cslibrary4a.NotificationController;
+import com.csl.cslibrary4a.NotificationConnector;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
@@ -286,9 +285,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     public void onResume() {
         super.onResume();
         if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment().onResume(): userVisibleHint = " + userVisibleHint);
-        if (userVisibleHint) {
-            setNotificationListener();
-        }
+        if (userVisibleHint) setNotificationListener();
     }
 
     @Override
@@ -334,10 +331,12 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     editTextProtectPassword.setVisibility(View.GONE);
                 }
             }
+            MainActivity.csLibrary4A.appendToLog("setNotificationListener in multibank inventory");
             setNotificationListener();
         } else {
             userVisibleHint = false;
             MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment is now INVISIBLE");
+            MainActivity.csLibrary4A.appendToLog("setNotificationListener null in multibank inventory");
             MainActivity.csLibrary4A.setNotificationListener(null);
             if (inventoryRfidTask != null) {
                 inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.STOP;
@@ -360,10 +359,11 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     }
 
     void setNotificationListener() {
-        MainActivity.csLibrary4A.setNotificationListener(new NotificationController.NotificationListener() {
+        MainActivity.csLibrary4A.appendToLog("setNotificationListener A in multibank inventory");
+        MainActivity.csLibrary4A.setNotificationListener(new NotificationConnector.NotificationListener() {
             @Override
             public void onChange() {
-                MainActivity.csLibrary4A.appendToLog("TRIGGER key is pressed.");
+                MainActivity.csLibrary4A.appendToLog("setNotificationListener TRIGGER key is pressed in multibank inventory.");
                 startStopHandler(true);
             }
         });
@@ -384,6 +384,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         if (mDid != null && mDid.matches("E203510")) MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
     }
     void startStopHandler(boolean buttonTrigger) {
+        MainActivity.csLibrary4A.appendToLog("0 buttonTrigger is " + buttonTrigger);
         if (buttonTrigger) MainActivity.csLibrary4A.appendToLog("BARTRIGGER: getTriggerButtonStatus = " + MainActivity.csLibrary4A.getTriggerButtonStatus());
         if (MainActivity.sharedObjects.runningInventoryBarcodeTask) {
             Toast.makeText(MainActivity.mContext, "Running barcode inventory", Toast.LENGTH_SHORT).show();
@@ -438,10 +439,12 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             extra2Bank = 2;
             extra2Offset = 0;
             extra2Count = 2;
+            MainActivity.csLibrary4A.appendToLog("mDid = " + mDid);
             if (mDid.matches("E2801101") || mDid.matches("E2801102") || mDid.matches("E2801103") || mDid.matches("E2801104") || mDid.matches("E2801105")) {
                 extra1Bank = 0;
                 extra1Offset = 4;
                 extra1Count = 1;
+                if (mDid.matches("E2801101")) extra2Count = 6;
             } else if (mDid.matches("E200B0")) {
                 extra1Bank = 2;
                 extra1Offset = 0;
@@ -477,6 +480,14 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 //extra2Bank = 3;
                 //extra2Offset = 0x10d;
                 //extra2Count = 1;
+            } else if (mDid.indexOf("E281D") == 0) {
+                //extra1Bank = 0;
+                //extra1Offset = 4;
+                //extra1Count = 1;
+            } else if (mDid.indexOf("E201E") == 0) {
+                extra1Bank = 3;
+                extra1Offset = 112;
+                extra1Count = 1;
             } else if (mDid.matches("E282402")) {
                 extra1Bank = 0;
                 extra1Offset = 11;
@@ -678,7 +689,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             } else {
                 button.setText("Start");
                 button.setEnabled(true);
-                setNotificationListener();
+                if (userVisibleHint) setNotificationListener();
             }
         }
     };

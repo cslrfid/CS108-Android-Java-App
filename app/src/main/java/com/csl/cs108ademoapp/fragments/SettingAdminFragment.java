@@ -26,7 +26,7 @@ import com.csl.cslibrary4a.RfidReaderChipData;
 public class SettingAdminFragment extends CommonFragment {
     private CheckBox checkBoxTriggerReporting, checkBoxInventoryBeep, checkBoxInventoryVibrate, checkBoxSaveFileEnable, checkBoxSaveCloudEnable, checkBoxSaveNewCloudEnable, checkBoxSaveAllCloudEnable, checkBoxDebugEnable;
     private CheckBox checkBoxCsvColumnResBank, checkBoxCsvColumnEpcBank, checkBoxCsvColumnTidBank, checkBoxCsvColumnUserBank, checkBoxCsvColumnPhase, checkBoxCsvColumnChannel, checkBoxCsvColumnTime, checkBoxCsvColumnTimeZone, checkBoxCsvColumnLocation, checkBoxCsvColumnDirection, checkBoxCsvColumnOthers;
-    private EditText editTextDeviceName, editTextCycleDelay, editTextTriggerReportingCount, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout;
+    private EditText editTextDeviceName, editTextCycleDelay, editTextTriggerReportingCount, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout, editTextServerImpinj, editTextServerImpinjName, editTextServerImpinjPasword;
     private TextView textViewReaderModel;
     private Spinner spinnerQueryBattery, spinnerQueryRssi, spinnerQueryVibrateMode, spinnerSavingFormat;
     private Button buttonCSLServer, button;
@@ -46,7 +46,7 @@ public class SettingAdminFragment extends CommonFragment {
     int iVibrateTime = -1; int iVibrateTimeMin = 1; int iVibrateTimeMax = 999;
     int iVibrateWindow = -1; int iVibrateWindowMin = 1; int iVibrateWindowMax = 4;
     boolean triggerReporting, inventoryBeep, inventoryVibrate, saveFileEnable, saveCloudEnable, saveNewCloudEnable, saveAllCloudEnable, debugEnable;
-    String serverName;
+    String serverName, serverImpinj, serverImpinjName, serverImpinjPasword;
     int iServerTimeout = -1; int iServerTimeoutMin = 3; int iServerTimeoutMax = 9;
 
     private SettingTask settingTask;
@@ -173,6 +173,9 @@ public class SettingAdminFragment extends CommonFragment {
         checkBoxSaveAllCloudEnable = (CheckBox) getActivity().findViewById(R.id.settingAdminAllToCloudEnable);
         editTextServer = (EditText) getActivity().findViewById(R.id.settingAdminServer);
         editTextServer.setHint("Cloud Address Pattern");
+        editTextServerImpinj = (EditText) getActivity().findViewById(R.id.settingAdminServerImpinj);
+        editTextServerImpinjName = (EditText) getActivity().findViewById(R.id.settingAdminServerImpinjName);
+        editTextServerImpinjPasword = (EditText) getActivity().findViewById(R.id.settingAdminServerImpinjPassword);
 
         TextView textViewAdminServerConnectTimeoutLabel = (TextView) getActivity().findViewById(R.id.settingAdminServerConnectTimeoutLabel);
         String stringAdminServerConnectTimeoutLabel  = textViewAdminServerConnectTimeoutLabel.getText().toString();
@@ -338,6 +341,9 @@ public class SettingAdminFragment extends CommonFragment {
                         saveAllCloudEnable = checkBoxSaveAllCloudEnable.isChecked();
                         serverName = editTextServer.getText().toString();
                         iServerTimeout = Integer.parseInt(editTextServerTimeout.getText().toString());
+                        serverImpinj = editTextServerImpinj.getText().toString();
+                        serverImpinjName = editTextServerImpinjName.getText().toString();
+                        serverImpinjPasword = editTextServerImpinjPasword.getText().toString();
                         debugEnable = checkBoxDebugEnable.isChecked();
                         settingUpdate();
                     } catch (Exception ex) {
@@ -421,6 +427,9 @@ public class SettingAdminFragment extends CommonFragment {
             if (editTextVibrateWindow != null)   editTextVibrateWindow.setText(String.valueOf(MainActivity.csLibrary4A.getVibrateWindow()));
             editTextServer.setText(MainActivity.csLibrary4A.getServerLocation());
             editTextServerTimeout.setText(String.valueOf(MainActivity.csLibrary4A.getServerTimeout()));
+            editTextServerImpinj.setText(MainActivity.csLibrary4A.getServerImpinjLocation());
+            editTextServerImpinjName.setText(MainActivity.csLibrary4A.getServerImpinjName());
+            editTextServerImpinjPasword.setText(MainActivity.csLibrary4A.getServerImpinjPassword());
             if (updating == false) {
                 String name = MainActivity.csLibrary4A.getBluetoothICFirmwareName();
                 if (name == null)   {
@@ -593,6 +602,33 @@ public class SettingAdminFragment extends CommonFragment {
                 sameSetting = false;
                 if (iServerTimeout < iServerTimeoutMin || iServerTimeout > iServerTimeoutMax) invalidRequest = true;
                 else if (MainActivity.csLibrary4A.setServerTimeout(iServerTimeout) == false)
+                    invalidRequest = true;
+            }
+        }
+        if (invalidRequest == false && editTextServerImpinj != null) {
+            String string = MainActivity.csLibrary4A.getServerImpinjLocation(); if (string == null) string = "";
+            MainActivity.csLibrary4A.appendToLog("old serverImpinj = " + string + ", new = " + serverImpinj);
+            if (string.matches(serverImpinj) == false || sameCheck == false) {
+                sameSetting = false;
+                if (MainActivity.csLibrary4A.setServerImpinjLocation(serverImpinj) == false)
+                    invalidRequest = true;
+            }
+        }
+        if (invalidRequest == false && editTextServerImpinjName != null) {
+            String string = MainActivity.csLibrary4A.getServerImpinjName(); if (string == null) string = "";
+            MainActivity.csLibrary4A.appendToLog("old serverImpinjName = " + string + ", new = " + serverImpinjName);
+            if (string.matches(serverImpinjName) == false || sameCheck == false) {
+                sameSetting = false;
+                if (MainActivity.csLibrary4A.setServerImpinjName(serverImpinjName) == false)
+                    invalidRequest = true;
+            }
+        }
+        if (invalidRequest == false && editTextServerImpinjPasword != null) {
+            String string = MainActivity.csLibrary4A.getServerImpinjPassword(); if (string == null) string = "";
+            MainActivity.csLibrary4A.appendToLog("old serverImpinjPassword = " + string + ", new = " + serverImpinjPasword + ", matched = " + string.matches(serverImpinjPasword));
+            if (string.length() != serverImpinjPasword.length() || string.matches(serverImpinjPasword) == false || sameCheck == false) {
+                sameSetting = false;
+                if (MainActivity.csLibrary4A.setServerImpinjPassword(serverImpinjPasword) == false)
                     invalidRequest = true;
             }
         }

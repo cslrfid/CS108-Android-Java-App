@@ -88,14 +88,19 @@ public class AccessImpinjFragment extends CommonFragment {
                 }
 
                 LinearLayout layoutA = (LinearLayout) getActivity().findViewById(R.id.accessImpinjProtectLayout);
+                LinearLayout layoutA1 = (LinearLayout) getActivity().findViewById(R.id.accessImpinjProtectLayout1);
                 if (position == impinjTag.m775.ordinal() ||
                         position == impinjTag.m780.ordinal() ||
                         position == impinjTag.m830.ordinal() ||
                         position == impinjTag.m770.ordinal() ||
                         position == impinjTag.m730.ordinal()) {
                     layoutA.setVisibility(View.VISIBLE);
+                    layoutA1.setVisibility(View.VISIBLE);
                     textViewProtectValue.setText("");
-                } else layoutA.setVisibility(View.GONE);
+                } else {
+                    layoutA.setVisibility(View.GONE);
+                    layoutA1.setVisibility(View.GONE);
+                }
 
                 LinearLayout layout0 = (LinearLayout) getActivity().findViewById(R.id.accessImpinjMemorySelectLayout);
                 if (position == impinjTag.m830.ordinal() || position == impinjTag.monza_R6P.ordinal()) {

@@ -11,14 +11,11 @@ public class ControllerConnector {
     final boolean DEBUG = false;
     boolean userDebugEnableDefault = false, userDebugEnable = userDebugEnableDefault;
 
-    Context context; TextView mLogView;
-    public ControllerConnector(Context context, TextView mLogView, Utility utility) {
+    Context context; Utility utility;
+    public ControllerConnector(Context context, Utility utility) {
         this.context = context;
-        this.mLogView = mLogView;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
     }
-
-    Utility utility;
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
     private void appendToLog(String s) { utility.appendToLog(s); }
@@ -174,30 +171,30 @@ public class ControllerConnector {
         return dataOut;
     }
 
-    public boolean isMatchControllerToWrite(CsReaderData csReaderData) {
+    public boolean isMatchControllerToWrite(ConnectorData connectorData) {
         boolean match = false;
-        if (controllerToWrite.size() != 0 && csReaderData.dataValues[0] == (byte)0xB0) {
+        if (controllerToWrite.size() != 0 && connectorData.dataValues[0] == (byte)0xB0) {
             byte[] dataInCompare = new byte[]{(byte) 0xB0, 0};
-            if (arrayTypeSet(dataInCompare, 1, controllerToWrite.get(0)) && (csReaderData.dataValues.length >= dataInCompare.length + 1)) {
-                if (match = compareArray(csReaderData.dataValues, dataInCompare, dataInCompare.length)) {
-                    if (DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply with payload = " + byteArrayToString(csReaderData.dataValues) + " for writeData.Controller." + controllerToWrite.get(0).toString());
+            if (arrayTypeSet(dataInCompare, 1, controllerToWrite.get(0)) && (connectorData.dataValues.length >= dataInCompare.length + 1)) {
+                if (match = compareArray(connectorData.dataValues, dataInCompare, dataInCompare.length)) {
+                    if (DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply with payload = " + byteArrayToString(connectorData.dataValues) + " for writeData.Controller." + controllerToWrite.get(0).toString());
                     if (controllerToWrite.get(0) == ControllerPayloadEvents.CONTROLLER_GET_VERSION) {
-                        if (csReaderData.dataValues.length >= 2 + controllerVersion.length) {
-                            System.arraycopy(csReaderData.dataValues, 2, controllerVersion, 0, controllerVersion.length);
+                        if (connectorData.dataValues.length >= 2 + controllerVersion.length) {
+                            System.arraycopy(connectorData.dataValues, 2, controllerVersion, 0, controllerVersion.length);
                             if (DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply.GetVersion with version = " + byteArrayToString(controllerVersion));
                         }
                     } else if (controllerToWrite.get(0) == ControllerPayloadEvents.CONTROLLER_GET_SERIALNUMBER) {
-                        int length = csReaderData.dataValues.length - 2;
+                        int length = connectorData.dataValues.length - 2;
                         serialNumber = new byte[length];
-                        System.arraycopy(csReaderData.dataValues, 2, serialNumber, 0, length);
+                        System.arraycopy(connectorData.dataValues, 2, serialNumber, 0, length);
                         if (DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply.GetSerialNumber with serialNumber = " + byteArrayToString(serialNumber));
                     } else if (controllerToWrite.get(0) == ControllerPayloadEvents.CONTROLLER_GET_MODELNAME) {
-                        int length = csReaderData.dataValues.length - 2;
+                        int length = connectorData.dataValues.length - 2;
                         modelName = new byte[length];
-                        System.arraycopy(csReaderData.dataValues, 2, modelName, 0, length);
+                        System.arraycopy(connectorData.dataValues, 2, modelName, 0, length);
                         if (DEBUG_PKDATA) appendToLog("PkData: matched controller.GetModelName.reply with modelName = " + byteArrayToString(modelName));
                     } else if (controllerToWrite.get(0) == ControllerPayloadEvents.CONTROLLER_RESET) {
-                        if (csReaderData.dataValues[2] != 0) {
+                        if (connectorData.dataValues[2] != 0) {
                             appendToLog("Controller RESET is found with error");
                         } else appendToLog("matched Controller.reply data is found");
                     } else {

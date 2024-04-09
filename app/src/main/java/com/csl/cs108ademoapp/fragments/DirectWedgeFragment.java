@@ -34,8 +34,7 @@ import com.csl.cs108ademoapp.DrawerListContent;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cslibrary4a.BluetoothGattConnector;
+import com.csl.cslibrary4a.BluetoothGatt;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.CustomAlertDialog;
 
@@ -47,7 +46,6 @@ public class DirectWedgeFragment extends CommonFragment {
     private ArrayList<ReaderDevice> readersList = MainActivity.sharedObjects.readersList;
     Handler handler = new Handler();
     private ReaderListAdapter readerListAdapter;
-    private Cs108Library4A mCsLibrary4A = MainActivity.csLibrary4A;
     boolean bConnecting = false;
     boolean bCurrentIMEmatched = false;
     String stringImeExpected, stringLabelExpected;
@@ -104,7 +102,7 @@ public class DirectWedgeFragment extends CommonFragment {
             boolean DEBUG = true;
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (DEBUG) mCsLibrary4A.appendToLog("OnItemClickListener: bConnecting = " + bConnecting + ", position = " + position);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("OnItemClickListener: bConnecting = " + bConnecting + ", position = " + position);
                 if (bConnecting) return;
 
                 ReaderDevice readerDevice = readerListAdapter.getItem(position);
@@ -124,12 +122,12 @@ public class DirectWedgeFragment extends CommonFragment {
                 }
                 readerListAdapter.notifyDataSetChanged();
 
-                if (DEBUG) mCsLibrary4A.appendToLog("OnItemClickListener: readerDevice.getSelected = " + readerDevice.getSelected());
-                if (mCsLibrary4A.isBleConnected() && readerDevice.getSelected() == false && readerDevice.isConnected()) {
-                    if (DEBUG) mCsLibrary4A.appendToLog("OnItemClickListener: going to disconnect");
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("OnItemClickListener: readerDevice.getSelected = " + readerDevice.getSelected());
+                if (MainActivity.csLibrary4A.isBleConnected() && readerDevice.getSelected() == false && readerDevice.isConnected()) {
+                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("OnItemClickListener: going to disconnect");
                     disconnectWedge();
-                } else if (mCsLibrary4A.isBleConnected() == false && readerDevice.getSelected()) {
-                    if (DEBUG) mCsLibrary4A.appendToLog("OnItemClickListener: going to CONNECT");
+                } else if (MainActivity.csLibrary4A.isBleConnected() == false && readerDevice.getSelected()) {
+                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("OnItemClickListener: going to CONNECT");
                     if (true) connectWedge(readerDevice);
                 }
             }
@@ -139,7 +137,7 @@ public class DirectWedgeFragment extends CommonFragment {
         buttonSetup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCsLibrary4A.isBleConnected() || true) new SettingWedgeFragment().show(getChildFragmentManager(), "TAG");
+                if (MainActivity.csLibrary4A.isBleConnected() || true) new SettingWedgeFragment().show(getChildFragmentManager(), "TAG");
                 else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.toast_not_ready), Toast.LENGTH_SHORT).show();
                 else Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.toast_ble_not_connected), Toast.LENGTH_SHORT).show();
             }
@@ -150,7 +148,7 @@ public class DirectWedgeFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 if (bConnecting) return;
-                if (mCsLibrary4A.isBleConnected()) {
+                if (MainActivity.csLibrary4A.isBleConnected()) {
                     disconnectWedge();
                     readerListAdapter.notifyDataSetChanged();
                 } else {
@@ -172,8 +170,8 @@ public class DirectWedgeFragment extends CommonFragment {
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCsLibrary4A.isBleConnected()) {
-                    if (mCsLibrary4A.mrfidToWriteSize() == 0) {
+                if (MainActivity.csLibrary4A.isBleConnected()) {
+                    if (MainActivity.csLibrary4A.mrfidToWriteSize() == 0) {
                         MainActivity.wedged = true;
                         Intent i = new Intent(Intent.ACTION_MAIN);
                         i.addCategory(Intent.CATEGORY_HOME);
@@ -225,14 +223,14 @@ public class DirectWedgeFragment extends CommonFragment {
     }
 
     void disconnectWedge() {
-        mCsLibrary4A.disconnect(false); bleDisConnecting = true; bConnecting = false;
+        MainActivity.csLibrary4A.disconnect(false); bleDisConnecting = true; bConnecting = false;
         readersList.clear();
         buttonConnect.setText("Connect");
         handler.removeCallbacks(runnableStart); handler.postDelayed(runnableStart, 2000);
     }
     void connectWedge(ReaderDevice readerDevice) {
         MainActivity.csLibrary4A.scanLeDevice(false);
-        mCsLibrary4A.connect(readerDevice); bConnecting = true;
+        MainActivity.csLibrary4A.connect(readerDevice); bConnecting = true;
         buttonConnect.setText("Connecting");
     }
 
@@ -244,7 +242,7 @@ public class DirectWedgeFragment extends CommonFragment {
             if (MainActivity.csLibrary4A.isBleConnected()) {
                 if (MainActivity.csLibrary4A.mrfidToWriteSize() == 0) {
                     MainActivity.csLibrary4A.setPowerLevel(MainActivity.wedgePower);
-                    MainActivity.csLibrary4A.appendToLog("isBleConnected is true with mrfidToWriteSize = " + mCsLibrary4A.mrfidToWriteSize());
+                    MainActivity.csLibrary4A.appendToLog("isBleConnected is true with mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
                     bConnecting = false;
                     for (int i = 0; i < readersList.size(); i++) {
                         ReaderDevice readerDevice = readersList.get(i);
@@ -267,14 +265,14 @@ public class DirectWedgeFragment extends CommonFragment {
                     readersList.clear(); listUpdated = true;
                 }
                 while (true) {
-                    BluetoothGattConnector.Cs108ScanData cs108ScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
+                    BluetoothGatt.Cs108ScanData cs108ScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
                     if (cs108ScanData != null) {
-                        BluetoothGattConnector.Cs108ScanData scanResultA = cs108ScanData;
+                        BluetoothGatt.Cs108ScanData scanResultA = cs108ScanData;
                         if (getActivity() == null) continue;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) continue;
                         } else if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) continue;
-                        if (DEBUG) mCsLibrary4A.appendToLog("scanResultA.device.getType() = " + scanResultA.device.getType() + ". scanResultA.rssi = " + scanResultA.rssi);
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("scanResultA.device.getType() = " + scanResultA.device.getType() + ". scanResultA.rssi = " + scanResultA.rssi);
                         if (scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE && (true || scanResultA.rssi < 0)) {
                             boolean match = false;
                             for (int i = 0; i < readersList.size(); i++) {
@@ -295,11 +293,11 @@ public class DirectWedgeFragment extends CommonFragment {
                                 if (scanResultA.device.getBondState() == 12) {
                                     strInfo += "BOND_BONDED\n";
                                 }
-                                readerDevice.setDetails(strInfo + "scanRecord=" + mCsLibrary4A.byteArrayToString(scanResultA.scanRecord));
+                                readerDevice.setDetails(strInfo + "scanRecord=" + MainActivity.csLibrary4A.byteArrayToString(scanResultA.scanRecord));
                                 readersList.add(readerDevice); listUpdated = true;
                             }
                         } else {
-                            if (DEBUG) mCsLibrary4A.appendToLog("deviceScanTask: rssi=" + scanResultA.rssi + ", error type=" + scanResultA.device.getType());
+                            if (DEBUG) MainActivity.csLibrary4A.appendToLog("deviceScanTask: rssi=" + scanResultA.rssi + ", error type=" + scanResultA.device.getType());
                         }
                     } else break;
                 }

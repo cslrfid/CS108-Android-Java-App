@@ -117,6 +117,7 @@
 
             <Button
                 style="@style/DashboardButton"
+                android:visibility="gone"
                 android:layout_height="50dp"
                 android:layout_marginTop="@dimen/home_icon_margin_1"
                 android:background="@drawable/btn_back"

@@ -1,5 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cs108ademoapp.MainActivity.tagSelected;
+
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,8 +28,7 @@ import com.csl.cs108ademoapp.InventoryRfidTask;
 import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cslibrary4a.NotificationController;
+import com.csl.cslibrary4a.NotificationConnector;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
@@ -65,10 +66,12 @@ public class InventoryRfidSearchFragment extends CommonFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        androidx.appcompat.app.ActionBar actionBar;
-        actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        actionBar.setIcon(R.drawable.dl_loc);
-        actionBar.setTitle(R.string.title_activity_geiger);
+        if (!isTabbed) {
+            androidx.appcompat.app.ActionBar actionBar;
+            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+            actionBar.setIcon(R.drawable.dl_loc);
+            actionBar.setTitle(R.string.title_activity_geiger);
+        }
 
         selectTag = new SelectTag((Activity)getActivity(), 0);
         TableRow tableRowProgressLabel;
@@ -81,13 +84,6 @@ public class InventoryRfidSearchFragment extends CommonFragment {
 
         geigerProgress = (ProgressBar) getActivity().findViewById(R.id.geigerProgress);
         checkBoxGeigerTone = (CheckBox) getActivity().findViewById(R.id.geigerToneCheck);
-
-        final ReaderDevice tagSelected = MainActivity.tagSelected;
-        if (tagSelected != null) {
-            if (tagSelected.getSelected() == true) {
-                selectTag.editTextTagID.setText(tagSelected.getAddress());
-            }
-        }
 
         seekGeiger = (SeekBar) getActivity().findViewById(R.id.geigerSeek);
         seekGeiger.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -190,12 +186,13 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         });
 
         playerN = MainActivity.sharedObjects.playerL;
+        setupTagID();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        setNotificationListener();
+        if (userVisibleHint) setNotificationListener();
     }
 
     @Override
@@ -214,8 +211,36 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         super.onDestroy();
     }
 
-    public InventoryRfidSearchFragment() {
+    boolean userVisibleHint = true;
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(getUserVisibleHint()) {
+            userVisibleHint = true;
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidSearchFragment is now VISIBLE");
+            setupTagID();
+            MainActivity.csLibrary4A.appendToLog("setNotificationListener in search inventory");
+            setNotificationListener();
+        } else {
+            userVisibleHint = false;
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidSearchFragment is now INVISIBLE");
+            MainActivity.csLibrary4A.appendToLog("setNotificationListener NULL in search inventory");
+            MainActivity.csLibrary4A.setNotificationListener(null);
+        }
+    }
+
+    boolean isTabbed = false;
+    public InventoryRfidSearchFragment(boolean isTabbed) {
         super("InventoryRfidSearchFragment");
+        this.isTabbed = isTabbed;
+    }
+    void setupTagID() {
+        final ReaderDevice tagSelected = MainActivity.tagSelected;
+        if (tagSelected != null) {
+            if (tagSelected.getSelected() == true) {
+                selectTag.editTextTagID.setText(tagSelected.getAddress());
+            }
+        }
     }
 
     double alertRssi; boolean alerting = false; long alertRssiUpdateTime;
@@ -252,9 +277,11 @@ public class InventoryRfidSearchFragment extends CommonFragment {
     };
 
     void setNotificationListener() {
-        MainActivity.csLibrary4A.setNotificationListener(new NotificationController.NotificationListener() {
+        MainActivity.csLibrary4A.appendToLog("setNotificationListener A in search inventory");
+        MainActivity.csLibrary4A.setNotificationListener(new NotificationConnector.NotificationListener() {
             @Override
             public void onChange() {
+                MainActivity.csLibrary4A.appendToLog("setNotificationListener TRIGGER key is pressed in search inventory.");
                 startStopHandler(true);
             }
         });
@@ -290,6 +317,16 @@ public class InventoryRfidSearchFragment extends CommonFragment {
 
     void startInventoryTask() {
         started = true; boolean invalidRequest = false;
+        if (tagSelected != null) {
+            if (tagSelected.getTid() != null) {
+                if (tagSelected.getTid().indexOf("E201E") == 0) {
+                    MainActivity.csLibrary4A.setTagRead(1);
+                    MainActivity.csLibrary4A.setAccessBank(3);
+                    MainActivity.csLibrary4A.setAccessOffset(112);
+                    MainActivity.csLibrary4A.setAccessCount(1);
+                }
+            }
+        }
         int memorybank = memoryBankSpinner.getSelectedItemPosition();
         int powerLevel = Integer.valueOf(editTextGeigerAntennaPower.getText().toString());
         if (powerLevel < 0 || powerLevel > 330) {

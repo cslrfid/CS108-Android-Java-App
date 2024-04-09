@@ -5,21 +5,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class BarcodeConnector {
     boolean DEBUG_PKDATA;
     public boolean userDebugEnableDefault = false;
     public boolean userDebugEnable = userDebugEnableDefault;
 
-    Context context; TextView mLogView;
-    public BarcodeConnector(Context context, TextView mLogView, Utility utility) {
+    Context context; Utility utility;
+    public BarcodeConnector(Context context, Utility utility) {
         this.context = context;
-        this.mLogView = mLogView;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
     }
-
-    Utility utility;
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
     private void appendToLog(String s) { utility.appendToLog(s); }
@@ -101,43 +97,43 @@ public class BarcodeConnector {
         return null;
     }
     public int barcodePowerOnTimeOut = 0;
-    public boolean isMatchBarcodeToWrite(CsReaderData csReaderData) {
+    public boolean isMatchBarcodeToWrite(ConnectorData connectorData) {
         boolean match = false, DEBUG = false;
-        if (barcodeToWrite.size() != 0 && csReaderData.dataValues[0] == (byte)0x90) {
-            if (DEBUG) appendToLog("csReadData = " + byteArrayToString(csReaderData.dataValues));
+        if (barcodeToWrite.size() != 0 && connectorData.dataValues[0] == (byte)0x90) {
+            if (DEBUG) appendToLog("csReadData = " + byteArrayToString(connectorData.dataValues));
             //if (DEBUG) appendToLog("tempDisconnect: icsModel = " + bluetoothConnector.getCsModel() + ", mBarcodeToWrite.size = " + mBarcodeToWrite.size());
             if (barcodeToWrite.size() != 0) if (DEBUG) appendToLog("mBarcodeToWrite(0) = " + barcodeToWrite.get(0).barcodePayloadEvent.toString() + "," + byteArrayToString(barcodeToWrite.get(0).dataValues));
             byte[] dataInCompare = new byte[]{(byte) 0x90, 0};
-            if (arrayTypeSet(dataInCompare, 1, barcodeToWrite.get(0).barcodePayloadEvent) && (csReaderData.dataValues.length == dataInCompare.length + 1)) {
-                if (match = compareArray(csReaderData.dataValues, dataInCompare, dataInCompare.length)) {
+            if (arrayTypeSet(dataInCompare, 1, barcodeToWrite.get(0).barcodePayloadEvent) && (connectorData.dataValues.length == dataInCompare.length + 1)) {
+                if (match = compareArray(connectorData.dataValues, dataInCompare, dataInCompare.length)) {
                     boolean bprocessed = false;
-                    byte[] data1 = new byte[csReaderData.dataValues.length - 2]; System.arraycopy(csReaderData.dataValues, 2, data1, 0, data1.length);
-                    if (DEBUG_PKDATA) appendToLog("PkData: matched Barcode.Reply with payload = " + byteArrayToString(csReaderData.dataValues) + " for writeData Barcode." + barcodeToWrite.get(0).barcodePayloadEvent.toString());
-                    if (csReaderData.dataValues[2] != 0) {
+                    byte[] data1 = new byte[connectorData.dataValues.length - 2]; System.arraycopy(connectorData.dataValues, 2, data1, 0, data1.length);
+                    if (DEBUG_PKDATA) appendToLog("PkData: matched Barcode.Reply with payload = " + byteArrayToString(connectorData.dataValues) + " for writeData Barcode." + barcodeToWrite.get(0).barcodePayloadEvent.toString());
+                    if (connectorData.dataValues[2] != 0) {
                         if (DEBUG) appendToLog("Barcode.reply data is found with error");
                     } else if (true) { //testing bluetoothConnector.getCsModel() == 108) {
                         if (barcodeToWrite.get(0).barcodePayloadEvent == BarcodePayloadEvents.BARCODE_POWER_ON) {
                             barcodePowerOnTimeOut = 1000;
                             if (DEBUG) appendToLog("tempDisconnect: BARCODE_POWER_ON");
                             onStatus = true;
-                            if (DEBUG_PKDATA | csReaderData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.PowerOn with result = " + csReaderData.dataValues[2] + " and onStatus = " + onStatus);
+                            if (DEBUG_PKDATA | connectorData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.PowerOn with result = " + connectorData.dataValues[2] + " and onStatus = " + onStatus);
                             bprocessed = true;
                         } else if (barcodeToWrite.get(0).barcodePayloadEvent == BarcodePayloadEvents.BARCODE_POWER_OFF) {
                             if (DEBUG) appendToLog("tempDisconnect: BARCODE_POWER_OFF");
                             onStatus = false;
-                            if (DEBUG_PKDATA | csReaderData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.PowerOff with result = " + csReaderData.dataValues[2] + " and onStatus = " + onStatus);
+                            if (DEBUG_PKDATA | connectorData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.PowerOff with result = " + connectorData.dataValues[2] + " and onStatus = " + onStatus);
                             bprocessed = true;
                         } else if (barcodeToWrite.get(0).barcodePayloadEvent == BarcodePayloadEvents.BARCODE_VIBRATE_ON) {
                             vibrateStatus = true;
-                            if (DEBUG_PKDATA | csReaderData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.VibrateOn with result = " + csReaderData.dataValues[2] + " and vibrateStatus = " + vibrateStatus);
+                            if (DEBUG_PKDATA | connectorData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.VibrateOn with result = " + connectorData.dataValues[2] + " and vibrateStatus = " + vibrateStatus);
                             bprocessed = true;
                         } else if (barcodeToWrite.get(0).barcodePayloadEvent == BarcodePayloadEvents.BARCODE_VIBRATE_OFF) {
                             vibrateStatus = false;
-                            if (DEBUG_PKDATA | csReaderData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.VibrateOff with result = " + csReaderData.dataValues[2] + " and vibrateStatus = " + vibrateStatus);
+                            if (DEBUG_PKDATA | connectorData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.VibrateOff with result = " + connectorData.dataValues[2] + " and vibrateStatus = " + vibrateStatus);
                             bprocessed = true;
                         } else if (barcodeToWrite.get(0).barcodePayloadEvent == BarcodePayloadEvents.BARCODE_COMMAND) {
                             barcodePowerOnTimeOut = 500;
-                            if (DEBUG_PKDATA | csReaderData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.Command with result = " + csReaderData.dataValues[2] + " and barcodePowerOnTimeOut = " + barcodePowerOnTimeOut);
+                            if (DEBUG_PKDATA | connectorData.dataValues[2] != 0) appendToLog("PkData: matched Barcode.Reply.Command with result = " + connectorData.dataValues[2] + " and barcodePowerOnTimeOut = " + barcodePowerOnTimeOut);
                             bprocessed = true;
                         } else {
                             bprocessed = true;
@@ -158,7 +154,7 @@ public class BarcodeConnector {
                     }
                     String string = "Up31 " + (bprocessed ? "" : "Unprocessed, ") + barcodeToWrite.get(0).barcodePayloadEvent.toString() + ", " + byteArrayToString(data1);
                     utility.writeDebug2File(string);
-                    barcodeToWrite.remove(0); sendDataToWriteSent = 0; mDataToWriteRemoved = true;
+                    barcodeToWrite.remove(0); sendDataToWriteSent = 0; mDataToWriteRemoved = true; appendToLog("barcodeToWrite remove0 with length = " + barcodeToWrite.size());
                     if (DEBUG_PKDATA) appendToLog("PkData: new mBarcodeToWrite size = " + barcodeToWrite.size());
                 }
             }
@@ -185,10 +181,10 @@ public class BarcodeConnector {
                 boolean isBarcodeData = false;
                 if (true || barcodePayloadEvents == BarcodePayloadEvents.BARCODE_SCAN_START || barcodePayloadEvents == BarcodePayloadEvents.BARCODE_COMMAND) isBarcodeData = true;
                 if (barcodeFailure && isBarcodeData) {
-                    barcodeToWrite.remove(0); sendDataToWriteSent = 0; mDataToWriteRemoved = true;
+                    barcodeToWrite.remove(0); sendDataToWriteSent = 0; mDataToWriteRemoved = true; appendToLog("barcodeToWrite remove0 with length = " + barcodeToWrite.size());
                 } else if (sendDataToWriteSent >= 5 && isBarcodeData) {
                     int oldSize = barcodeToWrite.size();
-                    barcodeToWrite.remove(0); sendDataToWriteSent = 0; mDataToWriteRemoved = true;
+                    barcodeToWrite.remove(0); sendDataToWriteSent = 0; mDataToWriteRemoved = true; appendToLog("barcodeToWrite remove0 with length = " + barcodeToWrite.size());
                     if (DEBUG) appendToLog("Removed after sending count-out with oldSize = " + oldSize + ", updated barcodeToWrite.size() = " + barcodeToWrite.size());
                     if (DEBUG) appendToLog("Removed after sending count-out.");
                     String string = "Problem in sending data to Barcode Module. Removed data sending after count-out";
@@ -205,7 +201,7 @@ public class BarcodeConnector {
                         mDataToWriteRemoved = false;
                     } else {
                         //if (DEBUG) appendToLogView("failure to send " + barcodeToWrite.get(0).barcodePayloadEvent.toString());
-                        barcodeToWrite.remove(0); sendDataToWriteSent = 0; mDataToWriteRemoved = true;
+                        barcodeToWrite.remove(0); sendDataToWriteSent = 0; mDataToWriteRemoved = true; appendToLog("barcodeToWrite remove0 with length = " + barcodeToWrite.size());
                     }
                     return true;*/
                 }
@@ -215,17 +211,17 @@ public class BarcodeConnector {
     }
 
     int iOkCount = 0;
-    public boolean isBarcodeToRead(CsReaderData csReaderData) {
+    public boolean isBarcodeToRead(ConnectorData connectorData) {
         boolean found = false, DEBUG = false;
 
-        if (csReaderData.dataValues[0] == (byte) 0x91) {
-            if (DEBUG_PKDATA) appendToLog("PkData: found Barcode.Uplink with payload = " + byteArrayToString(csReaderData.dataValues));
+        if (connectorData.dataValues[0] == (byte) 0x91) {
+            if (DEBUG_PKDATA) appendToLog("PkData: found Barcode.Uplink with payload = " + byteArrayToString(connectorData.dataValues));
             CsReaderBarcodeData csReaderBarcodeData = new CsReaderBarcodeData();
-            switch (csReaderData.dataValues[1]) {
+            switch (connectorData.dataValues[1]) {
                 case 0:
                     csReaderBarcodeData.barcodePayloadEvent = BarcodePayloadEvents.BARCODE_DATA_READ;
-                    byte[] dataValues = new byte[csReaderData.dataValues.length - 2];
-                    System.arraycopy(csReaderData.dataValues, 2, dataValues, 0, dataValues.length);
+                    byte[] dataValues = new byte[connectorData.dataValues.length - 2];
+                    System.arraycopy(connectorData.dataValues, 2, dataValues, 0, dataValues.length);
                     if (DEBUG_PKDATA) appendToLog("PkData: found Barcode.Uplink.DataRead with payload = " + byteArrayToString(dataValues));
                     //commandType = null;
                     if (barcodeToWrite.size() > 0) {
@@ -255,7 +251,7 @@ public class BarcodeConnector {
                     break;
             }
         }
-        if (found && DEBUG)  appendToLog("found Barcode.read data = " + byteArrayToString(csReaderData.dataValues));
+        if (found && DEBUG)  appendToLog("found Barcode.read data = " + byteArrayToString(connectorData.dataValues));
         return found;
     }
 }

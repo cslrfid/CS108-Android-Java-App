@@ -12,14 +12,11 @@ public class BluetoothConnector {
     public boolean userDebugEnableDefault = false;
     public boolean userDebugEnable = userDebugEnableDefault;
 
-    Context context; TextView mLogView;
-    public BluetoothConnector(Context context, TextView mLogView, Utility utility) {
+    Context context; Utility utility;
+    public BluetoothConnector(Context context, Utility utility) {
         this.context = context;
-        this.mLogView = mLogView;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
     }
-
-    Utility utility;
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
     private void appendToLog(String s) { utility.appendToLog(s); }
@@ -160,20 +157,20 @@ public class BluetoothConnector {
         return null;
     }
 
-    public boolean isMatchBluetoothIcToWrite(CsReaderData csReaderData) {
+    public boolean isMatchBluetoothIcToWrite(ConnectorData connectorData) {
         boolean match = false;
-        if (bluetoothIcToWrite.size() != 0 && csReaderData.dataValues[0] == (byte)0xC0) {
+        if (bluetoothIcToWrite.size() != 0 && connectorData.dataValues[0] == (byte)0xC0) {
             byte[] dataInCompare = new byte[]{(byte) 0xC0, 0};
-            if (arrayTypeSet(dataInCompare, 1, bluetoothIcToWrite.get(0).bluetoothIcPayloadEvent) && (csReaderData.dataValues.length >= dataInCompare.length + 1)) {
-                if (match = compareArray(csReaderData.dataValues, dataInCompare, dataInCompare.length)) {
+            if (arrayTypeSet(dataInCompare, 1, bluetoothIcToWrite.get(0).bluetoothIcPayloadEvent) && (connectorData.dataValues.length >= dataInCompare.length + 1)) {
+                if (match = compareArray(connectorData.dataValues, dataInCompare, dataInCompare.length)) {
                     boolean bprocessed = false;
-                    byte[] data1 = new byte[csReaderData.dataValues.length - 2]; System.arraycopy(csReaderData.dataValues, 2, data1, 0, data1.length);
-                    if (DEBUG_PKDATA) appendToLog("PkData: matched BluetoothIc.Reply with payload = " + byteArrayToString(csReaderData.dataValues) + " for writeData BluetoothIc." + bluetoothIcToWrite.get(0).bluetoothIcPayloadEvent.toString());
+                    byte[] data1 = new byte[connectorData.dataValues.length - 2]; System.arraycopy(connectorData.dataValues, 2, data1, 0, data1.length);
+                    if (DEBUG_PKDATA) appendToLog("PkData: matched BluetoothIc.Reply with payload = " + byteArrayToString(connectorData.dataValues) + " for writeData BluetoothIc." + bluetoothIcToWrite.get(0).bluetoothIcPayloadEvent.toString());
                     if (bluetoothIcToWrite.get(0).bluetoothIcPayloadEvent == BluetoothIcPayloadEvents.BLUETOOTH_GET_VERSION) {
-                        if (csReaderData.dataValues.length > 2) {
+                        if (connectorData.dataValues.length > 2) {
                             int length = mBluetoothIcVersion.length;
-                            if (csReaderData.dataValues.length - 2 < length) length = csReaderData.dataValues.length - 2;
-                            System.arraycopy(csReaderData.dataValues, 2, mBluetoothIcVersion, 0, length);
+                            if (connectorData.dataValues.length - 2 < length) length = connectorData.dataValues.length - 2;
+                            System.arraycopy(connectorData.dataValues, 2, mBluetoothIcVersion, 0, length);
                             if (mBluetoothIcVersion[0] == 3) icsModel = 463;
                             else if (mBluetoothIcVersion[0] == 1) icsModel = 108;
                             mBluetoothIcVersionUpdated = true;
@@ -182,13 +179,13 @@ public class BluetoothConnector {
                         }
                         if (DEBUG_PKDATA) appendToLog("PkData: matched BluetoothIc.Reply.GetVersion with version = " + byteArrayToString(mBluetoothIcVersion));
                     } else if (bluetoothIcToWrite.get(0).bluetoothIcPayloadEvent == BluetoothIcPayloadEvents.BLUETOOTH_GET_DEVICE_NAME) {
-                        if (csReaderData.dataValues.length > 2) {
-                            byte[] deviceName1 = new byte[csReaderData.dataValues.length - 2];
-                            System.arraycopy(csReaderData.dataValues, 2, deviceName1, 0, csReaderData.dataValues.length - 2);
+                        if (connectorData.dataValues.length > 2) {
+                            byte[] deviceName1 = new byte[connectorData.dataValues.length - 2];
+                            System.arraycopy(connectorData.dataValues, 2, deviceName1, 0, connectorData.dataValues.length - 2);
                             deviceName = deviceName1;
                             bprocessed = true;
                         }
-                        if (DEBUG_PKDATA) appendToLog("PkData: matched mBluetoothIc.GetDeviceName.Reply data is found with name=" + byteArrayToString(deviceName) + ", dataValues.length=" + csReaderData.dataValues.length + ", deviceName.length=" + deviceName.length);
+                        if (DEBUG_PKDATA) appendToLog("PkData: matched mBluetoothIc.GetDeviceName.Reply data is found with name=" + byteArrayToString(deviceName) + ", dataValues.length=" + connectorData.dataValues.length + ", deviceName.length=" + deviceName.length);
                     } else {
                         bprocessed = true;
                         if (DEBUG) appendToLog("matched mBluetoothIc.Other.Reply data is found.");

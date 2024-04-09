@@ -25,8 +25,7 @@ import android.widget.Toast;
 import com.csl.cs108ademoapp.CustomProgressDialog;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cslibrary4a.BluetoothGattConnector;
+import com.csl.cslibrary4a.BluetoothGatt;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 
@@ -38,9 +37,8 @@ public class ConnectionFragment extends CommonFragment {
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
     private ScanCallback mScanCallback;
     private ArrayList<ReaderDevice> readersList = MainActivity.sharedObjects.readersList;
-    private Cs108Library4A mCsLibrary4A = MainActivity.csLibrary4A;
 
-    private ArrayList<BluetoothGattConnector.Cs108ScanData> mScanResultList = new ArrayList<>();
+    private ArrayList<BluetoothGatt.Cs108ScanData> mScanResultList = new ArrayList<>();
     private Handler mHandler = new Handler();
     private DeviceConnectTask deviceConnectTask;
 
@@ -62,7 +60,7 @@ public class ConnectionFragment extends CommonFragment {
         MainActivity.csLibrary4A.appendToLog("getActivity().getPackageName() = " + getActivity().getPackageName());
         if (getActivity().getPackageName().contains("com.csl.cs710ademoapp")) textview.setVisibility(View.VISIBLE);
 
-        if (mCsLibrary4A.isBleConnected() == false) readersList.clear();
+        if (MainActivity.csLibrary4A.isBleConnected() == false) readersList.clear();
         final ListView readerListView = (ListView) getActivity().findViewById(R.id.readersList);
         TextView readerEmptyView = (TextView) getActivity().findViewById(R.id.empty);
         readerListView.setEmptyView(readerEmptyView);
@@ -76,13 +74,13 @@ public class ConnectionFragment extends CommonFragment {
                 if (bConnecting) return;
 
                 ReaderDevice readerDevice = readerListAdapter.getItem(position);
-                if (DEBUG) mCsLibrary4A.appendToLog("ConnectionFragment.OnItemClickListener: bConnecting = " + bConnecting + ", postion = " + position);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("ConnectionFragment.OnItemClickListener: bConnecting = " + bConnecting + ", postion = " + position);
                 boolean bSelectOld = readerDevice.getSelected();
 
-                if (mCsLibrary4A.isBleConnected() && readerDevice.isConnected() && (readerDevice.getSelected() || false)) {
-                    mCsLibrary4A.disconnect(false); bleDisConnecting = true;
+                if (MainActivity.csLibrary4A.isBleConnected() && readerDevice.isConnected() && (readerDevice.getSelected() || false)) {
+                    MainActivity.csLibrary4A.disconnect(false); bleDisConnecting = true;
                     readersList.clear();
-                } else if (mCsLibrary4A.isBleConnected() == false && readerDevice.getSelected() == false) {
+                } else if (MainActivity.csLibrary4A.isBleConnected() == false && readerDevice.getSelected() == false) {
                     boolean validStart = false;
                     if (deviceConnectTask == null) {
                         validStart = true;
@@ -120,7 +118,7 @@ public class ConnectionFragment extends CommonFragment {
                 readerListAdapter.notifyDataSetChanged();
             }
         });
-        if (mCsLibrary4A.isBleConnected() == false) {
+        if (MainActivity.csLibrary4A.isBleConnected() == false) {
             for (int i = 0; i < readersList.size(); i++) {
                 ReaderDevice readerDevice1 = readersList.get(i);
                 if (readerDevice1.isConnected()) {
@@ -158,7 +156,7 @@ public class ConnectionFragment extends CommonFragment {
         @Override
         public void run() {
             boolean operating = false;
-            if (mCsLibrary4A.isBleConnected())   operating = true;
+            if (MainActivity.csLibrary4A.isBleConnected())   operating = true;
             if (operating == false && deviceScanTask != null) {
                 if (deviceScanTask.isCancelled() == false)   operating = true;
             }
@@ -182,7 +180,7 @@ public class ConnectionFragment extends CommonFragment {
         protected String doInBackground(Void... a) {
             while (isCancelled() == false) {
                 if (wait4process == false) {
-                    BluetoothGattConnector.Cs108ScanData cs108ScanData = mCsLibrary4A.getNewDeviceScanned();
+                    BluetoothGatt.Cs108ScanData cs108ScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
                     if (cs108ScanData != null) mScanResultList.add(cs108ScanData);
                     if (scanning == false || mScanResultList.size() != 0 || System.currentTimeMillis() - timeMillisUpdate > 10000) {
                         wait4process = true; publishProgress("");
@@ -196,18 +194,18 @@ public class ConnectionFragment extends CommonFragment {
         protected void onProgressUpdate(String... output) {
             if (scanning == false) {
                 scanning = true;
-                if (mCsLibrary4A.scanLeDevice(true) == false) cancel(true);
+                if (MainActivity.csLibrary4A.scanLeDevice(true) == false) cancel(true);
                 else getActivity().invalidateOptionsMenu();
             }
             boolean listUpdated = false;
             while (mScanResultList.size() != 0) {
-                BluetoothGattConnector.Cs108ScanData scanResultA = mScanResultList.get(0);
+                BluetoothGatt.Cs108ScanData scanResultA = mScanResultList.get(0);
                 mScanResultList.remove(0);
                 if (getActivity() == null) continue;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) continue;
                 } else if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) continue;
-                if (DEBUG) mCsLibrary4A.appendToLog("scanResultA.device.getType() = " + scanResultA.device.getType() + ". scanResultA.rssi = " + scanResultA.rssi);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("scanResultA.device.getType() = " + scanResultA.device.getType() + ". scanResultA.rssi = " + scanResultA.rssi);
                 if (scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE && (true || scanResultA.rssi < 0)) {
                     boolean match = false;
                     for (int i = 0; i < readersList.size(); i++) {
@@ -228,11 +226,11 @@ public class ConnectionFragment extends CommonFragment {
                         if (scanResultA.device.getBondState() == 12) {
                             strInfo += "BOND_BONDED\n";
                         }
-                        readerDevice.setDetails(strInfo + "scanRecord=" + mCsLibrary4A.byteArrayToString(scanResultA.scanRecord));
+                        readerDevice.setDetails(strInfo + "scanRecord=" + MainActivity.csLibrary4A.byteArrayToString(scanResultA.scanRecord));
                         readersList.add(readerDevice); listUpdated = true;
                     }
                 } else {
-                    if (DEBUG) mCsLibrary4A.appendToLog("deviceScanTask: rssi=" + scanResultA.rssi + ", error type=" + scanResultA.device.getType());
+                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("deviceScanTask: rssi=" + scanResultA.rssi + ", error type=" + scanResultA.device.getType());
                 }
             }
             if (System.currentTimeMillis() - timeMillisUpdate > 10000) {
@@ -256,8 +254,8 @@ public class ConnectionFragment extends CommonFragment {
                         readersListOld.add(readerDevice1);
                     }
                 }
-                if (DEBUG) mCsLibrary4A.appendToLog("Matched. Updated readerListOld with size = " + readersListOld.size());
-                mCsLibrary4A.scanLeDevice(false);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("Matched. Updated readerListOld with size = " + readersListOld.size());
+                MainActivity.csLibrary4A.scanLeDevice(false);
                 getActivity().invalidateOptionsMenu();
                 scanning = false;
             }
@@ -268,18 +266,18 @@ public class ConnectionFragment extends CommonFragment {
         @Override
         protected void onCancelled() {
             super.onCancelled();
-            if (DEBUG) mCsLibrary4A.appendToLog("Stop Scanning 1A");
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("Stop Scanning 1A");
             deviceScanEnding();
         }
 
         @Override
         protected void onPostExecute(String result) {
-            if (DEBUG) mCsLibrary4A.appendToLog("Stop Scanning 1B");
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("Stop Scanning 1B");
             deviceScanEnding();
         }
 
         void deviceScanEnding() {
-            mCsLibrary4A.scanLeDevice(false);
+            MainActivity.csLibrary4A.scanLeDevice(false);
         }
     }
 
@@ -303,8 +301,8 @@ public class ConnectionFragment extends CommonFragment {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            if (DEBUG) MainActivity.csLibrary4A.appendToLog("start of Connection with mrfidToWriteSize = " + mCsLibrary4A.mrfidToWriteSize());
-            mCsLibrary4A.connect(connectingDevice);
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("start of Connection with mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+            MainActivity.csLibrary4A.connect(connectingDevice);
             waitTime = 30;
             setting = -1;
             progressDialog = new CustomProgressDialog(getActivity(), prgressMsg);
@@ -320,7 +318,7 @@ public class ConnectionFragment extends CommonFragment {
                     e.printStackTrace();
                 }
                 publishProgress("kkk ");
-                if (mCsLibrary4A.isBleConnected()) {
+                if (MainActivity.csLibrary4A.isBleConnected()) {
                     setting = 0; break;
                 }
             } while (--waitTime > 0);
@@ -339,21 +337,21 @@ public class ConnectionFragment extends CommonFragment {
 
         @Override
         protected void onCancelled(Integer result) {
-            if (DEBUG) mCsLibrary4A.appendToLog("onCancelled(): setting = " + setting + ", waitTime = " + waitTime);
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("onCancelled(): setting = " + setting + ", waitTime = " + waitTime);
             if (setting >= 0) {
                 Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.toast_ble_setup_problem), Toast.LENGTH_SHORT).show();
             } else {
-                mCsLibrary4A.isBleConnected();
+                MainActivity.csLibrary4A.isBleConnected();
                 Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.error_bluetooth_connection_failed), Toast.LENGTH_SHORT).show();
             }
             super.onCancelled();
-            mCsLibrary4A.disconnect(false); bleDisConnecting = true;
+            MainActivity.csLibrary4A.disconnect(false); bleDisConnecting = true;
 
             bConnecting = false;
         }
 
         protected void onPostExecute(Integer result) {
-            if (DEBUG) mCsLibrary4A.appendToLog("onPostExecute(): setting = " + setting + ", waitTime = " + waitTime);
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("onPostExecute(): setting = " + setting + ", waitTime = " + waitTime);
             ReaderDevice readerDevice = readersList.get(position);
             readerDevice.setConnected(true);
             readersList.set(position, readerDevice);
@@ -374,7 +372,7 @@ public class ConnectionFragment extends CommonFragment {
             if (DEBUG) MainActivity.csLibrary4A.appendToLog("ConnectionFragment: onPostExecute: getActivity().onBackPressed");
             getActivity().onBackPressed();
             bConnecting = false;
-            if (DEBUG) MainActivity.csLibrary4A.appendToLog("end of Connection with mrfidToWriteSize = " + mCsLibrary4A.mrfidToWriteSize());
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("end of Connection with mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
         }
     }
 }
