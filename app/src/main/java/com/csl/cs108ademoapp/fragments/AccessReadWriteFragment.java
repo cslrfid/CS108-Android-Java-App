@@ -227,7 +227,7 @@ public class AccessReadWriteFragment extends CommonFragment {
                 String strTemp = editTextAccessRWEpc.getText().toString();
                 if (selectTag.editTextTagID.getText().toString().matches(strTemp) == false) {
                     // needPopup = true;
-                    tagSelected.setAddress(strEpcValue); if (spinnerSelectBank.getSelectedItemPosition() == 0) selectTag.editTextTagID.setText(strTemp);
+                    tagSelected.setAddress(strTemp); if (spinnerSelectBank.getSelectedItemPosition() == 0) selectTag.editTextTagID.setText(strTemp);
                 }
             }
         }

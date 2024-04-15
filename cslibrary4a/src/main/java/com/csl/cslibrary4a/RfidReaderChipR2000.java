@@ -22,7 +22,7 @@ public class RfidReaderChipR2000 {
         this.context = context;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
         appendToLog("csReaderConnector 1 is " + (csReaderConnector108 == null ? "null" : "valid"));
-        appendToLog("csReaderConnector.rfidReaderChip 1 is " + (csReaderConnector108.rfidReaderChipR2000 == null ? "null" : "valid"));
+        //appendToLog("csReaderConnector.rfidReaderChip 1 is " + (csReaderConnector108.rfidReaderChipR2000 == null ? "null" : "valid"));
         //mRfidReaderChip = new RfidReaderChip();
         this.csReaderConnector108 = csReaderConnector108;
         this.DEBUGTHREAD = csReaderConnector108.DEBUGTHREAD;

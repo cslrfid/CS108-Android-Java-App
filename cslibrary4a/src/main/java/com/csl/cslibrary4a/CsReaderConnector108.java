@@ -31,14 +31,14 @@ public class CsReaderConnector108 {
         bluetoothGatt.disconnect();
         appendToLog("abcc done");
         rfidConnector.mRfidToWrite.clear();
-        rfidReaderChipR2000.mRx000ToWrite.clear();
+        rfidReader.mRx000ToWrite.clear();
     }
 
     public long getStreamInRate() { return bluetoothGatt.getStreamInRate(); }
 
     int writeDataCount; int btSendTimeOut = 0; long btSendTime = 0;
     boolean writeData(byte[] buffer, int timeout) {
-        if (rfidReaderChipR2000.isInventoring()) {
+        if (rfidReader.isInventoring()) {
             utility.appendToLogView("BtData: isInventoring is true when writeData " + byteArrayToString(buffer));
         }
         boolean result = bluetoothGatt.writeBleStreamOut(buffer);
@@ -319,7 +319,7 @@ public class CsReaderConnector108 {
     }
     public Cs108ConnectorData mCs108ConnectorData;
 
-    RfidConnector rfidConnector; public RfidReaderChipR2000 rfidReaderChipR2000; public RfidReader rfidReader;
+    RfidConnector rfidConnector; public RfidReader rfidReader;
     public BarcodeConnector barcodeConnector; public BarcodeNewland barcodeNewland;
     public NotificationConnector notificationConnector;
     public ControllerConnector controllerConnector;
@@ -342,7 +342,7 @@ public class CsReaderConnector108 {
         mCs108ConnectorData = new Cs108ConnectorData();
 
         rfidReader = new RfidReader(context, utility, this, null, bis108);
-        rfidConnector = rfidReader.rfidConnector; rfidReaderChipR2000 = rfidReader.rfidReaderChipR2000;
+        rfidConnector = rfidReader.rfidConnector;
         barcodeConnector = new BarcodeConnector(context, utility);
         barcodeNewland = new BarcodeNewland(context, utility, barcodeConnector);
         barcodeConnector.barcodeConnectorCallback = new BarcodeConnector.BarcodeConnectorCallback(){
@@ -402,7 +402,7 @@ public class CsReaderConnector108 {
             if (DEBUGTHREAD) appendToLog("mReadWriteRunnable starts");
             if (timer2Write != 0 || bluetoothGatt.getStreamInBufferSize() != 0 || rfidConnector.mRfidToRead.size() != 0) {
                 validBuffer = true;
-                if (DEBUG) appendToLog("mReadWriteRunnable(): START, timer2Write=" + timer2Write + ", streamInBufferSize = " + bluetoothGatt.getStreamInBufferSize() + ", mRfidToRead.size=" + rfidConnector.mRfidToRead.size() + ", mRx000ToRead.size=" + rfidReaderChipR2000.mRx000ToRead.size());
+                if (DEBUG) appendToLog("mReadWriteRunnable(): START, timer2Write=" + timer2Write + ", streamInBufferSize = " + bluetoothGatt.getStreamInBufferSize() + ", mRfidToRead.size=" + rfidConnector.mRfidToRead.size() + ", mRx000ToRead.size=" + rfidReader.mRx000ToRead.size());
             } else  validBuffer = false;
             int intervalReadWrite = 250; //50;   //50;    //500;   //500, 100;
             if (rfidConnector.rfidPowerOnTimeOut >= intervalReadWrite) {
@@ -424,7 +424,7 @@ public class CsReaderConnector108 {
             if (DEBUGTHREAD) appendToLog("start new mReadWriteRunnable after " + intervalReadWrite + " ms");
             //appendToLog("postDelayed mReadWriteRunnable within mReadWriteRunnable");
             mHandler.removeCallbacks(mReadWriteRunnable); mHandler.postDelayed(mReadWriteRunnable, intervalReadWrite);
-            if (rfidReaderChipR2000 == null) return;
+            if (rfidReader == null) return;
 
             boolean bFirst = true;
             mCs108DataReadRequest = false;
@@ -444,13 +444,13 @@ public class CsReaderConnector108 {
                         if (DEBUG) appendToLog("mReadWriteRunnable(): mCs108DataRead.dataValues = " + byteArrayToString(connectorData.dataValues));
                         if (rfidConnector.isMatchRfidToWrite(connectorData)) {
                             if (false) {
-                                for (int i = 0; i < rfidReaderChipR2000.mRx000ToRead.size(); i++) {
-                                    if (rfidReaderChipR2000.mRx000ToRead.get(i).responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_COMMAND_END)
+                                for (int i = 0; i < rfidReader.mRx000ToRead.size(); i++) {
+                                    if (rfidReader.mRx000ToRead.get(i).responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_COMMAND_END)
                                         if (DEBUG) appendToLog("mRx0000ToRead with COMMAND_END is removed");
                                 }
                                 if (DEBUG) appendToLog("mRx000ToRead.clear !!!");
                             }
-                            rfidReaderChipR2000.mRx000ToRead.clear(); if (DEBUG) appendToLog("mRx000ToRead.clear !!!");
+                            rfidReader.mRx000ToRead.clear(); if (DEBUG) appendToLog("mRx000ToRead.clear !!!");
                             if (writeDataCount > 0) writeDataCount--; if (bis108) ready2Write = true; //btSendTime = 0; aborting = false;
                         } else if (barcodeConnector.isMatchBarcodeToWrite(connectorData)) {
                             if (writeDataCount > 0) writeDataCount--; if (bis108) ready2Write = true; //btSendTime = 0;
@@ -512,10 +512,10 @@ public class CsReaderConnector108 {
                 timer2Write = 0;
                 if (rfidConnector.rfidFailure) rfidConnector.mRfidToWrite.clear();
                 if (barcodeConnector.barcodeFailure) { barcodeConnector.barcodeToWrite.clear(); appendToLog("barcodeToWrite is clear"); }
-                if (rfidReaderChipR2000.mRx000ToWrite.size() != 0 && rfidConnector.mRfidToWrite.size() == 0) {
+                if (rfidReader.mRx000ToWrite.size() != 0 && rfidConnector.mRfidToWrite.size() == 0) {
                     if (DEBUG)
-                        appendToLog("mReadWriteRunnable(): mRx000ToWrite.size=" + rfidReaderChipR2000.mRx000ToWrite.size() + ", mRfidToWrite.size=" + rfidConnector.mRfidToWrite.size());
-                    rfidReader.addRfidToWrite(rfidReaderChipR2000.mRx000ToWrite.get(0));
+                        appendToLog("mReadWriteRunnable(): mRx000ToWrite.size=" + rfidReader.mRx000ToWrite.size() + ", mRfidToWrite.size=" + rfidConnector.mRfidToWrite.size());
+                    rfidReader.addRfidToWrite(rfidReader.mRx000ToWrite.get(0));
                 }
                 boolean bisRfidCommandStop = false, bisRfidCommandExecute = false;
                 if (rfidConnector.mRfidToWrite.size() != 0 && DEBUG)
@@ -572,7 +572,7 @@ public class CsReaderConnector108 {
                             }
                         }
                     }
-                } else if (!bis108 && rfidReaderChipR2000.isInventoring()) {
+                } else if (!bis108 && rfidReader.isInventoring()) {
                     appendToLog("BtDataOut: done sendRfidToWrite with isInventoring is true");
                     if (rfidConnector.rfidPowerOnTimeOut != 0) {
                         if (DEBUG) appendToLog("rfidPowerOnTimeOut = " + rfidConnector.rfidPowerOnTimeOut + ", mRfidToWrite.size() = " + rfidConnector.mRfidToWrite.size());
@@ -723,24 +723,25 @@ public class CsReaderConnector108 {
                     }
                 }
             }
-            if (validBuffer) {
-                if (DEBUG)  appendToLog("mReadWriteRunnable: END, timer2Write=" + timer2Write + ", streamInBufferSize = " + bluetoothGatt.getStreamInBufferSize() + ", mRfidToRead.size=" + rfidConnector.mRfidToRead.size() + ", mRx000ToRead.size=" + rfidReaderChipR2000.mRx000ToRead.size());
-            }
+            /*if (validBuffer) {
+                if (DEBUG)  appendToLog("mReadWriteRunnable: END, timer2Write=" + timer2Write + ", streamInBufferSize = " + bluetoothGatt.getStreamInBufferSize() + ", mRfidToRead.size=" + rfidConnector.mRfidToRead.size() + ", mRx000ToRead.size=" + rfidReader.mRx000ToRead.size());
+            }*/
             //appendToLog("mRfidDevice is " + (mRfidDevice == null ? "null" : "valid"));
             //appendToLog("mRfidDevice.mRfidReaderChip is " + (mRfidDevice.mRfidReaderChip == null ? "null" : "valid"));
             //appendToLog("mRfidDevice.mRfidReaderChip.mRfidReaderChip is " + (mRfidDevice.mRfidReaderChip.mRfidReaderChip == null ? "null" : "valid"));
-            if (rfidReaderChipR2000 != null) rfidReader.mRx000UplinkHandler();
+            if (rfidReader != null) rfidReader.mRx000UplinkHandler();
             if (DEBUGTHREAD) appendToLog("mReadWriteRunnable: mReadWriteRunnable ends");
         }
     };
 
     int intervalRx000UplinkHandler = 250;
-    private final Runnable runnableRx000UplinkHandler = new Runnable() {
+    /*private final Runnable runnableRx000UplinkHandler = new Runnable() {
         @Override
         public void run() {
 //            mRfidDevice.mRx000Device.mRx000UplinkHandler();
             mHandler.postDelayed(runnableRx000UplinkHandler, intervalRx000UplinkHandler);
         }
     };
+    */
 }
 

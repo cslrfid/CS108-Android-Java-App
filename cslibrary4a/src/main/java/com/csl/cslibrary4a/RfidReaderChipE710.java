@@ -20,7 +20,6 @@ public class RfidReaderChipE710 {
     //RfidReaderChip mRfidReaderChip;
     boolean DEBUGTHREAD = false, DEBUG_APDATA = false;
     int intervalRx000UplinkHandler;
-    //public int invalidata, invalidUpdata; //invalidata, invalidUpdata, validata;
     boolean aborting = false;
     Context context; Utility utility; CsReaderConnector csReaderConnector;
     public RfidReaderChipE710(Context context, Utility utility, CsReaderConnector csReaderConnector) {

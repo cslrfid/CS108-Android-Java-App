@@ -101,6 +101,27 @@ public class Utility {
         }
         return bytes;
     }
+    public byte[] string2ByteArray(String string) {
+        byte[] bytes = null;
+        if (string == null) return null;
+        if ((string.length()/2)*2 != string.length()) string += "0";
+        for (int i = 0; i < string.length(); i+=2) {
+            try {
+                Short sValue = Short.parseShort(string.substring(i, i + 2), 16);
+                byte[] bytesNew = new byte[1];
+                if (bytes != null) {
+                    bytesNew = new byte[bytes.length + 1];
+                    System.arraycopy(bytes, 0, bytesNew, 0, bytes.length);
+                }
+                bytesNew[bytesNew.length - 1] = (byte) (sValue & 0xFF);
+                bytes = bytesNew;
+            } catch (Exception ex) {
+                appendToLog("Exception in i = " + i + ", substring = " + string.substring(i, i+2));
+                break;
+            }
+        }
+        return bytes;
+    }
     public int byteArrayToInt(byte[] bytes) {
         int iValue = 0;
         int length = bytes.length;
