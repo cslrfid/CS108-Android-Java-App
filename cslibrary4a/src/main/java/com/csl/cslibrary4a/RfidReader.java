@@ -1722,6 +1722,7 @@ public class RfidReader {
         return bRetValue;
     }
     public int FreqChnCnt(RegionCodes regionCode) {
+    if (bis108) {
         switch (regionCode) {
             case FCC:
             case AG:
@@ -1810,6 +1811,23 @@ public class RfidReader {
             default:
                 return 0;
         }
+    } else {
+        boolean DEBUG = true;
+        int iFreqChnCnt = -1, iValue = -1; //mRfidDevice.mRfidReaderChip.mRfidReaderChip.mRx000Setting.getCountryEnum(); //iValue--;
+        iValue = regionCode.ordinal() - RegionCodes.Albania1.ordinal() + 1;
+        if (DEBUG) appendToLog("regionCode = " + regionCode.toString() + ", regionCodeEnum = " + iValue);
+        if (iValue > 0) {
+            String strFreqChnCnt = csReaderConnector.rfidReader.strCountryEnumInfo[(iValue - 1) * csReaderConnector.rfidReader.iCountryEnumInfoColumn + 3];
+            if (DEBUG) appendToLog("strFreqChnCnt = " + strFreqChnCnt);
+            try {
+                iFreqChnCnt = Integer.parseInt(strFreqChnCnt);
+            } catch (Exception ex) {
+                appendToLog("!!! CANNOT parse strFreqChnCnt = " + strFreqChnCnt);
+            }
+        }
+        if (DEBUG) appendToLog("iFreqChnCnt = " + iFreqChnCnt);
+        return iFreqChnCnt; //1 for hopping, 0 for fixed
+    }
     }
     void macRead(int address) {
         if (rfidReaderChipR2000 != null) rfidReaderChipR2000.rx000Setting.readMAC(address);
