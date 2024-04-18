@@ -25,8 +25,8 @@ import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 import static com.csl.cs108ademoapp.MainActivity.mContext;
 import static com.csl.cs108ademoapp.MainActivity.tagSelected;
@@ -66,7 +66,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_access);
         actionBar.setTitle(R.string.title_activity_readWriteUser);
 
-        selectTag = new SelectTag((Activity)getActivity ());
+        selectTag = new SelectTag((Activity)getActivity(), 0);
         spinnerSelectBank = (Spinner) getActivity().findViewById(R.id.selectMemoryBank);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -269,7 +269,6 @@ public class AccessReadWriteUserFragment extends CommonFragment {
             msStartTime = SystemClock.elapsedRealtime();
             textViewRunTime.setText(""); MainActivity.csLibrary4A.appendToLog("StreamOut: Start of running time");
             updating = true; bankProcessing = 0; restartAccessBank = -1;
-//            MainActivity.mCs108Library4a.
             mHandler.removeCallbacks(updateRunnable);
             mHandler.post(updateRunnable);
         }
@@ -305,7 +304,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
                             selectTag.editTextTagID.getText().toString(), spinnerSelectBank.getSelectedItemPosition() + 1, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                            (operationRead ? Cs108Library4A.HostCommands.CMD_18K6CREAD: Cs108Library4A.HostCommands.CMD_18K6CWRITE), updateRunnable);
+                            (operationRead ? RfidReaderChipData.HostCommands.CMD_18K6CREAD: RfidReaderChipData.HostCommands.CMD_18K6CWRITE), updateRunnable);
                     accessTask.execute();
                     rerunRequest = true;
                 }

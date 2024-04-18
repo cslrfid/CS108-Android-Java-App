@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
 
 import java.util.ArrayList;
 
@@ -65,6 +65,12 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
             if (reader.getAddress().length() != 0) {
                 if (text1.length() != 0) text1 += "\n";
                 text1 += reader.getAddress();
+            }
+        }
+        if (reader.getUpcSerial() != null) {
+            if (reader.getUpcSerial().length() != 0)  {
+                if (text1.length() != 0) text1 += "\n";
+                text1 += reader.getUpcSerial();
             }
         }
         if (MainActivity.csLibrary4A.isBleScanning()) {

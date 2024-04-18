@@ -24,7 +24,7 @@ import android.widget.Toast;
 import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.CustomAlertDialog;
+import com.csl.cslibrary4a.CustomAlertDialog;
 
 public abstract class CommonFragment extends Fragment {
     final boolean DEBUG = false; final String TAG = "Hello";
@@ -38,7 +38,7 @@ public abstract class CommonFragment extends Fragment {
         if (DEBUG) {
         if (fragmentName == null) Log.i(TAG, "CommonFragment.onAttach: NULL fragmentName");
         else Log.i(TAG, "CommonFragment.onAttach: fragmentName = " + fragmentName);
-        if (MainActivity.csLibrary4A == null) Log.i(TAG, "CommonFragment.onAttach: NULL MainActivity.mCs108Library4a");
+        if (MainActivity.csLibrary4A == null) Log.i(TAG, "CommonFragment.onAttach: NULL MainActivity.csLibrary4a");
         if (fragmentName == null) MainActivity.csLibrary4A.appendToLog("NULL fragmentName");
         MainActivity.csLibrary4A.appendToLog(fragmentName);
         }
@@ -74,6 +74,12 @@ public abstract class CommonFragment extends Fragment {
         @Override
         public void run() {
             short reportCount = 5;
+            byte[] notificationData = MainActivity.csLibrary4A.onNotificationEvent();
+            if (false && notificationData != null) {
+                MainActivity.csLibrary4A.appendToLog("2 matched Error: " + MainActivity.csLibrary4A.byteArrayToString(notificationData));
+                CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                customPopupWindow.popupStart("Common Notification Error Code A101: " + MainActivity.csLibrary4A.byteArrayToString(notificationData), false);
+            }
             if (MainActivity.csLibrary4A.isBleConnected()) reportCount = MainActivity.csLibrary4A.getTriggerReportingCount();
             mHandler.postDelayed(updateTriggerRunnable, reportCount * 1100);
             if (menuTriggerItem == null) return;
@@ -130,23 +136,27 @@ public abstract class CommonFragment extends Fragment {
             if (MainActivity.csLibrary4A.isRfidFailure()) {
                 if (rfidFailure == false) {
                     rfidFailure = true;
-                    CustomAlertDialog appdialog = new CustomAlertDialog();
-                    appdialog.Confirm((Activity) MainActivity.mContext, "Rfid Transmission failure",
-                            "Do you want to disconnect the Bluetooth ?",
-                            "No thanks", "Disconnect",
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("Confirm is pressed");
-                                    MainActivity.csLibrary4A.forceBTdisconnect();
-                                }
-                            },
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("Cancel is pressed.");
-                                }
-                            });
+                    if (false) {
+                        CustomAlertDialog appdialog = new CustomAlertDialog();
+                        appdialog.Confirm((Activity) MainActivity.mContext, "Rfid Transmission failure",
+                                "Do you want to disconnect the Bluetooth ?",
+                                "No thanks", "Disconnect",
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (DEBUG)
+                                            MainActivity.csLibrary4A.appendToLog("Confirm is pressed");
+                                        MainActivity.csLibrary4A.forceBTdisconnect();
+                                    }
+                                },
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (DEBUG)
+                                            MainActivity.csLibrary4A.appendToLog("Cancel is pressed.");
+                                    }
+                                });
+                    }
                 }
             } else rfidFailure = false;
 
@@ -159,7 +169,7 @@ public abstract class CommonFragment extends Fragment {
                 if (batteryWarningPopupWindow != null)
                     batteryWarningPopupWindow.popupWindow.dismiss();
                 batteryWarningPopupWindow = new CustomPopupWindow(MainActivity.mContext);
-                batteryWarningPopupWindow.popupStart(strBatteryLow + "% Battery Life Left, Please Recharge CS108 or Replace with Freshly Charged CS108B", false);
+                batteryWarningPopupWindow.popupStart(strBatteryLow + "% Battery Life Left, Please Recharge CSL Reader or Replace with Freshly Charged CSL Reader battery", false);
             } else if (false && MainActivity.sharedObjects.batteryWarningShown > 10) MainActivity.sharedObjects.batteryWarningShown = 0;
 
             if (batteryCount_old == batteryCount && strText.length() != 0) {

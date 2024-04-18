@@ -8,7 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
 
 import java.util.ArrayList;
 

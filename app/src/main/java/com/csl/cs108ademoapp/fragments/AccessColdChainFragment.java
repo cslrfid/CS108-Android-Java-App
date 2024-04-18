@@ -19,8 +19,8 @@ import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessColdChainFragment extends CommonFragment {
     final boolean DEBUG = true;
@@ -290,10 +290,10 @@ public class AccessColdChainFragment extends CommonFragment {
                 MainActivity.csLibrary4A.appendToLog("processTickItems, invalid = " + invalid);
                 if (bankProcessing++ != 0 && invalid) rerunRequest = false;
                 else  {
-                    Cs108Library4A.HostCommands hostCommand;
-                    if (readWriteTypes == ReadWriteTypes.TEMPERATURE) hostCommand = Cs108Library4A.HostCommands.CMD_GETSENSORDATA;
-                    else if (operationRead) hostCommand = Cs108Library4A.HostCommands.CMD_18K6CREAD;
-                    else hostCommand = Cs108Library4A.HostCommands.CMD_18K6CWRITE;
+                    RfidReaderChipData.HostCommands hostCommand;
+                    if (readWriteTypes == ReadWriteTypes.TEMPERATURE) hostCommand = RfidReaderChipData.HostCommands.CMD_GETSENSORDATA;
+                    else if (operationRead) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CREAD;
+                    else hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CWRITE;
                     accessTask = new AccessTask(
                             (operationRead ? buttonRead : buttonWrite), null,
                             invalid,
@@ -301,7 +301,7 @@ public class AccessColdChainFragment extends CommonFragment {
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             hostCommand,
-                            0, 0, true,
+                            0, 0, true, false,
                             null, null, null, null, null);
                     accessTask.execute();
                     rerunRequest = true;

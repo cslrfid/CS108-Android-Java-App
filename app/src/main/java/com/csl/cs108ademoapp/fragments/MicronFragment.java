@@ -30,22 +30,22 @@ public class MicronFragment extends CommonFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) mAdapter.fragment0;
-        switch (item.getItemId()) {
-            case R.id.menuAction_clear:
-                fragment.clearTagsList();
-                return true;
-            case R.id.menuAction_sortRssi:
-                fragment.sortTagsListByRssi();
-                return true;
-            case R.id.menuAction_sort:
-                fragment.sortTagsList();
-                return true;
-            case R.id.menuAction_save:
-                fragment.saveTagsList();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        if (item.getItemId() == R.id.menuAction_clear) {
+            fragment.clearTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_sortRssi) {
+            fragment.sortTagsListByRssi();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_sort) {
+            fragment.sortTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_save) {
+            fragment.saveTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_share) {
+            fragment.shareTagsList();
+            return true;
+        } else return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -81,6 +81,8 @@ public class MicronFragment extends CommonFragment {
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
+
+        MainActivity.csLibrary4A.setBasicCurrentLinkProfile();
     }
 
     @Override
@@ -109,8 +111,7 @@ public class MicronFragment extends CommonFragment {
         if (mAdapter.fragment0 != null) mAdapter.fragment0.onDestroy();
         if (mAdapter.fragment1 != null) mAdapter.fragment1.onDestroy();
         if (MainActivity.selectFor != -1) {
-            MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
-            MainActivity.csLibrary4A.setSelectCriteriaDisable(2);
+            MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
             MainActivity.selectFor = -1;
         }
         MainActivity.csLibrary4A.restoreAfterTagSelect();

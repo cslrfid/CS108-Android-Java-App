@@ -24,12 +24,11 @@ import com.csl.cs108ademoapp.DrawerListContent.DrawerPositions;
 import com.csl.cs108ademoapp.adapters.DrawerListAdapter;
 import com.csl.cs108ademoapp.fragments.*;
 import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.ReaderDevice;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -155,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
     private void selectItem(DrawerPositions position) {
         if (DEBUG) Log.i(TAG, "MainActivity.selectItem: position = " + position);
         if (position != DrawerPositions.MAIN
+                && position != DrawerPositions.SPECIAL
                 && position != DrawerPositions.ABOUT
                 && position != DrawerPositions.CONNECT
                 && position != DrawerPositions.DIRECTWEDGE && csLibrary4A.isBleConnected() == false) {
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new InventoryFragment();
                 break;
             case SEARCH:
-                fragment = new InventoryRfidSearchFragment();
+                fragment = new InventoryRfidSearchFragment(false);
                 break;
             case MULTIBANK:
                 fragment = InventoryRfidiMultiFragment.newInstance(true, null);
@@ -207,8 +207,8 @@ public class MainActivity extends AppCompatActivity {
             case IMP775:
                 fragment = new ImpinjM775Fragment();
                 break;
-            case IMPAUTOTUNE:
-                fragment = new ImpinjAutoTuneFragment();
+            case ALIEN:
+                fragment = InventoryRfidiMultiFragment.newInstance(true, "E2003");
                 break;
             case UCODE8:
                 fragment = new Ucode8Fragment();
@@ -225,6 +225,12 @@ public class MainActivity extends AppCompatActivity {
             case AURASENSE:
                 fragment = new AuraSenseFragment();
                 break;
+            case KILOWAY:
+                fragment = new KilowayFragment();
+                break;
+            case LONGJING:
+                fragment = new LongjingFragment();
+                break;
             case AXZON:
                 fragment = AxzonSelectorFragment.newInstance(true);
                 break;
@@ -240,9 +246,6 @@ public class MainActivity extends AppCompatActivity {
             case ASYGNTAG:
                 fragment = InventoryRfidiMultiFragment.newInstance(true, "E283A");
                 break;
-            case LEDTAG:
-                fragment = new LedTagFragment();
-                break;
 
             case REGISTER:
                 fragment = new AccessRegisterFragment();
@@ -251,8 +254,6 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new AccessReadWriteUserFragment();
                 break;
             case WEDGE:
-                fragment = new HomeSpecialFragment();
-                break;
             case DIRECTWEDGE:
                 fragment = new DirectWedgeFragment();
                 break;
@@ -333,9 +334,7 @@ public class MainActivity extends AppCompatActivity {
     public void locateClicked(View view) {
         selectItem(DrawerPositions.SEARCH);
     }
-    public void multiBankClicked(View view) {
-        selectItem(DrawerPositions.MULTIBANK);
-    }
+    public void multiBankClicked(View view) { selectItem(DrawerPositions.MULTIBANK); }
     public void settClicked(View view) {
         selectItem(DrawerPositions.SETTING);
     }
@@ -353,30 +352,29 @@ public class MainActivity extends AppCompatActivity {
 
     public void impInventoryClicked(View view) { selectItem(DrawerPositions.IMPINVENTORY); }
     public void m775Clicked(View view) { selectItem(DrawerPositions.IMP775); }
-    public void autoTuneClicked(View view) { selectItem(DrawerPositions.IMPAUTOTUNE); }
+    public void alienClicked(View view) { selectItem(DrawerPositions.ALIEN); }
     public void uCode8Clicked(View view) { selectItem(DrawerPositions.UCODE8); }
     public void uCodeClicked(View view) { selectItem(DrawerPositions.UCODEDNA); }
     public void bapCardClicked(View view) { selectItem(DrawerPositions.BAPCARD); }
     public void coldChainClicked(View view) { selectItem(DrawerPositions.COLDCHAIN); }
     public void aurasenseClicked(View view) { selectItem(DrawerPositions.AURASENSE); }
+    public void kilowayClicked(View view) { selectItem(DrawerPositions.KILOWAY); }
+    public void longjingClicked(View view) { selectItem(DrawerPositions.LONGJING); }
     public void axzonClicked(View view) { selectItem(DrawerPositions.AXZON); }
     public void rfMicronClicked(View view) { selectItem(DrawerPositions.RFMICRON); }
     public void fdmicroClicked(View view) { selectItem(DrawerPositions.FDMICRO); }
     public void ctesiusClicked(View view) { selectItem(DrawerPositions.CTESIUS); }
     public void asygnClicked(View view) { selectItem(DrawerPositions.ASYGNTAG); }
-    public void ledInventoryClicked(View view) { selectItem(DrawerPositions.LEDTAG); }
 
-    public void regClicked(View view) {
-        selectItem(DrawerPositions.REGISTER);
-    }
+    public void regClicked(View view) { selectItem(DrawerPositions.REGISTER); }
     public static boolean wedged = false;
     public void wedgeClicked(View view) {
-        if (true) {
+        if (false) {
             wedged = true;
             Intent i = new Intent(Intent.ACTION_MAIN);
             i.addCategory(Intent.CATEGORY_HOME);
             startActivity(i);
-        }
+        } else selectItem(DrawerPositions.WEDGE);
     }
     public void directWedgeClicked(View view) {
         selectItem(DrawerPositions.DIRECTWEDGE);

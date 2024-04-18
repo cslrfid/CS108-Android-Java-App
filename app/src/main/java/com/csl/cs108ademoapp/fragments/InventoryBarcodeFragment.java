@@ -19,8 +19,8 @@ import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SaveList2ExternalTask;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
-import com.csl.cs108library4a.Cs108Library4A;
-import com.csl.cs108library4a.ReaderDevice;
+import com.csl.cslibrary4a.NotificationConnector;
+import com.csl.cslibrary4a.ReaderDevice;
 
 import java.util.Collections;
 
@@ -69,25 +69,22 @@ public class InventoryBarcodeFragment extends CommonFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menuAction_clear:
-                clearTagsList();
-                return true;
-            case R.id.menuAction_sortRssi:
-                //sortTagsListByRssi();
-                return true;
-            case R.id.menuAction_sort:
-                sortTagsList();
-                return true;
-            case R.id.menuAction_save:
-                saveTagsList();
-                return true;
-            case R.id.menuAction_share:
-                shareTagsList();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        if (item.getItemId() == R.id.menuAction_clear) {
+            clearTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_sortRssi) {
+            //sortTagsListByRssi();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_sort) {
+            sortTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_save) {
+            saveTagsList();
+            return true;
+        } else if (item.getItemId() == R.id.menuAction_share) {
+            shareTagsList();
+            return true;
+        } else return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -187,7 +184,7 @@ public class InventoryBarcodeFragment extends CommonFragment {
     }
 
     void setNotificationListener() {
-        MainActivity.csLibrary4A.setNotificationListener(new Cs108Library4A.NotificationListener() {
+        MainActivity.csLibrary4A.setNotificationListener(new NotificationConnector.NotificationListener() {
             @Override
             public void onChange() {
                 startStopHandler(true);

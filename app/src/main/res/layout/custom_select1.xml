@@ -1,0 +1,107 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:gravity="right"
+            style="@style/style_normal_font"
+            android:text="Select mask" />
+
+        <include
+            android:id="@+id/selectTagID1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_edittext" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/selectMemoryBankRow1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_top_margin"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="left"
+            style="@style/style_normal_font"
+            android:text="Select bank" />
+
+        <Spinner
+            android:id="@+id/selectMemoryBank1"
+            android:layout_margin="0dp"
+            android:layout_weight="1"
+            style="@style/style_default_spinner" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:visibility="gone"
+            style="@style/style_normal_font"
+            android:text="Offset (bit)" />
+
+        <EditText
+            android:id="@+id/selectMemoryOffset1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:visibility="gone"
+            android:inputType="numberDecimal"
+            style="@style/style_normal_font"
+            android:text="32" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/selectPasswordRow1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            style="@style/style_normal_font"
+            android:text="@string/password_title" />
+
+        <include
+            android:id="@+id/selectPasswordValue1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            layout="@layout/custom_edittext_password" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingLeft="@dimen/default_left_padding">
+
+        <TextView
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            style="@style/style_normal_font"
+            android:text="@string/settingAntennaPower_title" />
+
+        <EditText
+            android:id="@+id/selectAntennaPower1"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            style="@style/style_normal_font"
+            android:inputType="numberDecimal" />
+    </TableRow>
+</LinearLayout>

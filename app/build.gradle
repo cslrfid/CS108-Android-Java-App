@@ -1,18 +1,24 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 33
+    namespace 'com.csl.cs108ademoapp'
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileSdk 34
     defaultConfig {
         applicationId "com.csl.cs108ademoapp"
-        minSdkVersion 19
-        targetSdkVersion 33
-        versionCode 38
-        versionName "2.8.22"
+        minSdk 21
+        targetSdk 34
+        versionCode 41
+        versionName "2.14.0"
     }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.google.android.material:material:1.11.0'
     implementation project(':cs108library4a')
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation project(':cslibrary4a')
 }

@@ -87,7 +87,7 @@ public class AxzonSelectorFragment extends CommonFragment {
                 MainActivity.mDid = "E282405";
                 break;
             default:
-                MainActivity.mDid = "E28240";
+                MainActivity.mDid = "E2824";
                 break;
         }
         MainActivity.csLibrary4A.appendToLog("HelloABC: gotoAxzonFragment with tagType = " + tagType + ", MainActivity.mDid = " + MainActivity.mDid);

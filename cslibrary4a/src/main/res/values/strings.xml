@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">cslibrary4a</string>
+    <string name="toast_permission_not_granted">"Permissions are not granted. Please allow them in system setting."</string>
+</resources>

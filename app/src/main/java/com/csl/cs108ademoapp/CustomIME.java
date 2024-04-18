@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputConnection;
 
-import com.csl.cs108library4a.Cs108Library4A;
+import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.util.ArrayList;
 
@@ -29,9 +29,9 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
         super.onCreateInputView();;
         mHandler.post(serviceRunnable);
         KeyboardView keyboardView = null;
-        if (false) {
+        if (true) {
             keyboardView = (KeyboardView) getLayoutInflater().inflate(R.layout.keyboard_view, null);
-            Keyboard keyboard = new Keyboard(this, R.xml.number_pad);
+            Keyboard keyboard = new Keyboard(this, R.xml.number_pad1);
             keyboardView.setKeyboard(keyboard);
             //keyboardView.setOnKeyboardActionListener(this);
         }
@@ -51,8 +51,9 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
         @Override
         public void run() {
             String strCurrentIME = Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-            appendToLog("CustomIME Debug 0 with " + strCurrentIME);
-            if (strCurrentIME.contains("com.csl.cs108ademoapp") == false) return;
+            String strCompare = getPackageName();
+            appendToLog("CustomIME Debug 0 with strCurrentIME = " + strCurrentIME + ", strCompare = " + strCompare);
+            if (strCurrentIME.contains(strCompare) == false) return;
 
             mHandler.postDelayed(serviceRunnable, 1000);
             if (MainActivity.sharedObjects == null) return;
@@ -86,8 +87,8 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
                         if (matched == false && strEpc != null) {
                             epcArrayList.add(strEpc);
                             InputConnection ic = getCurrentInputConnection();
-                            strEpc = (MainActivity.wedgePrefix != null ? MainActivity.wedgePrefix : "") + strEpc
-                                    + (MainActivity.wedgeSuffix != null ? MainActivity.wedgeSuffix : "");
+                            if (MainActivity.wedgePrefix != null) strEpc = MainActivity.wedgePrefix + strEpc;
+                            if (MainActivity.wedgeSuffix != null) strEpc += MainActivity.wedgeSuffix;
                             switch (MainActivity.wedgeDelimiter) {
                                 default:
                                     strEpc += "\n";
@@ -124,7 +125,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
         if ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false)) return;
         if (started == false) {
             appendToLog("CustomIME Debug 11");
-            MainActivity.csLibrary4A.startOperation(Cs108Library4A.OperationTypes.TAG_INVENTORY);
+            MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY);
             inventoryRfidTask = new InventoryRfidTask();
             inventoryRfidTask.execute();
         }
