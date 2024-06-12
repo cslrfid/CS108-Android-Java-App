@@ -310,10 +310,12 @@ public class NotificationConnector {
             if (found) utility.writeDebug2File("Up32 " + csReaderNotificationData.notificationPayloadEvent.toString() + ", " + byteArrayToString(csReaderNotificationData.dataValues));
             return found;
         }
-    Context context; Utility utility;
-    public NotificationConnector(Context context, Utility utility) {
+    Context context; Utility utility; boolean triggerReporting; short triggerReportingCountSetting;
+    public NotificationConnector(Context context, Utility utility, boolean triggerReporting, short triggerReportingCountSetting) {
         this.context = context;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
+        this.triggerReporting = triggerReporting;
+        this.triggerReportingCountSetting = triggerReportingCountSetting;
     }
     private void appendToLog(String s) { utility.appendToLog(s); }
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
@@ -369,7 +371,6 @@ public class NotificationConnector {
     }
     public boolean getAutoBarStartSTop() { return getAutoBarStartStopStatus(); }
 
-    public boolean triggerReportingDefault = true, triggerReporting = triggerReportingDefault;
     public boolean getTriggerReporting() { return triggerReporting; }
     public boolean setTriggerReporting(boolean triggerReporting) {
         boolean bValue = false;
@@ -383,8 +384,8 @@ public class NotificationConnector {
     }
 
     public final int iNO_SUCH_SETTING = 10000;
-    public short triggerReportingCountSettingDefault = 1;
-    public short triggerReportingCountSetting = triggerReportingCountSettingDefault;
+    //public short triggerReportingCountSettingDefault = 1;
+    //public short triggerReportingCountSetting = triggerReportingCountSettingDefault;
     public short getTriggerReportingCount() {
         //if (getcsModel() == 108) bValue = checkHostProcessorVersion(hostProcessorICGetFirmwareVersion(),  1, 0, 16);
         //if (bValue == false) return iNO_SUCH_SETTING; else

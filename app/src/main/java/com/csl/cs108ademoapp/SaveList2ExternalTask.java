@@ -1,9 +1,10 @@
 package com.csl.cs108ademoapp;
 
-import android.Manifest;
-import android.app.Activity;
+import static android.content.Context.WIFI_SERVICE;
+import static com.csl.cs108ademoapp.MainActivity.csLibrary4A;
+import static com.csl.cs108ademoapp.MainActivity.mContext;
+
 import android.bluetooth.BluetoothAdapter;
-import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -11,7 +12,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
@@ -46,11 +46,6 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
-import static android.content.Context.WIFI_SERVICE;
-import static androidx.core.app.ActivityCompat.requestPermissions;
-import static com.csl.cs108ademoapp.MainActivity.mContext;
-import static com.csl.cs108ademoapp.MainActivity.csLibrary4A;
 
 public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
     public String messageStr;
@@ -381,6 +376,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         String resultDisplay = "";
         if (MainActivity.csLibrary4A.getSaveFileEnable() == false) return "No saving file as it is disabled";
         boolean writeExtPermission = true;
+/*
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 csLibrary4A.appendToLog("WRITE_EXTERNAL_STORAGE Permission is required !!!");
@@ -393,7 +389,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
                 }
             } else csLibrary4A.appendToLog("WRITE_EXTERNAL_STORAGE Permission is GRANTED !!!");
         }
-
+*/
         errorDisplay = null;
         if (writeExtPermission == false) {
             errorDisplay = "denied WRITE_EXTERNAL_STORAGE Permission !!!";

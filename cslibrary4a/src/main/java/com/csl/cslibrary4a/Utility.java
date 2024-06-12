@@ -1,9 +1,6 @@
 package com.csl.cslibrary4a;
 
-import static androidx.core.app.ActivityCompat.requestPermissions;
-
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
@@ -13,7 +10,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.epctagcoder.exception.EPCParseException;
 import org.epctagcoder.parse.SGTIN.ParseSGTIN;
@@ -175,10 +171,10 @@ public class Utility {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 writeExtPermission = false;
-                appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
-                requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
-                return;
+                //appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
+                //requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                //if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
+                //return;
             }
         }
         String errorDisplay = null;

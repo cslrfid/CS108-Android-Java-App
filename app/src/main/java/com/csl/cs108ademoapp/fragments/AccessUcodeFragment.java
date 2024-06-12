@@ -1,4 +1,3 @@
-
 package com.csl.cs108ademoapp.fragments;
 
 import static com.csl.cs108ademoapp.MainActivity.csLibrary4A;
@@ -265,12 +264,18 @@ public class AccessUcodeFragment extends CommonFragment {
         MainActivity.csLibrary4A.setSameCheck(false);
 
         MainActivity.csLibrary4A.appendToLog("mDid in AccessUcodeFragment = " + MainActivity.mDid);
-        TextView textView = (TextView) getActivity().findViewById(R.id.accessUCAuthKeyIdLabel); textView.setVisibility(View.GONE);
-        EditText editText = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId); editText.setVisibility(View.GONE);
-        editTextAuthMsg.setText("049CA53E55EA");
-        TableRow tableRow1 = (TableRow) getActivity().findViewById(R.id.accessUCAuthProfileRow); tableRow1.setVisibility(View.GONE);
-        LinearLayout layout1 = (LinearLayout) getActivity().findViewById(R.id.accessUCKeyLayout); layout1.setVisibility(View.GONE);
+        TextView textView = (TextView) getActivity().findViewById(R.id.accessUCAuthKeyIdLabel);
+        EditText editText = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId);
+        TableRow tableRow1 = (TableRow) getActivity().findViewById(R.id.accessUCAuthProfileRow);
+        LinearLayout layout1 = (LinearLayout) getActivity().findViewById(R.id.accessUCKeyLayout);
         LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessUCButtons); layout.setVisibility(View.GONE);
+        if (bImpinJTag) {
+            textView.setVisibility(View.GONE);
+            editText.setVisibility(View.GONE);
+            editTextAuthMsg.setText("049CA53E55EA");
+            tableRow1.setVisibility(View.GONE);
+            layout1.setVisibility(View.GONE);
+        }
 
         Button buttonImpinjCheck = (Button) getActivity().findViewById(R.id.accessUCImpinjCheck);
         buttonImpinjCheck.setOnClickListener(new View.OnClickListener() {

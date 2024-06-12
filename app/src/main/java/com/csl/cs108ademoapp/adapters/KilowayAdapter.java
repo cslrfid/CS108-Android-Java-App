@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 
 import com.csl.cs108ademoapp.fragments.AccessKilowayFragment;
+import com.csl.cs108ademoapp.fragments.InventoryRfidSearchFragment;
 import com.csl.cs108ademoapp.fragments.InventoryRfidiMultiFragment;
 
 public class KilowayAdapter extends FragmentStatePagerAdapter {
@@ -20,8 +21,12 @@ public class KilowayAdapter extends FragmentStatePagerAdapter {
                 fragment = InventoryRfidiMultiFragment.newInstance(true,"E281D");
                 fragment1 = fragment;
                 break;
-            case 1:
+            case 2:
                 fragment = new AccessKilowayFragment(false);
+                fragment0 = fragment;
+                break;
+            case 1:
+                fragment = new InventoryRfidSearchFragment(true);
                 fragment0 = fragment;
                 break;
             default:

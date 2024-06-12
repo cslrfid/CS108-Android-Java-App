@@ -14,10 +14,11 @@ public class BarcodeNewland {
     }
     BarcodeCommandTypes commandType;
 
-    Context context; Utility utility; BarcodeConnector barcodeConnector;
-    public BarcodeNewland(Context context, Utility utility, BarcodeConnector barcodeConnector) {
+    Context context; Utility utility; BarcodeConnector barcodeConnector; boolean barcode2TriggerMode;
+    public BarcodeNewland(Context context, Utility utility, BarcodeConnector barcodeConnector, boolean barcode2TriggerMode) {
         this.context = context;
         this.barcodeConnector = barcodeConnector;
+        this.barcode2TriggerMode = barcode2TriggerMode;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
     }
 
@@ -38,7 +39,7 @@ public class BarcodeNewland {
     }
 
     public byte bBarcodeTriggerMode = (byte)0xff;
-    public boolean barcode2TriggerModeDefault = true, barcode2TriggerMode = barcode2TriggerModeDefault;
+    //public boolean barcode2TriggerModeDefault = true, barcode2TriggerMode = barcode2TriggerModeDefault;
     boolean barcodeReadTriggerStart() {
         BarcodeConnector.CsReaderBarcodeData csReaderBarcodeData = new BarcodeConnector.CsReaderBarcodeData();
         csReaderBarcodeData.barcodePayloadEvent = BarcodeConnector.BarcodePayloadEvents.BARCODE_SCAN_START;

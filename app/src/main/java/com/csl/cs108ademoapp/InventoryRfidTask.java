@@ -449,11 +449,12 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             else strTidCompared = "E28011";
                         }
                         MainActivity.csLibrary4A.appendToLog("strTidCompared = " + strTidCompared);
-                        if (strTidCompared.matches("E282402")) { }
+                        if (strTidCompared.matches("E28011")) { }
+                        else if (strTidCompared.matches("E2806894") && MainActivity.mDid.matches("E2806894C")) { }
+                        else if (strTidCompared.matches("E281D")) { }
+                        else if (strTidCompared.matches("E282402")) { }
                         else if (strTidCompared.matches("E282403")) { }
                         else if (strTidCompared.matches("E282405")) { }
-                        else if (strTidCompared.matches("E2806894") && MainActivity.mDid.matches("E2806894C")) { }
-                        else if (strTidCompared.matches("E28011")) { }
                         else { //if (strMdid.matches("E280B0"))
                             boolean bMatched = false;
                             if (strExtra1 != null && strExtra1.indexOf(strTidCompared) == 0) {
@@ -584,12 +585,14 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             if (bAdd2End) tagsList.add(readerDevice);
                             else tagsList.add(0, readerDevice);
                             SharedObjects.TagsIndex tagsIndex = new SharedObjects.TagsIndex(strAddresss, tagsList.size() - 1); MainActivity.sharedObjects.tagsIndexList.add(tagsIndex); Collections.sort(MainActivity.sharedObjects.tagsIndexList);
+                            MainActivity.csLibrary4A.appendToLog("openServer: serverConnectValid is " + serverConnectValid);
                             if (serverConnectValid && ALLOW_RTSAVE && true) {
                                 try {
 //                                    saveExternalTask = new SaveList2ExternalTask();
 //                                    saveExternalTask.openServer();
                                     String msgOutput = saveExternalTask.createJSON(null, readerDevice).toString(); MainActivity.csLibrary4A.appendToLog("Json = " + msgOutput);
                                     saveExternalTask.write2Server(msgOutput);
+                                    MainActivity.csLibrary4A.appendToLog("openServer: write2Server data = " + msgOutput);
 
                                     //                                   saveExternalTask.closeServer();
                                     MainActivity.csLibrary4A.appendToLog("write2Server is done");

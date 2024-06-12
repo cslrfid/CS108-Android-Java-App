@@ -3810,7 +3810,7 @@ public class RfidReaderChipE710 {
                                         } else {
                                             int iEpcLength = getBytes2EpcLength(dataA.decodedPc);
                                             if (DEBUG) appendToLog("dataA.dataValues.length = " + dataA.dataValues.length + ", iEpcLength = " + iEpcLength + " for data " + byteArrayToString(dataA.dataValues));
-                                            if (dataA.dataValues.length - 18 > iEpcLength) {
+                                            if (dataA.dataValues.length - 18 >= iEpcLength) {
                                                 dataA.decodedEpc = new byte[dataA.dataValues.length - 18];
                                                 System.arraycopy(dataA.dataValues, 17, dataA.decodedEpc, 0, iEpcLength);
                                                 System.arraycopy(dataA.dataValues, iEpcLength + 18, dataA.decodedEpc, iEpcLength, dataA.dataValues.length - iEpcLength - 18);

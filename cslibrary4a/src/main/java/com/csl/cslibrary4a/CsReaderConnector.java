@@ -318,6 +318,7 @@ public class CsReaderConnector {
 
     }
     public Cs108ConnectorData mCs108ConnectorData;
+    public SettingData settingData;
 
     RfidConnector rfidConnector; public RfidReader rfidReader;
     public BarcodeConnector barcodeConnector; public BarcodeNewland barcodeNewland;
@@ -340,11 +341,15 @@ public class CsReaderConnector {
         writeDataCount = 0;
 
         mCs108ConnectorData = new Cs108ConnectorData();
+        notificationConnector = new NotificationConnector(context, utility, settingData.triggerReporting, settingData.triggerReportingCountSetting);
+        controllerConnector = new ControllerConnector(context, utility);
+        bluetoothConnector = new BluetoothConnector(context, utility, settingData.userDebugEnable);
+        //settingData = new SettingData(context, utility);
 
-        rfidReader = new RfidReader(context, utility, null, this, bis108);
+        rfidReader = new RfidReader(context, utility, null, this, bis108, bluetoothGatt, settingData, notificationConnector);
         rfidConnector = rfidReader.rfidConnector;
         barcodeConnector = new BarcodeConnector(context, utility);
-        barcodeNewland = new BarcodeNewland(context, utility, barcodeConnector);
+        barcodeNewland = new BarcodeNewland(context, utility, barcodeConnector, settingData.barcode2TriggerMode);
         barcodeConnector.barcodeConnectorCallback = new BarcodeConnector.BarcodeConnectorCallback(){
             @Override
             public boolean callbackMethod(byte[] dataValues, BarcodeConnector.CsReaderBarcodeData csReaderBarcodeData) {
@@ -352,9 +357,6 @@ public class CsReaderConnector {
                 return false;
             }
         };
-        notificationConnector = new NotificationConnector(context, utility);
-        controllerConnector = new ControllerConnector(context, utility);
-        bluetoothConnector = new BluetoothConnector(context, utility);
         mHandler.removeCallbacks(mReadWriteRunnable); mHandler.post(mReadWriteRunnable);
         appendToLog("!!! all major classes are initialised");
     }
@@ -389,6 +391,7 @@ public class CsReaderConnector {
         //if (DEBUGTHREAD) appendToLog("start immediate mReadWriteRunnable");
         //mHandler.removeCallbacks(mReadWriteRunnable); mHandler.post(mReadWriteRunnable);
         //mHandler.removeCallbacks(runnableRx000UplinkHandler); mHandler.post(runnableRx000UplinkHandler);
+        settingData = new SettingData(context, utility, bluetoothGatt, notificationConnector, rfidReader);
     }
 
     long timeReady; boolean aborting = false, sendFailure = false;
@@ -511,7 +514,7 @@ public class CsReaderConnector {
                 timeReady = System.currentTimeMillis();
                 timer2Write = 0;
                 if (rfidConnector.rfidFailure) rfidConnector.mRfidToWrite.clear();
-                if (barcodeConnector.barcodeFailure) { barcodeConnector.barcodeToWrite.clear(); appendToLog("barcodeToWrite is clear"); }
+                //if (barcodeConnector.barcodeFailure) { barcodeConnector.barcodeToWrite.clear(); appendToLog("barcodeToWrite is clear"); }
                 if (rfidReader.mRx000ToWrite.size() != 0 && rfidConnector.mRfidToWrite.size() == 0) {
                     if (DEBUG)
                         appendToLog("mReadWriteRunnable(): mRx000ToWrite.size=" + rfidReader.mRx000ToWrite.size() + ", mRfidToWrite.size=" + rfidConnector.mRfidToWrite.size());

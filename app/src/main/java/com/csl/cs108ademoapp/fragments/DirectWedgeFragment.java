@@ -36,7 +36,7 @@ import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cslibrary4a.BluetoothGatt;
 import com.csl.cslibrary4a.ReaderDevice;
-import com.csl.cslibrary4a.CustomAlertDialog;
+import com.csl.cs108ademoapp.CustomAlertDialog;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,17 +1,10 @@
 package com.csl.cs108ademoapp;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.Handler;
-
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.drawerlayout.widget.DrawerLayout;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -20,9 +13,39 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+
 import com.csl.cs108ademoapp.DrawerListContent.DrawerPositions;
 import com.csl.cs108ademoapp.adapters.DrawerListAdapter;
-import com.csl.cs108ademoapp.fragments.*;
+import com.csl.cs108ademoapp.fragments.AboutFragment;
+import com.csl.cs108ademoapp.fragments.AccessReadWriteFragment;
+import com.csl.cs108ademoapp.fragments.AccessReadWriteUserFragment;
+import com.csl.cs108ademoapp.fragments.AccessRegisterFragment;
+import com.csl.cs108ademoapp.fragments.AccessSecurityFragment;
+import com.csl.cs108ademoapp.fragments.AuraSenseFragment;
+import com.csl.cs108ademoapp.fragments.AxzonSelectorFragment;
+import com.csl.cs108ademoapp.fragments.ColdChainFragment;
+import com.csl.cs108ademoapp.fragments.ConnectionFragment;
+import com.csl.cs108ademoapp.fragments.DirectWedgeFragment;
+import com.csl.cs108ademoapp.fragments.FdmicroFragment;
+import com.csl.cs108ademoapp.fragments.HomeFragment;
+import com.csl.cs108ademoapp.fragments.HomeSpecialFragment;
+import com.csl.cs108ademoapp.fragments.ImpinjFragment;
+import com.csl.cs108ademoapp.fragments.ImpinjM775Fragment;
+import com.csl.cs108ademoapp.fragments.InventoryFragment;
+import com.csl.cs108ademoapp.fragments.InventoryRfidSearchFragment;
+import com.csl.cs108ademoapp.fragments.InventoryRfidSimpleFragment;
+import com.csl.cs108ademoapp.fragments.InventoryRfidiMultiFragment;
+import com.csl.cs108ademoapp.fragments.KilowayFragment;
+import com.csl.cs108ademoapp.fragments.LongjingFragment;
+import com.csl.cs108ademoapp.fragments.SettingFilterFragment;
+import com.csl.cs108ademoapp.fragments.SettingFragment;
+import com.csl.cs108ademoapp.fragments.TestFragment;
+import com.csl.cs108ademoapp.fragments.Ucode8Fragment;
+import com.csl.cs108ademoapp.fragments.UcodeFragment;
 import com.csl.cs108library4a.Cs108Library4A;
 import com.csl.cslibrary4a.ReaderDevice;
 
@@ -40,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     //Tag to identify the currently displayed fragment
     Fragment fragment = null;
     protected static final String TAG_CONTENT_FRAGMENT = "ContentFragment";
+    public static boolean isHomeFragment = false;
 
     public static TextView mLogView;
     private DrawerLayout mDrawerLayout;
@@ -51,11 +75,8 @@ public class MainActivity extends AppCompatActivity {
     public static SharedObjects sharedObjects;
     public static SensorConnector mSensorConnector;
     public static ReaderDevice tagSelected;
-    Handler mHandler = new Handler();
 
-    PendingIntent mPendingIntent;
-    IntentFilter writeTagFilters[];
-    String[][] techList;
+    Handler mHandler = new Handler();
 
     public static String mDid; public static int selectHold; public static int selectFor;
     public static class Config {

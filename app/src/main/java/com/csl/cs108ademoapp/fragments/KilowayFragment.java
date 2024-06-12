@@ -20,7 +20,7 @@ public class KilowayFragment extends CommonFragment {
     private ViewPager viewPager;
     KilowayAdapter mAdapter;
 
-    private String[] tabs = {"Scan", "Access"};
+    private String[] tabs = {"Scan", "Geiger"}; //, "Access"};
     int iTargetOld, iSessionOld;
 
     @Override
@@ -86,6 +86,7 @@ public class KilowayFragment extends CommonFragment {
 
         iTargetOld = MainActivity.csLibrary4A.getQueryTarget();
         iSessionOld = MainActivity.csLibrary4A.getQuerySession();
+        MainActivity.csLibrary4A.setBasicCurrentLinkProfile();
     }
 
     @Override

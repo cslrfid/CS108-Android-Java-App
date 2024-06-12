@@ -1,7 +1,6 @@
 package com.csl.cslibrary4a;
 
 import android.Manifest;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCallback;
@@ -13,38 +12,27 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
-import android.provider.Settings;
 
 import androidx.core.app.ActivityCompat;
 
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.PopupWindow;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
-import static androidx.core.app.ActivityCompat.requestPermissions;
 
 public class BluetoothGatt extends BluetoothGattCallback {
     boolean DEBUG_PKDATA, DEBUG_APDATA;
     public final boolean DEBUG_SCAN = false;
     public final boolean DEBUG_CONNECT = true;
-    final boolean DEBUG_BTDATA = false;
+    final boolean DEBUG_BTDATA = true;
     final boolean DEBUG = true, DEBUG_BTOP = false;
     static final String TAG = "Hello";
 
@@ -538,10 +526,10 @@ public class BluetoothGatt extends BluetoothGattCallback {
         }
     }
 
-    private Context mContext; private Activity activity; Utility utility; String strReaderServiceUUID;
+    private Context mContext; Utility utility; String strReaderServiceUUID; //private Activity activity;
     public BluetoothGatt(Context context, Utility utility, String strReaderServiceUUID) {
         boolean DEBUG = false;
-        mContext = context; activity = (Activity) mContext;
+        mContext = context; //activity = (Activity) mContext;
         this.strReaderServiceUUID = strReaderServiceUUID;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA; DEBUG_APDATA = utility.DEBUG_APDATA;
 
@@ -581,9 +569,9 @@ public class BluetoothGatt extends BluetoothGattCallback {
     }
 
     private PopupWindow popupWindow;
-    private boolean bleEnableRequestShown0 = false, bleEnableRequestShown = false;
+    private boolean /*bleEnableRequestShown0 = false, */bleEnableRequestShown = false;
     private boolean isLocationAccepted = false;
-    CustomAlertDialog appdialog; boolean bAlerting = false;
+    boolean bAlerting = false; //CustomAlertDialog appdialog;
     public boolean scanLeDevice(boolean enable, BluetoothAdapter.LeScanCallback mLeScanCallback, ScanCallback mScanCallBack) {
         boolean DEBUG = false;
         if (DEBUG) appendToLog("StreamOut: enable = " + enable);
@@ -597,24 +585,24 @@ public class BluetoothGatt extends BluetoothGattCallback {
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false)
                 isLocationAccepted = false;
         }
-        if (DEBUG_SCAN) appendToLog("isLocationAccepted = " + isLocationAccepted + ", bAlerting = " + bAlerting + ", bleEnableRequestShown = " + bleEnableRequestShown0);
-        if (false && isLocationAccepted == false) {
+        if (DEBUG_SCAN) appendToLog("isLocationAccepted = " + isLocationAccepted + ", bAlerting = " + bAlerting + ", bleEnableRequestShown = " + bleEnableRequestShown);
+        /*if (false && isLocationAccepted == false) {
             if (bAlerting == false && bleEnableRequestShown0 == false) {
                 bAlerting = true;
                 if (DEBUG) appendToLog("StreamOut: new AlertDialog");
                 popupAlert();
             }
             return false;
-        }
-
+        }*/
+/*
         if (DEBUG) appendToLog("StreamOut: Passed AlertDialog");
         if (enable && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (DEBUG) appendToLog("Checking permission and grant !!!");
             LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
             if (DEBUG_SCAN) appendToLog("locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
             if (DEBUG_SCAN) appendToLog("locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-            if (DEBUG_SCAN) appendToLog("ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) = " + ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION));
-            if (DEBUG_SCAN) appendToLog("ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)  = " + ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION));
+            if (DEBUG_SCAN) appendToLog("ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION));
+            if (DEBUG_SCAN) appendToLog("ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)  = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION));
             if (false && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) {
                 boolean isShowing = false;
                 if (popupWindow != null) isShowing = popupWindow.isShowing();
@@ -641,8 +629,8 @@ public class BluetoothGatt extends BluetoothGattCallback {
             } else if (
                     (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false
                             && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false)
-                            || (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                            && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                            || (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
                 if (true) {
                     if (bAlerting || bleEnableRequestShown0) return false;
                     bAlerting = true;
@@ -651,21 +639,23 @@ public class BluetoothGatt extends BluetoothGattCallback {
                 }
             }
         }
+*/
         if (isBLUETOOTH_CONNECTinvalid()) return false;
 
         if (locationReady == false) {
             if (DEBUG) appendToLog("AccessCoarseLocatin is NOT granted");
         } else if (bluetoothAdapter == null) {
             if (DEBUG) appendToLog("scanLeDevice(" + enable + ") with NULL mBluetoothAdapter");
-        } else if (!bluetoothAdapter.isEnabled()) {
+/*        } else if (!bluetoothAdapter.isEnabled()) {
             if (DEBUG) appendToLog("StreamOut: bleEnableRequestShown = " + bleEnableRequestShown);
             if (bleEnableRequestShown == false) {
-                if (DEBUG) appendToLog("scanLeDevice(" + enable + ") with DISABLED mBluetoothAdapter");
+                if (true) appendToLog("scanLeDevice(" + enable + ") with DISABLED mBluetoothAdapter");
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 activity.startActivityForResult(enableBtIntent, 1);
                 if (DEBUG) appendToLog("StreamOut: bleEnableRequestShown is set");
                 bleEnableRequestShown = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
             }
+*/
         } else {
             bleEnableRequestShown = false;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -701,13 +691,14 @@ public class BluetoothGatt extends BluetoothGattCallback {
     private final Runnable mRquestAllowRunnable = new Runnable() {
         @Override
         public void run() {
-            bleEnableRequestShown0 = false;
+            //bleEnableRequestShown0 = false;
             bleEnableRequestShown = false;
         }
     };
+/*
     void popupAlert() {
         appdialog = new CustomAlertDialog();
-        appdialog.Confirm((Activity) mContext, "Use your location",
+        appdialog.Confirm(activity, "Use your location",
                 "This app collects location data in the background.  In terms of the features using this location data in the background, this App collects location data when it is reading RFID tag in all inventory pages.  The purpose of this is to correlate the RFID tag with the actual GNSS(GPS) location of the tag.  In other words, this is to track the physical location of the logistics item tagged with the RFID tag.",
                 "No thanks", "Turn on",
                 new Runnable() {
@@ -715,9 +706,9 @@ public class BluetoothGatt extends BluetoothGattCallback {
                     public void run() {
                         isLocationAccepted = true;
                         appendToLog("StreamOut: This from FALSE proc");
-                        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
 //                                && ActivityCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-                                && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                             appendToLog("requestPermissions ACCESS_FINE_LOCATION 123");
                             requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
                             if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
@@ -744,7 +735,6 @@ public class BluetoothGatt extends BluetoothGattCallback {
                 });
     }
 
-    /*
     BroadcastReceiver myReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -976,11 +966,12 @@ public class BluetoothGatt extends BluetoothGattCallback {
 
     public boolean isBLUETOOTH_CONNECTinvalid() {
         boolean bValue = false;
+/*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (
                 ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
         )) {
             appendToLog("requestPermissions BLUETOOTH_CONNECT & BLUETOOTH_CONNECT 123");
-            requestPermissions((Activity) mContext, new String[] {
+            requestPermissions(activity, new String[] {
                     Manifest.permission.BLUETOOTH_SCAN,
                     Manifest.permission.BLUETOOTH_CONNECT
             }, 123);
@@ -988,8 +979,10 @@ public class BluetoothGatt extends BluetoothGattCallback {
             bValue = true;
         }
         //appendToLog("isBLUETOOTH_CONNECTinvalid returns " + bValue);
+*/
         return bValue;
     }
+
     String byteArray2DisplayString(byte[] byteData) { return utility.byteArray2DisplayString(byteData); }
     String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     int byteArrayToInt(byte[] bytes) { return utility.byteArrayToInt(bytes); }
