@@ -93,11 +93,10 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         MainActivity.mSensorConnector.mSensorDevice.turnOn(true);
         if (ALLOW_RTSAVE) {
             saveExternalTask = new SaveList2ExternalTask(false);
-            try {
-                saveExternalTask.openServer(false);
+            if (saveExternalTask.openServer(false)) {
                 serverConnectValid = true;
                 MainActivity.csLibrary4A.appendToLog("openServer is done");
-            } catch (Exception ex) {
+            } else {
                 MainActivity.csLibrary4A.appendToLog("openServer has Exception");
             }
         }
@@ -109,13 +108,13 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                 + ", getVibrateModeSetting = " + MainActivity.csLibrary4A.getVibrateModeSetting()
         );
         if (MainActivity.csLibrary4A.getInventoryVibrate() && bUseVibrateMode0 == false && MainActivity.csLibrary4A.getVibrateModeSetting() == 1) bValidVibrateNewAll = true;
-        MainActivity.csLibrary4A.appendToLog("bValidVibrateNewAll = " + bValidVibrateNewAll + ". If true, setVibrate_2");
+        MainActivity.csLibrary4A.appendToLog("setVibrateOn d 2 with bValidVibrateNewAll = " + bValidVibrateNewAll);
         if (bValidVibrateNewAll) MainActivity.csLibrary4A.setVibrateOn(2);
     }
 
     @Override
     protected void onPreExecute() {
-        inventoryHandler_setup();
+        //inventoryHandler_setup();
     }
 
     byte[] notificationData;
@@ -690,6 +689,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             }
 
                             if (validVibrate) {
+                                MainActivity.csLibrary4A.appendToLog("setVibrateOn E with bUseVibrateMode0 as " + bUseVibrateMode0);
                                 if (bUseVibrateMode0) MainActivity.csLibrary4A.setVibrateOn(1);
                                 else MainActivity.csLibrary4A.setVibrateOn(2);
                                 bStartVibrateWaiting = true; int timeout = MainActivity.csLibrary4A.getVibrateWindow() * 1000;
@@ -731,6 +731,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         @Override
         public void run() {
             bStartVibrateWaiting = false;
+            MainActivity.csLibrary4A.appendToLog("setVibrateOn F1 with bUseVibrateMode0 as " + bUseVibrateMode0);
             if (bUseVibrateMode0 == false) MainActivity.csLibrary4A.setVibrateOn(0);
         }
     };
@@ -750,7 +751,9 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         DeviceConnectTask4InventoryEnding(taskCancelReason);
     }
 
-    public InventoryRfidTask() { }
+    public InventoryRfidTask() {
+        inventoryHandler_setup();
+    }
     public InventoryRfidTask(Context context, int extra1Bank, int extra2Bank, int data1_count, int data2_count, int data1_offset, int data2_offset,
                              boolean invalidRequest, boolean beepEnable,
                              ArrayList<ReaderDevice> tagsList, ReaderListAdapter readerListAdapter, TextView geigerTagRssiView,
@@ -787,6 +790,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
             playerN = MainActivity.sharedObjects.playerN;
             MainActivity.csLibrary4A.appendToLogView("playerO and playerN is created");
         }
+        inventoryHandler_setup();
     }
 
     boolean popRequest = false; Toast mytoast;
@@ -795,12 +799,8 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         MainActivity.csLibrary4A.abortOperation();  //added in case previous command end is received with inventory stopped
         MainActivity.csLibrary4A.appendToLog("serverConnectValid = " + serverConnectValid);
         if (serverConnectValid && ALLOW_RTSAVE) {
-            try {
-                saveExternalTask.closeServer();
-                MainActivity.csLibrary4A.appendToLog("closeServer is done");
-            } catch (Exception ex) {
-                MainActivity.csLibrary4A.appendToLog("closeServer has Exception");
-            }
+            if (saveExternalTask.closeServer()) MainActivity.csLibrary4A.appendToLog("closeServer is done");
+            else MainActivity.csLibrary4A.appendToLog("closeServer has Exception");
         }
         MainActivity.csLibrary4A.appendToLog("INVENDING: Ending with endingRequest = " + endingRequest);
         if (MainActivity.mContext == null) return;
@@ -840,6 +840,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         }
         MainActivity.mSensorConnector.mLocationDevice.turnOn(false);
         MainActivity.mSensorConnector.mSensorDevice.turnOn(false);
+        MainActivity.csLibrary4A.appendToLog("setVibrateOn F 0");
         MainActivity.csLibrary4A.setVibrateOn(0);
     }
 

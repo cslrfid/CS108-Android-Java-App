@@ -201,9 +201,9 @@ public class SettingAdminFragment extends CommonFragment {
                 //String serverLocation = "https://" + "www.convergence.com.hk:" + "29090/WebServiceRESTs/1.0/req/" + "create-update-delete/update-entity/" + "tagdata";
                 //String serverLocation = "http://ptsv2.com/t/10i1t-1519143332/post";
                 editTextServer.setText(serverLocation);
-                String serverMqttLocation = "192.168.25.182";
-                editTextServerMqtt.setText(serverMqttLocation);
-                editTextTopicMqtt.setText("test/topic");
+                //String serverMqttLocation = "192.168.25.182";
+                //editTextServerMqtt.setText(serverMqttLocation);
+                //editTextTopicMqtt.setText("test/topic");
             }
         });
 
@@ -706,6 +706,7 @@ public class SettingAdminFragment extends CommonFragment {
             MainActivity.csLibrary4A.appendToLog("getForegroundServiceEnable = " + MainActivity.csLibrary4A.getForegroundServiceEnable() + ", foregroundServiceEnable = " + foregroundServiceEnable);
             if (MainActivity.csLibrary4A.getForegroundServiceEnable() != foregroundServiceEnable || sameCheck == false) {
                 sameSetting = false;
+                MainActivity.csLibrary4A.appendToLog("foregroundReader108: updated 2C");
                 if (MainActivity.csLibrary4A.setForegroundServiceEnable(foregroundServiceEnable) == false)
                     invalidRequest = true;
             }

@@ -291,7 +291,7 @@ public class AccessUcodeFragment extends CommonFragment {
         editTextAccessUCserverImpinj = (EditText) getActivity().findViewById(R.id.accessUCserverImpinj);
         editTextAccessUCemail = (EditText) getActivity().findViewById(R.id.accessUCemail);
         editTextAccessUCpassword = (EditText) getActivity().findViewById(R.id.accessUCpassword);
-        if (true) {
+        if (false) {
             editTextAccessUCserverImpinj.setText(csLibrary4A.getServerImpinjLocation());
             editTextAccessUCemail.setText(csLibrary4A.getServerImpinjName());
             editTextAccessUCpassword.setText(csLibrary4A.getServerImpinjPassword());

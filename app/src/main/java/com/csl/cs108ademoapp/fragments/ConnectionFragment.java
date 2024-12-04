@@ -2,7 +2,6 @@ package com.csl.cs108ademoapp.fragments;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanCallback;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -206,7 +205,7 @@ public class ConnectionFragment extends CommonFragment {
                     if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) continue;
                 } else if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) continue;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("scanResultA.device.getType() = " + scanResultA.device.getType() + ". scanResultA.rssi = " + scanResultA.rssi);
-                if (scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE && (true || scanResultA.rssi < 0)) {
+                if (/*scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE &&*/(true || scanResultA.rssi < 0)) {
                     boolean match = false;
                     for (int i = 0; i < readersList.size(); i++) {
                         if (readersList.get(i).getAddress().matches(scanResultA.device.getAddress())) {
@@ -358,7 +357,7 @@ public class ConnectionFragment extends CommonFragment {
             readerListAdapter.notifyDataSetChanged();
 
             String connectedBleAddress = connectingDevice.getAddress();
-            if (connectedBleAddress.matches(MainActivity.sharedObjects.connectedBleAddressOld) == false)   MainActivity.sharedObjects.versioinWarningShown = false;
+            if (connectedBleAddress.matches(MainActivity.sharedObjects.connectedBleAddressOld) == false)   MainActivity.sharedObjects.versionWarningShown = false;
             MainActivity.sharedObjects.connectedBleAddressOld = connectedBleAddress;
             MainActivity.sharedObjects.barsList.clear();
             MainActivity.sharedObjects.tagsList.clear();

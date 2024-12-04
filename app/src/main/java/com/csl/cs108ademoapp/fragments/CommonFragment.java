@@ -5,11 +5,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -21,13 +16,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+
+import com.csl.cs108ademoapp.CustomAlertDialog;
 import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.CustomAlertDialog;
 
 public abstract class CommonFragment extends Fragment {
-    final boolean DEBUG = true; final String TAG = "Hello";
+    final boolean DEBUG = false; final String TAG = "Hello";
     private String fragmentName;
     MenuItem menuTriggerItem, menuBatteryVoltageItem;
     Handler mHandler = new Handler();
@@ -131,7 +130,8 @@ public abstract class CommonFragment extends Fragment {
                                 });
                     }
                 } else if (DEBUG) MainActivity.csLibrary4A.appendToLog("bleConnected is Kept as FALSE in " + fragmentName);
-                MainActivity.sharedObjects.batteryWarningShown = 0; menuBatteryVoltageItem.setTitle("");  return;
+                MainActivity.sharedObjects.batteryWarningShown = 0; menuBatteryVoltageItem.setTitle("");
+                return;
             } else {
                 bleConnected = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("bleConnected is TRUE in " + fragmentName);
@@ -148,21 +148,21 @@ public abstract class CommonFragment extends Fragment {
                                 new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (DEBUG)
-                                            MainActivity.csLibrary4A.appendToLog("Confirm is pressed");
+                                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("Confirm is pressed");
                                         MainActivity.csLibrary4A.forceBTdisconnect();
                                     }
                                 },
                                 new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (DEBUG)
-                                            MainActivity.csLibrary4A.appendToLog("Cancel is pressed.");
+                                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("Cancel is pressed.");
                                     }
                                 });
                     }
                 }
-            } else rfidFailure = false;
+            } else {
+                rfidFailure = false;
+            }
 
             int batteryCount = MainActivity.csLibrary4A.getBatteryCount();
             String strText = MainActivity.csLibrary4A.getBatteryDisplay(false);
@@ -307,7 +307,7 @@ public abstract class CommonFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
+        if (false) MainActivity.csLibrary4A.appendToLog(fragmentName);
         super.onDestroyView();
     }
 

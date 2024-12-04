@@ -16,21 +16,19 @@ public class RfidReader {
     ArrayList<RfidConnector.CsReaderRfidData> mRx000ToWrite;
     ArrayList<RfidReaderChipData.Rx000pkgData> mRx000ToRead;
     public ArrayList<RfidConnector.CsReaderRfidData> mRfidToWrite;
-    Context context; Utility utility; CsReaderConnector108 csReaderConnector108; CsReaderConnector csReaderConnector; boolean bis108; BluetoothGatt bluetoothGatt; SettingData settingData; NotificationConnector notificationConnector;
-    public RfidReader(Context context, Utility utility, CsReaderConnector108 csReaderConnector108, CsReaderConnector csReaderConnector, boolean bis108, BluetoothGatt bluetoothGatt, SettingData settingData, NotificationConnector notificationConnector) {
+    Context context; Utility utility; boolean bis108; BluetoothGatt bluetoothGatt; SettingData settingData; NotificationConnector notificationConnector;
+    public RfidReader(Context context, Utility utility, CsReaderConnector csReaderConnector, boolean bis108, BluetoothGatt bluetoothGatt, SettingData settingData, NotificationConnector notificationConnector) {
         this.context = context;
         this.utility = utility;
-        this.csReaderConnector108 = csReaderConnector108;
-        this.csReaderConnector = csReaderConnector;
         this.bis108 = bis108;
         this.bluetoothGatt = bluetoothGatt;
         this.settingData = settingData;
         this.notificationConnector = notificationConnector;
 
         rfidConnector = new RfidConnector(context, utility); mRfidToWrite = rfidConnector.mRfidToWrite;
-        if (bis108) { //csReaderConnector108 != null) {
+        if (bis108) {
             appendToLog("bis108: new RfidReaderChipR2000 is created");
-            rfidReaderChipR2000 = new RfidReaderChipR2000(context, utility, csReaderConnector108);
+            rfidReaderChipR2000 = new RfidReaderChipR2000(context, utility, csReaderConnector);
             mRx000ToWrite = rfidReaderChipR2000.mRx000ToWrite;
             mRx000ToRead = rfidReaderChipR2000.mRx000ToRead;
         } else {
@@ -59,18 +57,14 @@ public class RfidReader {
     private void appendToLog(String s) { utility.appendToLog(s); }
 
     //============ Rfid ============
+    //============ Rfid ============
+    //============ Rfid ============
+    //============ Rfid ============
+    //============ Rfid ============
+
     public boolean setInvAlgoNoSave(boolean dynamicAlgo) {
         appendToLog("writeBleStreamOut: going to setInvAlgo with dynamicAlgo = " + dynamicAlgo);
         return setInvAlgo1(dynamicAlgo);
-    }
-    public boolean getInvAlgo1() {
-        int iValue;
-        iValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getInvAlgo() : rfidReaderChipE710.rx000Setting.getInvAlgo());
-        if (iValue < 0) {
-            return true;
-        } else {
-            return (iValue != 0 ? true : false);
-        }
     }
     public boolean setInvAlgo1(boolean dynamicAlgo) {
         boolean bValue = true, DEBUG = false;
@@ -93,28 +87,28 @@ public class RfidReader {
         return bValue;
     }
 
-    public static final int FCC_CHN_CNT = 50; //change "public static" to "private" later
-    public final double[] FCCTableOfFreq = new double[] { //change "public" to "private" later
+    private final int FCC_CHN_CNT = 50;
+    private final double[] FCCTableOfFreq = new double[] {
             902.75, 903.25, 903.75, 904.25, 904.75, 905.25, 905.75, 906.25, 906.75, 907.25,//10
             907.75, 908.25, 908.75, 909.25, 909.75, 910.25, 910.75, 911.25, 911.75, 912.25,//20
             912.75, 913.25, 913.75, 914.25, 914.75, 915.25, 915.75, 916.25, 916.75, 917.25,
             917.75, 918.25, 918.75, 919.25, 919.75, 920.25, 920.75, 921.25, 921.75, 922.25,
             922.75, 923.25, 923.75, 924.25, 924.75, 925.25, 925.75, 926.25, 926.75, 927.25 };
-    public final double[] FCCTableOfFreq0 = new double[] {
+    private final double[] FCCTableOfFreq0 = new double[] {
             903.75, 912.25, 907.75, 910.25, 922.75,     923.25, 923.75, 915.25, 909.25, 912.75,
             910.75, 913.75, 909.75, 905.25, 911.75,     902.75, 914.25, 918.25, 926.25, 925.75,
             920.75, 920.25, 907.25, 914.75, 919.75,     922.25, 903.25, 906.25, 905.75, 926.75,
             924.25, 904.75, 925.25, 924.75, 919.25,     916.75, 911.25, 921.25, 908.25, 908.75,
             913.25, 916.25, 904.25, 906.75, 917.75,     921.75, 917.25, 927.25, 918.75, 915.75 };
-    public int[] fccFreqSortedIdx0;
-    public final double[] FCCTableOfFreq1 = new double[] {
+    private int[] fccFreqSortedIdx0;
+    private final double[] FCCTableOfFreq1 = new double[] {
             915.25, 920.75, 909.25, 912.25, 918.25,     920.25, 909.75, 910.25, 919.75, 922.75,
             908.75, 913.75, 903.75, 919.25, 922.25,     907.75, 911.75, 923.75, 916.75, 926.25,
             908.25, 912.75, 924.25, 916.25, 927.25,     907.25, 910.75, 903.25, 917.75, 926.75,
             905.25, 911.25, 924.75, 917.25, 925.75,     906.75, 914.25, 904.75, 918.75, 923.25,
             902.75, 914.75, 905.75, 915.75, 925.25,     906.25, 921.25, 913.25, 921.75, 904.25 };
-    public int[] fccFreqSortedIdx1;
-    public int[] fccFreqTable = new int[] {
+    private int[] fccFreqSortedIdx1;
+    private int[] fccFreqTable = new int[] {
             0x00180E4F, //915.75 MHz
             0x00180E4D, //915.25 MHz
             0x00180E1D, //903.25 MHz
@@ -166,8 +160,8 @@ public class RfidReader {
             0x00180E1B, //902.75 MHz
             0x00180E6D, //923.25 MHz
     };
-    public int[] fccFreqTableIdx;
-    public final int[] fccFreqSortedIdx = new int[] {
+    private int[] fccFreqTableIdx;
+    private final int[] fccFreqSortedIdx = new int[] {
             26, 25, 1, 48, 47,
             3, 49, 35, 33, 13,
             32, 30, 5, 4, 45,
@@ -178,11 +172,11 @@ public class RfidReader {
             44, 14, 34, 28, 21,
             42, 11, 46, 20, 43,
             37, 36, 40, 0, 41 };
-    public static final int AUS_CHN_CNT = 10;
-    public final double[] AUSTableOfFreq = new double[] {
+    private final int AUS_CHN_CNT = 10;
+    private final double[] AUSTableOfFreq = new double[] {
             920.75, 921.25, 921.75, 922.25, 922.75,
             923.25, 923.75, 924.25, 924.75, 925.25 };
-    public final int[] AusFreqTable = new int[] {
+    private final int[] AusFreqTable = new int[] {
             0x00180E63, // 920.75MHz
             0x00180E69, // 922.25MHz
             0x00180E6F, // 923.75MHz
@@ -194,22 +188,22 @@ public class RfidReader {
             0x00180E67, // 921.75MHz
             0x00180E6D, // 923.25MHz
     };
-    public final int[] ausFreqSortedIdx = new int[] {
+    private final int[] ausFreqSortedIdx = new int[] {
             0, 3, 6, 8, 1,
             4, 7, 9, 2, 5 };
 
-    public static final double[] PRTableOfFreq = new double[] {
+    private double[] PRTableOfFreq = new double[] {
             915.25, 915.75, 916.25, 916.75, 917.25,
             917.75, 918.25, 918.75, 919.25, 919.75, 920.25, 920.75, 921.25, 921.75, 922.25,
             922.75, 923.25, 923.75, 924.25, 924.75, 925.25, 925.75, 926.25, 926.75, 927.25 };
     private int[] freqTable = null;
-    public int[] freqSortedIdx = null;
+    private int[] freqSortedIdx = null;
 
-    public static final int VZ_CHN_CNT = 10;
-    public final double[] VZTableOfFreq = new double[] {
+    private final int VZ_CHN_CNT = 10;
+    private final double[] VZTableOfFreq = new double[] {
             922.75, 923.25, 923.75, 924.25, 924.75,
             925.25, 925.75, 926.25, 926.75, 927.25 };
-    public final int[] vzFreqTable = new int[] {
+    private final int[] vzFreqTable = new int[] {
             0x00180E77, // 925.75 MHz
             0x00180E6B, // 922.75MHz
             0x00180E7D, // 927.25 MHz
@@ -221,12 +215,12 @@ public class RfidReader {
             0x00180E79, // 926.25 MHz
             0x00180E71, // 924.25MHz
     };
-    public final int[] vzFreqSortedIdx = new int[] {
+    private final int[] vzFreqSortedIdx = new int[] {
             6, 0, 9, 5, 1,
             8, 4, 2, 7, 3 };
 
-    public static final int BR1_CHN_CNT = 24;
-    public final double[] BR1TableOfFreq = new double[] {
+    private final int BR1_CHN_CNT = 24;
+    private final double[] BR1TableOfFreq = new double[] {
             //902.75, 903.25, 903.75, 904.25, 904.75,
             //905.25, 905.75, 906.25, 906.75, 907.25,
             //907.75, 908.25, 908.75, 909.25, 909.75,
@@ -238,7 +232,7 @@ public class RfidReader {
             920.75, 921.25, 921.75, 922.25, 922.75,
             923.25, 923.75, 924.25, 924.75, 925.25,
             925.75, 926.25, 926.75, 927.25 };
-    public final int[] br1FreqTable = new int[] {
+    private final int[] br1FreqTable = new int[] {
             0x00180E4F, //915.75 MHz
             //0x00180E4D, //915.25 MHz
             //0x00180E1D, //903.25 MHz
@@ -290,15 +284,15 @@ public class RfidReader {
             //0x00180E1B, //902.75 MHz
             0x00180E6D, //923.25 MHz
     };
-    public final int[] br1FreqSortedIdx = new int[] {
+    private final int[] br1FreqSortedIdx = new int[] {
             0, 22, 21, 23, 9,
             7, 6, 4, 19, 12,
             13, 3, 5, 1, 18,
             8, 2, 16, 20, 17,
             11, 10, 14, 15 };
 
-    public static final int BR2_CHN_CNT = 33;
-    public double[] BR2TableOfFreq = new double[] {
+    private final int BR2_CHN_CNT = 33;
+    private double[] BR2TableOfFreq = new double[] {
             902.75, 903.25, 903.75, 904.25, 904.75,
             905.25, 905.75, 906.25, 906.75,
             //907.25, 907.75, 908.25, 908.75, 909.25,
@@ -310,7 +304,7 @@ public class RfidReader {
             920.75, 921.25, 921.75, 922.25, 922.75,
             923.25, 923.75, 924.25, 924.75, 925.25,
             925.75, 926.25, 926.75, 927.25 };
-    public final int[] br2FreqTable = new int[] {
+    private final int[] br2FreqTable = new int[] {
             0x00180E4F, //915.75 MHz
             //0x00180E4D, //915.25 MHz
             0x00180E1D, //903.25 MHz
@@ -362,7 +356,7 @@ public class RfidReader {
             0x00180E1B, //902.75 MHz
             0x00180E6D, //923.25 MHz
     };
-    public final int[] br2FreqSortedIdx = new int[] {
+    private final int[] br2FreqSortedIdx = new int[] {
             9, 1, 31, 30, 3,
             32, 18, 16, 15, 13,
             5, 4, 28, 21, 8,
@@ -372,11 +366,11 @@ public class RfidReader {
             23, 0, 24,
     };
 
-    public static final int BR3_CHN_CNT = 9;
-    public final double[] BR3TableOfFreq = new double[] {
+    private final int BR3_CHN_CNT = 9;
+    private final double[] BR3TableOfFreq = new double[] {
             902.75, 903.25, 903.75, 904.25, 904.75, // 4
             905.25, 905.75, 906.25, 906.75 };
-    public final int[] br3FreqTable = new int[] {
+    private final int[] br3FreqTable = new int[] {
             0x00180E1D, //903.25 MHz
             0x00180E21, //904.25 MHz
             0x00180E25, //905.25 MHz
@@ -387,28 +381,28 @@ public class RfidReader {
             0x00180E29, //906.25 MHz
             0x00180E1B, //902.75 MHz
     };
-    public final int[] br3FreqSortedIdx = new int[] {
+    private final int[] br3FreqSortedIdx = new int[] {
             1, 3, 5, 4, 8,
             2, 6, 7, 0 };
 
-    public static final int BR4_CHN_CNT = 4;
-    public final double[] BR4TableOfFreq = new double[] {
+    private final int BR4_CHN_CNT = 4;
+    private final double[] BR4TableOfFreq = new double[] {
             902.75, 903.25, 903.75, 904.25 };
-    public final int[] br4FreqTable = new int[] {
+    private final int[] br4FreqTable = new int[] {
             0x00180E1D, //903.25 MHz
             0x00180E21, //904.25 MHz
             0x00180E1F, //903.75 MHz
             0x00180E1B, //902.75 MHz
     };
-    public final int[] br4FreqSortedIdx = new int[] {
+    private final int[] br4FreqSortedIdx = new int[] {
             1, 3, 2, 0 };
 
-    public static final int BR5_CHN_CNT = 14;
-    public final double[] BR5TableOfFreq = new double[] {
+    private final int BR5_CHN_CNT = 14;
+    private final double[] BR5TableOfFreq = new double[] {
             917.75, 918.25, 918.75, 919.25, 919.75, // 4
             920.25, 920.75, 921.25, 921.75, 922.25, // 9
             922.75, 923.25, 923.75, 924.25 };
-    public final int[] br5FreqTable = new int[] {
+    private final int[] br5FreqTable = new int[] {
             0x00180E61, //920.25 MHz
             0x00180E5D, //919.25 MHz
             0x00180E5B, //918.75 MHz
@@ -424,16 +418,16 @@ public class RfidReader {
             0x00180E6B, //922.75 MHz
             0x00180E6D, //923.25 MHz
     };
-    public final int[] br5FreqSortedIdx = new int[] {
+    private final int[] br5FreqSortedIdx = new int[] {
             5, 3, 2, 0, 8,
             9, 1, 4, 12, 13,
             7, 6, 10, 11 };
 
-    public static final int HK_CHN_CNT = 8;
-    public final double[] HKTableOfFreq = new double[] {
+    private final int HK_CHN_CNT = 8;
+    private final double[] HKTableOfFreq = new double[] {
             920.75, 921.25, 921.75, 922.25, 922.75,
             923.25, 923.75, 924.25 };
-    public final int[] hkFreqTable = new int[] {
+    private final int[] hkFreqTable = new int[] {
             0x00180E63, //920.75MHz
             0x00180E69, //922.25MHz
             0x00180E71, //924.25MHz
@@ -443,28 +437,28 @@ public class RfidReader {
             0x00180E6F, //923.75MHz
             0x00180E67, //921.75MHz
     };
-    public final int[] hkFreqSortedIdx = new int[] {
+    private final int[] hkFreqSortedIdx = new int[] {
             0, 3, 7, 1, 4,
             5, 6, 2 };
 
-    public static final int BD_CHN_CNT = 4;
-    public final double[] BDTableOfFreq = new double[] {
+    private final int BD_CHN_CNT = 4;
+    private final double[] BDTableOfFreq = new double[] {
             925.25, 925.75, 926.25, 926.75 };
-    public final int[] bdFreqTable = new int[] {
+    private final int[] bdFreqTable = new int[] {
             0x00180E75, //925.25MHz
             0x00180E77, //925.75MHz
             0x00180E79, //926.25MHz
             0x00180E7B, //926.75MHz
     };
-    public final int[] bdFreqSortedIdx = new int[] {
+    private final int[] bdFreqSortedIdx = new int[] {
             0, 3, 1, 2  };
 
-    public static final int TW_CHN_CNT = 12;
-    public final double[] TWTableOfFreq = new double[] {
+    private final int TW_CHN_CNT = 12;
+    private final double[] TWTableOfFreq = new double[] {
             922.25, 922.75, 923.25, 923.75, 924.25,
             924.75, 925.25, 925.75, 926.25, 926.75,
             927.25, 927.75 };
-    public int[] twFreqTable = new int[] {
+    private int[] twFreqTable = new int[] {
             0x00180E7D, //927.25MHz   10
             0x00180E73, //924.75MHz   5
             0x00180E6B, //922.75MHz   1
@@ -478,16 +472,16 @@ public class RfidReader {
             0x00180E77, //925.75MHz   7
             0x00180E6F, //923.75MHz   3
     };
-    public final int[] twFreqSortedIdx = new int[] {
+    private final int[] twFreqSortedIdx = new int[] {
             10, 5, 1, 6, 11,
             4, 8, 2, 9, 0,
             7, 3 };
 
-    public static final int MYS_CHN_CNT = 8;
-    public final double[] MYSTableOfFreq = new double[] {
+    private final int MYS_CHN_CNT = 8;
+    private final double[] MYSTableOfFreq = new double[] {
             919.75, 920.25, 920.75, 921.25, 921.75,
             922.25, 922.75, 923.25 };
-    public final int[] mysFreqTable = new int[] {
+    private final int[] mysFreqTable = new int[] {
             0x00180E5F, //919.75MHz
             0x00180E65, //921.25MHz
             0x00180E6B, //922.75MHz
@@ -497,17 +491,17 @@ public class RfidReader {
             0x00180E63, //920.75MHz
             0x00180E69, //922.25MHz
     };
-    public final int[] mysFreqSortedIdx = new int[] {
+    private final int[] mysFreqSortedIdx = new int[] {
             0, 3, 6, 1, 4,
             7, 2, 5 };
 
-    public static final int ZA_CHN_CNT = 16;
-    public final double[] ZATableOfFreq = new double[] {
+    private final int ZA_CHN_CNT = 16;
+    private final double[] ZATableOfFreq = new double[] {
             915.7, 915.9, 916.1, 916.3, 916.5,
             916.7, 916.9, 917.1, 917.3, 917.5,
             917.7, 917.9, 918.1, 918.3, 918.5,
             918.7 };
-    public final int[] zaFreqTable = new int[] {
+    private final int[] zaFreqTable = new int[] {
             0x003C23C5, //915.7 MHz
             0x003C23C7, //915.9 MHz
             0x003C23C9, //916.1 MHz
@@ -525,29 +519,29 @@ public class RfidReader {
             0x003C23E1, //918.5 MHz
             0x003C23E3, //918.7 MHz
     };
-    public final int[] zaFreqSortedIdx = new int[] {
+    private final int[] zaFreqSortedIdx = new int[] {
             0, 1, 2, 3, 4,
             5, 6, 7, 8, 9,
             10, 11, 12, 13, 14,
             15 };
 
-    public static final int ID_CHN_CNT = 4;
-    public final double[] IDTableOfFreq = new double[] {
+    final int ID_CHN_CNT = 4;
+    private final double[] IDTableOfFreq = new double[] {
             923.25, 923.75, 924.25, 924.75 };
-    public final int[] indonesiaFreqTable = new int[] {
+    private final int[] indonesiaFreqTable = new int[] {
             0x00180E6D, //923.25 MHz
             0x00180E6F,//923.75 MHz
             0x00180E71,//924.25 MHz
             0x00180E73,//924.75 MHz
     };
-    public final int[] indonesiaFreqSortedIdx = new int[] {
+    private final int[] indonesiaFreqSortedIdx = new int[] {
             0, 1, 2, 3 };
 
-    public static final int IL_CHN_CNT = 7;
-    public final double[] ILTableOfFreq = new double[] {
+    private final int IL_CHN_CNT = 7;
+    private final double[] ILTableOfFreq = new double[] {
             915.25, 915.5, 915.75, 916.0, 916.25, // 4
             916.5, 916.75 };
-    public final int[] ilFreqTable = new int[] {
+    private final int[] ilFreqTable = new int[] {
             0x00180E4D, //915.25 MHz
             0x00180E51, //916.25 MHz
             0x00180E4E, //915.5 MHz
@@ -556,27 +550,27 @@ public class RfidReader {
             0x00180E53, //916.75 MHz
             0x00180E50, //916.0 MHz
     };
-    public final int[] ilFreqSortedIdx = new int[] {
+    private final int[] ilFreqSortedIdx = new int[] {
             0, 4, 1, 5, 2,  6, 3 };
 
-    public static final int IL2019RW_CHN_CNT = 5;
-    public final double[] IL2019RWTableOfFreq = new double[] {
+    private final int IL2019RW_CHN_CNT = 5;
+    private final double[] IL2019RWTableOfFreq = new double[] {
             915.9, 916.025, 916.15, 916.275, 916.4 };
-    public final int[] il2019RwFreqTable = new int[] {
+    private final int[] il2019RwFreqTable = new int[] {
             0x003C23C7, //915.9 MHz
             0x003C23C8, //916.025 MHz
             0x003C23C9, //916.15 MHz
             0x003C23CA, //916.275 MHz
             0x003C23CB, //916.4 MHz
     };
-    public final int[] il2019RwFreqSortedIdx = new int[] {
+    private final int[] il2019RwFreqSortedIdx = new int[] {
             0, 4, 1, 2, 3 };
 
-    public static final int PH_CHN_CNT = 8;
-    public final double[] PHTableOfFreq = new double[] {
+    private final int PH_CHN_CNT = 8;
+    private final double[] PHTableOfFreq = new double[] {
             918.125, 918.375, 918.625, 918.875, 919.125, // 5
             919.375, 919.625, 919.875 };
-    public final int[] phFreqTable = new int[] {
+    private final int[] phFreqTable = new int[] {
             0x00301CB1, //918.125MHz   Channel 0
             0x00301CBB, //919.375MHz   Channel 5
             0x00301CB7, //918.875MHz   Channel 3
@@ -586,15 +580,15 @@ public class RfidReader {
             0x00301CB5, //918.625MHz   Channel 2
             0x00301CB9, //919.125MHz   Channel 4
     };
-    public final int[] phFreqSortedIdx = new int[] {
+    private final int[] phFreqSortedIdx = new int[] {
             0, 5, 3, 7, 1,  6, 2, 4 };
 
-    public static final int NZ_CHN_CNT = 11;
-    public final double[] NZTableOfFreq = new double[] {
+    private int NZ_CHN_CNT = 11;
+    private final double[] NZTableOfFreq = new double[] {
             922.25, 922.75, 923.25, 923.75, 924.25,// 4
             924.75, 925.25, 925.75, 926.25, 926.75,// 9
             927.25 };
-    public final int[] nzFreqTable = new int[] {
+    private final int[] nzFreqTable = new int[] {
             0x00180E71, //924.25 MHz
             0x00180E77, //925.75 MHz
             0x00180E69, //922.25 MHz
@@ -607,14 +601,14 @@ public class RfidReader {
             0x00180E6F, //923.75 MHz
             0x00180E73, //924.75 MHz
     };
-    public final int[] nzFreqSortedIdx = new int[] {
+    private final int[] nzFreqSortedIdx = new int[] {
             4, 7, 0, 9, 2,  10, 6, 1, 8, 3,     5 };
 
-    public static final int CN_CHN_CNT = 16;
-    public final double[] CHNTableOfFreq = new double[] {
+    private final int CN_CHN_CNT = 16;
+    private final double[] CHNTableOfFreq = new double[] {
             920.625, 920.875, 921.125, 921.375, 921.625, 921.875, 922.125, 922.375, 922.625, 922.875,
             923.125, 923.375, 923.625, 923.875, 924.125, 924.375 };
-    public final int[] cnFreqTable = new int[] {
+    private final int[] cnFreqTable = new int[] {
             0x00301CD3, //922.375MHz
             0x00301CD1, //922.125MHz
             0x00301CCD, //921.625MHz
@@ -632,17 +626,17 @@ public class RfidReader {
             0x00301CCF, //921.875MHz
             0x00301CE3, //924.375MHz
     };
-    public final int[] cnFreqSortedIdx = new int[] {
+    private final int[] cnFreqSortedIdx = new int[] {
             7, 6, 4, 0, 10,
             14, 3, 1, 9, 8,
             2, 13, 12, 11, 5,
             15 };
 
-    public static final int UH1_CHN_CNT = 10;
-    public final double[] UH1TableOfFreq = new double[] {
+    private final int UH1_CHN_CNT = 10;
+    private final double[] UH1TableOfFreq = new double[] {
             915.25, 915.75, 916.25, 916.75, 917.25,
             917.75, 918.25, 918.75, 919.25, 919.75 };
-    public final int[] uh1FreqTable = new int[] {
+    private final int[] uh1FreqTable = new int[] {
             0x00180E4F, //915.75 MHz
             0x00180E4D, //915.25 MHz
             0x00180E5D, //919.25 MHz
@@ -654,16 +648,16 @@ public class RfidReader {
             0x00180E5F, //919.75 MHz
             0x00180E53, //916.75 MHz
     };
-    public final int[] uh1FreqSortedIdx = new int[] {
+    private final int[] uh1FreqSortedIdx = new int[] {
             1, 0, 8, 7, 5,
             4, 6, 2, 9, 3 };
 
-    public static final int UH2_CHN_CNT = 15;
-    public final double[] UH2TableOfFreq = new double[] {
+    private final int UH2_CHN_CNT = 15;
+    private final double[] UH2TableOfFreq = new double[] {
             920.25, 920.75, 921.25, 921.75, 922.25,   // 4
             922.75, 923.25, 923.75, 924.25, 924.75,   // 9
             925.25, 925.75, 926.25, 926.75, 927.25 };
-    public final int[] uh2FreqTable = new int[] {
+    private final int[] uh2FreqTable = new int[] {
             0x00180E7B, //926.75 MHz
             0x00180E79, //926.25 MHz
             0x00180E7D, //927.25 MHz
@@ -680,13 +674,13 @@ public class RfidReader {
             0x00180E6B, //922.75 MHz
             0x00180E6D, //923.25 MHz
     };
-    public final int[] uh2FreqSortedIdx = new int[]{
+    private final int[] uh2FreqSortedIdx = new int[]{
             13, 12, 14, 0, 10,
             3, 4, 9, 7, 11,
             8, 2, 1, 5, 6, };
 
-    public static final int LH_CHN_CNT = 26;
-    public double[] LHTableOfFreq = new double[] {
+    private final int LH_CHN_CNT = 26;
+    private double[] LHTableOfFreq = new double[] {
             902.75, 903.25, 903.75, 904.25, 904.75, // 4
             905.25, 905.75, 906.25, 906.75, 907.25, // 9
             907.75, 908.25, 908.75, 909.25, 909.75, // 14
@@ -699,7 +693,7 @@ public class RfidReader {
             //923.25, 923.75, 924.25, 924.75, 925.25,
             //925.75, 926.25, 926.75, 927.25,
     };
-    public final int[] lhFreqTable = new int[] {
+    private final int[] lhFreqTable = new int[] {
             0x00180E1B, //902.75 MHz
             0x00180E35, //909.25 MHz
             0x00180E1D, //903.25 MHz
@@ -753,7 +747,7 @@ public class RfidReader {
             //0x00180E6B, //922.75 MHz
             //0x00180E6D, //923.25 MHz
     };
-    public final int[] lhFreqSortedIdx = new int[] {
+    private final int[] lhFreqSortedIdx = new int[] {
             0, 13, 1, 14, 2,
             15, 3, 16, 4, 17,
             5, 18, 6, 19, 7,
@@ -761,13 +755,13 @@ public class RfidReader {
             10, 23, 11, 24, 12,
             25 };
 
-    public static final int LH1_CHN_CNT = 14;
-    public double[] LH1TableOfFreq = new double[] {
+    private final int LH1_CHN_CNT = 14;
+    private double[] LH1TableOfFreq = new double[] {
             902.75, 903.25, 903.75, 904.25, 904.75, // 4
             905.25, 905.75, 906.25, 906.75, 907.25, // 9
             907.75, 908.25, 908.75, 909.25, // 13
     };
-    public final int[] lh1FreqTable = new int[] {
+    private final int[] lh1FreqTable = new int[] {
             0x00180E1B, //902.75 MHz
             0x00180E35, //909.25 MHz
             0x00180E1D, //903.25 MHz
@@ -783,17 +777,17 @@ public class RfidReader {
             0x00180E31, //908.25 MHz
             0x00180E33, //908.75 MHz
     };
-    public final int[] lh1FreqSortedIdx = new int[] {
+    private final int[] lh1FreqSortedIdx = new int[] {
             0, 13, 1, 2, 3,
             4, 5, 6, 7, 8,
             9, 10, 11, 12 };
 
-    public static final int LH2_CHN_CNT = 11;
-    public double[] LH2TableOfFreq = new double[] {
+    private final int LH2_CHN_CNT = 11;
+    private double[] LH2TableOfFreq = new double[] {
             909.75, 910.25, 910.75, 911.25, 911.75, // 4
             912.25, 912.75, 913.25, 913.75, 914.25, // 9
             914.75 };
-    public final int[] lh2FreqTable = new int[] {
+    private final int[] lh2FreqTable = new int[] {
             0x00180E37, //909.75 MHz
             0x00180E39, //910.25 MHz
             0x00180E3B, //910.75 MHz
@@ -806,39 +800,39 @@ public class RfidReader {
             0x00180E49, //914.25 MHz
             0x00180E4B, //914.75 MHz
     };
-    public final int[] lh2FreqSortedIdx = new int[] {
+    private final int[] lh2FreqSortedIdx = new int[] {
             0, 1, 2, 3, 4,
             5, 6, 7, 8, 9,
             10 };
 
-    public static final int ETSI_CHN_CNT = 4;
-    public final double[] ETSITableOfFreq = new double[] {
+    private final int ETSI_CHN_CNT = 4;
+    private final double[] ETSITableOfFreq = new double[] {
             865.70, 866.30, 866.90, 867.50 };
-    public final int[] etsiFreqTable = new int[] {
+    private final int[] etsiFreqTable = new int[] {
             0x003C21D1, //865.700MHz
             0x003C21D7, //866.300MHz
             0x003C21DD, //866.900MHz
             0x003C21E3, //867.500MHz
         };
-    public final int[] etsiFreqSortedIdx = new int[] {
+    private final int[] etsiFreqSortedIdx = new int[] {
             0, 1, 2, 3 };
 
-    public static final int IDA_CHN_CNT = 3;
-    public final double[] IDATableOfFreq = new double[] {
+    private final int IDA_CHN_CNT = 3;
+    private final double[] IDATableOfFreq = new double[] {
             865.70, 866.30, 866.90 };
-    public final int[] indiaFreqTable = new int[] {
+    private final int[] indiaFreqTable = new int[] {
             0x003C21D1, //865.700MHz
             0x003C21D7, //866.300MHz
             0x003C21DD, //866.900MHz
     };
-    public final int[] indiaFreqSortedIdx = new int[] {
+    private final int[] indiaFreqSortedIdx = new int[] {
             0, 1, 2 };
 
-    public static final int KR_CHN_CNT = 19;
-    public final double[] KRTableOfFreq = new double[] {
+    private final int KR_CHN_CNT = 19;
+    private final double[] KRTableOfFreq = new double[] {
             910.20, 910.40, 910.60, 910.80, 911.00, 911.20, 911.40, 911.60, 911.80, 912.00,
             912.20, 912.40, 912.60, 912.80, 913.00, 913.20, 913.40, 913.60, 913.80 };
-    public int[] krFreqTable = new int[] {
+    private int[] krFreqTable = new int[] {
             0x003C23A8, //912.8MHz   13
             0x003C23A0, //912.0MHz   9
             0x003C23AC, //913.2MHz   15
@@ -859,16 +853,16 @@ public class RfidReader {
             0x003C239A, //911.4MHz   6
             0x003C23AA, //913.0MHz   14
         };
-    public final int[] krFreqSortedIdx = new int[] {
+    private final int[] krFreqSortedIdx = new int[] {
             13, 9, 15, 8, 11,
             18, 2, 17, 1, 7,
             4, 10, 0, 12, 5,
             3, 16, 6, 14 };
 
-    public static final int KR2017RW_CHN_CNT = 6;
-    public final double[] KR2017RwTableOfFreq = new double[] {
+    private final int KR2017RW_CHN_CNT = 6;
+    private final double[] KR2017RwTableOfFreq = new double[] {
             917.30, 917.90, 918.50, 919.10, 919.70, 920.30 };
-    public int[] kr2017RwFreqTable = new int[] {
+    private int[] kr2017RwFreqTable = new int[] {
             0x003C23D5, // 917.3 -> 917.25  MHz Channel 1
             0x003C23DB, //917.9 -> 918 MHz Channel 2
             0x003C23E1, //918.5 MHz Channel 3
@@ -876,13 +870,13 @@ public class RfidReader {
             0x003C23ED, //919.7 -> 919.75 MHz Channel 5
             0x003C23F3 // 920.3 -> 920.25 MHz Channel 6
         };
-    public final int[] kr2017RwFreqSortedIdx = new int[] {
+    private final int[] kr2017RwFreqSortedIdx = new int[] {
             3, 0, 5, 1, 4, 2 };
 
-    public static final int JPN2012_CHN_CNT = 4;
-    public final double[] JPN2012TableOfFreq = new double[] {
+    private final int JPN2012_CHN_CNT = 4;
+    private final double[] JPN2012TableOfFreq = new double[] {
             916.80, 918.00, 919.20, 920.40 };
-    public final int[] jpn2012FreqTable = new int[] {
+    private final int[] jpn2012FreqTable = new int[] {
             0x003C23D0, //916.800MHz   Channel 1
             0x003C23DC, //918.000MHz   Channel 2
             0x003C23E8, //919.200MHz   Channel 3
@@ -890,13 +884,13 @@ public class RfidReader {
             //0x003C23F6, //920.600MHz   Channel 5
             //0x003C23F8, //920.800MHz   Channel 6
     };
-    public final int[] jpn2012FreqSortedIdx = new int[] {
+    private final int[] jpn2012FreqSortedIdx = new int[] {
             0, 1, 2, 3 };
 
-    public static final int JPN2012A_CHN_CNT = 6;
-    public final double[] JPN2012ATableOfFreq = new double[] {
+    private final int JPN2012A_CHN_CNT = 6;
+    private final double[] JPN2012ATableOfFreq = new double[] {
             916.80, 918.00, 919.20, 920.40, 920.60, 920.80 };
-    public final int[] jpn2012AFreqTable = new int[] {
+    private final int[] jpn2012AFreqTable = new int[] {
             0x003C23D0, //916.800MHz   Channel 1
             0x003C23DC, //918.000MHz   Channel 2
             0x003C23E8, //919.200MHz   Channel 3
@@ -904,36 +898,36 @@ public class RfidReader {
             0x003C23F6, //920.600MHz   Channel 5
             0x003C23F8, //920.800MHz   Channel 6
     };
-    public final int[] jpn2012AFreqSortedIdx = new int[] {
+    private final int[] jpn2012AFreqSortedIdx = new int[] {
             0, 1, 2, 3, 4, 5 };
 
-    public static final int ETSIUPPERBAND_CHN_CNT = 4;
-    public final double[] ETSIUPPERBANDTableOfFreq = new double[] {
+    private final int ETSIUPPERBAND_CHN_CNT = 4;
+    private final double[] ETSIUPPERBANDTableOfFreq = new double[] {
             916.3, 917.5, 918.7, 919.9 };
-    public final int[] etsiupperbandFreqTable = new int[] {
+    private final int[] etsiupperbandFreqTable = new int[] {
             0x003C23CB, //916.3 MHz
             0x003C23D7, //917.5 MHz
             0x003C23E3, //918.7 MHz
             0x003C23EF, //919.9 MHz
         };
-    public final int[] etsiupperbandFreqSortedIdx = new int[] {
+    private final int[] etsiupperbandFreqSortedIdx = new int[] {
             0, 1, 2, 3 };
 
-    public static final int VN1_CHN_CNT = 3;
-    public final double[] VN1TableOfFreq = new double[] {
+    private final int VN1_CHN_CNT = 3;
+    private final double[] VN1TableOfFreq = new double[] {
             866.30, 866.90, 867.50 };
-    public final int[] vietnam1FreqTable = new int[] {
+    private final int[] vietnam1FreqTable = new int[] {
             0x003C21D7, //866.300MHz
             0x003C21DD, //866.900MHz
             0x003C21E3, //867.500MHz
         };
-    public final int[] vietnam1FreqSortedIdx = new int[] {
+    private final int[] vietnam1FreqSortedIdx = new int[] {
             0, 1, 2 };
 
-    public static final int VN2_CHN_CNT = 8;
-    public final double[] VN2TableOfFreq = new double[] {
+    private final int VN2_CHN_CNT = 8;
+    private final double[] VN2TableOfFreq = new double[] {
             918.75, 919.25, 919.75, 920.25, 920.75, 921.25, 921.75, 922.25 };
-    public final int[] vietnam2FreqTable = new int[] {
+    private final int[] vietnam2FreqTable = new int[] {
             0x00180E61, //920.25 MHz
             0x00180E5D, //919.25 MHz
             0x00180E5B, //918.75 MHz
@@ -943,19 +937,19 @@ public class RfidReader {
             0x00180E65, //921.25 MHz
             0x00180E63, //920.75 MHz
         };
-    public final int[] vietnam2FreqSortedIdx = new int[] {
+    private final int[] vietnam2FreqSortedIdx = new int[] {
             3, 1, 0, 6, 7, 2, 5, 4 };
 
-    public static final int VN3_CHN_CNT = 4;
-    public final double[] VN3TableOfFreq = new double[] {
+    private final int VN3_CHN_CNT = 4;
+    private final double[] VN3TableOfFreq = new double[] {
             920.75, 921.25, 921.75, 922.25 };
-    public final int[] vietnam3FreqTable = new int[] {
+    private final int[] vietnam3FreqTable = new int[] {
             0x00180E67, //921.75 MHz
             0x00180E69, //922.25 MHz
             0x00180E65, //921.25 MHz
             0x00180E63, //920.75 MHz
         };
-    public final int[] vietnam3FreqSortedIdx = new int[] {
+    private final int[] vietnam3FreqSortedIdx = new int[] {
             2, 3, 1, 0 };
 /*
     boolean setChannelData(RegionCodes regionCode) {
@@ -1417,6 +1411,10 @@ public class RfidReader {
         rfidReaderChipE710.setPwrManagementMode(false);
         return rfidReaderChipE710.sendHostRegRequestHST_CMD(RfidReaderChipData.HostCommands.CMD_18K6CAUTHENTICATE);
     }
+
+    //============ Rfid ============
+    //============ Rfid ============
+
     public String getAuthMatchData() {
         int iValue1 = 96;
         String strValue;
@@ -1435,7 +1433,6 @@ public class RfidReader {
         }
         return result;
     }
-
     public int getStartQValue() {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.getAlgoStartQ(3) : rfidReaderChipE710.rx000Setting.getAlgoStartQ(3));
     }
@@ -1507,8 +1504,13 @@ public class RfidReader {
     public boolean setOnlyPowerLevel(long pwrlevel) {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setAntennaPower(pwrlevel) : rfidReaderChipE710.rx000Setting.setAntennaPower(pwrlevel));
     }
+
+    boolean[] bSelectEnabled = { false, false, false };
     boolean setSelectCriteria3(int index, boolean enable, int target, int action, int delay, int bank, int offset, String mask, int maskblen) {
         boolean DEBUG = false;
+        if (!enable) {
+            if (bSelectEnabled[index] = false) return true;
+        }
         if (DEBUG || true) appendToLog("setSelectCriteria 3 with index = " + index + ", enable = " + enable + ", target = " + target + ", action = " + action + ", delay = " + delay + ", bank = " + bank + ", offset = " + offset + ", mask = " + mask + ", maskbitlen = " + maskblen);
         int maskbytelen = maskblen / 4; if ((maskblen % 4) != 0) maskbytelen++; if (maskbytelen > 64) maskbytelen = 64;
         if (mask.length() > maskbytelen ) mask = mask.substring(0, maskbytelen);
@@ -1542,6 +1544,9 @@ public class RfidReader {
                 if (result) result = (bis108 ? rfidReaderChipR2000.rx000Setting.setQuerySelect(0) : rfidReaderChipE710.rx000Setting.setQuerySelect(0));
                 if (DEBUG) appendToLog("After setQuerySelect[0], result = " + result);
             }
+        }
+        if (result) {
+            bSelectEnabled[index] = enable;
         }
         return result;
     }
@@ -1834,136 +1839,136 @@ public class RfidReader {
     public final RegionCodes regionCodeDefault4Country2 = RegionCodes.FCC;
     public RegionCodes[] getRegionList() {
         if (bis108) {
-            boolean DEBUG = false;
-            RegionCodes[] regionList = null;
-            {
-                switch (getCountryCode()) {
-                    case 1:
-                        if (regionCode == null) regionCode = RegionCodes.ETSI;
-                        regionList = new RegionCodes[]{RegionCodes.ETSI, RegionCodes.IN, RegionCodes.VN1};
-                        break;
-                    default:
-                    case 2:
-                        int modifyCode = getFreqModifyCode();
-                        if (modifyCode != modifyCodeAA) {
-                            if (regionCode == null) regionCode = regionCodeDefault4Country2;
-                            regionList = new RegionCodes[]{
-                                    RegionCodes.AG,
-                                    RegionCodes.AU,
-                                    RegionCodes.BD,
-                                    RegionCodes.BR1, RegionCodes.BR2, RegionCodes.BR3, RegionCodes.BR4, RegionCodes.BR5,
-                                    RegionCodes.CL, RegionCodes.CO, RegionCodes.CR, RegionCodes.DR,
-                                    RegionCodes.HK,
-                                    RegionCodes.ID,
-                                    RegionCodes.IL2019RW,
-                                    RegionCodes.KR2017RW,
-                                    RegionCodes.LH1, RegionCodes.LH2,
-                                    RegionCodes.MY,
-                                    RegionCodes.MX, RegionCodes.PM,
-                                    RegionCodes.PR,
-                                    RegionCodes.PH, RegionCodes.SG,
-                                    RegionCodes.ZA,
-                                    RegionCodes.TH,
-                                    RegionCodes.UH1, RegionCodes.UH2,
-                                    RegionCodes.UG,
-                                    RegionCodes.FCC,
-                                    RegionCodes.VZ,
-                                    RegionCodes.VN};
-                        } else {
-                            String strSpecialCountryVersion = rfidReaderChipR2000.rx000OemSetting.getSpecialCountryVersion();
-                            if (strSpecialCountryVersion.contains("OFCA")) {
-                                regionCode = RegionCodes.HK;
-                                regionList = new RegionCodes[]{RegionCodes.HK};
-                            } else if (strSpecialCountryVersion.contains("SG")) {
-                                regionCode = RegionCodes.SG;
-                                regionList = new RegionCodes[]{RegionCodes.SG};
-                            } else if (strSpecialCountryVersion.contains("AS")) {
-                                regionCode = RegionCodes.AU;
-                                regionList = new RegionCodes[]{RegionCodes.AU};
-                            } else if (strSpecialCountryVersion.contains("NZ")) {
-                                regionCode = RegionCodes.NZ;
-                                regionList = new RegionCodes[]{RegionCodes.NZ};
-                            } else if (strSpecialCountryVersion.contains("ZA")) {
-                                regionCode = RegionCodes.ZA;
-                                regionList = new RegionCodes[]{RegionCodes.ZA};
-                            } else if (strSpecialCountryVersion.contains("TH")) {
-                                regionCode = RegionCodes.TH;
-                                regionList = new RegionCodes[]{RegionCodes.TH};
-                            } else {    //if (strSpecialCountryVersion.contains("*USA")) {
-                                regionCode = regionCodeDefault4Country2;
-                                regionList = new RegionCodes[]{RegionCodes.FCC};
-                            }
-                        }
-                        break;
-                    case 3:
-//                break;
-                    case 4:
-                        if (regionCode == null) regionCode = RegionCodes.TW;
-                        regionList = new RegionCodes[]{RegionCodes.TW, RegionCodes.AU, RegionCodes.MY,
-                                RegionCodes.HK, RegionCodes.SG, RegionCodes.ID, RegionCodes.CN};
-                        break;
-                    case 5:
-                        regionCode = RegionCodes.KR;
-                        regionList = new RegionCodes[]{RegionCodes.KR};
-                        break;
-                    case 6:
-                        regionCode = RegionCodes.KR2017RW;
-                        regionList = new RegionCodes[]{RegionCodes.KR2017RW};
-                        break;
-                    case 7:
-                        if (regionCode == null) regionCode = RegionCodes.CN;
-                        regionList = new RegionCodes[]{RegionCodes.CN, RegionCodes.AU, RegionCodes.HK, RegionCodes.TH,
-                                RegionCodes.SG, RegionCodes.MY, RegionCodes.ID, RegionCodes.VN2, RegionCodes.VN3};
-                        break;
-                    case 8:
+        boolean DEBUG = false;
+        RegionCodes[] regionList = null;
+        {
+            switch (getCountryCode()) {
+                case 1:
+                    if (regionCode == null) regionCode = RegionCodes.ETSI;
+                    regionList = new RegionCodes[]{RegionCodes.ETSI, RegionCodes.IN, RegionCodes.VN1};
+                    break;
+                default:
+                case 2:
+                    int modifyCode = getFreqModifyCode();
+                    if (modifyCode != modifyCodeAA) {
+                        if (regionCode == null) regionCode = regionCodeDefault4Country2;
+                        regionList = new RegionCodes[]{
+                                RegionCodes.AG,
+                                RegionCodes.AU,
+                                RegionCodes.BD,
+                                RegionCodes.BR1, RegionCodes.BR2, RegionCodes.BR3, RegionCodes.BR4, RegionCodes.BR5,
+                                RegionCodes.CL, RegionCodes.CO, RegionCodes.CR, RegionCodes.DR,
+                                RegionCodes.HK,
+                                RegionCodes.ID,
+                                RegionCodes.IL2019RW,
+                                RegionCodes.KR2017RW,
+                                RegionCodes.LH1, RegionCodes.LH2,
+                                RegionCodes.MY,
+                                RegionCodes.MX, RegionCodes.PM,
+                                RegionCodes.PR,
+                                RegionCodes.PH, RegionCodes.SG,
+                                RegionCodes.ZA,
+                                RegionCodes.TH,
+                                RegionCodes.UH1, RegionCodes.UH2,
+                                RegionCodes.UG,
+                                RegionCodes.FCC,
+                                RegionCodes.VZ,
+                                RegionCodes.VN};
+                    } else {
                         String strSpecialCountryVersion = rfidReaderChipR2000.rx000OemSetting.getSpecialCountryVersion();
-                        if (strSpecialCountryVersion.contains("6")) {
-                            regionCode = RegionCodes.JP6;
-                            regionList = new RegionCodes[]{RegionCodes.JP6};
-                        } else {
-                            regionCode = RegionCodes.JP;
-                            regionList = new RegionCodes[]{RegionCodes.JP};
-                        }
-                        break;
-                    case 9:
-                        regionCode = RegionCodes.ETSIUPPERBAND;
-                        regionList = new RegionCodes[]{RegionCodes.ETSIUPPERBAND};
-                        break;
-                }
-            }
-            countryInList = 0; if (DEBUG) appendToLog("saveSetting2File testpoint 1");
-            for (int i = 0; i < regionList.length; i++) {
-                if (regionCode == regionList[i]) {
-                    countryInList = i; if (DEBUG) appendToLog("saveSetting2File testpoint 2"); break;
-                }
-            }
-            if (countryInListDefault < 0) countryInListDefault = countryInList;
-            appendToLog("countryInListDefault = " + countryInListDefault);
-            return regionList;
-        } else {
-            boolean DEBUG = false;
-            RegionCodes[] regionList;
-            regionCode = null;
-            if (DEBUG) appendToLog("2 getCountryList");
-            regionList = getRegionList1();
-            if (DEBUG) appendToLog("2A getCountryList: regionList is " + (regionList != null ? "Valid" : "null"));
-            if (regionList != null) {
-                if (DEBUG) appendToLog(String.format("2b getCountryList: countryInList = %d, regionCode = %s", countryInList, (regionCode != null ? regionCode.toString() : "")));
-                if (countryInList < 0) {
-                    if (regionCode == null) regionCode = regionList[0];
-                    countryInList = 0;
-                    for (int i = 0; i < regionList.length; i++) {
-                        if (regionCode == regionList[i]) {
-                            countryInList = i;
-                            break;
+                        if (strSpecialCountryVersion.contains("OFCA")) {
+                            regionCode = RegionCodes.HK;
+                            regionList = new RegionCodes[]{RegionCodes.HK};
+                        } else if (strSpecialCountryVersion.contains("SG")) {
+                            regionCode = RegionCodes.SG;
+                            regionList = new RegionCodes[]{RegionCodes.SG};
+                        } else if (strSpecialCountryVersion.contains("AS")) {
+                            regionCode = RegionCodes.AU;
+                            regionList = new RegionCodes[]{RegionCodes.AU};
+                        } else if (strSpecialCountryVersion.contains("NZ")) {
+                            regionCode = RegionCodes.NZ;
+                            regionList = new RegionCodes[]{RegionCodes.NZ};
+                        } else if (strSpecialCountryVersion.contains("ZA")) {
+                            regionCode = RegionCodes.ZA;
+                            regionList = new RegionCodes[]{RegionCodes.ZA};
+                        } else if (strSpecialCountryVersion.contains("TH")) {
+                            regionCode = RegionCodes.TH;
+                            regionList = new RegionCodes[]{RegionCodes.TH};
+                        } else {    //if (strSpecialCountryVersion.contains("*USA")) {
+                            regionCode = regionCodeDefault4Country2;
+                            regionList = new RegionCodes[]{RegionCodes.FCC};
                         }
                     }
-                    if (countryInListDefault < 0) countryInListDefault = countryInList;
-                    regionCode = regionList[countryInList];
-                    if (DEBUG) appendToLog(String.format("2C getCountryList: countryInList = %d, regionCode = %s", countryInList, regionCode.toString()));
+                    break;
+                case 3:
+//                break;
+                case 4:
+                    if (regionCode == null) regionCode = RegionCodes.TW;
+                    regionList = new RegionCodes[]{RegionCodes.TW, RegionCodes.AU, RegionCodes.MY,
+                            RegionCodes.HK, RegionCodes.SG, RegionCodes.ID, RegionCodes.CN};
+                    break;
+                case 5:
+                    regionCode = RegionCodes.KR;
+                    regionList = new RegionCodes[]{RegionCodes.KR};
+                    break;
+                case 6:
+                    regionCode = RegionCodes.KR2017RW;
+                    regionList = new RegionCodes[]{RegionCodes.KR2017RW};
+                    break;
+                case 7:
+                    if (regionCode == null) regionCode = RegionCodes.CN;
+                    regionList = new RegionCodes[]{RegionCodes.CN, RegionCodes.AU, RegionCodes.HK, RegionCodes.TH,
+                            RegionCodes.SG, RegionCodes.MY, RegionCodes.ID, RegionCodes.VN2, RegionCodes.VN3};
+                    break;
+                case 8:
+                    String strSpecialCountryVersion = rfidReaderChipR2000.rx000OemSetting.getSpecialCountryVersion();
+                    if (strSpecialCountryVersion.contains("6")) {
+                        regionCode = RegionCodes.JP6;
+                        regionList = new RegionCodes[]{RegionCodes.JP6};
+                    } else {
+                        regionCode = RegionCodes.JP;
+                        regionList = new RegionCodes[]{RegionCodes.JP};
+                    }
+                    break;
+                case 9:
+                    regionCode = RegionCodes.ETSIUPPERBAND;
+                    regionList = new RegionCodes[]{RegionCodes.ETSIUPPERBAND};
+                    break;
+            }
+        }
+        countryInList = 0; if (DEBUG) appendToLog("saveSetting2File testpoint 1");
+        for (int i = 0; i < regionList.length; i++) {
+            if (regionCode == regionList[i]) {
+                countryInList = i; if (DEBUG) appendToLog("saveSetting2File testpoint 2"); break;
+            }
+        }
+        if (countryInListDefault < 0) countryInListDefault = countryInList;
+        appendToLog("countryInListDefault = " + countryInListDefault);
+        return regionList;
+        } else {
+        boolean DEBUG = false;
+        RegionCodes[] regionList;
+        regionCode = null;
+        if (DEBUG) appendToLog("2 getCountryList");
+        regionList = getRegionList1();
+        if (DEBUG) appendToLog("2A getCountryList: regionList is " + (regionList != null ? "Valid" : "null"));
+        if (regionList != null) {
+            if (DEBUG) appendToLog(String.format("2b getCountryList: countryInList = %d, regionCode = %s", countryInList, (regionCode != null ? regionCode.toString() : "")));
+            if (countryInList < 0) {
+                if (regionCode == null) regionCode = regionList[0];
+                countryInList = 0;
+                for (int i = 0; i < regionList.length; i++) {
+                    if (regionCode == regionList[i]) {
+                        countryInList = i;
+                        break;
+                    }
                 }
-            } else regionCode = null;
-            return regionList;
+                if (countryInListDefault < 0) countryInListDefault = countryInList;
+                regionCode = regionList[countryInList];
+                if (DEBUG) appendToLog(String.format("2C getCountryList: countryInList = %d, regionCode = %s", countryInList, regionCode.toString()));
+            }
+        } else regionCode = null;
+        return regionList;
         }
     }
     public boolean getChannelHoppingDefault() {
@@ -2190,6 +2195,27 @@ public class RfidReader {
     public boolean isRfidFailure() {
         return rfidConnector.rfidFailure;
     }
+    public void setReaderDefault() {
+        setPowerLevel(300);
+        setTagGroup(0, 0, 2);
+        setPopulation(60);
+        setInvAlgoNoSave(true);
+        setBasicCurrentLinkProfile();
+
+        setCountryInList(countryInListDefault);
+        setChannel(0);
+
+        //getAntennaPower(0)
+        //getPopulation()
+        //getQuerySession()
+        //getQueryTarget()
+        setTagFocus(false);
+        setFastId(false);
+        //getInvAlgo()
+        //\\getRetryCount()
+        //getCurrentProfile() + "\n"));
+        //\\getRxGain() + "\n"));
+    }
     public String getMacVer() {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.getMacVer() : rfidReaderChipE710.rx000Setting.getMacVer());
     }
@@ -2332,7 +2358,7 @@ public class RfidReader {
     }
     public int tagFocus = -1;
     public int getTagFocus() {
-        if (bis108) { //csReaderConnector108 != null) {
+        if (bis108) {
             tagFocus = rfidReaderChipR2000.rx000Setting.getImpinjExtension();
             if (tagFocus > 0) tagFocus = ((tagFocus & 0x10) >> 4);
         } else {
@@ -2342,7 +2368,7 @@ public class RfidReader {
     }
     public boolean setTagFocus(boolean tagFocusNew) {
         boolean bRetValue;
-        if (bis108) { //csReaderConnector108 != null) {
+        if (bis108) {
             bRetValue = rfidReaderChipR2000.rx000Setting.setImpinjExtension(tagFocusNew, (fastId > 0 ? true : false));
         } else {
             bRetValue = rfidReaderChipE710.rx000Setting.setImpinjExtension(tagFocusNew, (fastId > 0 ? true : false));
@@ -2362,7 +2388,7 @@ public class RfidReader {
     }
     public boolean setFastId(boolean fastIdNew) {
         boolean bRetValue;
-        if (bis108) { //csReaderConnector108 != null) {
+        if (bis108) {
             bRetValue = rfidReaderChipR2000.rx000Setting.setImpinjExtension((tagFocus > 0 ? true : false), fastIdNew);
         } else {
             bRetValue = rfidReaderChipE710.rx000Setting.setImpinjExtension((tagFocus > 0 ? true : false), fastIdNew);
@@ -2436,7 +2462,7 @@ public class RfidReader {
             }
             return result;
         }
-        boolean DEBUG = false;
+        boolean DEBUG = true;
         if (DEBUG) appendToLog("1 setCurrentLinkProfile: input profile = " + profile);
         if (true && profile < 50) {
             List<String> profileList = getProfileList();
@@ -2925,6 +2951,9 @@ public class RfidReader {
     }
     public boolean setSelectCriteria(int index, boolean enable, int target, int action, int delay, int bank, int offset, String mask) {
         if (bis108) {
+            if (!enable) {
+                if (bSelectEnabled[index] == enable) return true;
+            }
             appendToLog("cs108Library4A: setSelectCriteria 2 with index = " + index + ", enable = " + enable + ", target = " + target + ", action = " + action + ", delay = " + delay + ", bank = " + bank + ", offset = " + offset + ", mask = " + mask);
             if (index < 0) index = findFirstEmptySelect();
             if (index < 0) {
@@ -2961,6 +2990,9 @@ public class RfidReader {
                         rfidReaderChipR2000.rx000Setting.setQuerySelect(0);
                     }
                 }
+            }
+            if (result) {
+                bSelectEnabled[index] = enable;
             }
             return result;
         } else {
@@ -3133,6 +3165,7 @@ public class RfidReader {
             case TAG_INVENTORY_COMPACT:
             case TAG_INVENTORY:
             case TAG_SEARCHING:
+                //setInventoring(true);
                 if (operationTypes == RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT) {
                     if (false && tagFocus >= 1) {
                         setTagGroup(-1, 1, 0);  //Set Session S1, Target A
@@ -3663,6 +3696,9 @@ public class RfidReader {
     }
     public boolean setAccessWriteData(String dataInput) {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setAccessWriteData(dataInput) : rfidReaderChipE710.rx000Setting.setAccessWriteData(dataInput));
+    }
+    public boolean setResReadNoReply(boolean resReadNoReply) {
+        return (bis108 ? false : rfidReaderChipE710.rx000Setting.setResReadNoReply(resReadNoReply));
     }
     public boolean setTagRead(int tagRead) {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setTagRead(tagRead) : rfidReaderChipE710.rx000Setting.setTagRead(tagRead));

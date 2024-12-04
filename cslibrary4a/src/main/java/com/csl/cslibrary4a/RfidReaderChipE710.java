@@ -595,6 +595,13 @@ public class RfidReaderChipE710 {
         }
 
         byte[][] multibankReadConfig = new byte[3][];
+        int getMultibankEnable(int iSelectPort) {
+            int iValue = 0;
+            if (multibankReadConfig[iSelectPort] != null) {
+                if (multibankReadConfig[iSelectPort][0] != 0) iValue = multibankReadConfig[iSelectPort][0];
+            }
+            return iValue;
+        }
         int getMultibankReadLength(int iSelectPort) {
             int iValue = 0;
             if (multibankReadConfig[iSelectPort] != null) {
@@ -1464,6 +1471,18 @@ public class RfidReaderChipE710 {
             } else appendToLog("getTagRead = 0 as multibankReadConfig[0] = " + byteArrayToString(multibankReadConfig[0]) + ", [1] = " + byteArrayToString(multibankReadConfig[1]));
             return iValue;
         }
+        boolean isMultibankReplyNeed(int index) {
+            boolean bValue = false;
+            if (resReadNoReply) bValue = true;
+            appendToLog("multibankReadConfig[" + index + "] = " + byteArrayToString(rx000Setting.multibankReadConfig[index]) + ", bValue = " + bValue);
+            return bValue;
+        }
+        boolean resReadNoReply = false;
+        public boolean setResReadNoReply(boolean resReadNoReply) {
+            appendToLog("setResReadNoReply[" + resReadNoReply + "]");
+            this.resReadNoReply = resReadNoReply;
+            return true;
+        }
         public boolean setTagRead(int tagRead) {
             boolean bValue = false, DEBUG = false;
             if (DEBUG) appendToLog("0 setTagRead with tagRead = " + tagRead);
@@ -1472,12 +1491,15 @@ public class RfidReaderChipE710 {
             else if (rx000Setting.multibankReadConfig[1] == null)
                 appendToLog("!!! CANNOT continue as multibankReadConfig[1] is null !!!");
             else {
-                if (DEBUG)
+                if (DEBUG) {
                     appendToLog("0 multibankReadConfig[0] = " + byteArrayToString(rx000Setting.multibankReadConfig[0]));
+                    appendToLog("0 multibankReadConfig[1] = " + byteArrayToString(rx000Setting.multibankReadConfig[1]));
+                }
                 if ((tagRead == 0 && rx000Setting.multibankReadConfig[0][0] != 0)
                         || (tagRead != 0 && rx000Setting.multibankReadConfig[0][0] == 0)) {
                     byte[] bytes = new byte[1];
-                    if (tagRead != 0) bytes[0] = 1;
+                    if (tagRead == 2 && isMultibankReplyNeed(0)) bytes[0] = 2;
+                    else if (tagRead != 0) bytes[0] = 1;
                     else bytes[0] = 0;
                     bValue = writeMAC(0x3270 + 7 * 0, bytes, true);
                     if (bValue)
@@ -2616,7 +2638,7 @@ public class RfidReaderChipE710 {
             return iValue;
         }
         public boolean setCurrentProfile(int currentProfile) {
-            byte[] data; boolean DEBUG = false, bValue = false;
+            byte[] data; boolean DEBUG = true, bValue = false;
             if (DEBUG) appendToLog("2 setCurrentProfile: currentProfile = " + currentProfile + ", iRfidModeSingleByte = " + iRfidModeSingleByte);
             if (antennaPortConfig[antennaSelect] == null) appendToLog("CANNOT continue as antennaPortConfig[" + antennaSelect + "] is null !!!");
             else if (getCurrentProfile() == currentProfile && sameCheck) bValue = true;
@@ -3826,7 +3848,8 @@ public class RfidReaderChipE710 {
                                                         if (DEBUG) appendToLog("Check iDataIndex = " + iDataIndex + ", iDataOffset = " + iDataOffset + ", iBankLength = " + iBankLength + ", iMbDataLength = " + iMbDataLength);
                                                         if (iDataOffset + iBankLength > iMbDataLength) appendToLog("!!! iBankLength " + iBankLength + " is too long for iDataOffset " + iDataOffset + ", iMbDataLength = " + iMbDataLength);
                                                         else {
-                                                            if (iDataIndex == 0) {
+                                                            if (rx000Setting.getMultibankEnable(i) == 2) iDataIndex++;
+                                                            else if (iDataIndex == 0) {
                                                                 dataA.decodedData1 = new byte[iBankLength];
                                                                 System.arraycopy(dataA.dataValues, iEpcLength + 18 + iDataOffset, dataA.decodedData1, 0, dataA.decodedData1.length);
                                                                 if (DEBUG) appendToLog("decodedData1 = " + byteArrayToString(dataA.decodedData1));
@@ -3945,51 +3968,61 @@ public class RfidReaderChipE710 {
                                                 dataA.decodedError = null;
                                                 break;
                                             case 1:
-                                                dataA.decodedError = "Tag cache table buffer is overflowed";
+                                                dataA.decodedError = "0x0001 Tag cache table buffer is overflowed";
                                                 break;
                                             case 2:
-                                                dataA.decodedError = "Wrong register address";
+                                                dataA.decodedError = "0x0002 Wrong register address";
                                                 break;
                                             case 3:
-                                                dataA.decodedError = "Register length too large";
+                                                dataA.decodedError = "0x0003 Register length too large";
                                                 break;
                                             case 4:
-                                                dataA.decodedError = "E710 not powered up";
+                                                dataA.decodedError = "0x0004 E710 not powered up";
                                                 break;
                                             case 5:
-                                                dataA.decodedError = "Invalid parameter";
+                                                dataA.decodedError = "0x0005 Invalid parameter";
                                                 break;
                                             case 6:
-                                                dataA.decodedError = "Event fifo full";
+                                                dataA.decodedError = "0x0006 Event fifo full";
                                                 break;
                                             case 7:
-                                                dataA.decodedError = "TX not ramped up";
+                                                dataA.decodedError = "0x0007 TX not ramped up";
                                                 break;
                                             case 8:
-                                                dataA.decodedError = "Register read only";
+                                                dataA.decodedError = "0x0008 Register read only";
                                                 break;
                                             case 9:
-                                                dataA.decodedError = "Failed to halt";
+                                                dataA.decodedError = "0x0009 Failed to halt";
+                                                break;
                                             case 10:
-                                                dataA.decodedError = "PLL not locked";
+                                                dataA.decodedError = "0x000A PLL not locked";
                                                 break;
                                             case 11:
-                                                dataA.decodedError = "Power control target failed";
+                                                dataA.decodedError = "0x000B Power control target failed";
                                                 break;
                                             case 12:
-                                                dataA.decodedError = "Radio power not enabled";
+                                                dataA.decodedError = "0x000C Radio power not enabled";
                                                 break;
                                             case 13:
-                                                dataA.decodedError = "E710 command error";
+                                                dataA.decodedError = "0x000D E710 command error (e.g. battery low)";
                                                 break;
                                             case 14:
-                                                dataA.decodedError = "E710 Op timeout";
+                                                dataA.decodedError = "0x000E E710 Op timeout";
                                                 break;
                                             case 15:
-                                                dataA.decodedError = "E710 Aggregate error";
+                                                dataA.decodedError = "0x000F E710 Aggregate error (e.g. battery low, metal reflection)";
                                                 break;
-                                            case 0xFFF:
-                                                dataA.decodedError = "Other error";
+                                            case 0x10:
+                                                dataA.decodedError = "0x0010 E710 hardware link error";
+                                                break;
+                                            case 0x11:
+                                                dataA.decodedError = "0x0011 E710 event fail to send error";
+                                                break;
+                                            case 0x12:
+                                                dataA.decodedError = "0x0012 E710 antenna error (e.g. metal reflection)";
+                                                break;
+                                            case 0x00FF:
+                                                dataA.decodedError = "0x00FF Other error (e.g. battery low)";
                                                 break;
                                             default:
                                                 dataA.decodedError = "Unknown error";

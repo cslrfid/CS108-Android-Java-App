@@ -2,6 +2,8 @@ package com.csl.cs108ademoapp.fragments;
 
 import androidx.lifecycle.Lifecycle;
 import android.os.Bundle;
+
+import com.csl.cs108ademoapp.adapters.MyAdapter;
 import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
@@ -13,12 +15,11 @@ import android.view.ViewGroup;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.AxzonAdapter;
 
 public class AxzonFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    AxzonAdapter mAdapter;
+    MyAdapter adapter;
 
     private String[] tabs = { "Scan/Select", "Read" };
     private String[] tabsXerxes = { "Logger", "Security" };
@@ -31,7 +32,7 @@ public class AxzonFragment extends CommonFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) mAdapter.fragment0;
+        InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) adapter.fragment0;
         if (item.getItemId() == R.id.menuAction_clear) {
             fragment.clearTagsList();
             return true;
@@ -71,9 +72,14 @@ public class AxzonFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        mAdapter = AxzonAdapter.newinstance(getActivity().getSupportFragmentManager(), (bXervesTag ? 4 : 2));
+        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), (bXervesTag ? 4 : 2));
+        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, ""));
+        adapter.setFragment(1, AccessMicronFragment.newInstance(true));
+        adapter.setFragment(2, new AccessXerxesLoggerFragment());
+        adapter.setFragment(3, new AccessUcodeFragment());
+
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
-        viewPager.setAdapter(mAdapter);
+        viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
         for (String tab_name : tabs) {
@@ -105,37 +111,37 @@ public class AxzonFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        if (mAdapter.fragment0 != null) if (mAdapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment0.onPause();
-        if (mAdapter.fragment1 != null) if (mAdapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment1.onPause();
-        if (mAdapter.fragment2 != null) if (mAdapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment2.onPause();
-        if (mAdapter.fragment3 != null) if (mAdapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment3.onPause();
+        if (adapter.fragment0 != null) if (adapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment0.onPause();
+        if (adapter.fragment1 != null) if (adapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment1.onPause();
+        if (adapter.fragment2 != null) if (adapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment2.onPause();
+        if (adapter.fragment3 != null) if (adapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment3.onPause();
         super.onPause();
     }
 
     @Override
     public void onStop() {
-        if (mAdapter.fragment0 != null) if (mAdapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment0.onStop();
-        if (mAdapter.fragment1 != null) if (mAdapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment1.onStop();
-        if (mAdapter.fragment2 != null) if (mAdapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment2.onStop();
-        if (mAdapter.fragment3 != null) if (mAdapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment3.onStop();
+        if (adapter.fragment0 != null) if (adapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment0.onStop();
+        if (adapter.fragment1 != null) if (adapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment1.onStop();
+        if (adapter.fragment2 != null) if (adapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment2.onStop();
+        if (adapter.fragment3 != null) if (adapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment3.onStop();
         super.onStop();
     }
 
     @Override
     public void onDestroyView() {
-        if (mAdapter.fragment0 != null) if (mAdapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment0.onDestroyView();
-        if (mAdapter.fragment1 != null) if (mAdapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment1.onDestroyView();
-        if (mAdapter.fragment2 != null) if (mAdapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment2.onDestroyView();
-        if (mAdapter.fragment3 != null) if (mAdapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment3.onDestroyView();
+        if (adapter.fragment0 != null) if (adapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment0.onDestroyView();
+        if (adapter.fragment1 != null) if (adapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment1.onDestroyView();
+        if (adapter.fragment2 != null) if (adapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment2.onDestroyView();
+        if (adapter.fragment3 != null) if (adapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment3.onDestroyView();
         super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
-        if (mAdapter.fragment0 != null) if (mAdapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment0.onDestroy();
-        if (mAdapter.fragment1 != null) if (mAdapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment1.onDestroy();
-        if (mAdapter.fragment2 != null) if (mAdapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment2.onDestroy();
-        if (mAdapter.fragment3 != null) if (mAdapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment3.onDestroy();
+        if (adapter.fragment0 != null) if (adapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment0.onDestroy();
+        if (adapter.fragment1 != null) if (adapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment1.onDestroy();
+        if (adapter.fragment2 != null) if (adapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment2.onDestroy();
+        if (adapter.fragment3 != null) if (adapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment3.onDestroy();
         if (MainActivity.selectFor != -1) {
             MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
             MainActivity.selectFor = -1;
@@ -146,10 +152,10 @@ public class AxzonFragment extends CommonFragment {
 
     @Override
     public void onDetach() {
-        if (mAdapter.fragment0 != null) if (mAdapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment0.onDetach();
-        if (mAdapter.fragment1 != null) if (mAdapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment1.onDetach();
-        if (mAdapter.fragment2 != null) if (mAdapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment2.onDetach();
-        if (mAdapter.fragment3 != null) if (mAdapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) mAdapter.fragment3.onDetach();
+        if (adapter.fragment0 != null) if (adapter.fragment0.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment0.onDetach();
+        if (adapter.fragment1 != null) if (adapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment1.onDetach();
+        if (adapter.fragment2 != null) if (adapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment2.onDetach();
+        if (adapter.fragment3 != null) if (adapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment3.onDetach();
         super.onDetach();
     }
 

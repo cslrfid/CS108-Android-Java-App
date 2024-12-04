@@ -26,6 +26,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -61,7 +64,7 @@ public class HomeFragment extends CommonFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState, true);
         if (getActivity().getPackageName().contains("com.csl.cs710ademoapp")) return inflater.inflate(R.layout.home_layout710, container, false);
-        else return inflater.inflate(R.layout.home_layout, container, false);
+        else return inflater.inflate(R.layout.home_layout108, container, false);
     }
 
     @Override
@@ -71,12 +74,37 @@ public class HomeFragment extends CommonFragment {
         if (true && ((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             actionBar.setIcon(android.R.drawable.ic_menu_save);
-            if (getActivity().getPackageName().contains("cs710awedgeapp")) actionBar.setTitle(R.string.title_activity_newhome1);
-            else if (getActivity().getPackageName().contains("cs710ademoapp")) actionBar.setTitle(R.string.title_activity_newhome);
-            else actionBar.setTitle(R.string.title_activity_home);
+            if (getActivity().getPackageName().contains("cs710ademoapp")) actionBar.setTitle(R.string.title_activity_home_cs710);
+            else actionBar.setTitle(R.string.title_activity_home_cs108);
+        }
+        if (true) {
+            String strForegroundReader = MainActivity.csLibrary4A.getForegroundReader();
+            MainActivity.csLibrary4A.appendToLog("strForegroundReader = " + strForegroundReader + ", getForegroundServiceEnable = " + MainActivity.csLibrary4A.getForegroundServiceEnable());
+            if (!getActivity().getPackageName().contains("com.csl.cs710awedgeapp") && strForegroundReader != null && strForegroundReader.length() != 0) {
+                MainActivity.csLibrary4A.appendToLog("strForegroundReader = " + strForegroundReader + ", getForegroundServiceEnable = " + MainActivity.csLibrary4A.getForegroundServiceEnable());
+                LinearLayout linearLayout1, linearLayout2, linearLayout3, linearLayout4, linearLayout5;
+                linearLayout1 = (LinearLayout) getActivity().findViewById(R.id.mainRow1);
+                linearLayout2 = (LinearLayout) getActivity().findViewById(R.id.mainRow2);
+                linearLayout3 = (LinearLayout) getActivity().findViewById(R.id.mainRow3);
+                linearLayout4 = (LinearLayout) getActivity().findViewById(R.id.mainRow4);
+                linearLayout5 = (LinearLayout) getActivity().findViewById(R.id.mainRow5);
+                if (getActivity().getPackageName().contains("com.csl.cs710ademoapp")) {
+                    FrameLayout frameLayout = (FrameLayout) getActivity().findViewById(R.id.mainButton1);
+                    frameLayout.setVisibility(View.INVISIBLE);
+                } else {
+                    Button button = (Button) getActivity().findViewById(R.id.mainButton1);
+                    button.setVisibility(View.INVISIBLE);
+                }
+                linearLayout1.setVisibility(View.INVISIBLE);
+                linearLayout2.setVisibility(View.GONE);
+                linearLayout3.setVisibility(View.VISIBLE);
+                linearLayout4.setVisibility(View.INVISIBLE);
+                //linearLayout5.setVisibility(View.INVISIBLE);
+
+            }
         }
         MainActivity.mDid = null;
-        if (true || MainActivity.sharedObjects.versioinWarningShown == false)
+        if (true || MainActivity.sharedObjects.versionWarningShown == false)
             mHandler.post(runnableConfiguring);
         mHandler.postDelayed(runnableStartService, 1000);
     }
@@ -91,7 +119,7 @@ public class HomeFragment extends CommonFragment {
     @Override
     public void onDestroyView() {
         isHomeFragment = false;
-        MainActivity.csLibrary4A.appendToLog("isHomeFragment1 = " + isHomeFragment);
+        //MainActivity.csLibrary4A.appendToLog("isHomeFragment1 = " + isHomeFragment);
         super.onDestroyView();
     }
 
@@ -126,14 +154,14 @@ public class HomeFragment extends CommonFragment {
                 }
             } else {
                 stopProgressDialog();
-                if (MainActivity.sharedObjects.versioinWarningShown == false) {
+                if (MainActivity.sharedObjects.versionWarningShown == false) {
                     String stringPopup = MainActivity.csLibrary4A.checkVersion();
                     if (false && stringPopup != null && stringPopup.length() != 0) {
                         stringPopup = "Firmware too old\nPlease upgrade firmware to at least:" + stringPopup;
                         CustomPopupWindow customPopupWindow = new CustomPopupWindow((Context)getActivity());
                         customPopupWindow.popupStart(stringPopup, false);
                     }
-                    MainActivity.sharedObjects.versioinWarningShown = true;
+                    MainActivity.sharedObjects.versionWarningShown = true;
                 }
             }
             MainActivity.csLibrary4A.setPwrManagementMode(true);
@@ -217,7 +245,10 @@ public class HomeFragment extends CommonFragment {
                     MainActivity.csLibrary4A.appendToLog("runnableStartService: handled POST_NOTIFICATIONS");
                     startService();
                 }
-            } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle POST_NOTIFICATIONS");
+            } else {
+                MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle POST_NOTIFICATIONS");
+                startService();
+            }
         }
     };
     Intent serviceIntent;

@@ -2,6 +2,8 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimary</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
         <item name="android:actionBarTabTextStyle">@style/ActionTabTextStyle</item>
@@ -136,6 +138,7 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">@dimen/dashboard_textSize</item>
         <item name="android:textColor">#222222</item>
+        <item name="android:background">@color/colorPrimary</item>
     </style>
 
     <!--Background for save config-->

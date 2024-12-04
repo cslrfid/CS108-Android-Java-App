@@ -6,13 +6,13 @@ android {
         buildConfig true
     }
 
-    compileSdk 34
+    compileSdk 35
     defaultConfig {
         applicationId "com.csl.cs108ademoapp"
         minSdk 23
-        targetSdk 34
-        versionCode 41
-        versionName "2.14.7"
+        targetSdk 35
+        versionCode 42
+        versionName "2.14.31"
     }
 }
 
@@ -22,6 +22,5 @@ dependencies {
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.github.hannesa2:paho.mqtt.android:4.3.beta2'
-    implementation project(':cs108library4a')
     implementation project(':cslibrary4a')
 }

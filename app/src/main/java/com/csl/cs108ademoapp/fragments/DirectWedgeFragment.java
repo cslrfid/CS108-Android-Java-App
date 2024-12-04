@@ -1,11 +1,20 @@
 package com.csl.cs108ademoapp.fragments;
 
-import android.Manifest;
-import android.bluetooth.BluetoothDevice;
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.BLUETOOTH;
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
+import static android.Manifest.permission.BLUETOOTH_SCAN;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.content.Context.LOCATION_SERVICE;
+
+import static com.csl.cs108ademoapp.MainActivity.mContext;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,15 +37,14 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import com.csl.cs108ademoapp.BuildConfig;
 import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.DrawerListContent;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
+import com.csl.cs108ademoapp.CustomAlertDialog;
 import com.csl.cslibrary4a.BluetoothGatt;
 import com.csl.cslibrary4a.ReaderDevice;
-import com.csl.cs108ademoapp.CustomAlertDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +54,7 @@ public class DirectWedgeFragment extends CommonFragment {
     private ArrayList<ReaderDevice> readersList = MainActivity.sharedObjects.readersList;
     Handler handler = new Handler();
     private ReaderListAdapter readerListAdapter;
-    boolean bConnecting = false;
+    boolean bWedgeConnecting = false, bWedgeConnected = false;
     boolean bCurrentIMEmatched = false;
     String stringImeExpected, stringLabelExpected;
 
@@ -64,15 +72,19 @@ public class DirectWedgeFragment extends CommonFragment {
         TableRow tableRow2 = getActivity().findViewById(R.id.directWedgeRow2);
         TableRow tableRow3 = getActivity().findViewById(R.id.directWedgeRow3);
         TableRow tableRow4 = getActivity().findViewById(R.id.directWedgeRow4);
+        TableRow tableRow5 = getActivity().findViewById(R.id.directWedgeRow5);
         TableRow tableRowStart = getActivity().findViewById(R.id.directWedgeRowStart);
+        MainActivity.csLibrary4A.appendToLog("getPackageName = " + getActivity().getPackageName());
         if (getActivity().getPackageName().contains("cs710awedgeapp")) {
             androidx.appcompat.app.ActionBar actionBar;
             actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             actionBar.setIcon(R.drawable.dl_access);
-            ColorDrawable colorDrawable = new ColorDrawable(Color.parseColor("#0000FF"));
+            ColorDrawable colorDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
             actionBar.setBackgroundDrawable(colorDrawable);
-            actionBar.setTitle("CSL Java Simple Wedge v" + BuildConfig.VERSION_NAME);
-
+            actionBar.setTitle(R.string.app_ime_simplewedge1);
+            actionBar.setDisplayHomeAsUpEnabled(false);
+            //String strTitle = actionBar.getTitle().toString() + " v" + BuildConfig.VERSION_NAME;
+            //actionBar.setTitle(strTitle);
         } else { //if (getActivity().getPackageName().contains("cs710ademoapp")) {
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             actionBar.setIcon(R.drawable.dl_inv);
@@ -82,6 +94,7 @@ public class DirectWedgeFragment extends CommonFragment {
             tableRow2.setVisibility(View.GONE);
             tableRow3.setVisibility(View.GONE);
             tableRow4.setVisibility(View.GONE);
+            tableRow5.setVisibility(View.GONE);
             tableRowStart.setVisibility(View.VISIBLE);
         }
 
@@ -102,8 +115,8 @@ public class DirectWedgeFragment extends CommonFragment {
             boolean DEBUG = true;
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (DEBUG) MainActivity.csLibrary4A.appendToLog("OnItemClickListener: bConnecting = " + bConnecting + ", position = " + position);
-                if (bConnecting) return;
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("OnItemClickListener: bConnecting = " + bWedgeConnecting + ", position = " + position);
+                if (bWedgeConnecting) return;
 
                 ReaderDevice readerDevice = readerListAdapter.getItem(position);
                 if (readersList.size() > position) {
@@ -147,7 +160,7 @@ public class DirectWedgeFragment extends CommonFragment {
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (bConnecting) return;
+                if (bWedgeConnecting) return;
                 if (MainActivity.csLibrary4A.isBleConnected()) {
                     disconnectWedge();
                     readerListAdapter.notifyDataSetChanged();
@@ -167,6 +180,7 @@ public class DirectWedgeFragment extends CommonFragment {
         });
 
         Button buttonStart = (Button) getActivity().findViewById(R.id.directWedgeButtonStart);
+        if (!getActivity().getPackageName().matches("com.csl.cs710awedgeapp")) buttonStart.setVisibility(View.VISIBLE);
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -185,29 +199,29 @@ public class DirectWedgeFragment extends CommonFragment {
         buttonInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                CustomPopupWindow customPopupWindow = new CustomPopupWindow(mContext);
                 String stringInfo =
-                "1.	After installation, when first time entering the application, the application may request user to do something, such as turning on location permission, selecting location accuracy, allowing connection and enabling <CSL Java Simple Wedge>. Please follow the requests and give positive answers.\n\n" +
-                "2.	Use the Reader List box with title: \"Tick box to select reader\" and select the reader you want to connect to.  The list shows the reader name and type and Bluetooth MAC address.  Tick the box on the right hand side to select the reader to be connected. Once ticked, the reader will be connected automatically. The Connect button below would change to Disconnect.\n\n" +
-                "3.	Once connected, you can now swap this application to background.  Just press the Android \"square\" button at the bottom of the screen and the application will be swapped to background\n\n" +
-                "4.	Open the final application that you want the wedge to serve.  Call this \"Final Application\" for easy reference.\n\n" +
-                "5.	If the \"Final Application\" allows user to select another input devices, user should see a keyboard icon at the lower right corner of the screen. Select the keyboard <CSL Java Simple Wedge> as the input.\n\n" +
-                "6.	At this point, the Wedge is ready for the \"Final Application\".  Just press and hold the blue gun trigger button of the reader to read the tags in front of the CS710S (or CS108) reader. The tag EPCs will then be shown in the \"Final Application\".\n\n" +
-                "7.	At the end of tag reading, release the trigger button, close the \"Final Application\" and swap back the CSL Simple Wedge application from the background.\n\n" +
-                "8.	Now you can press the Disconnect button to disconnect from the CS710S (or CS108) reader.\n\n" +
-                "9.	Configuration button: Press the button to modify some parameters, such as power, prefix, suffix and delimiter.\n\n" +
-                "10. Connect / Disconnect button: Press the button to connect / disconnect the reader.";
+                "1.	For the first time launching the application, please grant device permission for location, connectivity and enabling <CSL Data Wedge>. \n\n" +
+                "2.	Readers will be discovered by the app and please check the box on the right hand side to select the reader to be connected. \n\n" +
+                "3.	Once connected, put the application in background.\n\n" +
+                "4.	Open the target application where you would like data to be printed.\n\n" +
+                "5.	On the target applicatoin , put the cursor to the text field where data will be printed.  Switch your keyboard to <CSL Data Wedge>.\n\n" +
+                "6.	Press and hold the trigger key of the reader to start reading tags. EPC values will be printed to the cursor on your target application.\n\n" +
+                "7.	Switch back to the CSL Data Wedge application.  Now you can press the \"Disconnect\" button to disconnect from the reader.\n\n" +
+                "8.	Configuration button: Press the button to modify parameters such as power, prefix, suffix and delimiter.\n\n";
                 MainActivity.csLibrary4A.appendToLog(stringInfo);
                 customPopupWindow.popupStart(stringInfo, false);
             }
         });
 
-        handler.post(runnableStart);
+        handler.post(runnableStartService);
+        handler.postDelayed(runnableStart, 1000);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        readerListAdapter.notifyDataSetChanged();
         updateCurrentIMEMatched();
     }
 
@@ -222,17 +236,95 @@ public class DirectWedgeFragment extends CommonFragment {
         super("DirectWedgeFragment");
     }
 
+    public static boolean bUserRequestedDisconnect = false;
     void disconnectWedge() {
-        MainActivity.csLibrary4A.disconnect(false); bleDisConnecting = true; bConnecting = false;
+        MainActivity.csLibrary4A.appendToLog("foregroundReader108: updated 2A");
+        MainActivity.csLibrary4A.setForegroundServiceEnable(false);
+        MainActivity.csLibrary4A.appendToLog("getForegroundReader = " + MainActivity.csLibrary4A.getForegroundReader());
+
+        MainActivity.csLibrary4A.disconnect(false); bleDisConnecting = true; bWedgeConnecting = false; bUserRequestedDisconnect = true;
         readersList.clear();
         buttonConnect.setText("Connect");
         handler.removeCallbacks(runnableStart); handler.postDelayed(runnableStart, 2000);
+
+        MainActivity.csLibrary4A.setWedgeDeviceName(null); MainActivity.csLibrary4A.setWedgeDeviceAddress(null);
     }
     void connectWedge(ReaderDevice readerDevice) {
         MainActivity.csLibrary4A.scanLeDevice(false);
-        MainActivity.csLibrary4A.connect(readerDevice); bConnecting = true;
+        MainActivity.csLibrary4A.connect(readerDevice); bWedgeConnecting = true; bWedgeConnected = false; bUserRequestedDisconnect = false;
         buttonConnect.setText("Connecting");
+        MainActivity.csLibrary4A.setWedgeDeviceName(readerDevice.getName()); MainActivity.csLibrary4A.setWedgeDeviceAddress(readerDevice.getAddress());
+        MainActivity.csLibrary4A.setWedgeDeviceUUID2p1(readerDevice.getServiceUUID2p1());
     }
+
+    Runnable runnableStartService = new Runnable() {
+        boolean DEBUG = false;
+
+        @Override
+        public void run() {
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE) = " + ActivityCompat.checkSelfPermission(mContext, WRITE_EXTERNAL_STORAGE));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, READ_EXTERNAL_STORAGE)  = " + ActivityCompat.checkSelfPermission(mContext, READ_EXTERNAL_STORAGE));
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (mContext.checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions WRITE_EXTERNAL_STORAGE"); //
+                    requestPermissions(new String[] { WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE }, 1);
+                    //Toast.makeText(mContext, com.csl.cslibrary4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
+                } else MainActivity.csLibrary4A.appendToLog("runnableStartService: WRITE_EXTERNAL_STORAGE is permitted"); ///
+            } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle WRITE_EXTERNAL_STORAGE");
+
+            LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) = " + ActivityCompat.checkSelfPermission(mContext, ACCESS_FINE_LOCATION));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_COARSE_LOCATION)  = " + ActivityCompat.checkSelfPermission(mContext, ACCESS_COARSE_LOCATION));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if ((ActivityCompat.checkSelfPermission(mContext, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(mContext, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                    CustomAlertDialog appdialog = new CustomAlertDialog();
+                    appdialog.Confirm(getActivity(), "Use your location",
+                            "This app collects location data in the background.  In terms of the features using this location data in the background, this App collects location data when it is reading RFID tag in all inventory pages.  The purpose of this is to correlate the RFID tag with the actual GNSS(GPS) location of the tag.  In other words, this is to track the physical location of the logistics item tagged with the RFID tag.",
+                            "No thanks", "Turn on",
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    MainActivity.csLibrary4A.appendToLog("runnableStartService: allow permission in ACCESS_FINE_LOCATION handler");
+                                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions ACCESS_FINE_LOCATION");
+                                    requestPermissions(new String[] { ACCESS_FINE_LOCATION }, 123); //ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION
+                                    //if (false) Toast.makeText(mContext, com.csl.cslibrary4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
+                                    /*{
+                                        LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
+                                        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) {
+                                            MainActivity.csLibrary4A.appendToLog("popupAlert: StreamOut: start activity ACTION_LOCATION_SOURCE_SETTINGS");
+                                            Intent intent1 = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                            mContext.startActivity(intent1);
+                                        }
+                                    }*/
+                                    //bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
+                                    //bAlerting = false;
+                                }
+                            },
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    MainActivity.csLibrary4A.appendToLog("runnableStartService: reject permission in ACCESS_FINE_LOCATION handler");
+                                    //bAlerting = false;
+                                    //bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
+                                }
+                            });
+                    MainActivity.csLibrary4A.appendToLog("runnableStartService: started ACCESS_FINE_LOCATION handler");
+                } else MainActivity.csLibrary4A.appendToLog("runnableStartService: handled ACCESS_FINE_LOCATION");
+            } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle ACCESS_FINE_LOCATION");
+
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_CONNECT) = " + ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_CONNECT));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_SCAN)  = " + ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_SCAN));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
+                    requestPermissions(new String[] { BLUETOOTH_SCAN, BLUETOOTH_CONNECT }, 123);
+                } else MainActivity.csLibrary4A.appendToLog("runnableStartService: handled BLUETOOTH_CONNECT and BLUETOOTH_SCAN");
+            } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
+        }
+    };
 
     int runningMode = -1, connectWait = 0, scanWait = 0;
     Runnable runnableStart = new Runnable() {
@@ -241,71 +333,127 @@ public class DirectWedgeFragment extends CommonFragment {
             boolean bValue = true;
             if (MainActivity.csLibrary4A.isBleConnected()) {
                 if (MainActivity.csLibrary4A.mrfidToWriteSize() == 0) {
-                    MainActivity.csLibrary4A.setPowerLevel(MainActivity.wedgePower);
-                    MainActivity.csLibrary4A.appendToLog("isBleConnected is true with mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
-                    bConnecting = false;
-                    for (int i = 0; i < readersList.size(); i++) {
-                        ReaderDevice readerDevice = readersList.get(i);
-                        if (readerDevice.getSelected() && readerDevice.isConnected() == false) {
-                            readerDevice.setConnected(true);
-                            readersList.set(i, readerDevice);
-                            readerListAdapter.notifyDataSetChanged();
+                    bWedgeConnecting = false;
+                    if (bWedgeConnected == false) {
+                        bWedgeConnected = true;
+                        MainActivity.csLibrary4A.setPowerLevel(MainActivity.csLibrary4A.getWedgePower());
+                        MainActivity.csLibrary4A.appendToLog("runnableStart: isBleConnected is true with mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+                        for (int i = 0; i < readersList.size(); i++) {
+                            ReaderDevice readerDevice = readersList.get(i);
+                            if (readerDevice.getSelected() && readerDevice.isConnected() == false) {
+                                readerDevice.setConnected(true);
+                                readersList.set(i, readerDevice);
+                                readerListAdapter.notifyDataSetChanged();
+                            }
+                        }
+                        if (getActivity().getPackageName().contains("cs710awedgeapp")) {
+                            MainActivity.csLibrary4A.appendToLog("foregroundReader108: updated 2b");
+                            MainActivity.csLibrary4A.setForegroundServiceEnable(true);
+                            MainActivity.csLibrary4A.saveSetting2File();
                         }
                     }
                     buttonConnect.setText("Disconnect");
-                    return;
                 } //else Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.toast_not_ready), Toast.LENGTH_SHORT).show();
-            } else if (bConnecting) {
-                MainActivity.csLibrary4A.appendToLog("bConnecting is true");
+            } else if (bWedgeConnecting) {
+                MainActivity.csLibrary4A.appendToLog("runnableStart: bConnecting is true");
             } else if (MainActivity.csLibrary4A.isBleScanning()) {
-                MainActivity.csLibrary4A.appendToLog("isBleScanning is true");
+                MainActivity.csLibrary4A.appendToLog("runnableStart: isBleScanning is true");
                 boolean listUpdated = false;
-                if (false && ++scanWait > 10) {
+                if (++scanWait > 10) {
+                    boolean bValue1 = MainActivity.csLibrary4A.scanLeDevice(false);
+                    MainActivity.csLibrary4A.appendToLog("runnableStart: STOP scanning with result = " + bValue1);
                     scanWait = 0;
-                    readersList.clear(); listUpdated = true;
-                }
-                while (true) {
-                    BluetoothGatt.Cs108ScanData cs108ScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
-                    if (cs108ScanData != null) {
-                        BluetoothGatt.Cs108ScanData scanResultA = cs108ScanData;
-                        if (getActivity() == null) continue;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) continue;
-                        } else if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) continue;
-                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("scanResultA.device.getType() = " + scanResultA.device.getType() + ". scanResultA.rssi = " + scanResultA.rssi);
-                        if (scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE && (true || scanResultA.rssi < 0)) {
-                            boolean match = false;
-                            for (int i = 0; i < readersList.size(); i++) {
-                                if (readersList.get(i).getAddress().matches(scanResultA.device.getAddress())) {
-                                    ReaderDevice readerDevice1 = readersList.get(i);
-                                    int count = readerDevice1.getCount();
-                                    count++;
-                                    readerDevice1.setCount(count);
-                                    readerDevice1.setRssi(scanResultA.rssi);
-                                    readersList.set(i, readerDevice1); listUpdated = true;
-                                    match = true;
-                                    break;
+                    readersList.clear();
+                    listUpdated = true;
+                } else {
+                    while (true) {
+                        BluetoothGatt.Cs108ScanData cs108ScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
+                        if (cs108ScanData != null) {
+                            BluetoothGatt.Cs108ScanData scanResultA = cs108ScanData;
+                            if (getActivity() == null) continue;
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                                    continue;
                                 }
+                            } else if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+                                continue;
                             }
-                            if (match == false) {
-                                ReaderDevice readerDevice = new ReaderDevice(scanResultA.device.getName(), scanResultA.device.getAddress(), false, "", 1, scanResultA.rssi, scanResultA.serviceUUID2p2);
-                                String strInfo = "";
-                                if (scanResultA.device.getBondState() == 12) {
-                                    strInfo += "BOND_BONDED\n";
+                            if (DEBUG)
+                                MainActivity.csLibrary4A.appendToLog("runnableStart: scanResultA.device.getType() = " + scanResultA.device.getType() + ". scanResultA.rssi = " + scanResultA.rssi);
+                            if (/*scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE &&*/ (true || scanResultA.rssi < 0)) {
+                                boolean match = false;
+                                for (int i = 0; i < readersList.size(); i++) {
+                                    if (readersList.get(i).getAddress().matches(scanResultA.device.getAddress())) {
+                                        ReaderDevice readerDevice1 = readersList.get(i);
+                                        int count = readerDevice1.getCount();
+                                        count++;
+                                        readerDevice1.setCount(count);
+                                        readerDevice1.setRssi(scanResultA.rssi);
+                                        readersList.set(i, readerDevice1);
+                                        listUpdated = true;
+                                        match = true;
+                                        break;
+                                    }
                                 }
-                                readerDevice.setDetails(strInfo + "scanRecord=" + MainActivity.csLibrary4A.byteArrayToString(scanResultA.scanRecord));
-                                readersList.add(readerDevice); listUpdated = true;
+                                if (match == false) {
+                                    ReaderDevice readerDevice = new ReaderDevice(scanResultA.device.getName(), scanResultA.device.getAddress(), false, "", 1, scanResultA.rssi, scanResultA.serviceUUID2p2);
+                                    String strInfo = "";
+                                    if (scanResultA.device.getBondState() == 12) {
+                                        strInfo += "BOND_BONDED\n";
+                                    }
+                                    //readerDevice.setDetails(strInfo + "scanRecord=" + mCsLibrary4A.byteArrayToString(scanResultA.scanRecord));
+                                    readersList.add(readerDevice);
+                                    listUpdated = true;
+                                }
+                            } else {
+                                if (DEBUG)
+                                    MainActivity.csLibrary4A.appendToLog("runnableStart: deviceScanTask: rssi=" + scanResultA.rssi + ", error type=" + scanResultA.device.getType());
                             }
+                            //scanWait = 0;
                         } else {
-                            if (DEBUG) MainActivity.csLibrary4A.appendToLog("deviceScanTask: rssi=" + scanResultA.rssi + ", error type=" + scanResultA.device.getType());
+                            MainActivity.csLibrary4A.appendToLog("runnableStart: NO reader is found with scanWait = " + scanWait);
+                            break;
                         }
-                    } else break;
+                    }
+                    if (listUpdated) readerListAdapter.notifyDataSetChanged();
                 }
-                if (listUpdated) readerListAdapter.notifyDataSetChanged();
             } else {
-                MainActivity.csLibrary4A.appendToLog("isBleScanning is FALSE");
-                bConnecting = false; connectWait = 0; scanWait = 0;
-                boolean bValue1 = MainActivity.csLibrary4A.scanLeDevice(true);
+                MainActivity.csLibrary4A.appendToLog("bbb 4");
+                if (bWedgeConnected) {
+                    bWedgeConnected = false;
+                    MainActivity.csLibrary4A.appendToLog("bbb 4A");
+                    readersList.clear(); readerListAdapter.notifyDataSetChanged();
+                    buttonConnect.setText("Connect");
+                }
+                MainActivity.csLibrary4A.appendToLog("runnableStart: isBleScanning is FALSE");
+                boolean bScanPermitted = true;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { //that is android 12 or above
+                    if (ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
+                            || ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                        bScanPermitted = false;
+                        //MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
+                        //requestPermissions(new String[] { BLUETOOTH_SCAN, BLUETOOTH_CONNECT }, 123);
+                        MainActivity.csLibrary4A.appendToLog("runnableStart: CANNOT start scanLeDevice as BLUETOOTH_CONNECT && BLUETOOTH_SCAN is NOT yet permitted");
+                    } else {
+                        MainActivity.csLibrary4A.appendToLog("runnableStartService: BLUETOOTH_CONNECT and BLUETOOTH_SCAN and (ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION) is permitted");
+                    }
+                } else {
+                    MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
+                    if (ActivityCompat.checkSelfPermission(mContext, BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+                        bScanPermitted = false;
+                        MainActivity.csLibrary4A.appendToLog("runnableStart: CANNOT start scanLeDevice as BLUETOOTH is NOT yet permitted");
+                    } else {
+                        MainActivity.csLibrary4A.appendToLog("runnableStartService: BLUETOOTH_CONNECT and BLUETOOTH_SCAN and (ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION) is permitted");
+                    }
+                }
+                if ((ActivityCompat.checkSelfPermission(mContext, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(mContext, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                    bScanPermitted = false;
+                    MainActivity.csLibrary4A.appendToLog("runnableStart: CANNOT start scanLeDevice as ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION is NOT yet permitted");
+                }
+                bWedgeConnecting = false; connectWait = 0; scanWait = 0;
+                boolean bValue1 = false;
+                if (bScanPermitted) bValue1 = MainActivity.csLibrary4A.scanLeDevice(true);
                 MainActivity.csLibrary4A.appendToLog("runnableStart: starting scanLeDevice is " + bValue1 + " with isScanning = " + MainActivity.csLibrary4A.isBleScanning());
             }
             handler.postDelayed(runnableStart, 1000);
@@ -347,9 +495,9 @@ public class DirectWedgeFragment extends CommonFragment {
             boolean bFound = false;
             List<InputMethodInfo> list = null;
             stringImeExpected = getActivity().getPackageName() + ".CustomIME";
-            if (MainActivity.drawerPositionsDefault != DrawerListContent.DrawerPositions.MAIN) stringLabelExpected = getResources().getString(R.string.app_newime1);
-            else if (getActivity().getPackageName().contains("cs710ademoapp")) stringLabelExpected = getResources().getString(R.string.app_newime);
-            else stringLabelExpected = getResources().getString(R.string.app_ime);
+            if (MainActivity.drawerPositionsDefault != DrawerListContent.DrawerPositions.MAIN) stringLabelExpected = getResources().getString(R.string.app_ime_simplewedge1);
+            else if (getActivity().getPackageName().contains("cs710ademoapp")) stringLabelExpected = getResources().getString(R.string.app_ime_cs710);
+            else stringLabelExpected = getResources().getString(R.string.app_ime_cs108);
             InputMethodManager inputMethodManager = inputMethodManager = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
 
             MainActivity.csLibrary4A.appendToLog("FEATURE_INPUT_METHODS is " + getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_INPUT_METHODS));
@@ -389,7 +537,7 @@ public class DirectWedgeFragment extends CommonFragment {
                     if (list.get(i).getServiceName().contains(stringImeExpected) && list.get(i).loadLabel(getActivity().getPackageManager()).toString().contains(stringLabelExpected)) {
                         bFound = true;
                         MainActivity.csLibrary4A.appendToLog("Found expected IME with id = " + list.get(i).getId());
-                        String idCurrent = Settings.Secure.getString(MainActivity.mContext.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+                        String idCurrent = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
                         MainActivity.csLibrary4A.appendToLog("Found current IME with id = " + idCurrent);
                         if (list.get(i).getId().matches(idCurrent)) {
                             MainActivity.csLibrary4A.appendToLog("expected IME matches current IME");

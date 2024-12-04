@@ -238,8 +238,10 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         final ReaderDevice tagSelected = MainActivity.tagSelected;
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
-                if (tagSelected.getTid().indexOf("E281D") == 0 || tagSelected.getTid().indexOf("E201E") == 0) {
-                    memoryBankSpinner.setSelection(1);
+                if (tagSelected.getTid() != null) {
+                    if (tagSelected.getTid().indexOf("E281D") == 0 || tagSelected.getTid().indexOf("E201E") == 0) {
+                        memoryBankSpinner.setSelection(1);
+                    }
                 }
                 switch (memoryBankSpinner.getSelectedItemPosition()) {
                     case 0:

@@ -666,7 +666,7 @@ public class BluetoothGatt extends BluetoothGattCallback {
                 }
             }
             if (enable == false) {
-                if (DEBUG) appendToLog("abcc scanLeDevice(" + enable + ") with mScanCallBack is " + (mScanCallBack != null ? "VALID" : "INVALID"));
+                if (true) appendToLog("abcc scanLeDevice(" + enable + ") with mScanCallBack is " + (mScanCallBack != null ? "VALID" : "INVALID"));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     if (mScanCallBack != null) bluetoothLeScanner.stopScan(mScanCallBack);
                 } else {
@@ -675,11 +675,11 @@ public class BluetoothGatt extends BluetoothGattCallback {
                 mScanning = false; result = true;
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    if (DEBUG) appendToLog("scanLeDevice(" + enable + "): START with mleScanner. ActivityCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_SCAN) = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN));
+                    if (true) appendToLog("scanLeDevice(" + enable + "): START with mleScanner. ActivityCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_SCAN) = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN));
                     if (isBLUETOOTH_CONNECTinvalid()) return false;
                     else bluetoothLeScanner.startScan(mScanCallBack);
                 } else {
-                    if (DEBUG) appendToLog("scanLeDevice(" + enable + "): START with mBluetoothAdapter");
+                    if (true) appendToLog("scanLeDevice(" + enable + "): START with mBluetoothAdapter");
                     bluetoothAdapter.startLeScan(mLeScanCallback);
                 }
                 mScanning = true; result = true;

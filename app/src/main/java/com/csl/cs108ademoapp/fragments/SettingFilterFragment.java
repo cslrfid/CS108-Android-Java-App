@@ -1,22 +1,23 @@
 package com.csl.cs108ademoapp.fragments;
 
 import android.os.Bundle;
-import com.google.android.material.tabs.TabLayout;
-
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
+
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.FilterAdapter;
+import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.google.android.material.tabs.TabLayout;
 
 public class SettingFilterFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    FilterAdapter mAdapter;
+    MyAdapter adapter;
 
     private String[] tabs = {"Pre-filter", "Post-filter", "Rssi-filter"};
 
@@ -36,9 +37,13 @@ public class SettingFilterFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        mAdapter = new FilterAdapter(getActivity().getSupportFragmentManager());
+        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter.setFragment(0, new SettingFilterPreFragment());
+        adapter.setFragment(1, new SettingFilterPostFragment());
+        adapter.setFragment(2, new SettingFilterRssiFragment());
+
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
-        viewPager.setAdapter(mAdapter);
+        viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
         for (String tab_name : tabs) {
@@ -48,6 +53,7 @@ public class SettingFilterFragment extends CommonFragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                Log.i(TAG, "tab.position is " + tab.getPosition());
                 viewPager.setCurrentItem(tab.getPosition());
             }
 
@@ -63,36 +69,36 @@ public class SettingFilterFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        mAdapter.fragment0.onPause();
-        mAdapter.fragment1.onPause();
+        adapter.fragment0.onPause();
+        adapter.fragment1.onPause();
         super.onPause();
     }
 
     @Override
     public void onStop() {
-        mAdapter.fragment0.onStop();
-        mAdapter.fragment1.onStop();
+        adapter.fragment0.onStop();
+        adapter.fragment1.onStop();
         super.onStop();
     }
 
     @Override
     public void onDestroyView() {
-        mAdapter.fragment0.onDestroyView();
-        mAdapter.fragment1.onDestroyView();
+        adapter.fragment0.onDestroyView();
+        adapter.fragment1.onDestroyView();
         super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
-        mAdapter.fragment0.onDestroy();
-        mAdapter.fragment1.onDestroy();
+        adapter.fragment0.onDestroy();
+        adapter.fragment1.onDestroy();
         super.onDestroy();
     }
 
     @Override
     public void onDetach() {
-        mAdapter.fragment0.onDetach();
-        mAdapter.fragment1.onDetach();
+        adapter.fragment0.onDetach();
+        adapter.fragment1.onDetach();
         super.onDetach();
     }
 
