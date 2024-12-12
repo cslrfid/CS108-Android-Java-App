@@ -107,6 +107,7 @@
                 android:onClick="coldChainClicked" />
 
             <Button
+                android:id="@+id/SpecialButtonAurasense"
                 style="@style/DashboardButton"
                 android:layout_height="50dp"
                 android:layout_marginTop="@dimen/home_icon_margin_1"
@@ -117,7 +118,7 @@
 
             <Button
                 style="@style/DashboardButton"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:layout_height="50dp"
                 android:layout_marginTop="@dimen/home_icon_margin_1"
                 android:background="@drawable/btn_back"

@@ -1,3 +1,15 @@
 include ':app', 'cs108library4a'
 include ':cslibrary4a'
 include ':epctagcoder'
+include ':MqttAndroidClient'
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        maven { url "https://repo.eclipse.org/content/repositories/paho-snapshots/" }
+        maven { url "https://repo.eclipse.org/content/repositories/paho-releases/" }
+    }
+}

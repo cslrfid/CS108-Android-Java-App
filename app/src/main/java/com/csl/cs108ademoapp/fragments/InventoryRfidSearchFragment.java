@@ -114,11 +114,11 @@ public class InventoryRfidSearchFragment extends CommonFragment {
                         editTextRWSelectOffset.setText("32");
                         break;
                     case 1:
-                        if (tagSelected != null) { if (tagSelected.getTid() != null) selectTag.editTextTagID.setText(tagSelected.getTid()); }
+                        if (tagSelected != null) selectTag.editTextTagID.setText(tagSelected.getTid());
                         editTextRWSelectOffset.setText("0");
                         break;
                     case 2:
-                        if (tagSelected != null) { if (tagSelected.getUser() != null) selectTag.editTextTagID.setText(tagSelected.getUser()); }
+                        if (tagSelected != null) selectTag.editTextTagID.setText(tagSelected.getUser());
                         editTextRWSelectOffset.setText("0");
                         break;
                     default:
@@ -238,7 +238,22 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         final ReaderDevice tagSelected = MainActivity.tagSelected;
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
-                selectTag.editTextTagID.setText(tagSelected.getAddress());
+                if (tagSelected.getTid() != null) {
+                    if (tagSelected.getTid().indexOf("E281D") == 0 || tagSelected.getTid().indexOf("E201E") == 0) {
+                        memoryBankSpinner.setSelection(1);
+                    }
+                }
+                switch (memoryBankSpinner.getSelectedItemPosition()) {
+                    case 0:
+                        selectTag.editTextTagID.setText(tagSelected.getAddress());
+                        break;
+                    case 1:
+                        selectTag.editTextTagID.setText(tagSelected.getTid());
+                        break;
+                    case 2:
+                        selectTag.editTextTagID.setText(tagSelected.getUser());
+                        break;
+                }
             }
         }
     }

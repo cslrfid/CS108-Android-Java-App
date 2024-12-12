@@ -179,7 +179,8 @@ public class BarcodeConnector {
                 BarcodePayloadEvents barcodePayloadEvents = barcodeToWrite.get(0).barcodePayloadEvent;
                 //if (DEBUG)  appendToLog("barcodePayloadEvents = " + barcodePayloadEvents.toString());
                 boolean isBarcodeData = false;
-                if (true || barcodePayloadEvents == BarcodePayloadEvents.BARCODE_SCAN_START || barcodePayloadEvents == BarcodePayloadEvents.BARCODE_COMMAND) isBarcodeData = true;
+                if (barcodePayloadEvents == BarcodePayloadEvents.BARCODE_SCAN_START || barcodePayloadEvents == BarcodePayloadEvents.BARCODE_COMMAND) isBarcodeData = true;
+                //appendToLog("BarcodePayloadEvents = " + barcodePayloadEvents.toString() + ", barcodeFailure = " + barcodeFailure + ", isBarcodeData = " + isBarcodeData + ", sendDataToWriteSent = " + sendDataToWriteSent);
                 if (barcodeFailure && isBarcodeData) {
                     barcodeToWrite.remove(0); sendDataToWriteSent = 0; mDataToWriteRemoved = true; appendToLog("barcodeToWrite remove0 with length = " + barcodeToWrite.size());
                 } else if (sendDataToWriteSent >= 5 && isBarcodeData) {

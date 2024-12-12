@@ -72,7 +72,23 @@
             <Spinner
                 android:id="@+id/directWedgeSettingSpinnerDelimiter"
                 android:layout_width="0dp"
-                android:layout_weight="1" />
+                android:layout_weight="2" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="Output" />
+
+            <Spinner
+                android:id="@+id/directWedgeSettingSpinnerOutput"
+                android:layout_width="0dp"
+                android:layout_weight="2" />
         </TableRow>
     </LinearLayout>
 </RelativeLayout>

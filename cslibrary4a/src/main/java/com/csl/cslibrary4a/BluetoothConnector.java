@@ -9,13 +9,14 @@ import java.util.ArrayList;
 public class BluetoothConnector {
     boolean DEBUG_PKDATA;
     final boolean DEBUG = false;
-    public boolean userDebugEnableDefault = false;
-    public boolean userDebugEnable = userDebugEnableDefault;
+//    public boolean userDebugEnableDefault = false;
+//    public boolean userDebugEnable = userDebugEnableDefault;
 
-    Context context; Utility utility;
-    public BluetoothConnector(Context context, Utility utility) {
+    Context context; Utility utility; boolean userDebugEnable;
+    public BluetoothConnector(Context context, Utility utility, boolean userDebugEnable) {
         this.context = context;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
+        this.userDebugEnable = userDebugEnable;
     }
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }

@@ -1,27 +1,28 @@
 package com.csl.cs108ademoapp.fragments;
 
 import android.os.Bundle;
-import com.google.android.material.tabs.TabLayout;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.csl.cs108ademoapp.MainActivity;
-import com.csl.cs108ademoapp.adapters.SettingAdapter;
+import com.csl.cs108ademoapp.adapters.MyAdapter;
 import com.csl.cs108ademoapp.R;
+import com.google.android.material.tabs.TabLayout;
 
 public class SettingFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
     FragmentStatePagerAdapter pagerAdapter;
-    SettingAdapter mAdapter;
+    MyAdapter adapter;
     Fragment fragment0, fragment1;
 
     private String[] tabs = { "Operation", "Administration" };
@@ -68,10 +69,12 @@ public class SettingFragment extends CommonFragment {
                 return fragment;
             }
         };
-        mAdapter = new SettingAdapter(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter.setFragment(0, new SettingOperateFragment());
+        adapter.setFragment(1, new SettingAdminFragment());
 
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
-        viewPager.setAdapter(mAdapter); //pagerAdapter); //mAdapter);
+        viewPager.setAdapter(adapter); //pagerAdapter); //mAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
         for (String tab_name : tabs) {
@@ -96,37 +99,37 @@ public class SettingFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        mAdapter.fragment0.onPause();
-        mAdapter.fragment1.onPause();
+        adapter.fragment0.onPause();
+        adapter.fragment1.onPause();
         super.onPause();
     }
 
     @Override
     public void onStop() {
-        mAdapter.fragment0.onStop();
-        mAdapter.fragment1.onStop();
+        adapter.fragment0.onStop();
+        adapter.fragment1.onStop();
         MainActivity.csLibrary4A.setAntennaSelect(0);
         super.onStop();
     }
 
     @Override
     public void onDestroyView() {
-        mAdapter.fragment0.onDestroyView();
-        mAdapter.fragment1.onDestroyView();
+        adapter.fragment0.onDestroyView();
+        adapter.fragment1.onDestroyView();
         super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
-        mAdapter.fragment0.onDestroy();
-        mAdapter.fragment1.onDestroy();
+        adapter.fragment0.onDestroy();
+        adapter.fragment1.onDestroy();
         super.onDestroy();
     }
 
     @Override
     public void onDetach() {
-        mAdapter.fragment0.onDetach();
-        mAdapter.fragment1.onDetach();
+        adapter.fragment0.onDetach();
+        adapter.fragment1.onDetach();
         super.onDetach();
     }
 

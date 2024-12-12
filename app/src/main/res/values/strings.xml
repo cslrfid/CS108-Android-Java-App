@@ -1,18 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_newname1">CSL Wedge</string>
-    <string name="app_newname">CS710S Java</string>
-    <string name="app_name">CS108 Java</string>
-    <string name="app_newime1">CSL Java Simple Wedge</string>
-    <string name="app_newime">CSL Java Wedge</string>
-    <string name="app_ime">CS108 Java Wedge</string>
     <string name="subtype_en_US">English (US)</string>
 
+    <string name="app_name_simplewedge">CSL Wedge</string>
+    <string name="app_name_cs710">CS710S Java</string>
+    <string name="app_name_cs108">CS108 Java</string>
+    <string name="app_ime_simplewedge1">CSL Data Wedge</string>
+    <string name="app_ime_simplewedge">CSL Java Simple Wedge</string>
+    <string name="app_ime_cs710">CSL Java Wedge</string>
+    <string name="app_ime_cs108">CS108 Java Wedge</string>
+
     <!-- Strings for Fragment actionBar title -->
-    <string name="title_activity_newhome1">CSL Wedge</string>
-    <string name="title_activity_newhome">CSL Java</string>
-    <string name="title_activity_home">Convergence Systems</string>
+    <string name="title_activity_home_simplewedge">CSL Wedge</string>
+    <string name="title_activity_home_cs710">CSL Java</string>
+    <string name="title_activity_home_cs108">Convergence Systems</string>
 
     <string name="title_activity_special">Special Functions</string>
 
@@ -332,6 +333,12 @@
         <item>Comma(0x2C)</item>
         <item>Space(0x20)</item>
         <item>None</item>
+    </string-array>
+
+    <string-array name="wedgeOutput_options">
+        <item>RFID in EPC</item>
+        <item>RFID in Sgtin-96</item>
+        <item>Barcode</item>
     </string-array>
 
     <string-array name="impinj_options">

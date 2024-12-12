@@ -167,7 +167,7 @@ public class RfidConnector {
             if (DEBUG) appendToLog("Removed after sending count-out.");
             if (true) {
                 appendToLog("Rfdid data transmission failure !!! clear mRfidToWrite buffer !!!");
-                utility.writeDebug2File("Down fails to transmit " + byteArrayToString(mRfidToWrite.get(0).dataValues));
+                //utility.writeDebug2File("Down fails to transmit " + byteArrayToString(mRfidToWrite.get(0).dataValues));
                 rfidFailure = true;
                 mRfidToWrite.clear();
             } else if (rfidValid == false) {
@@ -179,7 +179,6 @@ public class RfidConnector {
                 disconnect();
             }*/
             if (DEBUG) appendToLog("done");
-            mRfidToWrite.remove(0); sendRfidToWriteSent = 0; mRfidToWriteRemoved = true; if (DEBUG) appendToLog("mmRfidToWrite remove 2");
         } else {
             if (DEBUG)
                 appendToLog("size = " + mRfidToWrite.size() + ", PayloadEvents = " + rfidPayloadEvents.toString() + ", data=" + byteArrayToString(mRfidToWrite.get(0).dataValues));

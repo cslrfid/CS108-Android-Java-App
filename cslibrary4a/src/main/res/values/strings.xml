@@ -1,4 +1,56 @@
 <resources>
     <string name="app_name">cslibrary4a</string>
+
+    <string-array name="profile1_options">
+        <item>0: Multipath Interference Resistance</item>
+        <item>1: Range/Dense reader</item>
+        <item>2: Range/Throughput/Dense reader</item>
+        <item>3: Maximum throughput</item>
+    </string-array>
+    <string-array name="profile2_options">
+        <item>11: Miller 1 640kHz Tari 7.5us</item>
+        <item>1:  Miller 2 640kHz Tari 7.5us</item>
+        <item>15: Miller 4 640kHz Tari 7.5us</item>
+        <item>12: Miller 2 320kHz Tari 15us</item>
+        <item>3:  Miller 2 320kHz Tari 20us</item>
+        <item>5:  Miller 4 320kHz Tari 20us</item>
+        <item>7:  Miller 4 250kHz Tari 20us</item>
+        <item>13: Miller 8 160kHz Tari 20us</item>
+    </string-array>
+    <string-array name="profile3_options">
+        <item>103: Miller 1 640kHz Tari 6.25us</item>
+        <item>11:  Miller 1 640kHz Tari 7.5us</item>
+        <item>302: Miller 1 640kHz Tari 7.5us</item>
+        <item>120: Miller 2 640kHz Tari 6.25us</item>
+        <item>1:   Miller 2 640kHz Tari 7.5us</item>
+        <item>323: Miller 2 640kHz Tari 7.5us</item>
+        <item>15:  Miller 4 640kHz Tari 7.5us</item>
+        <item>344: Miller 4 640kHz Tari 7.5us</item>
+        <item>345: Miller 4 640kHz Tari 7.5us</item>
+        <item>12:  Miller 2 320kHz Tari 15us</item>
+        <item>223: Miller 2 320kHz Tari 15us</item>
+        <item>3:   Miller 2 320kHz Tari 20us</item>
+        <item>222: Miller 2 320kHz Tari 20us</item>
+        <item>5:   Miller 4 320kHz Tari 20us</item>
+        <item>241: Miller 4 320kHz Tari 20us</item>
+        <item>7:   Miller 4 250kHz Tari 20us</item>
+        <item>244: Miller 4 250kHz Tari 20us</item>
+        <item>13:  Miller 8 160kHz Tari 20us</item>
+        <item>285: Miller 8 160kHz Tari 20us</item>
+    </string-array>
+    <string-array name="profile3A_options">
+        <item>103: Miller 1 640kHz Tari 6.25us</item>
+        <item>302: Miller 1 640kHz Tari 7.5us</item>
+        <item>120: Miller 2 640kHz Tari 6.25us</item>
+        <item>323: Miller 2 640kHz Tari 7.5us</item>
+        <item>344: Miller 4 640kHz Tari 7.5us</item>
+        <item>345: Miller 4 640kHz Tari 7.5us</item>
+        <item>223: Miller 2 320kHz Tari 15us</item>
+        <item>222: Miller 2 320kHz Tari 20us</item>
+        <item>241: Miller 4 320kHz Tari 20us</item>
+        <item>244: Miller 4 250kHz Tari 20us</item>
+        <item>285: Miller 8 160kHz Tari 20us</item>
+    </string-array>
+
     <string name="toast_permission_not_granted">"Permissions are not granted. Please allow them in system setting."</string>
 </resources>

@@ -17,16 +17,14 @@ public class RfidReaderChipR2000 {
     int intervalRx000UplinkHandler;
     public int invalidUpdata; //invalidata, invalidUpdata, validata;
     boolean aborting = false;
-    Context context; Utility utility; CsReaderConnector108 csReaderConnector108;
-    public RfidReaderChipR2000(Context context, Utility utility, CsReaderConnector108 csReaderConnector108) {
+    Context context; Utility utility; CsReaderConnector csReaderConnector;
+    public RfidReaderChipR2000(Context context, Utility utility, CsReaderConnector csReaderConnector) {
         this.context = context;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
-        appendToLog("csReaderConnector 1 is " + (csReaderConnector108 == null ? "null" : "valid"));
-        //appendToLog("csReaderConnector.rfidReaderChip 1 is " + (csReaderConnector108.rfidReaderChipR2000 == null ? "null" : "valid"));
-        //mRfidReaderChip = new RfidReaderChip();
-        this.csReaderConnector108 = csReaderConnector108;
-        this.DEBUGTHREAD = csReaderConnector108.DEBUGTHREAD;
-        this.intervalRx000UplinkHandler = csReaderConnector108.intervalRx000UplinkHandler;
+        appendToLog("csReaderConnector 1 is " + (csReaderConnector == null ? "null" : "valid"));
+        this.csReaderConnector = csReaderConnector;
+        this.DEBUGTHREAD = csReaderConnector.DEBUGTHREAD;
+        this.intervalRx000UplinkHandler = csReaderConnector.intervalRx000UplinkHandler;
     }
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
@@ -89,9 +87,10 @@ public class RfidReaderChipR2000 {
 
             if (set_default_setting) {
                 //Inventtory block paraameters
-                queryTarget = mDefault.queryTarget;
-                querySession = mDefault.querySession;
-                querySelect = mDefault.querySelect;
+                //queryTarget = mDefault.queryTarget;
+                //querySession = mDefault.querySession;
+                //querySelect = mDefault.querySelect;
+                //appendToLog("BtDataOut: RfidReaderChipR2000.Rx000Setting new querySelect = " + querySelect);
                 invAlgo = mDefault.invAlgo;
                 matchRep = mDefault.matchRep;
                 tagSelect = mDefault.tagSelect;
@@ -275,6 +274,7 @@ public class RfidReaderChipR2000 {
         }
         public boolean setImpinjExtension(boolean tagFocus, boolean fastId) {
             int iValue = (tagFocus ? 0x10 : 0) | (fastId ? 0x20 : 0);
+            if (impinjExtensionValue == iValue && sameCheck) return true;
             boolean bRetValue = writeMAC(0x203, iValue);
             if (bRetValue) impinjExtensionValue = iValue;
             return bRetValue;
@@ -668,12 +668,20 @@ public class RfidReaderChipR2000 {
             else if (queryTarget >= 0) { rx000Setting.setAlgoAbFlip(0); }
 
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 0, 9, 0, 0, 0, 0};
-            if (queryTarget != 2 && (queryTarget < QUERYTARGET_MIN || queryTarget > QUERYTARGET_MAX))
-                queryTarget = mDefault.queryTarget;
-            if (querySession < QUERYSESSION_MIN || querySession > QUERYSESSION_MAX)
-                querySession = mDefault.querySession;
-            if (querySelect < QUERYSELECT_MIN || querySelect > QUERYSELECT_MAX)
-                querySelect = mDefault.querySelect;
+            if (queryTarget != 2 && (queryTarget < QUERYTARGET_MIN || queryTarget > QUERYTARGET_MAX)) {
+                if (this.queryTarget >= QUERYTARGET_MIN && this.queryTarget <= QUERYTARGET_MAX)
+                    queryTarget = this.queryTarget;
+                else queryTarget = mDefault.queryTarget;
+            }
+            if (querySession < QUERYSESSION_MIN || querySession > QUERYSESSION_MAX) {
+                if (this.querySession >= QUERYSESSION_MIN && this.querySession <= QUERYSESSION_MAX)
+                    querySession = this.querySession;
+                else querySession = mDefault.querySession;
+            }
+            if (querySelect < QUERYSELECT_MIN || querySelect > QUERYSELECT_MAX) {
+                if (this.querySelect >= QUERYSELECT_MIN && this.querySelect <= QUERYSELECT_MAX) querySelect = this.querySelect;
+                else querySelect = mDefault.querySelect;
+            }
             if (this.queryTarget == queryTarget && this.querySession == querySession && this.querySelect == querySelect && sameCheck) return true;
             msgBuffer[4] |= ((queryTarget == 2 ? 0 : queryTarget) << 4);
             msgBuffer[4] |= (byte) (querySession << 5);
@@ -715,6 +723,7 @@ public class RfidReaderChipR2000 {
             return querySelect;
         }
         public boolean setQuerySelect(int querySelect) {
+            if (querySelect == this.querySelect) return true;
             return setQueryTarget(queryTarget, querySession, querySelect);
         }
 
@@ -1612,7 +1621,9 @@ public class RfidReaderChipR2000 {
         }
 
         final int ACCPWD_INVALID = 0; final long ACCPWD_MIN = 0; final long ACCPWD_MAX = 0x0FFFFFFFF;
+        String stringAccessPasword = "";
         public boolean setRx000AccessPassword(String password) {
+            if (stringAccessPasword.matches(password) && sameCheck) return true;
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 6, (byte) 0x0A, 0, 0, 0, 0};
             if (password == null) password = "";
             String hexString = "0123456789ABCDEF";
@@ -1635,6 +1646,7 @@ public class RfidReaderChipR2000 {
             }
             boolean retValue = sendHostRegRequest(HostRegRequests.HST_TAGACC_ACCPWD, true, msgBuffer);
             if (DEBUG) appendToLog("sendHostRegRequest(): retValue = " + retValue);
+            if (retValue) stringAccessPasword = password;
             return retValue;
         }
 
@@ -2553,7 +2565,7 @@ public class RfidReaderChipR2000 {
                 algoHighThres = mDefault.algoHighThres;
             if (algoLowThres < ALGOLOWTHRES_MIN || algoLowThres > ALGOLOWTHRES_MAX)
                 algoLowThres = mDefault.algoLowThres;
-            if (false && this.algoStartQ == startQ && this.algoMaxQ == algoMaxQ && this.algoMinQ == algoMinQ
+            if (this.algoStartQ == startQ && this.algoMaxQ == algoMaxQ && this.algoMinQ == algoMinQ
                     && this.algoMaxRep == algoMaxRep && this.algoHighThres == algoHighThres && this.algoLowThres == algoLowThres
                     && sameCheck)
                 return true;
@@ -2586,7 +2598,7 @@ public class RfidReaderChipR2000 {
         boolean setAlgoRetry(int algoRetry) {
             if (algoRetry < ALGORETRY_MIN || algoRetry > ALGORETRY_MAX)
                 algoRetry = mDefault.algoRetry;
-            if (false && this.algoRetry == algoRetry && sameCheck) return true;
+            if (this.algoRetry == algoRetry && sameCheck) return true;
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 4, 9, 0, 0, 0, 0};
             msgBuffer[4] = (byte) algoRetry;
             this.algoRetry = algoRetry;
@@ -2623,7 +2635,7 @@ public class RfidReaderChipR2000 {
             if (algoRunTilZero < ALGORUNTILZERO_MIN || algoRunTilZero > ALGORUNTILZERO_MAX)
                 algoRunTilZero = mDefault.algoRunTilZero;
             if (false) appendToLog("this.algoAbFlip  = " + this.algoAbFlip + ", algoAbFlip = " + algoAbFlip + ", this.algoRunTilZero = " + this.algoRunTilZero + ", algoRunTilZero = " + algoRunTilZero);
-            if (false && this.algoAbFlip == algoAbFlip && this.algoRunTilZero == algoRunTilZero && sameCheck) return true;
+            if (this.algoAbFlip == algoAbFlip && this.algoRunTilZero == algoRunTilZero && sameCheck) return true;
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 5, 9, 0, 0, 0, 0};
             if (algoAbFlip != 0) {
                 msgBuffer[4] |= 0x01;
@@ -2902,31 +2914,31 @@ public class RfidReaderChipR2000 {
             int packageType = 0;
             long lTime = System.currentTimeMillis();
             boolean bdebugging = false;
-            if (csReaderConnector108.rfidConnector.mRfidToRead.size() != 0) {
+            if (csReaderConnector.rfidConnector.mRfidToRead.size() != 0) {
                 bdebugging = true;
                 if (DEBUGTHREAD) appendToLog("mRx000UplinkHandler(): START");
             } else if (DEBUGTHREAD) appendToLog("mRx000UplinkHandler(): START AAA");
             boolean bFirst = true;
             byte[] data1 = null;
             RfidDataReadTypes rfidDataReadTypes = null;
-            while (csReaderConnector108.rfidConnector.mRfidToRead.size() != 0) {
-                if (csReaderConnector108.isBleConnected() == false) {
-                    csReaderConnector108.rfidConnector.mRfidToRead.clear();
+            while (csReaderConnector.rfidConnector.mRfidToRead.size() != 0) {
+                if (csReaderConnector.isBleConnected() == false) {
+                    csReaderConnector.rfidConnector.mRfidToRead.clear();
                 } else if (System.currentTimeMillis() - lTime > (intervalRx000UplinkHandler / 2)) {
                     writeDebug2File("Up4  " + String.valueOf(intervalRx000UplinkHandler) + "ms Timeout");
                     if (DEBUG)
-                        appendToLogView("mRx000UplinkHandler_TIMEOUT !!! mRfidToRead.size() = " + csReaderConnector108.rfidConnector.mRfidToRead.size());
+                        appendToLogView("mRx000UplinkHandler_TIMEOUT !!! mRfidToRead.size() = " + csReaderConnector.rfidConnector.mRfidToRead.size());
                     break;
                 } else {
                     if (bFirst) {
                         bFirst = false;
                     } //writeDebug2File("D" + String.valueOf(intervalRx000UplinkHandler) + ", " + System.currentTimeMillis()); }
-                    byte[] dataIn = csReaderConnector108.rfidConnector.mRfidToRead.get(0).dataValues;
-                    long tagMilliSeconds = csReaderConnector108.rfidConnector.mRfidToRead.get(0).milliseconds;
-                    boolean invalidSequence = csReaderConnector108.rfidConnector.mRfidToRead.get(0).invalidSequence;
+                    byte[] dataIn = csReaderConnector.rfidConnector.mRfidToRead.get(0).dataValues;
+                    long tagMilliSeconds = csReaderConnector.rfidConnector.mRfidToRead.get(0).milliseconds;
+                    boolean invalidSequence = csReaderConnector.rfidConnector.mRfidToRead.get(0).invalidSequence;
                     if (DEBUG)
                         appendToLog("mRx000UplinkHandler(): invalidSequence = " + invalidSequence + ", Processing data = " + byteArrayToString(dataIn) + ", length=" + dataIn.length + ", mRfidToReading.length=" + mRfidToReading.length + ", startIndex=" + startIndex + ", startIndexNew=" + startIndexNew + ", mRfidToReadingOffset=" + mRfidToReadingOffset);
-                    csReaderConnector108.rfidConnector.mRfidToRead.remove(0);
+                    csReaderConnector.rfidConnector.mRfidToRead.remove(0);
 
                     if (dataIn.length >= mRfidToReading.length - mRfidToReadingOffset) {
                         byte[] unhandledBytes = new byte[mRfidToReadingOffset];
@@ -2974,23 +2986,23 @@ public class RfidReaderChipR2000 {
                                         && (mRfidToReading[startIndex + 1] == 2 || mRfidToReading[startIndex + 1] == 3 || mRfidToReading[startIndex + 1] == 7)) {   //input as Control Command Response
                                     dataIn = mRfidToReading;
                                     if (DEBUG) appendToLog("decoding CONTROL data");
-                                    if (csReaderConnector108.rfidConnector.mRfidToWrite.size() == 0) {
+                                    if (csReaderConnector.rfidConnector.mRfidToWrite.size() == 0) {
                                         if (DEBUG)
                                             appendToLog("Control Response is received with null mRfidToWrite");
-                                    } else if (csReaderConnector108.rfidConnector.mRfidToWrite.get(0) == null) {
+                                    } else if (csReaderConnector.rfidConnector.mRfidToWrite.get(0) == null) {
                                         if (DEBUG)
                                             appendToLog("Control Response is received with null mRfidToWrite.get(0)");
-                                    } else if (csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues == null) {
-                                        csReaderConnector108.rfidConnector.mRfidToWrite.remove(0);
+                                    } else if (csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues == null) {
+                                        csReaderConnector.rfidConnector.mRfidToWrite.remove(0);
                                         if (DEBUG) appendToLog("mmRfidToWrite remove 5");
                                         if (DEBUG)
                                             appendToLog("Control Response is received with null mRfidToWrite.dataValues");
-                                    } else if (!(csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues[0] == dataIn[startIndex + 0] && csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues[1] == dataIn[startIndex + 1])) {
+                                    } else if (!(csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues[0] == dataIn[startIndex + 0] && csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues[1] == dataIn[startIndex + 1])) {
                                         if (DEBUG)
                                             appendToLog("Control Response is received with Mis-matched mRfidToWrite, " + startIndex + ", " + byteArrayToString(dataIn));
                                     } else {
                                         byte[] dataInCompare = null;
-                                        switch (csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues[1]) {
+                                        switch (csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues[1]) {
                                             case 2: //SOFTRESET
                                                 rfidDataReadTypes = RfidDataReadTypes.RFID_DATA_READ_SOFTRESET;
                                                 dataInCompare = new byte[]{0x40, 0x02, (byte) 0xbf, (byte) 0xfd, (byte) 0xbf, (byte) 0xfd, (byte) 0xbf, (byte) 0xfd};
@@ -3010,12 +3022,12 @@ public class RfidReaderChipR2000 {
                                             if (DEBUG)
                                                 appendToLog("Control response with invalid data: " + byteArrayToString(dataIn8));
                                         } else {
-                                            csReaderConnector108.rfidConnector.mRfidToWrite.remove(0);
-                                            csReaderConnector108.rfidConnector.sendRfidToWriteSent = 0;
-                                            csReaderConnector108.rfidConnector.mRfidToWriteRemoved = true;
+                                            csReaderConnector.rfidConnector.mRfidToWrite.remove(0);
+                                            csReaderConnector.rfidConnector.sendRfidToWriteSent = 0;
+                                            csReaderConnector.rfidConnector.mRfidToWriteRemoved = true;
                                             if (DEBUG) appendToLog("mmRfidToWrite remove 6");
                                             if (DEBUG)
-                                                appendToLog("matched control command with mRfidToWrite.size=" + csReaderConnector108.rfidConnector.mRfidToWrite.size());
+                                                appendToLog("matched control command with mRfidToWrite.size=" + csReaderConnector.rfidConnector.mRfidToWrite.size());
                                         }
                                     }
                                     if (true) {
@@ -3037,10 +3049,10 @@ public class RfidReaderChipR2000 {
                                     startIndexNew = startIndex + iPayloadSizeMin;
                                 } else if ((mRfidToReading[startIndex + 0] == (byte) 0x00 || mRfidToReading[startIndex + 0] == (byte) 0x70)
                                         && mRfidToReading[startIndex + 1] == 0
-                                        && csReaderConnector108.rfidConnector.mRfidToWrite.size() != 0
-                                        && csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues != null
-                                        && csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues[0] == 0x70
-                                        && csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues[1] == 0
+                                        && csReaderConnector.rfidConnector.mRfidToWrite.size() != 0
+                                        && csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues != null
+                                        && csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues[0] == 0x70
+                                        && csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues[1] == 0
                                 ) {   //if input as HOST_REG_RESP
                                     if (DEBUG)
                                         appendToLog("loop: decoding HOST_REG_RESP data with startIndex = " + startIndex + ", mRfidToReading=" + byteArrayToString(mRfidToReading));
@@ -3055,7 +3067,7 @@ public class RfidReaderChipR2000 {
                                     //    if (true) appendToLog("mRx000UplinkHandler(): HOST_REG_RESP is received with invalid mRfidDevice.mRfidToWrite.get(0).dataValues=" + byteArrayToString(mRfidDevice.mRfidToWrite.get(0).dataValues));
                                     //} else
                                     {
-                                        int addressToWrite = csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues[2] + csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues[3] * 256;
+                                        int addressToWrite = csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues[2] + csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues[3] * 256;
                                         int addressToRead = dataIn[startIndex + 2] + dataIn[startIndex + 3] * 256;
                                         if (addressToRead != addressToWrite) {
                                             if (DEBUG)
@@ -3491,9 +3503,9 @@ public class RfidReaderChipR2000 {
                                                     break;
                                             }
                                             rfidDataReadTypes = RfidDataReadTypes.RFID_DATA_READ_REGREAD;
-                                            csReaderConnector108.rfidConnector.mRfidToWrite.remove(0);
-                                            csReaderConnector108.rfidConnector.sendRfidToWriteSent = 0;
-                                            csReaderConnector108.rfidConnector.mRfidToWriteRemoved = true;
+                                            csReaderConnector.rfidConnector.mRfidToWrite.remove(0);
+                                            csReaderConnector.rfidConnector.sendRfidToWriteSent = 0;
+                                            csReaderConnector.rfidConnector.mRfidToWriteRemoved = true;
                                             if (DEBUG) appendToLog("mmRfidToWrite remove 7");
                                         }
                                     }
@@ -3544,11 +3556,11 @@ public class RfidReaderChipR2000 {
                                                 if (dataIn[startIndex + 0] != 1 && dataIn[startIndex + 0] != 2) {
                                                     if (DEBUG)
                                                         appendToLog("command COMMAND_BEGIN is found without first byte as 0x01 or 0x02, " + byteArrayToString(dataInPayload));
-                                                } else if (csReaderConnector108.rfidConnector.mRfidToWrite.size() == 0) {
+                                                } else if (csReaderConnector.rfidConnector.mRfidToWrite.size() == 0) {
                                                     if (DEBUG)
                                                         appendToLog("command COMMAND_BEGIN is found without mRfidToWrite");
                                                 } else {
-                                                    byte[] dataWritten = csReaderConnector108.rfidConnector.mRfidToWrite.get(0).dataValues;
+                                                    byte[] dataWritten = csReaderConnector.rfidConnector.mRfidToWrite.get(0).dataValues;
                                                     if (dataWritten == null) {
                                                     } else if (!(dataWritten[0] == (byte) 0x70 && dataWritten[1] == 1 && dataWritten[2] == 0 && dataWritten[3] == (byte) 0xF0)) {
                                                         if (DEBUG)
@@ -3571,9 +3583,9 @@ public class RfidReaderChipR2000 {
                                                             if (DEBUG)
                                                                 appendToLog("command COMMAND_BEGIN is found with mis-matched command:" + byteArrayToString(dataWritten));
                                                         } else {
-                                                            csReaderConnector108.rfidConnector.mRfidToWrite.remove(0);
-                                                            csReaderConnector108.rfidConnector.sendRfidToWriteSent = 0;
-                                                            csReaderConnector108.rfidConnector.mRfidToWriteRemoved = true;
+                                                            csReaderConnector.rfidConnector.mRfidToWrite.remove(0);
+                                                            csReaderConnector.rfidConnector.sendRfidToWriteSent = 0;
+                                                            csReaderConnector.rfidConnector.mRfidToWriteRemoved = true;
                                                             if (DEBUG)
                                                                 appendToLog("mmRfidToWrite remove 8");
                                                             setInventoring(true);
@@ -3735,7 +3747,7 @@ public class RfidReaderChipR2000 {
                                                                         index++;
                                                                     }
                                                                     if (DEBUG)
-                                                                        appendToLog((dataA.dataValues != null ? "mRfidToRead.size() = " + csReaderConnector108.rfidConnector.mRfidToRead.size() + ", dataValues = " + byteArrayToString(dataA.dataValues) + ", " : "") + "2 decodedRssi = " + dataA.decodedRssi + ", decodedPc = " + byteArrayToString(dataA.decodedPc) + ", decodedEpc = " + byteArrayToString(dataA.decodedEpc));
+                                                                        appendToLog((dataA.dataValues != null ? "mRfidToRead.size() = " + csReaderConnector.rfidConnector.mRfidToRead.size() + ", dataValues = " + byteArrayToString(dataA.dataValues) + ", " : "") + "2 decodedRssi = " + dataA.decodedRssi + ", decodedPc = " + byteArrayToString(dataA.decodedPc) + ", decodedEpc = " + byteArrayToString(dataA.decodedEpc));
                                                                     if (dataValuesFull.length > index) {
                                                                         mRx000ToRead.add(dataA);
 
@@ -4096,7 +4108,7 @@ public class RfidReaderChipR2000 {
         public boolean sendControlCommand(ControlCommands controlCommands) {
             byte[] msgBuffer = new byte[]{(byte) 0x40, 6, 0, 0, 0, 0, 0, 0};
             boolean needResponse = false;
-            if (csReaderConnector108.isBleConnected() == false) return false;
+            if (csReaderConnector.isBleConnected() == false) return false;
             switch (controlCommands) {
                 default:
                     msgBuffer = null;
@@ -4384,7 +4396,7 @@ public class RfidReaderChipR2000 {
             boolean needResponse = false;
             boolean validRequest = false;
 
-            if (csReaderConnector108.isBleConnected() == false) return false;
+            if (csReaderConnector.isBleConnected() == false) return false;
             addMacAccessHistory(msgBuffer);
             switch (hostRegRequests) {
                 case MAC_OPERATION:
@@ -4477,8 +4489,8 @@ public class RfidReaderChipR2000 {
 
         void addRfidToWrite(RfidConnector.CsReaderRfidData csReaderRfidData) {
             boolean repeatRequest = false;
-            if (csReaderConnector108.rfidConnector.mRfidToWrite.size() != 0) {
-                RfidConnector.CsReaderRfidData csReaderRfidData1 = csReaderConnector108.rfidConnector.mRfidToWrite.get(csReaderConnector108.rfidConnector.mRfidToWrite.size() - 1);
+            if (csReaderConnector.rfidConnector.mRfidToWrite.size() != 0) {
+                RfidConnector.CsReaderRfidData csReaderRfidData1 = csReaderConnector.rfidConnector.mRfidToWrite.get(csReaderConnector.rfidConnector.mRfidToWrite.size() - 1);
                 if (csReaderRfidData.rfidPayloadEvent == csReaderRfidData1.rfidPayloadEvent) {
                     if (csReaderRfidData.dataValues == null && csReaderRfidData1.dataValues == null) {
                         repeatRequest = true;
@@ -4494,7 +4506,7 @@ public class RfidReaderChipR2000 {
             if (repeatRequest == false) {
                 if (false)
                     appendToLog("add cs108RfidData to mRfidToWrite with rfidPayloadEvent = " + csReaderRfidData.rfidPayloadEvent);
-                csReaderConnector108.rfidConnector.mRfidToWrite.add(csReaderRfidData);
+                csReaderConnector.rfidConnector.mRfidToWrite.add(csReaderRfidData);
             }
         }
     //}
