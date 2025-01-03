@@ -1,5 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_COLDCHAIN;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -12,13 +14,13 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.google.android.material.tabs.TabLayout;
 
 public class ColdChainFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    MyAdapter adapter;
+    AdapterTab adapter;
 
     private String[] tabs = {"Select Tag", "Logging", "One-shot"};
 
@@ -59,8 +61,8 @@ public class ColdChainFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
-        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true,"E280B0"));
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, TAG_EM_COLDCHAIN, "E280B0"));
         adapter.setFragment(1, new AccessColdChainFragment());
         adapter.setFragment(2, new AccessEm4325PassiveFragment());
 

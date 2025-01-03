@@ -1,5 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ;
+
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -673,7 +675,7 @@ public class AccessImpinjFragment extends CommonFragment {
                 } else MainActivity.csLibrary4A.setTagGroup(MainActivity.csLibrary4A.getQuerySelect(), 0, 2);
                 if (checkBoxFastId.isChecked()) iValue |= 0x20;
                 if (spinnerTagSelect.getSelectedItemPosition() != impinjTag.others.ordinal()) iValue |= (spinnerTagSelect.getSelectedItemPosition() + 1);
-                MainActivity.mDid = "E28011" + String.format("%02X", iValue);
+                MainActivity.tagType = TAG_IMPINJ; /* need more tagType */ MainActivity.mDid = "E28011" + String.format("%02X", iValue);
                 MainActivity.csLibrary4A.appendToLog(String.format("HelloK: iValue = 0x%02X, mDid = %s", iValue, MainActivity.mDid));
                 MainActivity.csLibrary4A.setImpinJExtension(checkBoxTagFocus.isChecked(), checkBoxFastId.isChecked());
             }

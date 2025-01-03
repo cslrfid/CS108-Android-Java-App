@@ -1,5 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_LONGJING;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -12,13 +14,13 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.google.android.material.tabs.TabLayout;
 
 public class LongjingFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    MyAdapter adapter;
+    AdapterTab adapter;
 
     private String[] tabs = {"Scan", "Geiger"}; //"Access",
     int iTargetOld, iSessionOld;
@@ -60,8 +62,8 @@ public class LongjingFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
-        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true,"E201E"));
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, TAG_LONGJING, "E201E"));
         adapter.setFragment(1, new InventoryRfidSearchFragment(true));
         adapter.setFragment(2, new AccessKilowayFragment(true));
 

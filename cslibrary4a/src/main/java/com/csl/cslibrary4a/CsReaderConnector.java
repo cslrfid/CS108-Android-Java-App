@@ -36,7 +36,7 @@ public class CsReaderConnector {
 
     public long getStreamInRate() { return bluetoothGatt.getStreamInRate(); }
 
-    int writeDataCount; int btSendTimeOut = 0; long btSendTime = 0;
+    int writeDataCount; int btSendTimeOut = 0; long btSendTime = 0; int BTSENDDELAY = 20;
     boolean writeData(byte[] buffer, int timeout) {
         if (rfidReader.isInventoring()) {
             utility.appendToLogView("BtData: isInventoring is true when writeData " + byteArrayToString(buffer));
@@ -45,7 +45,7 @@ public class CsReaderConnector {
         if (result == false) appendToLog("!!! failure to writeData with previous btSendTimeout = " + btSendTimeOut + ", btSendTime = " + btSendTime);
         if (true) {
             btSendTime = System.currentTimeMillis();
-            btSendTimeOut = timeout + 60;
+            btSendTimeOut = timeout + BTSENDDELAY;
             if (bluetoothGatt.isCharacteristicListRead() == false) btSendTimeOut += 3000;
         }
         return result;
@@ -273,12 +273,13 @@ public class CsReaderConnector {
                             cs108DataLeftOffset -= cs108DataReadStart;
                             cs108DataReadStart = 0;
                             cs108DataReadStart = -1;
-                            if (mCs108DataReadRequest == false) {
+                            if (true || mCs108DataReadRequest == false) {
                                 mCs108DataReadRequest = true;
                                 if (DEBUGTHREAD) appendToLog("ready2Write: start immediate mReadWriteRunnable");
                                 //appendToLog("post mReadWriteRunnable within processBleStreamInData");
                                 mHandler.removeCallbacks(mReadWriteRunnable); mHandler.post(mReadWriteRunnable);
-                            }
+                                appendToLog("BtData: processBleStreamOut starts mReadWriteRunnable as mCs108DataReadRequest");
+                            } //appendToLog("BtData: processBleStreamOut cannot start mReadWriteRunnable as mCs108DataReadRequest is true");
                         }
                     }
                     if (validHeader && cs108DataReadStart < 0) {
@@ -409,9 +410,10 @@ public class CsReaderConnector {
 
         @Override
         public void run() {
-            if (DEBUGTHREAD) appendToLog("mReadWriteRunnable starts");
+            if (DEBUGTHREAD || true) appendToLog("BtData: mReadWriteRunnable starts");
             if (rfidConnector == null) {
                 mHandler.postDelayed(mReadWriteRunnable, 500);
+                appendToLog("BtData: mReadWriteRunnable restart after 500ms");
                 return;
             }
             if (timer2Write != 0 || bluetoothGatt.getStreamInBufferSize() != 0 || rfidConnector.mRfidToRead.size() != 0) {
@@ -438,6 +440,7 @@ public class CsReaderConnector {
             if (DEBUGTHREAD) appendToLog("start new mReadWriteRunnable after " + intervalReadWrite + " ms");
             //appendToLog("postDelayed mReadWriteRunnable within mReadWriteRunnable");
             mHandler.removeCallbacks(mReadWriteRunnable); mHandler.postDelayed(mReadWriteRunnable, intervalReadWrite);
+            appendToLog("BtData: mReadWriteRunnable restart after 250ms");
             if (rfidReader == null) return;
 
             boolean bFirst = true;
@@ -505,10 +508,11 @@ public class CsReaderConnector {
             lTime = System.currentTimeMillis();
             if (rfidConnector.mRfidToWriteRemoved)  {
                 rfidConnector.mRfidToWriteRemoved = false; ready2Write = true; btSendTime = 0; appendToLog("ready2Write is set true after true mRfidDevice.mRfidToWriteRemoved ");
-                btSendTime = (lTime - btSendTimeOut + 60);
-                if (DEBUGTHREAD) appendToLog("ready2Write: start new mReadWriteRunnable after " + 60 + " ms");
+                btSendTime = (lTime - btSendTimeOut + BTSENDDELAY);
+                if (DEBUGTHREAD) appendToLog("ready2Write: start new mReadWriteRunnable after " + BTSENDDELAY + " ms");
                 //appendToLog("postDelayed mReadWriteRunnable within mReadWriteRunnable 2");
-                mHandler.removeCallbacks(mReadWriteRunnable); mHandler.postDelayed(mReadWriteRunnable, 60 + 2);
+                mHandler.removeCallbacks(mReadWriteRunnable); mHandler.postDelayed(mReadWriteRunnable, BTSENDDELAY + 2);
+                appendToLog("BtData: mReadWriteRunnable restart after 62ms");
                 if (DEBUG_PKDATA) appendToLog("PkData: mReadWriteRunnable: processed Rfidcode. btSendTime is set to 0 to allow new sending with systime = " + lTime);
             }
             if (bis108) {
@@ -521,6 +525,7 @@ public class CsReaderConnector {
                     ready2Write = true;
                 }
             }
+            if (DEBUG) appendToLog("BtData: ready2Write = " + ready2Write);
             if (ready2Write) {
                 timeReady = System.currentTimeMillis();
                 timer2Write = 0;
@@ -557,6 +562,7 @@ public class CsReaderConnector {
                 }
                 if (barcodeConnector.barcodeToWrite.size() != 0 && true)
                     appendToLog("AAA 1 barcodeToWrite.size = " + barcodeConnector.barcodeToWrite.size() + ", bisRfidCommandStop = " + bisRfidCommandStop + ", barcodePowerOnTimeOut = " + barcodeConnector.barcodePowerOnTimeOut);
+                if (DEBUG) appendToLog("BtData: bisRfidCommandStop is " + bisRfidCommandStop);
                 if (bisRfidCommandStop) {
                     appendToLog("AAA 2");
                     if (rfidConnector.rfidPowerOnTimeOut != 0) {
@@ -565,16 +571,15 @@ public class CsReaderConnector {
                         if (isBleConnected() == false) {
                             rfidConnector.mRfidToWrite.clear();
                         } else {
-                            if (DEBUG)
-                                appendToLog("BtDataOut: currentTime = " + System.currentTimeMillis() + ", btSendTime = " + btSendTime + ", difference = " + (System.currentTimeMillis() - btSendTime) + ", btSendTimeOut = " + btSendTimeOut);
+                            appendToLog("BtDataOut 1: currentTime = " + System.currentTimeMillis() + ", btSendTime = " + btSendTime + ", difference = " + (System.currentTimeMillis() - btSendTime) + ", btSendTimeOut = " + btSendTimeOut);
                             if (System.currentTimeMillis() - btSendTime > btSendTimeOut) {
                                 boolean retValue = false;
                                 byte[] dataOut = rfidConnector.sendRfidToWrite();
                                 if (dataOut != null) {
                                     retValue = writeData(dataOut, (rfidConnector.mRfidToWrite.get(0).waitUplinkResponse ? 500 : 0));
-                                    appendToLog("done writeData with waitUplinkResponse = " + rfidConnector.mRfidToWrite.get(0).waitUplinkResponse);
+                                    appendToLog("BtData: done writeData with waitUplinkResponse = " + rfidConnector.mRfidToWrite.get(0).waitUplinkResponse);
                                 }
-                                if (DEBUG) appendToLog("BtDataOut: done writeRfid with size = " + rfidConnector.mRfidToWrite.size() + ", PayloadEvents = " + rfidConnector.mRfidToWrite.get(0).rfidPayloadEvent.toString() + ", data=" + byteArrayToString(rfidConnector.mRfidToWrite.get(0).dataValues));
+                                appendToLog("BtData: done writeRfid with size = " + rfidConnector.mRfidToWrite.size() + ", PayloadEvents = " + rfidConnector.mRfidToWrite.get(0).rfidPayloadEvent.toString() + ", data=" + byteArrayToString(rfidConnector.mRfidToWrite.get(0).dataValues));
                                 rfidConnector.sendRfidToWriteSent++;
                                 if (retValue)   {
                                     rfidConnector.mRfidToWriteRemoved = false;
@@ -596,7 +601,7 @@ public class CsReaderConnector {
                             rfidConnector.mRfidToWrite.clear();
                         } else {
                             if (DEBUG)
-                                appendToLog("BtDataOut: currentTime = " + System.currentTimeMillis() + ", btSendTime = " + btSendTime + ", difference = " + (System.currentTimeMillis() - btSendTime) + ", btSendTimeOut = " + btSendTimeOut);
+                                appendToLog("BtDataOut 2: currentTime = " + System.currentTimeMillis() + ", btSendTime = " + btSendTime + ", difference = " + (System.currentTimeMillis() - btSendTime) + ", btSendTimeOut = " + btSendTimeOut);
                             if (System.currentTimeMillis() - btSendTime > btSendTimeOut) {
                                 boolean retValue = false;
                                 byte[] dataOut = rfidConnector.sendRfidToWrite();
@@ -711,13 +716,14 @@ public class CsReaderConnector {
                     ready2Write = false;
                     appendToLog("ready2Write is set false after true sendBarcodeToWrite");
                 } else if (rfidConnector.rfidPowerOnTimeOut != 0) {
-                    if (DEBUG) appendToLog("rfidPowerOnTimeOut = " + rfidConnector.rfidPowerOnTimeOut + ", mRfidToWrite.size() = " + rfidConnector.mRfidToWrite.size());
+                    if (DEBUG || true) appendToLog("rfidPowerOnTimeOut = " + rfidConnector.rfidPowerOnTimeOut + ", mRfidToWrite.size() = " + rfidConnector.mRfidToWrite.size());
                 } else if (rfidConnector.rfidFailure == false && rfidConnector.mRfidToWrite.size() != 0) {
+                    appendToLog("BtData: rfidFailure is false and mRfidToWrite.size is " + rfidConnector.mRfidToWrite.size());
                     if (isBleConnected() == false) {
                         rfidConnector.mRfidToWrite.clear();
                     } else {
-                        if (DEBUG)
-                            appendToLog("BtDataOut: currentTime = " + System.currentTimeMillis() + ", btSendTime = " + btSendTime + ", difference = " + (System.currentTimeMillis() - btSendTime) + ", btSendTimeOut = " + btSendTimeOut);
+                        if (DEBUG || true)
+                            appendToLog("BtDataOut 3: currentTime = " + System.currentTimeMillis() + ", btSendTime = " + btSendTime + ", difference = " + (System.currentTimeMillis() - btSendTime) + ", btSendTimeOut = " + btSendTimeOut);
                         if (System.currentTimeMillis() - btSendTime > btSendTimeOut) {
                             boolean retValue = false;
                             byte[] dataOut = rfidConnector.sendRfidToWrite();
@@ -730,13 +736,16 @@ public class CsReaderConnector {
                                 String stringCompare = "800280B310A";
                                 if (bis108) stringCompare = "8002700100F00F000000";
                                 appendToLog("AAA sending rifd data portion = " + string + ", " + string.indexOf(stringCompare));
-                                if (string.indexOf(stringCompare) == 0) rfidReader.setInventoring(true);
+                                if (string.indexOf(stringCompare) == 0)
+                                    rfidReader.setInventoring(true);
                             }
-                            if (DEBUG) appendToLog("BtDataOut: done writeRfid with size = " + rfidConnector.mRfidToWrite.size() + ", PayloadEvents = " + rfidConnector.mRfidToWrite.get(0).rfidPayloadEvent.toString() + ", data=" + byteArrayToString(rfidConnector.mRfidToWrite.get(0).dataValues));
+                            if (DEBUG)
+                                appendToLog("BtDataOut: done writeRfid with size = " + rfidConnector.mRfidToWrite.size() + ", PayloadEvents = " + rfidConnector.mRfidToWrite.get(0).rfidPayloadEvent.toString() + ", data=" + byteArrayToString(rfidConnector.mRfidToWrite.get(0).dataValues));
                             rfidConnector.sendRfidToWriteSent++;
-                            if (retValue)   {
+                            if (retValue) {
                                 rfidConnector.mRfidToWriteRemoved = false;
-                                if (DEBUG) appendToLog("writeRfid() with sendRfidToWriteSent = " + rfidConnector.sendRfidToWriteSent);
+                                if (DEBUG)
+                                    appendToLog("writeRfid() with sendRfidToWriteSent = " + rfidConnector.sendRfidToWriteSent);
                                 sendFailure = false;
                                 //bValue = true;
                             } else sendFailure = true;

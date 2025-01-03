@@ -144,7 +144,7 @@ public class AccessKilowayFragment extends CommonFragment {
                         else rerunRequest = false;
                     } else {
                         accessTask = new AccessTask(
-                                buttonRead, invalid,
+                                buttonRead, invalid, false,
                                 editTextRWTagID.getText().toString(), 1, 32,
                                 "00000000", Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                                 false, null);

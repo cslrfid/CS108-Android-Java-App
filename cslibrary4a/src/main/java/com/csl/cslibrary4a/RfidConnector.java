@@ -168,10 +168,12 @@ public class RfidConnector {
             if (true) {
                 appendToLog("Rfdid data transmission failure !!! clear mRfidToWrite buffer !!!");
                 //utility.writeDebug2File("Down fails to transmit " + byteArrayToString(mRfidToWrite.get(0).dataValues));
+                appendToLog("BtDataOut: sendRfidToWrite 1 set rfidFailure as true with dataValues as " + byteArrayToString(mRfidToWrite.get(0).dataValues));
                 rfidFailure = true;
                 mRfidToWrite.clear();
             } else if (rfidValid == false) {
                 Toast.makeText(context, "Problem in sending data to Rfid Module. Rfid is disabled.", Toast.LENGTH_SHORT).show();
+                appendToLog("BtDataOut: sendRfidToWrite 2 set rfidFailure as true");
                 rfidFailure = true;
             } /*else {
                 Toast.makeText(context, "Problem in Sending Commands to RFID Module.  Bluetooth Disconnected.  Please Reconnect", Toast.LENGTH_SHORT).show();

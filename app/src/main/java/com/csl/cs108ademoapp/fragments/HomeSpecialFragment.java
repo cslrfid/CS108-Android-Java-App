@@ -36,7 +36,7 @@ public class HomeSpecialFragment extends CommonFragment {
             buttonAuraSense.setVisibility(View.GONE);
             buttonFdmicro.setVisibility(View.GONE); buttonLanda.setVisibility(View.GONE);
         }
-        MainActivity.mDid = null;
+        MainActivity.tagType = null; MainActivity.mDid = null;
         if (MainActivity.csLibrary4A.isBleConnected()) MainActivity.csLibrary4A.restoreAfterTagSelect();
     }
 

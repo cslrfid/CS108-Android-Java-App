@@ -10,7 +10,7 @@ android {
     defaultConfig {
         minSdk 23
         targetSdk 35
-        buildConfigField 'String', 'VERSION_NAME', "\"22\""
+        buildConfigField 'String', 'VERSION_NAME', "\"28\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

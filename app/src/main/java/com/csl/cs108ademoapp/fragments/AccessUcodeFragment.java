@@ -24,6 +24,7 @@ import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SaveList2ExternalTask;
 import com.csl.cs108ademoapp.SelectTag;
+import com.csl.cslibrary4a.AesCmac;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
 

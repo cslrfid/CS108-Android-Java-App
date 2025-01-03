@@ -1,6 +1,9 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_AURASENSE;
+
 import android.os.Bundle;
+
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -141,7 +144,7 @@ public class AuraSenseFragment extends CommonFragment {
                     fragment0 = fragment;
                     break;
                 default:
-                    fragment = InventoryRfidiMultiFragment.newInstance(true,"E280B12");
+                    fragment = InventoryRfidiMultiFragment.newInstance(true, TAG_EM_AURASENSE, "E280B12");
                     fragment1 = fragment;
                     break;
             }

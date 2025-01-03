@@ -1,5 +1,10 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S2;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S3;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_XERXES;
+
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -78,16 +83,16 @@ public class AxzonSelectorFragment extends CommonFragment {
     void gotoAxzonFragment(int tagType) {
         switch(tagType) {
             case 2:
-                MainActivity.mDid = "E282402";
+                MainActivity.tagType = TAG_MAGNUS_S2; MainActivity.mDid = "E282402";
                 break;
             case 3:
-                MainActivity.mDid = "E282403";
+                MainActivity.tagType = TAG_MAGNUS_S3; MainActivity.mDid = "E282403";
                 break;
             case 5:
-                MainActivity.mDid = "E282405";
+                MainActivity.tagType = TAG_XERXES; MainActivity.mDid = "E282405";
                 break;
             default:
-                MainActivity.mDid = "E2824";
+                MainActivity.tagType = TAG_AXZON; MainActivity.mDid = "E2824";
                 break;
         }
         MainActivity.csLibrary4A.appendToLog("HelloABC: gotoAxzonFragment with tagType = " + tagType + ", MainActivity.mDid = " + MainActivity.mDid);

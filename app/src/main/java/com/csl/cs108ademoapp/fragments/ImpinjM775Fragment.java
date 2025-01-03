@@ -1,5 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M755;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
@@ -12,13 +14,13 @@ import android.view.ViewGroup;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.google.android.material.tabs.TabLayout;
 
 public class ImpinjM775Fragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    MyAdapter adapter;
+    AdapterTab adapter;
 
     private String[] tabs = {"Configuration", "Scan"};
     int iTargetOld, iSessionOld;
@@ -45,9 +47,9 @@ public class ImpinjM775Fragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
         adapter.setFragment(0, new AccessImpinjFragment(true));
-        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true, "E2C011"));
+        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true, TAG_IMPINJ_M755, "E2C011"));
 
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
         viewPager.setAdapter(adapter);

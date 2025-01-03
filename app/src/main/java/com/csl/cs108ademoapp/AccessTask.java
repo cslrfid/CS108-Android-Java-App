@@ -25,7 +25,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     Button button; String buttonText;
     TextView registerRunTime, registerTagGot, registerVoltageLevel;
     TextView registerYield, registerTotal;
-    boolean invalidRequest;
+    boolean invalidRequest, selectOne = false;
     String selectMask; int selectBank, selectOffset;
     String strPassword; int powerLevel;
     RfidReaderChipData.HostCommands hostCommand;
@@ -49,7 +49,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     int batteryCountInventory_old;
     boolean bSkipClearFilter = false;
 
-    public AccessTask(Button button, boolean invalidRequest,
+    public AccessTask(Button button, boolean invalidRequest, boolean selectOne,
                       String selectMask, int selectBank, int selectOffset,
                       String strPassword, int powerLevel, RfidReaderChipData.HostCommands hostCommand,
                       boolean bEnableErrorPopWindow, Runnable updateRunnable) {
@@ -58,6 +58,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         this.registerVoltageLevel = registerVoltageLevel;
 
         this.invalidRequest = invalidRequest; MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest);
+        this.selectOne = selectOne;
         this.selectMask = selectMask;
         this.selectBank = selectBank;
         this.selectOffset = selectOffset;
@@ -156,14 +157,14 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessTask(): powerLevel = " + powerLevel);
             int matchRep = 1;
             if (repeat > 1) matchRep = repeat;
-            if (bSkipClearFilter == false) {
+            if (false && bSkipClearFilter == false) {
                 MainActivity.csLibrary4A.appendToLog("Going to setSelectCriteria disable");
                 MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
             }
             if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
             else if (skipSelect == false) {
-                MainActivity.csLibrary4A.appendToLog("setSelectCriteria: Going to setSelectTag");
-                if (MainActivity.csLibrary4A.setSelectedTag(selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
+                MainActivity.csLibrary4A.appendToLog("BtDataOut: AccessTask.preExecute goes to setSelectTag");
+                if (MainActivity.csLibrary4A.setSelectedTag(selectOne, selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
                     invalidRequest = true; MainActivity.csLibrary4A.appendToLog("setSelectedTag is failed with selectMask = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", powerLevel = " + powerLevel);
                 }
             }
@@ -319,7 +320,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     }
 
     void DeviceConnectTask4RegisterEnding() {
-        MainActivity.csLibrary4A.setAccessCount(0);
+        //MainActivity.csLibrary4A.setAccessCount(0);
         String strErrorMessage = "";
         if (false) {
             boolean success = false;

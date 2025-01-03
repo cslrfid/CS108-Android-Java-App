@@ -20,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.csl.cs108ademoapp.CustomPopupWindow;
@@ -31,6 +32,7 @@ import com.csl.cs108ademoapp.SaveList2ExternalTask;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 import com.csl.cslibrary4a.NotificationConnector;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReader;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.util.Collections;
@@ -39,6 +41,7 @@ import java.util.Comparator;
 public class InventoryRfidiMultiFragment extends CommonFragment {
     final private boolean bAdd2End = false;
     private boolean bMultiBank = false, bMultiBankInventory = false, bctesiusInventory = false;
+    private RfidReader.TagType tagType;
     private String mDid = null;
     int vibrateTimeBackup = 0;
 
@@ -133,6 +136,12 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         if (getArguments() != null) {
             bMultiBank = getArguments().getBoolean("bMultiBank");
             mDid = getArguments().getString("mDid");
+            try {
+                int iValue = getArguments().getInt("enumTagType");
+                MainActivity.csLibrary4A.appendToLog("onCreate: enumTagType iValue = " + iValue);
+                tagType = RfidReader.TagType.values()[iValue];
+                MainActivity.csLibrary4A.appendToLog("onCreate: enumTagType = " + tagType.toString());
+            } catch (Exception e) { }
             if (bMultiBank && mDid == null) {
                 bMultiBankInventory = true;
             } else if (bMultiBank && mDid != null) {
@@ -152,7 +161,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
 
         MainActivity.selectFor = -1;
         if (bMultiBankInventory | bctesiusInventory) {
-            androidx.appcompat.app.ActionBar actionBar;
+            ActionBar actionBar;
             actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             actionBar.setIcon(R.drawable.dl_inv);
             if (bMultiBankInventory) actionBar.setTitle(R.string.title_activity_inventoryRfidMulti);
@@ -347,10 +356,12 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         }
     }
 
-    public static InventoryRfidiMultiFragment newInstance(boolean bMultiBank, String mDid) {
+    public static InventoryRfidiMultiFragment newInstance(boolean bMultiBank, RfidReader.TagType tagType, String mDid) {
         InventoryRfidiMultiFragment myFragment = new InventoryRfidiMultiFragment();
 
         Bundle args = new Bundle();
+        MainActivity.csLibrary4A.appendToLog("newInstance: enumTagType = " + (tagType == null ? "null" : tagType.toString()));
+        if (tagType != null) args.putInt("enumTagType", tagType.ordinal());
         args.putBoolean("bMultiBank", bMultiBank);
         args.putString("mDid", mDid);
         myFragment.setArguments(args);
@@ -421,144 +432,53 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             MainActivity.csLibrary4A.appendToLogView("CANCELLING: StartStopHandler generates taskCancelReason = " + inventoryRfidTask.taskCancelReason.toString());
         } else MainActivity.csLibrary4A.appendToLog("BtData. Stop when still writing !!!");
     }
-
     void startInventoryTask() {
         MainActivity.csLibrary4A.appendToLog("startInventoryTask");
-        int extra1Bank = -1, extra2Bank = -1;
-        int extra1Count = 0, extra2Count = 0;
-        int extra1Offset = 0, extra2Offset = 0;
+        //RfidReader.ExtraBankData extraBankData = new RfidReader.ExtraBankData();
         String mDid = this.mDid;
 
         MainActivity.csLibrary4A.appendToLog("Rin: mDid = " + (mDid == null ? "null" : mDid) + ", MainActivity.mDid = " + MainActivity.mDid + ", bMultiBankInventory = " + bMultiBankInventory);
         if (mDid != null && MainActivity.mDid != null) {
             if (MainActivity.mDid.indexOf("E280B12") != 0) mDid = MainActivity.mDid;
         }
+
+        RfidReader.ExtraBankData extraBankData = new RfidReader.ExtraBankData();
+        if (mDid != null) extraBankData.setExtraBankData(MainActivity.tagType, mDid);
+        else if (bMultiBank) {
+            CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessInventoryBankTitle1);
+            int extra1Bank = 0, extra2Bank = 0;
+            int extra1Count, extra2Count;
+            int extra1Offset = 0, extra2Offset = 0;
+            if (checkBox.isChecked()) {
+                extra1Bank = spinnerBank1.getSelectedItemPosition();
+                EditText editText = (EditText) getActivity().findViewById(R.id.accessInventoryOffset1);
+                extra1Offset = Integer.valueOf(editText.getText().toString());
+                editText = (EditText) getActivity().findViewById(R.id.accessInventoryLength1);
+                extra1Count = Integer.valueOf(editText.getText().toString());
+            } else extra1Count = 0;
+            checkBox = (CheckBox) getActivity().findViewById(R.id.accessInventoryBankTitle2);
+            if (checkBox.isChecked()) {
+                extra2Bank = spinnerBank2.getSelectedItemPosition();
+                EditText editText = (EditText) getActivity().findViewById(R.id.accessInventoryOffset2);
+                extra2Offset = Integer.valueOf(editText.getText().toString());
+                editText = (EditText) getActivity().findViewById(R.id.accessInventoryLength2);
+                extra2Count = Integer.valueOf(editText.getText().toString());
+            } else extra2Count = 0;
+            extraBankData.setExtraBankData(extra1Bank, extra1Count, extra1Offset, extra2Bank, extra2Count, extra2Offset);
+        }
+
         if (mDid != null) {
             MainActivity.csLibrary4A.appendToLog("mDid is valid as " + mDid);
-            //if (MainActivity.csLibrary4A.getSelectEnable())
-                MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
             if (MainActivity.mDid != null && mDid.length() == 0) mDid = MainActivity.mDid;
             MainActivity.csLibrary4A.appendToLog("new mDid is " + mDid);
-            extra2Bank = 2;
-            extra2Offset = 0;
-            extra2Count = 2;
+
             MainActivity.csLibrary4A.appendToLog("mDid = " + mDid);
-            if (mDid.matches("E2801101") || mDid.matches("E2801102") || mDid.matches("E2801103") || mDid.matches("E2801104") || mDid.matches("E2801105")) {
-                extra1Bank = 0;
-                extra1Offset = 4;
-                extra1Count = 1;
-                if (mDid.matches("E2801101")) extra2Count = 6;
-            } else if (mDid.matches("E200B0")) {
-                extra1Bank = 2;
-                extra1Offset = 0;
-                extra1Count = 2;
-                extra2Bank = 3;
-                extra2Offset = 0x2d;
-                extra2Count = 1;
-            } else if (mDid.matches("E203510")) {
-                extra1Bank = 2;
-                extra1Offset = 0;
-                extra1Count = 2;
-                extra2Bank = 3;
-                extra2Offset = 8;
-                extra2Count = 2;
-            } else if (mDid.matches("E283A")) {
-                extra1Bank = 2;
-                extra1Offset = 0;
-                extra1Count = 2;
-                extra2Bank = 3;
-                extra2Offset = 0;
-                extra2Count = 8;
-            } else if (mDid.indexOf("E280B12") == 0) {
-                extra1Bank = 2;
-                extra1Offset = 0;
-                extra1Count = 2;
-                extra2Bank = 3;
-                extra2Offset = 0x120;
-                extra2Count = 1;
-            } else if (mDid.indexOf("E280B0") == 0) {
-                extra1Bank = 3;
-                extra1Offset = 188;
-                extra1Count = 2;
-                //extra2Bank = 3;
-                //extra2Offset = 0x10d;
-                //extra2Count = 1;
-            } else if (mDid.indexOf("E281D") == 0) { //need atmel firmware 0.2.20
-                extra1Bank = 0;
-                extra1Offset = 4;
-                extra1Count = 1;
-                extra2Count = 6;
-            } else if (mDid.indexOf("E201E") == 0) {
-                extra1Bank = 3;
-                extra1Offset = 112;
-                extra1Count = 1;
-                extra2Count = 6;
-            } else if (mDid.matches("E282402")) {
-                extra1Bank = 0;
-                extra1Offset = 11;
-                extra1Count = 1;
-                extra2Bank = 0;
-                extra2Offset = 13;
-                extra2Count = 1;
-            } else if (mDid.matches("E282403")) {
-                extra1Bank = 0;
-                extra1Offset = 12;
-                extra1Count = 3;
-                extra2Bank = 3;
-                extra2Offset = 8;
-                extra2Count = 4;
-            } else if (mDid.matches("E282405")) {
-                extra1Bank = 0;
-                extra1Offset = 10;
-                extra1Count = 5;
-                extra2Bank = 3;
-                extra2Offset = 0x12;
-                extra2Count = 4;
-            }
-            MainActivity.csLibrary4A.appendToLog("mDid = " + mDid);
-            if (mDid.indexOf("E280B12") == 0) {
-                if (MainActivity.mDid.matches("E280B12B")) {
-                    MainActivity.csLibrary4A.setSelectCriteria(0, true, 4, 0, 5, 1, 0x220, "8321");
-                    MainActivity.csLibrary4A.appendToLog("Hello123: Set Sense at Select !!!");
-                } else { //if (MainActivity.mDid.matches("E280B12A")) {
-                    MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
-                    MainActivity.csLibrary4A.appendToLog("Hello123: Set Sense at BOOT !!!");
-                }
-            } else if (mDid.matches("E203510")) {
-                MainActivity.csLibrary4A.setSelectCriteria(0, true, 7, 4, 0, 2, 0, mDid);
+            if (mDid.matches("E203510")) {
                 if (MainActivity.csLibrary4A.get98XX() == 2) MainActivity.csLibrary4A.setCurrentLinkProfile(1);
             } else if (mDid.matches("E283A")) {
                 if (MainActivity.csLibrary4A.get98XX() == 2) MainActivity.csLibrary4A.setCurrentLinkProfile(9);
-            } else if (mDid.matches("E28240")) {
-                if (MainActivity.selectFor != 0) {
-                    MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
-                    MainActivity.selectFor = 0;
-                }
-            } else if (mDid.matches("E282402")) {
-                MainActivity.csLibrary4A.appendToLog("selectFor = " + MainActivity.selectFor);
-                if (MainActivity.selectFor != 2) {
-                    MainActivity.csLibrary4A.setSelectCriteria(0, true, 4, 2, 0, 3, 0xA0, "20");
-                    MainActivity.selectFor = 2;
-                }
-            } else if (mDid.matches("E282403")) {
-                if (MainActivity.selectFor != 3) {
-                    MainActivity.csLibrary4A.setSelectCriteria(0, true, 4, 2, 0, 3, 0xD0, "1F");
-                    MainActivity.csLibrary4A.setSelectCriteria(1, true, 4, 2, 5, 3, 0xE0, "");
-                    MainActivity.selectFor = 3;
-                }
             } else if (mDid.matches("E282405")) {
-                if (MainActivity.selectFor != 5) {
-                    MainActivity.csLibrary4A.setSelectCriteria(0, true, 4, 5, MainActivity.selectHold, 3, 0x3B0, "00");
-                    MainActivity.csLibrary4A.setSelectCriteriaDisable(2);
-                    if (MainActivity.csLibrary4A.getRetryCount() < 2) MainActivity.csLibrary4A.setRetryCount(2);
-                    MainActivity.selectFor = 5;
-                }
-            } else {
-                MainActivity.csLibrary4A.appendToLog("MainActivity.selectFor = " + MainActivity.selectFor);
-                if (MainActivity.selectFor != -1) {
-                    MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
-                    MainActivity.selectFor = -1;
-                }
+                if (MainActivity.csLibrary4A.getRetryCount() < 2) MainActivity.csLibrary4A.setRetryCount(2);
             }
             boolean bNeedSelectedTagByTID = true;
             if (mDid.indexOf("E2806894") == 0) {
@@ -567,70 +487,23 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 if (MainActivity.mDid.matches("E2806894A")) {
                     Log.i(TAG, "HelloK: Find E2806894A");
                     MainActivity.csLibrary4A.setInvBrandId(false);
-                    MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
                 } else if (MainActivity.mDid.matches("E2806894B")) {
                     Log.i(TAG, "HelloK: Find E2806894B");
                     MainActivity.csLibrary4A.setInvBrandId(false);
-                    MainActivity.csLibrary4A.setSelectCriteria(0, true, 4, 0, 1, 0x203, "1", true);
-                    MainActivity.csLibrary4A.setSelectCriteria(1, true, 4, 2, 2, 0, "E2806894", false);
                     if (true) bNeedSelectedTagByTID = false;
                 } else if (MainActivity.mDid.matches("E2806894C") || MainActivity.mDid.matches("E2806894d")) {
                     Log.i(TAG, "HelloK: Find " + MainActivity.mDid);
                     MainActivity.csLibrary4A.setInvBrandId(true);
-                    MainActivity.csLibrary4A.setSelectCriteria(0, true, 4, 0, 1, 0x204, "1", true);
-                    MainActivity.csLibrary4A.setSelectCriteria(1, true, 4, 2, 2, 0, "E2806894", false);
                     if (true) bNeedSelectedTagByTID = false;
                 }
-            } //else if (mDid.indexOf("E28011") == 0) bNeedSelectedTagByTID = false;
-            Log.i(TAG, "BleStreamOut: going to setSelectedTagByTID with mDid = " + mDid + " with extra1Bank = " + extra1Bank + ", extra2Bank = " + extra2Bank + ", bNeedSelectedTagByTID = " + bNeedSelectedTagByTID + ", checkBoxFilterFdTag = " + checkBoxFilterByTid.isChecked() + ", bMultiBank = " + bMultiBank);
-            if (bNeedSelectedTagByTID) {
-                String strMdid = mDid;
-                if (strMdid.indexOf("E28011") == 0) {
-                    int iValue = Integer.valueOf(strMdid.substring(6, 8), 16); iValue &= 0x0F;
-                    MainActivity.csLibrary4A.appendToLog(String.format("iValue = 0x%X", iValue));
-                    if (iValue == 1) strMdid = "E2C011A2";
-                    else if (iValue == 2) strMdid = "E28011C";
-                    else if (iValue == 3) strMdid = "E28011B";
-                    else if (iValue == 4) strMdid = "E28011A";
-                    else if (iValue == 5) strMdid = "E280119";
-                    else if (iValue == 6) strMdid = "E2801171";
-                    else if (iValue == 7) strMdid = "E2801170";
-                    else if (iValue == 8) strMdid = "E2801150";
-                    else strMdid = "E2001"; //strMdid.substring(0, 5); even E2801 or E2C01 will return
-                }
-                MainActivity.csLibrary4A.appendToLog("revised mDid = " + strMdid + " with checkBoxFilterByTid.isChecked() = " + checkBoxFilterByTid.isChecked());
-                if (checkBoxFilterByTid.isChecked()) {
-                    MainActivity.csLibrary4A.appendToLog("setSelectCriteria: Going to setSelectedByTID");
-                    if (checkBoxFilterByProtect.isChecked()) {
-                        if (editTextProtectPassword.getText().toString().trim().length() == 0) editTextProtectPassword.setText("00000000");
-                        MainActivity.csLibrary4A.setSelectCriteria(-1, true, 4, 0, 3, 0, editTextProtectPassword.getText().toString(), false);
-                    }
-                    MainActivity.csLibrary4A.setSelectedTagByTID(strMdid, -1);
-                } else {
-                    //MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
-                    MainActivity.csLibrary4A.setInvAlgo(MainActivity.csLibrary4A.getInvAlgo());
-                }
             }
-        } else if (bMultiBankInventory) {
-            CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessInventoryBankTitle1);
-            if (checkBox.isChecked()) {
-                extra1Bank = spinnerBank1.getSelectedItemPosition();
-                EditText editText = (EditText) getActivity().findViewById(R.id.accessInventoryOffset1);
-                extra1Offset = Integer.valueOf(editText.getText().toString());
-                editText = (EditText) getActivity().findViewById(R.id.accessInventoryLength1);
-                extra1Count = Integer.valueOf(editText.getText().toString());
-            }
-            checkBox = (CheckBox) getActivity().findViewById(R.id.accessInventoryBankTitle2);
-            if (checkBox.isChecked()) {
-                extra2Bank = spinnerBank2.getSelectedItemPosition();
-                EditText editText = (EditText) getActivity().findViewById(R.id.accessInventoryOffset2);
-                extra2Offset = Integer.valueOf(editText.getText().toString());
-                editText = (EditText) getActivity().findViewById(R.id.accessInventoryLength2);
-                extra2Count = Integer.valueOf(editText.getText().toString());
-            }
+            int iValue123 = MainActivity.csLibrary4A.setSelectData(MainActivity.tagType, mDid,
+                    bNeedSelectedTagByTID && checkBoxFilterByTid.isChecked(),
+                    (checkBoxFilterByProtect.isChecked() ? editTextProtectPassword.getText().toString(): null),
+                    MainActivity.selectFor, MainActivity.selectHold);
+            if (iValue123 > 0) MainActivity.selectFor = iValue123;
         }
 
-        MainActivity.csLibrary4A.appendToLog("bMultiBank = " + bMultiBank + " with extra1Bank = " + extra1Bank + "," + extra1Offset + "," + extra1Count + ", extra2Bank = " + extra2Bank + "," + extra2Offset + "," + extra2Count);
         if (bMultiBank == false) {
             MainActivity.csLibrary4A.restoreAfterTagSelect();
             inventoryRfidTask = new InventoryRfidTask(getContext(), -1, -1, 0, 0, 0, 0,
@@ -642,25 +515,16 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
         } else {
             boolean inventoryUcode8_bc = mDid != null && mDid.matches("E2806894") && MainActivity.mDid != null && (MainActivity.mDid.matches("E2806894B") || MainActivity.mDid.matches("E2806894C"));
-            if ((extra1Bank != -1 && extra1Count != 0) || (extra2Bank != -1 && extra2Count != 0)) {
-                if (extra1Bank == -1 || extra1Count == 0) {
-                    extra1Bank = extra2Bank;
-                    extra2Bank = 0;
-                    extra1Count = extra2Count;
-                    extra2Count = 0;
-                    extra1Offset = extra2Offset;
-                    extra2Offset = 0;
-                }
-                if (extra1Bank == 1) extra1Offset += 2;
-                if (extra2Bank == 1) extra2Offset += 2;
-                MainActivity.csLibrary4A.appendToLog("HelloK: mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid + " with extra1Bank = " + extra1Bank + "," + extra1Offset + "," + extra1Count + ", extra2Bank = " + extra2Bank + "," + extra2Offset + "," + extra2Count);
+            if ((extraBankData.extra1Bank != -1 && extraBankData.extra1Count != 0) || (extraBankData.extra2Bank != -1 && extraBankData.extra2Count != 0)) {
+                extraBankData.adjustExtraBank1();
+                MainActivity.csLibrary4A.appendToLog("HelloK: mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid + " with extra1Bank = " + extraBankData.extra1Bank + "," + extraBankData.extra1Offset + "," + extraBankData.extra1Count + ", extra2Bank = " + extraBankData.extra2Bank + "," + extraBankData.extra2Offset + "," + extraBankData.extra2Count);
                 if (mDid != null) MainActivity.csLibrary4A.setResReadNoReply(mDid.matches("E281D"));
                 if (inventoryUcode8_bc == false) {
                     MainActivity.csLibrary4A.appendToLog("BleStreamOut: Set Multibank");
-                    MainActivity.csLibrary4A.setTagRead(extra2Count != 0 && extra2Count != 0 ? 2 : 1);
-                    MainActivity.csLibrary4A.setAccessBank(extra1Bank, extra2Bank);
-                    MainActivity.csLibrary4A.setAccessOffset(extra1Offset, extra2Offset);
-                    MainActivity.csLibrary4A.setAccessCount(extra1Count, extra2Count);
+                    MainActivity.csLibrary4A.setTagRead(extraBankData.extra2Count != 0 && extraBankData.extra2Count != 0 ? 2 : 1);
+                    MainActivity.csLibrary4A.setAccessBank(extraBankData.extra1Bank, extraBankData.extra2Bank);
+                    MainActivity.csLibrary4A.setAccessOffset(extraBankData.extra1Offset, extraBankData.extra2Offset);
+                    MainActivity.csLibrary4A.setAccessCount(extraBankData.extra1Count, extraBankData.extra2Count);
                     needResetData = true;
                 } else if (needResetData) {
                     MainActivity.csLibrary4A.setTagRead(0);
@@ -670,8 +534,8 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     needResetData = false;
                 }
             } else resetSelectData();
-            MainActivity.csLibrary4A.appendToLog("startInventoryTask: going to startOperation with extra1Bank = " + extra1Bank + "," + extra1Offset + "," + extra1Count + ", extra2Bank = " + extra2Bank + "," + extra2Offset + "," + extra2Count);
-            inventoryRfidTask = new InventoryRfidTask(getContext(), extra1Bank, extra2Bank, extra1Count, extra2Count, extra1Offset, extra2Offset,
+            MainActivity.csLibrary4A.appendToLog("startInventoryTask: going to startOperation with extra1Bank = " + extraBankData.extra1Bank + "," + extraBankData.extra1Offset + "," + extraBankData.extra1Count + ", extra2Bank = " + extraBankData.extra2Bank + "," + extraBankData.extra2Offset + "," + extraBankData.extra2Count);
+            inventoryRfidTask = new InventoryRfidTask(getContext(), extraBankData.extra1Bank, extraBankData.extra2Bank, extraBankData.extra1Count, extraBankData.extra2Count, extraBankData.extra1Offset, extraBankData.extra2Offset,
                     false, MainActivity.csLibrary4A.getInventoryBeep(),
                     MainActivity.sharedObjects.tagsList, readerListAdapter, null, mDid,
                     rfidRunTime, null, rfidVoltageLevel, rfidYieldView, button, rfidRateView);

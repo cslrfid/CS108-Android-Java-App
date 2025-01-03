@@ -3,6 +3,9 @@ package com.csl.cslibrary4a;
 import static java.lang.Math.log10;
 
 import android.content.Context;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ public class RfidReader {
     ArrayList<RfidConnector.CsReaderRfidData> mRx000ToWrite;
     ArrayList<RfidReaderChipData.Rx000pkgData> mRx000ToRead;
     public ArrayList<RfidConnector.CsReaderRfidData> mRfidToWrite;
+    CountryChannelData countryChannelData;
     Context context; Utility utility; boolean bis108; BluetoothGatt bluetoothGatt; SettingData settingData; NotificationConnector notificationConnector;
     public RfidReader(Context context, Utility utility, CsReaderConnector csReaderConnector, boolean bis108, BluetoothGatt bluetoothGatt, SettingData settingData, NotificationConnector notificationConnector) {
         this.context = context;
@@ -43,14 +47,234 @@ public class RfidReader {
                 }
             };
         }
-        fccFreqTableIdx = new int[50];
-        int[] freqSortedINx = fccFreqSortedIdx;
+        countryChannelData = new CountryChannelData();
+        countryChannelData.fccFreqTableIdx = new int[50];
+        int[] freqSortedINx = countryChannelData.fccFreqSortedIdx;
         for (int i = 0; i < 50; i++) {
-            fccFreqTableIdx[fccFreqSortedIdx[i]] = i;
+            countryChannelData.fccFreqTableIdx[countryChannelData.fccFreqSortedIdx[i]] = i;
         }
         for (int i = 0; i < 50; i++) {
-            if (false) appendToLog("fccFreqTableIdx[" + i + "] = " + fccFreqTableIdx[i]);
+            if (false) appendToLog("fccFreqTableIdx[" + i + "] = " + countryChannelData.fccFreqTableIdx[i]);
         }
+    }
+
+    public enum TagType {
+        TAG_NULL,
+        TAG_IMPINJ, TAG_IMPINJ_M755, //E28011, E2C011
+        TAG_ALIEN, //E2003
+        TAG_NXP, TAG_NXP_UCODEDNA, TAG_NXP_UCODE8,              //E2806, E2C06, E2806894
+        TAG_NXP_UCODE8_EPC, TAG_NXP_UCODE8_EPCTID, TAG_NXP_UCODE8_EPCBRAND, TAG_NXP_UCODE8_EPCBRANDTID, //E2806894A, E2806894B, E2806894C, E2806894d
+        TAG_EM, TAG_EM_BAP, TAG_EM_COLDCHAIN, TAG_EM_AURASENSE, TAG_EM_AURASENSE_ATBOOT, TAG_EM_AURASENSE_ATSELECT, //E280B, E200B0, E280B0, E280B12, E280B12A, E280B12B
+        TAG_KILOWAY, //E281D
+        TAG_LONGJING, //E201E
+        TAG_FDMICRO, //E2827001
+        TAG_CTESIUS, //E203510
+        TAG_ASYGNTAG, //E283A
+        TAG_AXZON, TAG_MAGNUS_S2, TAG_MAGNUS_S3, TAG_XERXES,    //E2824, E282402, E282403, E282405
+    }
+    public static class ExtraBankData {
+        public int extra1Bank;
+        public int extra2Bank;
+        public int extra1Count;
+        public int extra2Count;
+        public int extra1Offset;
+        public int extra2Offset;
+
+        public ExtraBankData() {
+            extra1Bank = -1; extra2Bank = -1;
+            extra1Count = 0; extra2Count = 0;
+            extra1Offset = 0; extra2Offset = 0;
+        }
+
+        public void setExtraBankData(int extra1Bank, int extra1Count, int extra1Offset, int extra2Bank, int extra2Count, int extra2Offset) {
+            this.extra1Bank = extra1Bank; this.extra2Bank = extra2Bank;
+            this.extra1Count = extra1Count; this.extra2Count = extra2Count;
+            this.extra1Offset = extra1Offset; this.extra2Offset = extra2Offset;
+        }
+        public void setExtraBankData(RfidReader.TagType tagType, String mDid) {
+            extra2Bank = 2;
+            extra2Offset = 0;
+            extra2Count = 2;
+            Log.i("Hello", "tagType = " + (tagType == null ? "null" : tagType.toString()) + ", mDid = " + mDid);
+            if (mDid.matches("E2801101") || mDid.matches("E2801102") || mDid.matches("E2801103") || mDid.matches("E2801104") || mDid.matches("E2801105")) {
+                extra1Bank = 0;
+                extra1Offset = 4;
+                extra1Count = 1;
+                if (mDid.matches("E2801101")) extra2Count = 6;
+            } else if (mDid.matches("E200B0")) {
+                extra1Bank = 2;
+                extra1Offset = 0;
+                extra1Count = 2;
+                extra2Bank = 3;
+                extra2Offset = 0x2d;
+                extra2Count = 1;
+            } else if (mDid.matches("E203510")) {
+                extra1Bank = 2;
+                extra1Offset = 0;
+                extra1Count = 2;
+                extra2Bank = 3;
+                extra2Offset = 8;
+                extra2Count = 2;
+            } else if (mDid.matches("E283A")) {
+                extra1Bank = 2;
+                extra1Offset = 0;
+                extra1Count = 2;
+                extra2Bank = 3;
+                extra2Offset = 0;
+                extra2Count = 8;
+            } else if (mDid.indexOf("E280B12") == 0) {
+                extra1Bank = 2;
+                extra1Offset = 0;
+                extra1Count = 2;
+                extra2Bank = 3;
+                extra2Offset = 0x120;
+                extra2Count = 1;
+            } else if (mDid.indexOf("E280B0") == 0) {
+                extra1Bank = 3;
+                extra1Offset = 188;
+                extra1Count = 2;
+                //extra2Bank = 3;
+                //extra2Offset = 0x10d;
+                //extra2Count = 1;
+            } else if (mDid.indexOf("E281D") == 0) { //need atmel firmware 0.2.20
+                extra1Bank = 0;
+                extra1Offset = 4;
+                extra1Count = 1;
+                extra2Count = 6;
+            } else if (mDid.indexOf("E201E") == 0) {
+                extra1Bank = 3;
+                extra1Offset = 112;
+                extra1Count = 1;
+                extra2Count = 6;
+            } else if (mDid.matches("E282402")) {
+                extra1Bank = 0;
+                extra1Offset = 11;
+                extra1Count = 1;
+                extra2Bank = 0;
+                extra2Offset = 13;
+                extra2Count = 1;
+            } else if (mDid.matches("E282403")) {
+                extra1Bank = 0;
+                extra1Offset = 12;
+                extra1Count = 3;
+                extra2Bank = 3;
+                extra2Offset = 8;
+                extra2Count = 4;
+            } else if (mDid.matches("E282405")) {
+                extra1Bank = 0;
+                extra1Offset = 10;
+                extra1Count = 5;
+                extra2Bank = 3;
+                extra2Offset = 0x12;
+                extra2Count = 4;
+            }
+        }
+
+        public void adjustExtraBank1() {
+            if (extra1Bank == -1 || extra1Count == 0) {
+                extra1Bank = extra2Bank;
+                extra2Bank = 0;
+                extra1Count = extra2Count;
+                extra2Count = 0;
+                extra1Offset = extra2Offset;
+                extra2Offset = 0;
+            }
+            if (extra1Bank == 1) extra1Offset += 2;
+            if (extra2Bank == 1) extra2Offset += 2;
+        }
+    }
+    public int setSelectData(RfidReader.TagType tagType, String mDid, boolean bNeedSelectedTagByTID, String stringProtectPassword, int selectFor, int selectHold) {
+        int iValue = -1;
+        if (mDid != null) {
+            setSelectCriteriaDisable(-1);
+            if (mDid.indexOf("E280B12") == 0) {
+                if (mDid.matches("E280B12B")) {
+                    setSelectCriteria(0, true, 4, 0, 5, 1, 0x220, "8321");
+                    appendToLog("Hello123: Set Sense at Select !!!");
+                } else { //if (MainActivity.mDid.matches("E280B12A")) {
+                    setSelectCriteriaDisable(-1);
+                    appendToLog("Hello123: Set Sense at BOOT !!!");
+                }
+            } else if (mDid.matches("E203510")) {
+                setSelectCriteria(0, true, 7, 4, 0, 2, 0, mDid);
+            } else if (mDid.matches("E28240")) {
+                if (selectFor != 0) {
+                    setSelectCriteriaDisable(-1);
+                    selectFor = 0;
+                    iValue = selectFor;
+                }
+            } else if (mDid.matches("E282402")) {
+                appendToLog("selectFor = " + selectFor);
+                if (selectFor != 2) {
+                    setSelectCriteria(0, true, 4, 2, 0, 3, 0xA0, "20");
+                    selectFor = 2;
+                    iValue = selectFor;
+                }
+            } else if (mDid.matches("E282403")) {
+                if (selectFor != 3) {
+                    setSelectCriteria(0, true, 4, 2, 0, 3, 0xD0, "1F");
+                    setSelectCriteria(1, true, 4, 2, 5, 3, 0xE0, "");
+                    selectFor = 3;
+                    iValue = selectFor;
+                }
+            } else if (mDid.matches("E282405")) {
+                if (selectFor != 5) {
+                    setSelectCriteria(0, true, 4, 5, selectHold, 3, 0x3B0, "00");
+                    setSelectCriteriaDisable(2);
+                    selectFor = 5;
+                    iValue = selectFor;
+                }
+            } else {
+                appendToLog("MainActivity.selectFor = " + selectFor);
+                if (selectFor != -1) {
+                    setSelectCriteriaDisable(-1);
+                    selectFor = -1;
+                    iValue = selectFor;
+                }
+            }
+
+            if (mDid.indexOf("E2806894") == 0) {
+                if (mDid.matches("E2806894A")) {
+                    appendToLog("HelloK: Find E2806894A");
+                    setSelectCriteriaDisable(1);
+                } else if (mDid.matches("E2806894B")) {
+                    appendToLog("HelloK: Find E2806894B");
+                    setSelectCriteria(0, true, 4, 0, 1, 0x203, "1", true);
+                    setSelectCriteria(1, true, 4, 2, 2, 0, "E2806894", false);
+                } else if (mDid.matches("E2806894C") || mDid.matches("E2806894d")) {
+                    appendToLog("HelloK: Find " + mDid);
+                    setSelectCriteria(0, true, 4, 0, 1, 0x204, "1", true);
+                    setSelectCriteria(1, true, 4, 2, 2, 0, "E2806894", false);
+                }
+            }
+
+            if (bNeedSelectedTagByTID) {
+                String strMdid = mDid;
+                if (strMdid.indexOf("E28011") == 0) {
+                    int iValue1 = Integer.valueOf(strMdid.substring(6, 8), 16);
+                    iValue1 &= 0x0F;
+                    appendToLog(String.format("iValue1 = 0x%X", iValue1));
+                    if (iValue1 == 1) strMdid = "E2C011A2";
+                    else if (iValue1 == 2) strMdid = "E28011C";
+                    else if (iValue1 == 3) strMdid = "E28011B";
+                    else if (iValue1 == 4) strMdid = "E28011A";
+                    else if (iValue1 == 5) strMdid = "E280119";
+                    else if (iValue1 == 6) strMdid = "E2801171";
+                    else if (iValue1 == 7) strMdid = "E2801170";
+                    else if (iValue1 == 8) strMdid = "E2801150";
+                    else
+                        strMdid = "E2001"; //strMdid.substring(0, 5); even E2801 or E2C01 will return
+                }
+                appendToLog("setSelectCriteria: Going to setSelectedByTID");
+                if (stringProtectPassword != null) {
+                    if (stringProtectPassword.trim().length() == 0)
+                        stringProtectPassword = "00000000";
+                    setSelectCriteria(-1, true, 4, 0, 3, 0, stringProtectPassword, false);
+                }
+                setSelectedTagByTID(strMdid, -1);
+            }
+        }
+        return iValue;
     }
 
     //============ utility ============
@@ -87,870 +311,1037 @@ public class RfidReader {
         return bValue;
     }
 
-    private final int FCC_CHN_CNT = 50;
-    private final double[] FCCTableOfFreq = new double[] {
-            902.75, 903.25, 903.75, 904.25, 904.75, 905.25, 905.75, 906.25, 906.75, 907.25,//10
-            907.75, 908.25, 908.75, 909.25, 909.75, 910.25, 910.75, 911.25, 911.75, 912.25,//20
-            912.75, 913.25, 913.75, 914.25, 914.75, 915.25, 915.75, 916.25, 916.75, 917.25,
-            917.75, 918.25, 918.75, 919.25, 919.75, 920.25, 920.75, 921.25, 921.75, 922.25,
-            922.75, 923.25, 923.75, 924.25, 924.75, 925.25, 925.75, 926.25, 926.75, 927.25 };
-    private final double[] FCCTableOfFreq0 = new double[] {
-            903.75, 912.25, 907.75, 910.25, 922.75,     923.25, 923.75, 915.25, 909.25, 912.75,
-            910.75, 913.75, 909.75, 905.25, 911.75,     902.75, 914.25, 918.25, 926.25, 925.75,
-            920.75, 920.25, 907.25, 914.75, 919.75,     922.25, 903.25, 906.25, 905.75, 926.75,
-            924.25, 904.75, 925.25, 924.75, 919.25,     916.75, 911.25, 921.25, 908.25, 908.75,
-            913.25, 916.25, 904.25, 906.75, 917.75,     921.75, 917.25, 927.25, 918.75, 915.75 };
-    private int[] fccFreqSortedIdx0;
-    private final double[] FCCTableOfFreq1 = new double[] {
-            915.25, 920.75, 909.25, 912.25, 918.25,     920.25, 909.75, 910.25, 919.75, 922.75,
-            908.75, 913.75, 903.75, 919.25, 922.25,     907.75, 911.75, 923.75, 916.75, 926.25,
-            908.25, 912.75, 924.25, 916.25, 927.25,     907.25, 910.75, 903.25, 917.75, 926.75,
-            905.25, 911.25, 924.75, 917.25, 925.75,     906.75, 914.25, 904.75, 918.75, 923.25,
-            902.75, 914.75, 905.75, 915.75, 925.25,     906.25, 921.25, 913.25, 921.75, 904.25 };
-    private int[] fccFreqSortedIdx1;
-    private int[] fccFreqTable = new int[] {
-            0x00180E4F, //915.75 MHz
-            0x00180E4D, //915.25 MHz
-            0x00180E1D, //903.25 MHz
-            0x00180E7B, //926.75 MHz
-            0x00180E79, //926.25 MHz
-            0x00180E21, //904.25 MHz
-            0x00180E7D, //927.25 MHz
-            0x00180E61, //920.25 MHz
-            0x00180E5D, //919.25 MHz
-            0x00180E35, //909.25 MHz
-            0x00180E5B, //918.75 MHz
-            0x00180E57, //917.75 MHz
-            0x00180E25, //905.25 MHz
-            0x00180E23, //904.75 MHz
-            0x00180E75, //925.25 MHz
-            0x00180E67, //921.75 MHz
-            0x00180E4B, //914.75 MHz
-            0x00180E2B, //906.75 MHz
-            0x00180E47, //913.75 MHz
-            0x00180E69, //922.25 MHz
-            0x00180E3D, //911.25 MHz
-            0x00180E3F, //911.75 MHz
-            0x00180E1F, //903.75 MHz
-            0x00180E33, //908.75 MHz
-            0x00180E27, //905.75 MHz
-            0x00180E41, //912.25 MHz
-            0x00180E29, //906.25 MHz
-            0x00180E55, //917.25 MHz
-            0x00180E49, //914.25 MHz
-            0x00180E2D, //907.25 MHz
-            0x00180E59, //918.25 MHz
-            0x00180E51, //916.25 MHz
-            0x00180E39, //910.25 MHz
-            0x00180E3B, //910.75 MHz
-            0x00180E2F, //907.75 MHz
-            0x00180E73, //924.75 MHz
-            0x00180E37, //909.75 MHz
-            0x00180E5F, //919.75 MHz
-            0x00180E53, //916.75 MHz
-            0x00180E45, //913.25 MHz
-            0x00180E6F, //923.75 MHz
-            0x00180E31, //908.25 MHz
-            0x00180E77, //925.75 MHz
-            0x00180E43, //912.75 MHz
-            0x00180E71, //924.25 MHz
-            0x00180E65, //921.25 MHz
-            0x00180E63, //920.75 MHz
-            0x00180E6B, //922.75 MHz
-            0x00180E1B, //902.75 MHz
-            0x00180E6D, //923.25 MHz
-    };
-    private int[] fccFreqTableIdx;
-    private final int[] fccFreqSortedIdx = new int[] {
-            26, 25, 1, 48, 47,
-            3, 49, 35, 33, 13,
-            32, 30, 5, 4, 45,
-            38, 24, 8, 22, 39,
-            17, 18, 2, 12, 6,
-            19, 7, 29, 23, 9,
-            31, 27, 15, 16, 10,
-            44, 14, 34, 28, 21,
-            42, 11, 46, 20, 43,
-            37, 36, 40, 0, 41 };
-    private final int AUS_CHN_CNT = 10;
-    private final double[] AUSTableOfFreq = new double[] {
-            920.75, 921.25, 921.75, 922.25, 922.75,
-            923.25, 923.75, 924.25, 924.75, 925.25 };
-    private final int[] AusFreqTable = new int[] {
-            0x00180E63, // 920.75MHz
-            0x00180E69, // 922.25MHz
-            0x00180E6F, // 923.75MHz
-            0x00180E73, // 924.75MHz
-            0x00180E65, // 921.25MHz
-            0x00180E6B, // 922.75MHz
-            0x00180E71, // 924.25MHz
-            0x00180E75, // 925.25MHz
-            0x00180E67, // 921.75MHz
-            0x00180E6D, // 923.25MHz
-    };
-    private final int[] ausFreqSortedIdx = new int[] {
-            0, 3, 6, 8, 1,
-            4, 7, 9, 2, 5 };
-
-    private double[] PRTableOfFreq = new double[] {
-            915.25, 915.75, 916.25, 916.75, 917.25,
-            917.75, 918.25, 918.75, 919.25, 919.75, 920.25, 920.75, 921.25, 921.75, 922.25,
-            922.75, 923.25, 923.75, 924.25, 924.75, 925.25, 925.75, 926.25, 926.75, 927.25 };
     private int[] freqTable = null;
     private int[] freqSortedIdx = null;
-
-    private final int VZ_CHN_CNT = 10;
-    private final double[] VZTableOfFreq = new double[] {
-            922.75, 923.25, 923.75, 924.25, 924.75,
-            925.25, 925.75, 926.25, 926.75, 927.25 };
-    private final int[] vzFreqTable = new int[] {
-            0x00180E77, // 925.75 MHz
-            0x00180E6B, // 922.75MHz
-            0x00180E7D, // 927.25 MHz
-            0x00180E75, // 925.25MHz
-            0x00180E6D, // 923.25MHz
-            0x00180E7B, // 926.75 MHz
-            0x00180E73, // 924.75MHz
-            0x00180E6F, // 923.75MHz
-            0x00180E79, // 926.25 MHz
-            0x00180E71, // 924.25MHz
-    };
-    private final int[] vzFreqSortedIdx = new int[] {
-            6, 0, 9, 5, 1,
-            8, 4, 2, 7, 3 };
-
-    private final int BR1_CHN_CNT = 24;
-    private final double[] BR1TableOfFreq = new double[] {
-            //902.75, 903.25, 903.75, 904.25, 904.75,
-            //905.25, 905.75, 906.25, 906.75, 907.25,
-            //907.75, 908.25, 908.75, 909.25, 909.75,
-            //910.25, 910.75, 911.25, 911.75, 912.25,
-            //912.75, 913.25, 913.75, 914.25, 914.75,
-            //915.25,
-            915.75, 916.25, 916.75, 917.25, 917.75,
-            918.25, 918.75, 919.25, 919.75, 920.25,
-            920.75, 921.25, 921.75, 922.25, 922.75,
-            923.25, 923.75, 924.25, 924.75, 925.25,
-            925.75, 926.25, 926.75, 927.25 };
-    private final int[] br1FreqTable = new int[] {
-            0x00180E4F, //915.75 MHz
-            //0x00180E4D, //915.25 MHz
-            //0x00180E1D, //903.25 MHz
-            0x00180E7B, //926.75 MHz
-            0x00180E79, //926.25 MHz
-            //0x00180E21, //904.25 MHz
-            0x00180E7D, //927.25 MHz
-            0x00180E61, //920.25 MHz
-            0x00180E5D, //919.25 MHz
-            //0x00180E35, //909.25 MHz
-            0x00180E5B, //918.75 MHz
-            0x00180E57, //917.75 MHz
-            //0x00180E25, //905.25 MHz
-            //0x00180E23, //904.75 MHz
-            0x00180E75, //925.25 MHz
-            0x00180E67, //921.75 MHz
-            //0x00180E4B, //914.75 MHz
-            //0x00180E2B, //906.75 MHz
-            //0x00180E47, //913.75 MHz
-            0x00180E69, //922.25 MHz
-            //0x00180E3D, //911.25 MHz
-            //0x00180E3F, //911.75 MHz
-            //0x00180E1F, //903.75 MHz
-            //0x00180E33, //908.75 MHz
-            //0x00180E27, //905.75 MHz
-            //0x00180E41, //912.25 MHz
-            //0x00180E29, //906.25 MHz
-            0x00180E55, //917.25 MHz
-            //0x00180E49, //914.25 MHz
-            //0x00180E2D, //907.25 MHz
-            0x00180E59, //918.25 MHz
-            0x00180E51, //916.25 MHz
-            //0x00180E39, //910.25 MHz
-            //0x00180E3B, //910.75 MHz
-            //0x00180E2F, //907.75 MHz
-            0x00180E73, //924.75 MHz
-            //0x00180E37, //909.75 MHz
-            0x00180E5F, //919.75 MHz
-            0x00180E53, //916.75 MHz
-            //0x00180E45, //913.25 MHz
-            0x00180E6F, //923.75 MHz
-            //0x00180E31, //908.25 MHz
-            0x00180E77, //925.75 MHz
-            //0x00180E43, //912.75 MHz
-            0x00180E71, //924.25 MHz
-            0x00180E65, //921.25 MHz
-            0x00180E63, //920.75 MHz
-            0x00180E6B, //922.75 MHz
-            //0x00180E1B, //902.75 MHz
-            0x00180E6D, //923.25 MHz
-    };
-    private final int[] br1FreqSortedIdx = new int[] {
-            0, 22, 21, 23, 9,
-            7, 6, 4, 19, 12,
-            13, 3, 5, 1, 18,
-            8, 2, 16, 20, 17,
-            11, 10, 14, 15 };
-
-    private final int BR2_CHN_CNT = 33;
-    private double[] BR2TableOfFreq = new double[] {
-            902.75, 903.25, 903.75, 904.25, 904.75,
-            905.25, 905.75, 906.25, 906.75,
-            //907.25, 907.75, 908.25, 908.75, 909.25,
-            //909.75, 910.25, 910.75, 911.25, 911.75,
-            //912.25, 912.75, 913.25, 913.75, 914.25,
-            //914.75, 915.25,
-            915.75, 916.25, 916.75, 917.25, 917.75,
-            918.25, 918.75, 919.25, 919.75, 920.25,
-            920.75, 921.25, 921.75, 922.25, 922.75,
-            923.25, 923.75, 924.25, 924.75, 925.25,
-            925.75, 926.25, 926.75, 927.25 };
-    private final int[] br2FreqTable = new int[] {
-            0x00180E4F, //915.75 MHz
-            //0x00180E4D, //915.25 MHz
-            0x00180E1D, //903.25 MHz
-            0x00180E7B, //926.75 MHz
-            0x00180E79, //926.25 MHz
-            0x00180E21, //904.25 MHz
-            0x00180E7D, //927.25 MHz
-            0x00180E61, //920.25 MHz
-            0x00180E5D, //919.25 MHz
-            //0x00180E35, //909.25 MHz
-            0x00180E5B, //918.75 MHz
-            0x00180E57, //917.75 MHz
-            0x00180E25, //905.25 MHz
-            0x00180E23, //904.75 MHz
-            0x00180E75, //925.25 MHz
-            0x00180E67, //921.75 MHz
-            //0x00180E4B, //914.75 MHz
-            0x00180E2B, //906.75 MHz
-            //0x00180E47, //913.75 MHz
-            0x00180E69, //922.25 MHz
-            //0x00180E3D, //911.25 MHz
-            //0x00180E3F, //911.75 MHz
-            0x00180E1F, //903.75 MHz
-            //0x00180E33, //908.75 MHz
-            0x00180E27, //905.75 MHz
-            //0x00180E41, //912.25 MHz
-            0x00180E29, //906.25 MHz
-            0x00180E55, //917.25 MHz
-            //0x00180E49, //914.25 MHz
-            //0x00180E2D, //907.25 MHz
-            0x00180E59, //918.25 MHz
-            0x00180E51, //916.25 MHz
-            //0x00180E39, //910.25 MHz
-            //0x00180E3B, //910.75 MHz
-            //0x00180E2F, //907.75 MHz
-            0x00180E73, //924.75 MHz
-            //0x00180E37, //909.75 MHz
-            0x00180E5F, //919.75 MHz
-            0x00180E53, //916.75 MHz
-            //0x00180E45, //913.25 MHz
-            0x00180E6F, //923.75 MHz
-            //0x00180E31, //908.25 MHz
-            0x00180E77, //925.75 MHz
-            //0x00180E43, //912.75 MHz
-            0x00180E71, //924.25 MHz
-            0x00180E65, //921.25 MHz
-            0x00180E63, //920.75 MHz
-            0x00180E6B, //922.75 MHz
-            0x00180E1B, //902.75 MHz
-            0x00180E6D, //923.25 MHz
-    };
-    private final int[] br2FreqSortedIdx = new int[] {
-            9, 1, 31, 30, 3,
-            32, 18, 16, 15, 13,
-            5, 4, 28, 21, 8,
-            22, 2, 6, 7, 12,
-            14, 10, 27, 17, 11,
-            25, 29, 26, 20, 19,
-            23, 0, 24,
-    };
-
-    private final int BR3_CHN_CNT = 9;
-    private final double[] BR3TableOfFreq = new double[] {
-            902.75, 903.25, 903.75, 904.25, 904.75, // 4
-            905.25, 905.75, 906.25, 906.75 };
-    private final int[] br3FreqTable = new int[] {
-            0x00180E1D, //903.25 MHz
-            0x00180E21, //904.25 MHz
-            0x00180E25, //905.25 MHz
-            0x00180E23, //904.75 MHz
-            0x00180E2B, //906.75 MHz
-            0x00180E1F, //903.75 MHz
-            0x00180E27, //905.75 MHz
-            0x00180E29, //906.25 MHz
-            0x00180E1B, //902.75 MHz
-    };
-    private final int[] br3FreqSortedIdx = new int[] {
-            1, 3, 5, 4, 8,
-            2, 6, 7, 0 };
-
-    private final int BR4_CHN_CNT = 4;
-    private final double[] BR4TableOfFreq = new double[] {
-            902.75, 903.25, 903.75, 904.25 };
-    private final int[] br4FreqTable = new int[] {
-            0x00180E1D, //903.25 MHz
-            0x00180E21, //904.25 MHz
-            0x00180E1F, //903.75 MHz
-            0x00180E1B, //902.75 MHz
-    };
-    private final int[] br4FreqSortedIdx = new int[] {
-            1, 3, 2, 0 };
-
-    private final int BR5_CHN_CNT = 14;
-    private final double[] BR5TableOfFreq = new double[] {
-            917.75, 918.25, 918.75, 919.25, 919.75, // 4
-            920.25, 920.75, 921.25, 921.75, 922.25, // 9
-            922.75, 923.25, 923.75, 924.25 };
-    private final int[] br5FreqTable = new int[] {
-            0x00180E61, //920.25 MHz
-            0x00180E5D, //919.25 MHz
-            0x00180E5B, //918.75 MHz
-            0x00180E57, //917.75 MHz
-            0x00180E67, //921.75 MHz
-            0x00180E69, //922.25 MHz
-            0x00180E59, //918.25 MHz
-            0x00180E5F, //919.75 MHz
-            0x00180E6F, //923.75 MHz
-            0x00180E71, //924.25 MHz
-            0x00180E65, //921.25 MHz
-            0x00180E63, //920.75 MHz
-            0x00180E6B, //922.75 MHz
-            0x00180E6D, //923.25 MHz
-    };
-    private final int[] br5FreqSortedIdx = new int[] {
-            5, 3, 2, 0, 8,
-            9, 1, 4, 12, 13,
-            7, 6, 10, 11 };
-
-    private final int HK_CHN_CNT = 8;
-    private final double[] HKTableOfFreq = new double[] {
-            920.75, 921.25, 921.75, 922.25, 922.75,
-            923.25, 923.75, 924.25 };
-    private final int[] hkFreqTable = new int[] {
-            0x00180E63, //920.75MHz
-            0x00180E69, //922.25MHz
-            0x00180E71, //924.25MHz
-            0x00180E65, //921.25MHz
-            0x00180E6B, //922.75MHz
-            0x00180E6D, //923.25MHz
-            0x00180E6F, //923.75MHz
-            0x00180E67, //921.75MHz
-    };
-    private final int[] hkFreqSortedIdx = new int[] {
-            0, 3, 7, 1, 4,
-            5, 6, 2 };
-
-    private final int BD_CHN_CNT = 4;
-    private final double[] BDTableOfFreq = new double[] {
-            925.25, 925.75, 926.25, 926.75 };
-    private final int[] bdFreqTable = new int[] {
-            0x00180E75, //925.25MHz
-            0x00180E77, //925.75MHz
-            0x00180E79, //926.25MHz
-            0x00180E7B, //926.75MHz
-    };
-    private final int[] bdFreqSortedIdx = new int[] {
-            0, 3, 1, 2  };
-
-    private final int TW_CHN_CNT = 12;
-    private final double[] TWTableOfFreq = new double[] {
-            922.25, 922.75, 923.25, 923.75, 924.25,
-            924.75, 925.25, 925.75, 926.25, 926.75,
-            927.25, 927.75 };
-    private int[] twFreqTable = new int[] {
-            0x00180E7D, //927.25MHz   10
-            0x00180E73, //924.75MHz   5
-            0x00180E6B, //922.75MHz   1
-            0x00180E75, //925.25MHz   6
-            0x00180E7F, //927.75MHz   11
-            0x00180E71, //924.25MHz   4
-            0x00180E79, //926.25MHz   8
-            0x00180E6D, //923.25MHz   2
-            0x00180E7B, //926.75MHz   9
-            0x00180E69, //922.25MHz   0
-            0x00180E77, //925.75MHz   7
-            0x00180E6F, //923.75MHz   3
-    };
-    private final int[] twFreqSortedIdx = new int[] {
-            10, 5, 1, 6, 11,
-            4, 8, 2, 9, 0,
-            7, 3 };
-
-    private final int MYS_CHN_CNT = 8;
-    private final double[] MYSTableOfFreq = new double[] {
-            919.75, 920.25, 920.75, 921.25, 921.75,
-            922.25, 922.75, 923.25 };
-    private final int[] mysFreqTable = new int[] {
-            0x00180E5F, //919.75MHz
-            0x00180E65, //921.25MHz
-            0x00180E6B, //922.75MHz
-            0x00180E61, //920.25MHz
-            0x00180E67, //921.75MHz
-            0x00180E6D, //923.25MHz
-            0x00180E63, //920.75MHz
-            0x00180E69, //922.25MHz
-    };
-    private final int[] mysFreqSortedIdx = new int[] {
-            0, 3, 6, 1, 4,
-            7, 2, 5 };
-
-    private final int ZA_CHN_CNT = 16;
-    private final double[] ZATableOfFreq = new double[] {
-            915.7, 915.9, 916.1, 916.3, 916.5,
-            916.7, 916.9, 917.1, 917.3, 917.5,
-            917.7, 917.9, 918.1, 918.3, 918.5,
-            918.7 };
-    private final int[] zaFreqTable = new int[] {
-            0x003C23C5, //915.7 MHz
-            0x003C23C7, //915.9 MHz
-            0x003C23C9, //916.1 MHz
-            0x003C23CB, //916.3 MHz
-            0x003C23CD, //916.5 MHz
-            0x003C23CF, //916.7 MHz
-            0x003C23D1, //916.9 MHz
-            0x003C23D3, //917.1 MHz
-            0x003C23D5, //917.3 MHz
-            0x003C23D7, //917.5 MHz
-            0x003C23D9, //917.7 MHz
-            0x003C23DB, //917.9 MHz
-            0x003C23DD, //918.1 MHz
-            0x003C23DF, //918.3 MHz
-            0x003C23E1, //918.5 MHz
-            0x003C23E3, //918.7 MHz
-    };
-    private final int[] zaFreqSortedIdx = new int[] {
-            0, 1, 2, 3, 4,
-            5, 6, 7, 8, 9,
-            10, 11, 12, 13, 14,
-            15 };
-
-    final int ID_CHN_CNT = 4;
-    private final double[] IDTableOfFreq = new double[] {
-            923.25, 923.75, 924.25, 924.75 };
-    private final int[] indonesiaFreqTable = new int[] {
-            0x00180E6D, //923.25 MHz
-            0x00180E6F,//923.75 MHz
-            0x00180E71,//924.25 MHz
-            0x00180E73,//924.75 MHz
-    };
-    private final int[] indonesiaFreqSortedIdx = new int[] {
-            0, 1, 2, 3 };
-
-    private final int IL_CHN_CNT = 7;
-    private final double[] ILTableOfFreq = new double[] {
-            915.25, 915.5, 915.75, 916.0, 916.25, // 4
-            916.5, 916.75 };
-    private final int[] ilFreqTable = new int[] {
-            0x00180E4D, //915.25 MHz
-            0x00180E51, //916.25 MHz
-            0x00180E4E, //915.5 MHz
-            0x00180E52, //916.5 MHz
-            0x00180E4F, //915.75 MHz
-            0x00180E53, //916.75 MHz
-            0x00180E50, //916.0 MHz
-    };
-    private final int[] ilFreqSortedIdx = new int[] {
-            0, 4, 1, 5, 2,  6, 3 };
-
-    private final int IL2019RW_CHN_CNT = 5;
-    private final double[] IL2019RWTableOfFreq = new double[] {
-            915.9, 916.025, 916.15, 916.275, 916.4 };
-    private final int[] il2019RwFreqTable = new int[] {
-            0x003C23C7, //915.9 MHz
-            0x003C23C8, //916.025 MHz
-            0x003C23C9, //916.15 MHz
-            0x003C23CA, //916.275 MHz
-            0x003C23CB, //916.4 MHz
-    };
-    private final int[] il2019RwFreqSortedIdx = new int[] {
-            0, 4, 1, 2, 3 };
-
-    private final int PH_CHN_CNT = 8;
-    private final double[] PHTableOfFreq = new double[] {
-            918.125, 918.375, 918.625, 918.875, 919.125, // 5
-            919.375, 919.625, 919.875 };
-    private final int[] phFreqTable = new int[] {
-            0x00301CB1, //918.125MHz   Channel 0
-            0x00301CBB, //919.375MHz   Channel 5
-            0x00301CB7, //918.875MHz   Channel 3
-            0x00301CBF, //919.875MHz   Channel 7
-            0x00301CB3, //918.375MHz   Channel 1
-            0x00301CBD, //919.625MHz   Channel 6
-            0x00301CB5, //918.625MHz   Channel 2
-            0x00301CB9, //919.125MHz   Channel 4
-    };
-    private final int[] phFreqSortedIdx = new int[] {
-            0, 5, 3, 7, 1,  6, 2, 4 };
-
-    private int NZ_CHN_CNT = 11;
-    private final double[] NZTableOfFreq = new double[] {
-            922.25, 922.75, 923.25, 923.75, 924.25,// 4
-            924.75, 925.25, 925.75, 926.25, 926.75,// 9
-            927.25 };
-    private final int[] nzFreqTable = new int[] {
-            0x00180E71, //924.25 MHz
-            0x00180E77, //925.75 MHz
-            0x00180E69, //922.25 MHz
-            0x00180E7B, //926.75 MHz
-            0x00180E6D, //923.25 MHz
-            0x00180E7D, //927.25 MHz
-            0x00180E75, //925.25 MHz
-            0x00180E6B, //922.75 MHz
-            0x00180E79, //926.25 MHz
-            0x00180E6F, //923.75 MHz
-            0x00180E73, //924.75 MHz
-    };
-    private final int[] nzFreqSortedIdx = new int[] {
-            4, 7, 0, 9, 2,  10, 6, 1, 8, 3,     5 };
-
-    private final int CN_CHN_CNT = 16;
-    private final double[] CHNTableOfFreq = new double[] {
-            920.625, 920.875, 921.125, 921.375, 921.625, 921.875, 922.125, 922.375, 922.625, 922.875,
-            923.125, 923.375, 923.625, 923.875, 924.125, 924.375 };
-    private final int[] cnFreqTable = new int[] {
-            0x00301CD3, //922.375MHz
-            0x00301CD1, //922.125MHz
-            0x00301CCD, //921.625MHz
-            0x00301CC5, //920.625MHz
-            0x00301CD9, //923.125MHz
-            0x00301CE1, //924.125MHz
-            0x00301CCB, //921.375MHz
-            0x00301CC7, //920.875MHz
-            0x00301CD7, //922.875MHz
-            0x00301CD5, //922.625MHz
-            0x00301CC9, //921.125MHz
-            0x00301CDF, //923.875MHz
-            0x00301CDD, //923.625MHz
-            0x00301CDB, //923.375MHz
-            0x00301CCF, //921.875MHz
-            0x00301CE3, //924.375MHz
-    };
-    private final int[] cnFreqSortedIdx = new int[] {
-            7, 6, 4, 0, 10,
-            14, 3, 1, 9, 8,
-            2, 13, 12, 11, 5,
-            15 };
-
-    private final int UH1_CHN_CNT = 10;
-    private final double[] UH1TableOfFreq = new double[] {
-            915.25, 915.75, 916.25, 916.75, 917.25,
-            917.75, 918.25, 918.75, 919.25, 919.75 };
-    private final int[] uh1FreqTable = new int[] {
-            0x00180E4F, //915.75 MHz
-            0x00180E4D, //915.25 MHz
-            0x00180E5D, //919.25 MHz
-            0x00180E5B, //918.75 MHz
-            0x00180E57, //917.75 MHz
-            0x00180E55, //917.25 MHz
-            0x00180E59, //918.25 MHz
-            0x00180E51, //916.25 MHz
-            0x00180E5F, //919.75 MHz
-            0x00180E53, //916.75 MHz
-    };
-    private final int[] uh1FreqSortedIdx = new int[] {
-            1, 0, 8, 7, 5,
-            4, 6, 2, 9, 3 };
-
-    private final int UH2_CHN_CNT = 15;
-    private final double[] UH2TableOfFreq = new double[] {
-            920.25, 920.75, 921.25, 921.75, 922.25,   // 4
-            922.75, 923.25, 923.75, 924.25, 924.75,   // 9
-            925.25, 925.75, 926.25, 926.75, 927.25 };
-    private final int[] uh2FreqTable = new int[] {
-            0x00180E7B, //926.75 MHz
-            0x00180E79, //926.25 MHz
-            0x00180E7D, //927.25 MHz
-            0x00180E61, //920.25 MHz
-            0x00180E75, //925.25 MHz
-            0x00180E67, //921.75 MHz
-            0x00180E69, //922.25 MHz
-            0x00180E73, //924.75 MHz
-            0x00180E6F, //923.75 MHz
-            0x00180E77, //925.75 MHz
-            0x00180E71, //924.25 MHz
-            0x00180E65, //921.25 MHz
-            0x00180E63, //920.75 MHz
-            0x00180E6B, //922.75 MHz
-            0x00180E6D, //923.25 MHz
-    };
-    private final int[] uh2FreqSortedIdx = new int[]{
-            13, 12, 14, 0, 10,
-            3, 4, 9, 7, 11,
-            8, 2, 1, 5, 6, };
-
-    private final int LH_CHN_CNT = 26;
-    private double[] LHTableOfFreq = new double[] {
-            902.75, 903.25, 903.75, 904.25, 904.75, // 4
-            905.25, 905.75, 906.25, 906.75, 907.25, // 9
-            907.75, 908.25, 908.75, 909.25, 909.75, // 14
-            910.25, 910.75, 911.25, 911.75, 912.25, // 19
-            912.75, 913.25, 913.75, 914.25, 914.75, // 24
-            915.25, // 25
-            //915.75, 916.25, 916.75, 917.25, 917.75,
-            //918.25, 918.75, 919.25, 919.75, 920.25,
-            //920.75, 921.25, 921.75, 922.25, 922.75,
-            //923.25, 923.75, 924.25, 924.75, 925.25,
-            //925.75, 926.25, 926.75, 927.25,
-    };
-    private final int[] lhFreqTable = new int[] {
-            0x00180E1B, //902.75 MHz
-            0x00180E35, //909.25 MHz
-            0x00180E1D, //903.25 MHz
-            0x00180E37, //909.75 MHz
-            0x00180E1F, //903.75 MHz
-            0x00180E39, //910.25 MHz
-            0x00180E21, //904.25 MHz
-            0x00180E3B, //910.75 MHz
-            0x00180E23, //904.75 MHz
-            0x00180E3D, //911.25 MHz
-            0x00180E25, //905.25 MHz
-            0x00180E3F, //911.75 MHz
-            0x00180E27, //905.75 MHz
-            0x00180E41, //912.25 MHz
-            0x00180E29, //906.25 MHz
-            0x00180E43, //912.75 MHz
-            0x00180E2B, //906.75 MHz
-            0x00180E45, //913.25 MHz
-            0x00180E2D, //907.25 MHz
-            0x00180E47, //913.75 MHz
-            0x00180E2F, //907.75 MHz
-            0x00180E49, //914.25 MHz
-            0x00180E31, //908.25 MHz
-            0x00180E4B, //914.75 MHz
-            0x00180E33, //908.75 MHz
-            0x00180E4D, //915.25 MHz
-
-
-            //0x00180E4F, //915.75 MHz
-            //0x00180E7B, //926.75 MHz
-            //0x00180E79, //926.25 MHz
-            //0x00180E7D, //927.25 MHz
-            //0x00180E61, //920.25 MHz
-            //0x00180E5D, //919.25 MHz
-            //0x00180E5B, //918.75 MHz
-            //0x00180E57, //917.75 MHz
-            //0x00180E75, //925.25 MHz
-            //0x00180E67, //921.75 MHz
-            //0x00180E69, //922.25 MHz
-            //0x00180E55, //917.25 MHz
-            //0x00180E59, //918.25 MHz
-            //0x00180E51, //916.25 MHz
-            //0x00180E73, //924.75 MHz
-            //0x00180E5F, //919.75 MHz
-            //0x00180E53, //916.75 MHz
-            //0x00180E6F, //923.75 MHz
-            //0x00180E77, //925.75 MHz
-            //0x00180E71, //924.25 MHz
-            //0x00180E65, //921.25 MHz
-            //0x00180E63, //920.75 MHz
-            //0x00180E6B, //922.75 MHz
-            //0x00180E6D, //923.25 MHz
-    };
-    private final int[] lhFreqSortedIdx = new int[] {
-            0, 13, 1, 14, 2,
-            15, 3, 16, 4, 17,
-            5, 18, 6, 19, 7,
-            20, 8, 21, 9, 22,
-            10, 23, 11, 24, 12,
-            25 };
-
-    private final int LH1_CHN_CNT = 14;
-    private double[] LH1TableOfFreq = new double[] {
-            902.75, 903.25, 903.75, 904.25, 904.75, // 4
-            905.25, 905.75, 906.25, 906.75, 907.25, // 9
-            907.75, 908.25, 908.75, 909.25, // 13
-    };
-    private final int[] lh1FreqTable = new int[] {
-            0x00180E1B, //902.75 MHz
-            0x00180E35, //909.25 MHz
-            0x00180E1D, //903.25 MHz
-            0x00180E1F, //903.75 MHz
-            0x00180E21, //904.25 MHz
-            0x00180E23, //904.75 MHz
-            0x00180E25, //905.25 MHz
-            0x00180E27, //905.75 MHz
-            0x00180E29, //906.25 MHz
-            0x00180E2B, //906.75 MHz
-            0x00180E2D, //907.25 MHz
-            0x00180E2F, //907.75 MHz
-            0x00180E31, //908.25 MHz
-            0x00180E33, //908.75 MHz
-    };
-    private final int[] lh1FreqSortedIdx = new int[] {
-            0, 13, 1, 2, 3,
-            4, 5, 6, 7, 8,
-            9, 10, 11, 12 };
-
-    private final int LH2_CHN_CNT = 11;
-    private double[] LH2TableOfFreq = new double[] {
-            909.75, 910.25, 910.75, 911.25, 911.75, // 4
-            912.25, 912.75, 913.25, 913.75, 914.25, // 9
-            914.75 };
-    private final int[] lh2FreqTable = new int[] {
-            0x00180E37, //909.75 MHz
-            0x00180E39, //910.25 MHz
-            0x00180E3B, //910.75 MHz
-            0x00180E3D, //911.25 MHz
-            0x00180E3F, //911.75 MHz
-            0x00180E41, //912.25 MHz
-            0x00180E43, //912.75 MHz
-            0x00180E45, //913.25 MHz
-            0x00180E47, //913.75 MHz
-            0x00180E49, //914.25 MHz
-            0x00180E4B, //914.75 MHz
-    };
-    private final int[] lh2FreqSortedIdx = new int[] {
-            0, 1, 2, 3, 4,
-            5, 6, 7, 8, 9,
-            10 };
-
-    private final int ETSI_CHN_CNT = 4;
-    private final double[] ETSITableOfFreq = new double[] {
-            865.70, 866.30, 866.90, 867.50 };
-    private final int[] etsiFreqTable = new int[] {
-            0x003C21D1, //865.700MHz
-            0x003C21D7, //866.300MHz
-            0x003C21DD, //866.900MHz
-            0x003C21E3, //867.500MHz
+    static class CountryChannelData {
+        final int FCC_CHN_CNT = 50;
+        private final double[] FCCTableOfFreq = new double[]{
+                902.75, 903.25, 903.75, 904.25, 904.75, 905.25, 905.75, 906.25, 906.75, 907.25,//10
+                907.75, 908.25, 908.75, 909.25, 909.75, 910.25, 910.75, 911.25, 911.75, 912.25,//20
+                912.75, 913.25, 913.75, 914.25, 914.75, 915.25, 915.75, 916.25, 916.75, 917.25,
+                917.75, 918.25, 918.75, 919.25, 919.75, 920.25, 920.75, 921.25, 921.75, 922.25,
+                922.75, 923.25, 923.75, 924.25, 924.75, 925.25, 925.75, 926.25, 926.75, 927.25};
+        private final double[] FCCTableOfFreq0 = new double[]{
+                903.75, 912.25, 907.75, 910.25, 922.75, 923.25, 923.75, 915.25, 909.25, 912.75,
+                910.75, 913.75, 909.75, 905.25, 911.75, 902.75, 914.25, 918.25, 926.25, 925.75,
+                920.75, 920.25, 907.25, 914.75, 919.75, 922.25, 903.25, 906.25, 905.75, 926.75,
+                924.25, 904.75, 925.25, 924.75, 919.25, 916.75, 911.25, 921.25, 908.25, 908.75,
+                913.25, 916.25, 904.25, 906.75, 917.75, 921.75, 917.25, 927.25, 918.75, 915.75};
+        private int[] fccFreqSortedIdx0;
+        private final double[] FCCTableOfFreq1 = new double[]{
+                915.25, 920.75, 909.25, 912.25, 918.25, 920.25, 909.75, 910.25, 919.75, 922.75,
+                908.75, 913.75, 903.75, 919.25, 922.25, 907.75, 911.75, 923.75, 916.75, 926.25,
+                908.25, 912.75, 924.25, 916.25, 927.25, 907.25, 910.75, 903.25, 917.75, 926.75,
+                905.25, 911.25, 924.75, 917.25, 925.75, 906.75, 914.25, 904.75, 918.75, 923.25,
+                902.75, 914.75, 905.75, 915.75, 925.25, 906.25, 921.25, 913.25, 921.75, 904.25};
+        private int[] fccFreqSortedIdx1;
+        private int[] fccFreqTable = new int[]{
+                0x00180E4F, //915.75 MHz
+                0x00180E4D, //915.25 MHz
+                0x00180E1D, //903.25 MHz
+                0x00180E7B, //926.75 MHz
+                0x00180E79, //926.25 MHz
+                0x00180E21, //904.25 MHz
+                0x00180E7D, //927.25 MHz
+                0x00180E61, //920.25 MHz
+                0x00180E5D, //919.25 MHz
+                0x00180E35, //909.25 MHz
+                0x00180E5B, //918.75 MHz
+                0x00180E57, //917.75 MHz
+                0x00180E25, //905.25 MHz
+                0x00180E23, //904.75 MHz
+                0x00180E75, //925.25 MHz
+                0x00180E67, //921.75 MHz
+                0x00180E4B, //914.75 MHz
+                0x00180E2B, //906.75 MHz
+                0x00180E47, //913.75 MHz
+                0x00180E69, //922.25 MHz
+                0x00180E3D, //911.25 MHz
+                0x00180E3F, //911.75 MHz
+                0x00180E1F, //903.75 MHz
+                0x00180E33, //908.75 MHz
+                0x00180E27, //905.75 MHz
+                0x00180E41, //912.25 MHz
+                0x00180E29, //906.25 MHz
+                0x00180E55, //917.25 MHz
+                0x00180E49, //914.25 MHz
+                0x00180E2D, //907.25 MHz
+                0x00180E59, //918.25 MHz
+                0x00180E51, //916.25 MHz
+                0x00180E39, //910.25 MHz
+                0x00180E3B, //910.75 MHz
+                0x00180E2F, //907.75 MHz
+                0x00180E73, //924.75 MHz
+                0x00180E37, //909.75 MHz
+                0x00180E5F, //919.75 MHz
+                0x00180E53, //916.75 MHz
+                0x00180E45, //913.25 MHz
+                0x00180E6F, //923.75 MHz
+                0x00180E31, //908.25 MHz
+                0x00180E77, //925.75 MHz
+                0x00180E43, //912.75 MHz
+                0x00180E71, //924.25 MHz
+                0x00180E65, //921.25 MHz
+                0x00180E63, //920.75 MHz
+                0x00180E6B, //922.75 MHz
+                0x00180E1B, //902.75 MHz
+                0x00180E6D, //923.25 MHz
         };
-    private final int[] etsiFreqSortedIdx = new int[] {
-            0, 1, 2, 3 };
+        private int[] fccFreqTableIdx;
+        private final int[] fccFreqSortedIdx = new int[]{
+                26, 25, 1, 48, 47,
+                3, 49, 35, 33, 13,
+                32, 30, 5, 4, 45,
+                38, 24, 8, 22, 39,
+                17, 18, 2, 12, 6,
+                19, 7, 29, 23, 9,
+                31, 27, 15, 16, 10,
+                44, 14, 34, 28, 21,
+                42, 11, 46, 20, 43,
+                37, 36, 40, 0, 41};
 
-    private final int IDA_CHN_CNT = 3;
-    private final double[] IDATableOfFreq = new double[] {
-            865.70, 866.30, 866.90 };
-    private final int[] indiaFreqTable = new int[] {
-            0x003C21D1, //865.700MHz
-            0x003C21D7, //866.300MHz
-            0x003C21DD, //866.900MHz
-    };
-    private final int[] indiaFreqSortedIdx = new int[] {
-            0, 1, 2 };
-
-    private final int KR_CHN_CNT = 19;
-    private final double[] KRTableOfFreq = new double[] {
-            910.20, 910.40, 910.60, 910.80, 911.00, 911.20, 911.40, 911.60, 911.80, 912.00,
-            912.20, 912.40, 912.60, 912.80, 913.00, 913.20, 913.40, 913.60, 913.80 };
-    private int[] krFreqTable = new int[] {
-            0x003C23A8, //912.8MHz   13
-            0x003C23A0, //912.0MHz   9
-            0x003C23AC, //913.2MHz   15
-            0x003C239E, //911.8MHz   8
-            0x003C23A4, //912.4MHz   11
-            0x003C23B2, //913.8MHz   18
-            0x003C2392, //910.6MHz   2
-            0x003C23B0, //913.6MHz   17
-            0x003C2390, //910.4MHz   1
-            0x003C239C, //911.6MHz   7
-            0x003C2396, //911.0MHz   4
-            0x003C23A2, //912.2MHz   10
-            0x003C238E, //910.2MHz   0
-            0x003C23A6, //912.6MHz   12
-            0x003C2398, //911.2MHz   5
-            0x003C2394, //910.8MHz   3
-            0x003C23AE, //913.4MHz   16
-            0x003C239A, //911.4MHz   6
-            0x003C23AA, //913.0MHz   14
+        private final int AUS_CHN_CNT = 10;
+        private final double[] AUSTableOfFreq = new double[]{
+                920.75, 921.25, 921.75, 922.25, 922.75,
+                923.25, 923.75, 924.25, 924.75, 925.25};
+        private final int[] AusFreqTable = new int[]{
+                0x00180E63, // 920.75MHz
+                0x00180E69, // 922.25MHz
+                0x00180E6F, // 923.75MHz
+                0x00180E73, // 924.75MHz
+                0x00180E65, // 921.25MHz
+                0x00180E6B, // 922.75MHz
+                0x00180E71, // 924.25MHz
+                0x00180E75, // 925.25MHz
+                0x00180E67, // 921.75MHz
+                0x00180E6D, // 923.25MHz
         };
-    private final int[] krFreqSortedIdx = new int[] {
-            13, 9, 15, 8, 11,
-            18, 2, 17, 1, 7,
-            4, 10, 0, 12, 5,
-            3, 16, 6, 14 };
+        private final int[] ausFreqSortedIdx = new int[]{
+                0, 3, 6, 8, 1,
+                4, 7, 9, 2, 5};
 
-    private final int KR2017RW_CHN_CNT = 6;
-    private final double[] KR2017RwTableOfFreq = new double[] {
-            917.30, 917.90, 918.50, 919.10, 919.70, 920.30 };
-    private int[] kr2017RwFreqTable = new int[] {
-            0x003C23D5, // 917.3 -> 917.25  MHz Channel 1
-            0x003C23DB, //917.9 -> 918 MHz Channel 2
-            0x003C23E1, //918.5 MHz Channel 3
-            0x003C23E7, //919.1 -> 919  MHz Channel 4
-            0x003C23ED, //919.7 -> 919.75 MHz Channel 5
-            0x003C23F3 // 920.3 -> 920.25 MHz Channel 6
+        private double[] PRTableOfFreq = new double[]{
+                915.25, 915.75, 916.25, 916.75, 917.25,
+                917.75, 918.25, 918.75, 919.25, 919.75, 920.25, 920.75, 921.25, 921.75, 922.25,
+                922.75, 923.25, 923.75, 924.25, 924.75, 925.25, 925.75, 926.25, 926.75, 927.25};
+
+        private final int VZ_CHN_CNT = 10;
+        private final double[] VZTableOfFreq = new double[]{
+                922.75, 923.25, 923.75, 924.25, 924.75,
+                925.25, 925.75, 926.25, 926.75, 927.25};
+        private final int[] vzFreqTable = new int[]{
+                0x00180E77, // 925.75 MHz
+                0x00180E6B, // 922.75MHz
+                0x00180E7D, // 927.25 MHz
+                0x00180E75, // 925.25MHz
+                0x00180E6D, // 923.25MHz
+                0x00180E7B, // 926.75 MHz
+                0x00180E73, // 924.75MHz
+                0x00180E6F, // 923.75MHz
+                0x00180E79, // 926.25 MHz
+                0x00180E71, // 924.25MHz
         };
-    private final int[] kr2017RwFreqSortedIdx = new int[] {
-            3, 0, 5, 1, 4, 2 };
+        private final int[] vzFreqSortedIdx = new int[]{
+                6, 0, 9, 5, 1,
+                8, 4, 2, 7, 3};
 
-    private final int JPN2012_CHN_CNT = 4;
-    private final double[] JPN2012TableOfFreq = new double[] {
-            916.80, 918.00, 919.20, 920.40 };
-    private final int[] jpn2012FreqTable = new int[] {
-            0x003C23D0, //916.800MHz   Channel 1
-            0x003C23DC, //918.000MHz   Channel 2
-            0x003C23E8, //919.200MHz   Channel 3
-            0x003C23F4, //920.400MHz   Channel 4
-            //0x003C23F6, //920.600MHz   Channel 5
-            //0x003C23F8, //920.800MHz   Channel 6
-    };
-    private final int[] jpn2012FreqSortedIdx = new int[] {
-            0, 1, 2, 3 };
-
-    private final int JPN2012A_CHN_CNT = 6;
-    private final double[] JPN2012ATableOfFreq = new double[] {
-            916.80, 918.00, 919.20, 920.40, 920.60, 920.80 };
-    private final int[] jpn2012AFreqTable = new int[] {
-            0x003C23D0, //916.800MHz   Channel 1
-            0x003C23DC, //918.000MHz   Channel 2
-            0x003C23E8, //919.200MHz   Channel 3
-            0x003C23F4, //920.400MHz   Channel 4
-            0x003C23F6, //920.600MHz   Channel 5
-            0x003C23F8, //920.800MHz   Channel 6
-    };
-    private final int[] jpn2012AFreqSortedIdx = new int[] {
-            0, 1, 2, 3, 4, 5 };
-
-    private final int ETSIUPPERBAND_CHN_CNT = 4;
-    private final double[] ETSIUPPERBANDTableOfFreq = new double[] {
-            916.3, 917.5, 918.7, 919.9 };
-    private final int[] etsiupperbandFreqTable = new int[] {
-            0x003C23CB, //916.3 MHz
-            0x003C23D7, //917.5 MHz
-            0x003C23E3, //918.7 MHz
-            0x003C23EF, //919.9 MHz
+        private final int BR1_CHN_CNT = 24;
+        private final double[] BR1TableOfFreq = new double[]{
+                //902.75, 903.25, 903.75, 904.25, 904.75,
+                //905.25, 905.75, 906.25, 906.75, 907.25,
+                //907.75, 908.25, 908.75, 909.25, 909.75,
+                //910.25, 910.75, 911.25, 911.75, 912.25,
+                //912.75, 913.25, 913.75, 914.25, 914.75,
+                //915.25,
+                915.75, 916.25, 916.75, 917.25, 917.75,
+                918.25, 918.75, 919.25, 919.75, 920.25,
+                920.75, 921.25, 921.75, 922.25, 922.75,
+                923.25, 923.75, 924.25, 924.75, 925.25,
+                925.75, 926.25, 926.75, 927.25};
+        private final int[] br1FreqTable = new int[]{
+                0x00180E4F, //915.75 MHz
+                //0x00180E4D, //915.25 MHz
+                //0x00180E1D, //903.25 MHz
+                0x00180E7B, //926.75 MHz
+                0x00180E79, //926.25 MHz
+                //0x00180E21, //904.25 MHz
+                0x00180E7D, //927.25 MHz
+                0x00180E61, //920.25 MHz
+                0x00180E5D, //919.25 MHz
+                //0x00180E35, //909.25 MHz
+                0x00180E5B, //918.75 MHz
+                0x00180E57, //917.75 MHz
+                //0x00180E25, //905.25 MHz
+                //0x00180E23, //904.75 MHz
+                0x00180E75, //925.25 MHz
+                0x00180E67, //921.75 MHz
+                //0x00180E4B, //914.75 MHz
+                //0x00180E2B, //906.75 MHz
+                //0x00180E47, //913.75 MHz
+                0x00180E69, //922.25 MHz
+                //0x00180E3D, //911.25 MHz
+                //0x00180E3F, //911.75 MHz
+                //0x00180E1F, //903.75 MHz
+                //0x00180E33, //908.75 MHz
+                //0x00180E27, //905.75 MHz
+                //0x00180E41, //912.25 MHz
+                //0x00180E29, //906.25 MHz
+                0x00180E55, //917.25 MHz
+                //0x00180E49, //914.25 MHz
+                //0x00180E2D, //907.25 MHz
+                0x00180E59, //918.25 MHz
+                0x00180E51, //916.25 MHz
+                //0x00180E39, //910.25 MHz
+                //0x00180E3B, //910.75 MHz
+                //0x00180E2F, //907.75 MHz
+                0x00180E73, //924.75 MHz
+                //0x00180E37, //909.75 MHz
+                0x00180E5F, //919.75 MHz
+                0x00180E53, //916.75 MHz
+                //0x00180E45, //913.25 MHz
+                0x00180E6F, //923.75 MHz
+                //0x00180E31, //908.25 MHz
+                0x00180E77, //925.75 MHz
+                //0x00180E43, //912.75 MHz
+                0x00180E71, //924.25 MHz
+                0x00180E65, //921.25 MHz
+                0x00180E63, //920.75 MHz
+                0x00180E6B, //922.75 MHz
+                //0x00180E1B, //902.75 MHz
+                0x00180E6D, //923.25 MHz
         };
-    private final int[] etsiupperbandFreqSortedIdx = new int[] {
-            0, 1, 2, 3 };
+        private final int[] br1FreqSortedIdx = new int[]{
+                0, 22, 21, 23, 9,
+                7, 6, 4, 19, 12,
+                13, 3, 5, 1, 18,
+                8, 2, 16, 20, 17,
+                11, 10, 14, 15};
 
-    private final int VN1_CHN_CNT = 3;
-    private final double[] VN1TableOfFreq = new double[] {
-            866.30, 866.90, 867.50 };
-    private final int[] vietnam1FreqTable = new int[] {
-            0x003C21D7, //866.300MHz
-            0x003C21DD, //866.900MHz
-            0x003C21E3, //867.500MHz
+        private final int BR2_CHN_CNT = 33;
+        private double[] BR2TableOfFreq = new double[]{
+                902.75, 903.25, 903.75, 904.25, 904.75,
+                905.25, 905.75, 906.25, 906.75,
+                //907.25, 907.75, 908.25, 908.75, 909.25,
+                //909.75, 910.25, 910.75, 911.25, 911.75,
+                //912.25, 912.75, 913.25, 913.75, 914.25,
+                //914.75, 915.25,
+                915.75, 916.25, 916.75, 917.25, 917.75,
+                918.25, 918.75, 919.25, 919.75, 920.25,
+                920.75, 921.25, 921.75, 922.25, 922.75,
+                923.25, 923.75, 924.25, 924.75, 925.25,
+                925.75, 926.25, 926.75, 927.25};
+        private final int[] br2FreqTable = new int[]{
+                0x00180E4F, //915.75 MHz
+                //0x00180E4D, //915.25 MHz
+                0x00180E1D, //903.25 MHz
+                0x00180E7B, //926.75 MHz
+                0x00180E79, //926.25 MHz
+                0x00180E21, //904.25 MHz
+                0x00180E7D, //927.25 MHz
+                0x00180E61, //920.25 MHz
+                0x00180E5D, //919.25 MHz
+                //0x00180E35, //909.25 MHz
+                0x00180E5B, //918.75 MHz
+                0x00180E57, //917.75 MHz
+                0x00180E25, //905.25 MHz
+                0x00180E23, //904.75 MHz
+                0x00180E75, //925.25 MHz
+                0x00180E67, //921.75 MHz
+                //0x00180E4B, //914.75 MHz
+                0x00180E2B, //906.75 MHz
+                //0x00180E47, //913.75 MHz
+                0x00180E69, //922.25 MHz
+                //0x00180E3D, //911.25 MHz
+                //0x00180E3F, //911.75 MHz
+                0x00180E1F, //903.75 MHz
+                //0x00180E33, //908.75 MHz
+                0x00180E27, //905.75 MHz
+                //0x00180E41, //912.25 MHz
+                0x00180E29, //906.25 MHz
+                0x00180E55, //917.25 MHz
+                //0x00180E49, //914.25 MHz
+                //0x00180E2D, //907.25 MHz
+                0x00180E59, //918.25 MHz
+                0x00180E51, //916.25 MHz
+                //0x00180E39, //910.25 MHz
+                //0x00180E3B, //910.75 MHz
+                //0x00180E2F, //907.75 MHz
+                0x00180E73, //924.75 MHz
+                //0x00180E37, //909.75 MHz
+                0x00180E5F, //919.75 MHz
+                0x00180E53, //916.75 MHz
+                //0x00180E45, //913.25 MHz
+                0x00180E6F, //923.75 MHz
+                //0x00180E31, //908.25 MHz
+                0x00180E77, //925.75 MHz
+                //0x00180E43, //912.75 MHz
+                0x00180E71, //924.25 MHz
+                0x00180E65, //921.25 MHz
+                0x00180E63, //920.75 MHz
+                0x00180E6B, //922.75 MHz
+                0x00180E1B, //902.75 MHz
+                0x00180E6D, //923.25 MHz
         };
-    private final int[] vietnam1FreqSortedIdx = new int[] {
-            0, 1, 2 };
+        private final int[] br2FreqSortedIdx = new int[]{
+                9, 1, 31, 30, 3,
+                32, 18, 16, 15, 13,
+                5, 4, 28, 21, 8,
+                22, 2, 6, 7, 12,
+                14, 10, 27, 17, 11,
+                25, 29, 26, 20, 19,
+                23, 0, 24,
+        };
 
-    private final int VN2_CHN_CNT = 8;
-    private final double[] VN2TableOfFreq = new double[] {
-            918.75, 919.25, 919.75, 920.25, 920.75, 921.25, 921.75, 922.25 };
-    private final int[] vietnam2FreqTable = new int[] {
-            0x00180E61, //920.25 MHz
-            0x00180E5D, //919.25 MHz
-            0x00180E5B, //918.75 MHz
-            0x00180E67, //921.75 MHz
-            0x00180E69, //922.25 MHz
-            0x00180E5F, //919.75 MHz
-            0x00180E65, //921.25 MHz
-            0x00180E63, //920.75 MHz
+        private final int BR3_CHN_CNT = 9;
+        private final double[] BR3TableOfFreq = new double[]{
+                902.75, 903.25, 903.75, 904.25, 904.75, // 4
+                905.25, 905.75, 906.25, 906.75};
+        private final int[] br3FreqTable = new int[]{
+                0x00180E1D, //903.25 MHz
+                0x00180E21, //904.25 MHz
+                0x00180E25, //905.25 MHz
+                0x00180E23, //904.75 MHz
+                0x00180E2B, //906.75 MHz
+                0x00180E1F, //903.75 MHz
+                0x00180E27, //905.75 MHz
+                0x00180E29, //906.25 MHz
+                0x00180E1B, //902.75 MHz
         };
-    private final int[] vietnam2FreqSortedIdx = new int[] {
-            3, 1, 0, 6, 7, 2, 5, 4 };
+        private final int[] br3FreqSortedIdx = new int[]{
+                1, 3, 5, 4, 8,
+                2, 6, 7, 0};
 
-    private final int VN3_CHN_CNT = 4;
-    private final double[] VN3TableOfFreq = new double[] {
-            920.75, 921.25, 921.75, 922.25 };
-    private final int[] vietnam3FreqTable = new int[] {
-            0x00180E67, //921.75 MHz
-            0x00180E69, //922.25 MHz
-            0x00180E65, //921.25 MHz
-            0x00180E63, //920.75 MHz
+        private final int BR4_CHN_CNT = 4;
+        private final double[] BR4TableOfFreq = new double[]{
+                902.75, 903.25, 903.75, 904.25};
+        private final int[] br4FreqTable = new int[]{
+                0x00180E1D, //903.25 MHz
+                0x00180E21, //904.25 MHz
+                0x00180E1F, //903.75 MHz
+                0x00180E1B, //902.75 MHz
         };
-    private final int[] vietnam3FreqSortedIdx = new int[] {
-            2, 3, 1, 0 };
+        private final int[] br4FreqSortedIdx = new int[]{
+                1, 3, 2, 0};
+
+        private final int BR5_CHN_CNT = 14;
+        private final double[] BR5TableOfFreq = new double[]{
+                917.75, 918.25, 918.75, 919.25, 919.75, // 4
+                920.25, 920.75, 921.25, 921.75, 922.25, // 9
+                922.75, 923.25, 923.75, 924.25};
+        private final int[] br5FreqTable = new int[]{
+                0x00180E61, //920.25 MHz
+                0x00180E5D, //919.25 MHz
+                0x00180E5B, //918.75 MHz
+                0x00180E57, //917.75 MHz
+                0x00180E67, //921.75 MHz
+                0x00180E69, //922.25 MHz
+                0x00180E59, //918.25 MHz
+                0x00180E5F, //919.75 MHz
+                0x00180E6F, //923.75 MHz
+                0x00180E71, //924.25 MHz
+                0x00180E65, //921.25 MHz
+                0x00180E63, //920.75 MHz
+                0x00180E6B, //922.75 MHz
+                0x00180E6D, //923.25 MHz
+        };
+        private final int[] br5FreqSortedIdx = new int[]{
+                5, 3, 2, 0, 8,
+                9, 1, 4, 12, 13,
+                7, 6, 10, 11};
+
+        private final int HK_CHN_CNT = 8;
+        private final double[] HKTableOfFreq = new double[]{
+                920.75, 921.25, 921.75, 922.25, 922.75,
+                923.25, 923.75, 924.25};
+        private final int[] hkFreqTable = new int[]{
+                0x00180E63, //920.75MHz
+                0x00180E69, //922.25MHz
+                0x00180E71, //924.25MHz
+                0x00180E65, //921.25MHz
+                0x00180E6B, //922.75MHz
+                0x00180E6D, //923.25MHz
+                0x00180E6F, //923.75MHz
+                0x00180E67, //921.75MHz
+        };
+        private final int[] hkFreqSortedIdx = new int[]{
+                0, 3, 7, 1, 4,
+                5, 6, 2};
+
+        private final int BD_CHN_CNT = 4;
+        private final double[] BDTableOfFreq = new double[]{
+                925.25, 925.75, 926.25, 926.75};
+        private final int[] bdFreqTable = new int[]{
+                0x00180E75, //925.25MHz
+                0x00180E77, //925.75MHz
+                0x00180E79, //926.25MHz
+                0x00180E7B, //926.75MHz
+        };
+        private final int[] bdFreqSortedIdx = new int[]{
+                0, 3, 1, 2};
+
+        private final int TW_CHN_CNT = 12;
+        private final double[] TWTableOfFreq = new double[]{
+                922.25, 922.75, 923.25, 923.75, 924.25,
+                924.75, 925.25, 925.75, 926.25, 926.75,
+                927.25, 927.75};
+        private int[] twFreqTable = new int[]{
+                0x00180E7D, //927.25MHz   10
+                0x00180E73, //924.75MHz   5
+                0x00180E6B, //922.75MHz   1
+                0x00180E75, //925.25MHz   6
+                0x00180E7F, //927.75MHz   11
+                0x00180E71, //924.25MHz   4
+                0x00180E79, //926.25MHz   8
+                0x00180E6D, //923.25MHz   2
+                0x00180E7B, //926.75MHz   9
+                0x00180E69, //922.25MHz   0
+                0x00180E77, //925.75MHz   7
+                0x00180E6F, //923.75MHz   3
+        };
+        private final int[] twFreqSortedIdx = new int[]{
+                10, 5, 1, 6, 11,
+                4, 8, 2, 9, 0,
+                7, 3};
+
+        private final int MYS_CHN_CNT = 8;
+        private final double[] MYSTableOfFreq = new double[]{
+                919.75, 920.25, 920.75, 921.25, 921.75,
+                922.25, 922.75, 923.25};
+        private final int[] mysFreqTable = new int[]{
+                0x00180E5F, //919.75MHz
+                0x00180E65, //921.25MHz
+                0x00180E6B, //922.75MHz
+                0x00180E61, //920.25MHz
+                0x00180E67, //921.75MHz
+                0x00180E6D, //923.25MHz
+                0x00180E63, //920.75MHz
+                0x00180E69, //922.25MHz
+        };
+        private final int[] mysFreqSortedIdx = new int[]{
+                0, 3, 6, 1, 4,
+                7, 2, 5};
+
+        private final int ZA_CHN_CNT = 16;
+        private final double[] ZATableOfFreq = new double[]{
+                915.7, 915.9, 916.1, 916.3, 916.5,
+                916.7, 916.9, 917.1, 917.3, 917.5,
+                917.7, 917.9, 918.1, 918.3, 918.5,
+                918.7};
+        private final int[] zaFreqTable = new int[]{
+                0x003C23C5, //915.7 MHz
+                0x003C23C7, //915.9 MHz
+                0x003C23C9, //916.1 MHz
+                0x003C23CB, //916.3 MHz
+                0x003C23CD, //916.5 MHz
+                0x003C23CF, //916.7 MHz
+                0x003C23D1, //916.9 MHz
+                0x003C23D3, //917.1 MHz
+                0x003C23D5, //917.3 MHz
+                0x003C23D7, //917.5 MHz
+                0x003C23D9, //917.7 MHz
+                0x003C23DB, //917.9 MHz
+                0x003C23DD, //918.1 MHz
+                0x003C23DF, //918.3 MHz
+                0x003C23E1, //918.5 MHz
+                0x003C23E3, //918.7 MHz
+        };
+        private final int[] zaFreqSortedIdx = new int[]{
+                0, 1, 2, 3, 4,
+                5, 6, 7, 8, 9,
+                10, 11, 12, 13, 14,
+                15};
+
+        final int ID_CHN_CNT = 4;
+        private final double[] IDTableOfFreq = new double[]{
+                923.25, 923.75, 924.25, 924.75};
+        private final int[] indonesiaFreqTable = new int[]{
+                0x00180E6D, //923.25 MHz
+                0x00180E6F,//923.75 MHz
+                0x00180E71,//924.25 MHz
+                0x00180E73,//924.75 MHz
+        };
+        private final int[] indonesiaFreqSortedIdx = new int[]{
+                0, 1, 2, 3};
+
+        private final int IL_CHN_CNT = 7;
+        private final double[] ILTableOfFreq = new double[]{
+                915.25, 915.5, 915.75, 916.0, 916.25, // 4
+                916.5, 916.75};
+        private final int[] ilFreqTable = new int[]{
+                0x00180E4D, //915.25 MHz
+                0x00180E51, //916.25 MHz
+                0x00180E4E, //915.5 MHz
+                0x00180E52, //916.5 MHz
+                0x00180E4F, //915.75 MHz
+                0x00180E53, //916.75 MHz
+                0x00180E50, //916.0 MHz
+        };
+        private final int[] ilFreqSortedIdx = new int[]{
+                0, 4, 1, 5, 2, 6, 3};
+
+        private final int IL2019RW_CHN_CNT = 5;
+        private final double[] IL2019RWTableOfFreq = new double[]{
+                915.9, 916.025, 916.15, 916.275, 916.4};
+        private final int[] il2019RwFreqTable = new int[]{
+                0x003C23C7, //915.9 MHz
+                0x003C23C8, //916.025 MHz
+                0x003C23C9, //916.15 MHz
+                0x003C23CA, //916.275 MHz
+                0x003C23CB, //916.4 MHz
+        };
+        private final int[] il2019RwFreqSortedIdx = new int[]{
+                0, 4, 1, 2, 3};
+
+        private final int PH_CHN_CNT = 8;
+        private final double[] PHTableOfFreq = new double[]{
+                918.125, 918.375, 918.625, 918.875, 919.125, // 5
+                919.375, 919.625, 919.875};
+        private final int[] phFreqTable = new int[]{
+                0x00301CB1, //918.125MHz   Channel 0
+                0x00301CBB, //919.375MHz   Channel 5
+                0x00301CB7, //918.875MHz   Channel 3
+                0x00301CBF, //919.875MHz   Channel 7
+                0x00301CB3, //918.375MHz   Channel 1
+                0x00301CBD, //919.625MHz   Channel 6
+                0x00301CB5, //918.625MHz   Channel 2
+                0x00301CB9, //919.125MHz   Channel 4
+        };
+        private final int[] phFreqSortedIdx = new int[]{
+                0, 5, 3, 7, 1, 6, 2, 4};
+
+        private int NZ_CHN_CNT = 11;
+        private final double[] NZTableOfFreq = new double[]{
+                922.25, 922.75, 923.25, 923.75, 924.25,// 4
+                924.75, 925.25, 925.75, 926.25, 926.75,// 9
+                927.25};
+        private final int[] nzFreqTable = new int[]{
+                0x00180E71, //924.25 MHz
+                0x00180E77, //925.75 MHz
+                0x00180E69, //922.25 MHz
+                0x00180E7B, //926.75 MHz
+                0x00180E6D, //923.25 MHz
+                0x00180E7D, //927.25 MHz
+                0x00180E75, //925.25 MHz
+                0x00180E6B, //922.75 MHz
+                0x00180E79, //926.25 MHz
+                0x00180E6F, //923.75 MHz
+                0x00180E73, //924.75 MHz
+        };
+        private final int[] nzFreqSortedIdx = new int[]{
+                4, 7, 0, 9, 2, 10, 6, 1, 8, 3, 5};
+
+        private final int CN_CHN_CNT = 16;
+        private final double[] CHNTableOfFreq = new double[]{
+                920.625, 920.875, 921.125, 921.375, 921.625, 921.875, 922.125, 922.375, 922.625, 922.875,
+                923.125, 923.375, 923.625, 923.875, 924.125, 924.375};
+        private final int[] cnFreqTable = new int[]{
+                0x00301CD3, //922.375MHz
+                0x00301CD1, //922.125MHz
+                0x00301CCD, //921.625MHz
+                0x00301CC5, //920.625MHz
+                0x00301CD9, //923.125MHz
+                0x00301CE1, //924.125MHz
+                0x00301CCB, //921.375MHz
+                0x00301CC7, //920.875MHz
+                0x00301CD7, //922.875MHz
+                0x00301CD5, //922.625MHz
+                0x00301CC9, //921.125MHz
+                0x00301CDF, //923.875MHz
+                0x00301CDD, //923.625MHz
+                0x00301CDB, //923.375MHz
+                0x00301CCF, //921.875MHz
+                0x00301CE3, //924.375MHz
+        };
+        private final int[] cnFreqSortedIdx = new int[]{
+                7, 6, 4, 0, 10,
+                14, 3, 1, 9, 8,
+                2, 13, 12, 11, 5,
+                15};
+
+        private final int UH1_CHN_CNT = 10;
+        private final double[] UH1TableOfFreq = new double[]{
+                915.25, 915.75, 916.25, 916.75, 917.25,
+                917.75, 918.25, 918.75, 919.25, 919.75};
+        private final int[] uh1FreqTable = new int[]{
+                0x00180E4F, //915.75 MHz
+                0x00180E4D, //915.25 MHz
+                0x00180E5D, //919.25 MHz
+                0x00180E5B, //918.75 MHz
+                0x00180E57, //917.75 MHz
+                0x00180E55, //917.25 MHz
+                0x00180E59, //918.25 MHz
+                0x00180E51, //916.25 MHz
+                0x00180E5F, //919.75 MHz
+                0x00180E53, //916.75 MHz
+        };
+        private final int[] uh1FreqSortedIdx = new int[]{
+                1, 0, 8, 7, 5,
+                4, 6, 2, 9, 3};
+
+        private final int UH2_CHN_CNT = 15;
+        private final double[] UH2TableOfFreq = new double[]{
+                920.25, 920.75, 921.25, 921.75, 922.25,   // 4
+                922.75, 923.25, 923.75, 924.25, 924.75,   // 9
+                925.25, 925.75, 926.25, 926.75, 927.25};
+        private final int[] uh2FreqTable = new int[]{
+                0x00180E7B, //926.75 MHz
+                0x00180E79, //926.25 MHz
+                0x00180E7D, //927.25 MHz
+                0x00180E61, //920.25 MHz
+                0x00180E75, //925.25 MHz
+                0x00180E67, //921.75 MHz
+                0x00180E69, //922.25 MHz
+                0x00180E73, //924.75 MHz
+                0x00180E6F, //923.75 MHz
+                0x00180E77, //925.75 MHz
+                0x00180E71, //924.25 MHz
+                0x00180E65, //921.25 MHz
+                0x00180E63, //920.75 MHz
+                0x00180E6B, //922.75 MHz
+                0x00180E6D, //923.25 MHz
+        };
+        private final int[] uh2FreqSortedIdx = new int[]{
+                13, 12, 14, 0, 10,
+                3, 4, 9, 7, 11,
+                8, 2, 1, 5, 6,};
+
+        private final int LH_CHN_CNT = 26;
+        private double[] LHTableOfFreq = new double[]{
+                902.75, 903.25, 903.75, 904.25, 904.75, // 4
+                905.25, 905.75, 906.25, 906.75, 907.25, // 9
+                907.75, 908.25, 908.75, 909.25, 909.75, // 14
+                910.25, 910.75, 911.25, 911.75, 912.25, // 19
+                912.75, 913.25, 913.75, 914.25, 914.75, // 24
+                915.25, // 25
+                //915.75, 916.25, 916.75, 917.25, 917.75,
+                //918.25, 918.75, 919.25, 919.75, 920.25,
+                //920.75, 921.25, 921.75, 922.25, 922.75,
+                //923.25, 923.75, 924.25, 924.75, 925.25,
+                //925.75, 926.25, 926.75, 927.25,
+        };
+        private final int[] lhFreqTable = new int[]{
+                0x00180E1B, //902.75 MHz
+                0x00180E35, //909.25 MHz
+                0x00180E1D, //903.25 MHz
+                0x00180E37, //909.75 MHz
+                0x00180E1F, //903.75 MHz
+                0x00180E39, //910.25 MHz
+                0x00180E21, //904.25 MHz
+                0x00180E3B, //910.75 MHz
+                0x00180E23, //904.75 MHz
+                0x00180E3D, //911.25 MHz
+                0x00180E25, //905.25 MHz
+                0x00180E3F, //911.75 MHz
+                0x00180E27, //905.75 MHz
+                0x00180E41, //912.25 MHz
+                0x00180E29, //906.25 MHz
+                0x00180E43, //912.75 MHz
+                0x00180E2B, //906.75 MHz
+                0x00180E45, //913.25 MHz
+                0x00180E2D, //907.25 MHz
+                0x00180E47, //913.75 MHz
+                0x00180E2F, //907.75 MHz
+                0x00180E49, //914.25 MHz
+                0x00180E31, //908.25 MHz
+                0x00180E4B, //914.75 MHz
+                0x00180E33, //908.75 MHz
+                0x00180E4D, //915.25 MHz
+
+
+                //0x00180E4F, //915.75 MHz
+                //0x00180E7B, //926.75 MHz
+                //0x00180E79, //926.25 MHz
+                //0x00180E7D, //927.25 MHz
+                //0x00180E61, //920.25 MHz
+                //0x00180E5D, //919.25 MHz
+                //0x00180E5B, //918.75 MHz
+                //0x00180E57, //917.75 MHz
+                //0x00180E75, //925.25 MHz
+                //0x00180E67, //921.75 MHz
+                //0x00180E69, //922.25 MHz
+                //0x00180E55, //917.25 MHz
+                //0x00180E59, //918.25 MHz
+                //0x00180E51, //916.25 MHz
+                //0x00180E73, //924.75 MHz
+                //0x00180E5F, //919.75 MHz
+                //0x00180E53, //916.75 MHz
+                //0x00180E6F, //923.75 MHz
+                //0x00180E77, //925.75 MHz
+                //0x00180E71, //924.25 MHz
+                //0x00180E65, //921.25 MHz
+                //0x00180E63, //920.75 MHz
+                //0x00180E6B, //922.75 MHz
+                //0x00180E6D, //923.25 MHz
+        };
+        private final int[] lhFreqSortedIdx = new int[]{
+                0, 13, 1, 14, 2,
+                15, 3, 16, 4, 17,
+                5, 18, 6, 19, 7,
+                20, 8, 21, 9, 22,
+                10, 23, 11, 24, 12,
+                25};
+
+        private final int LH1_CHN_CNT = 14;
+        private double[] LH1TableOfFreq = new double[]{
+                902.75, 903.25, 903.75, 904.25, 904.75, // 4
+                905.25, 905.75, 906.25, 906.75, 907.25, // 9
+                907.75, 908.25, 908.75, 909.25, // 13
+        };
+        private final int[] lh1FreqTable = new int[]{
+                0x00180E1B, //902.75 MHz
+                0x00180E35, //909.25 MHz
+                0x00180E1D, //903.25 MHz
+                0x00180E1F, //903.75 MHz
+                0x00180E21, //904.25 MHz
+                0x00180E23, //904.75 MHz
+                0x00180E25, //905.25 MHz
+                0x00180E27, //905.75 MHz
+                0x00180E29, //906.25 MHz
+                0x00180E2B, //906.75 MHz
+                0x00180E2D, //907.25 MHz
+                0x00180E2F, //907.75 MHz
+                0x00180E31, //908.25 MHz
+                0x00180E33, //908.75 MHz
+        };
+        private final int[] lh1FreqSortedIdx = new int[]{
+                0, 13, 1, 2, 3,
+                4, 5, 6, 7, 8,
+                9, 10, 11, 12};
+
+        private final int LH2_CHN_CNT = 11;
+        private double[] LH2TableOfFreq = new double[]{
+                909.75, 910.25, 910.75, 911.25, 911.75, // 4
+                912.25, 912.75, 913.25, 913.75, 914.25, // 9
+                914.75};
+        private final int[] lh2FreqTable = new int[]{
+                0x00180E37, //909.75 MHz
+                0x00180E39, //910.25 MHz
+                0x00180E3B, //910.75 MHz
+                0x00180E3D, //911.25 MHz
+                0x00180E3F, //911.75 MHz
+                0x00180E41, //912.25 MHz
+                0x00180E43, //912.75 MHz
+                0x00180E45, //913.25 MHz
+                0x00180E47, //913.75 MHz
+                0x00180E49, //914.25 MHz
+                0x00180E4B, //914.75 MHz
+        };
+        private final int[] lh2FreqSortedIdx = new int[]{
+                0, 1, 2, 3, 4,
+                5, 6, 7, 8, 9,
+                10};
+
+        private final int ETSI_CHN_CNT = 4;
+        private final double[] ETSITableOfFreq = new double[]{
+                865.70, 866.30, 866.90, 867.50};
+        private final int[] etsiFreqTable = new int[]{
+                0x003C21D1, //865.700MHz
+                0x003C21D7, //866.300MHz
+                0x003C21DD, //866.900MHz
+                0x003C21E3, //867.500MHz
+        };
+        private final int[] etsiFreqSortedIdx = new int[]{
+                0, 1, 2, 3};
+
+        private final int IDA_CHN_CNT = 3;
+        private final double[] IDATableOfFreq = new double[]{
+                865.70, 866.30, 866.90};
+        private final int[] indiaFreqTable = new int[]{
+                0x003C21D1, //865.700MHz
+                0x003C21D7, //866.300MHz
+                0x003C21DD, //866.900MHz
+        };
+        private final int[] indiaFreqSortedIdx = new int[]{
+                0, 1, 2};
+
+        private final int KR_CHN_CNT = 19;
+        private final double[] KRTableOfFreq = new double[]{
+                910.20, 910.40, 910.60, 910.80, 911.00, 911.20, 911.40, 911.60, 911.80, 912.00,
+                912.20, 912.40, 912.60, 912.80, 913.00, 913.20, 913.40, 913.60, 913.80};
+        private int[] krFreqTable = new int[]{
+                0x003C23A8, //912.8MHz   13
+                0x003C23A0, //912.0MHz   9
+                0x003C23AC, //913.2MHz   15
+                0x003C239E, //911.8MHz   8
+                0x003C23A4, //912.4MHz   11
+                0x003C23B2, //913.8MHz   18
+                0x003C2392, //910.6MHz   2
+                0x003C23B0, //913.6MHz   17
+                0x003C2390, //910.4MHz   1
+                0x003C239C, //911.6MHz   7
+                0x003C2396, //911.0MHz   4
+                0x003C23A2, //912.2MHz   10
+                0x003C238E, //910.2MHz   0
+                0x003C23A6, //912.6MHz   12
+                0x003C2398, //911.2MHz   5
+                0x003C2394, //910.8MHz   3
+                0x003C23AE, //913.4MHz   16
+                0x003C239A, //911.4MHz   6
+                0x003C23AA, //913.0MHz   14
+        };
+        private final int[] krFreqSortedIdx = new int[]{
+                13, 9, 15, 8, 11,
+                18, 2, 17, 1, 7,
+                4, 10, 0, 12, 5,
+                3, 16, 6, 14};
+
+        private final int KR2017RW_CHN_CNT = 6;
+        private final double[] KR2017RwTableOfFreq = new double[]{
+                917.30, 917.90, 918.50, 919.10, 919.70, 920.30};
+        private int[] kr2017RwFreqTable = new int[]{
+                0x003C23D5, // 917.3 -> 917.25  MHz Channel 1
+                0x003C23DB, //917.9 -> 918 MHz Channel 2
+                0x003C23E1, //918.5 MHz Channel 3
+                0x003C23E7, //919.1 -> 919  MHz Channel 4
+                0x003C23ED, //919.7 -> 919.75 MHz Channel 5
+                0x003C23F3 // 920.3 -> 920.25 MHz Channel 6
+        };
+        private final int[] kr2017RwFreqSortedIdx = new int[]{
+                3, 0, 5, 1, 4, 2};
+
+        private final int JPN2012_CHN_CNT = 4;
+        private final double[] JPN2012TableOfFreq = new double[]{
+                916.80, 918.00, 919.20, 920.40};
+        private final int[] jpn2012FreqTable = new int[]{
+                0x003C23D0, //916.800MHz   Channel 1
+                0x003C23DC, //918.000MHz   Channel 2
+                0x003C23E8, //919.200MHz   Channel 3
+                0x003C23F4, //920.400MHz   Channel 4
+                //0x003C23F6, //920.600MHz   Channel 5
+                //0x003C23F8, //920.800MHz   Channel 6
+        };
+        private final int[] jpn2012FreqSortedIdx = new int[]{
+                0, 1, 2, 3};
+
+        private final int JPN2012A_CHN_CNT = 6;
+        private final double[] JPN2012ATableOfFreq = new double[]{
+                916.80, 918.00, 919.20, 920.40, 920.60, 920.80};
+        private final int[] jpn2012AFreqTable = new int[]{
+                0x003C23D0, //916.800MHz   Channel 1
+                0x003C23DC, //918.000MHz   Channel 2
+                0x003C23E8, //919.200MHz   Channel 3
+                0x003C23F4, //920.400MHz   Channel 4
+                0x003C23F6, //920.600MHz   Channel 5
+                0x003C23F8, //920.800MHz   Channel 6
+        };
+        private final int[] jpn2012AFreqSortedIdx = new int[]{
+                0, 1, 2, 3, 4, 5};
+
+        private final int ETSIUPPERBAND_CHN_CNT = 4;
+        private final double[] ETSIUPPERBANDTableOfFreq = new double[]{
+                916.3, 917.5, 918.7, 919.9};
+        private final int[] etsiupperbandFreqTable = new int[]{
+                0x003C23CB, //916.3 MHz
+                0x003C23D7, //917.5 MHz
+                0x003C23E3, //918.7 MHz
+                0x003C23EF, //919.9 MHz
+        };
+        private final int[] etsiupperbandFreqSortedIdx = new int[]{
+                0, 1, 2, 3};
+
+        private final int VN1_CHN_CNT = 3;
+        private final double[] VN1TableOfFreq = new double[]{
+                866.30, 866.90, 867.50};
+        private final int[] vietnam1FreqTable = new int[]{
+                0x003C21D7, //866.300MHz
+                0x003C21DD, //866.900MHz
+                0x003C21E3, //867.500MHz
+        };
+        private final int[] vietnam1FreqSortedIdx = new int[]{
+                0, 1, 2};
+
+        private final int VN2_CHN_CNT = 8;
+        private final double[] VN2TableOfFreq = new double[]{
+                918.75, 919.25, 919.75, 920.25, 920.75, 921.25, 921.75, 922.25};
+        private final int[] vietnam2FreqTable = new int[]{
+                0x00180E61, //920.25 MHz
+                0x00180E5D, //919.25 MHz
+                0x00180E5B, //918.75 MHz
+                0x00180E67, //921.75 MHz
+                0x00180E69, //922.25 MHz
+                0x00180E5F, //919.75 MHz
+                0x00180E65, //921.25 MHz
+                0x00180E63, //920.75 MHz
+        };
+        private final int[] vietnam2FreqSortedIdx = new int[]{
+                3, 1, 0, 6, 7, 2, 5, 4};
+
+        private final int VN3_CHN_CNT = 4;
+        private final double[] VN3TableOfFreq = new double[]{
+                920.75, 921.25, 921.75, 922.25};
+        private final int[] vietnam3FreqTable = new int[]{
+                0x00180E67, //921.75 MHz
+                0x00180E69, //922.25 MHz
+                0x00180E65, //921.25 MHz
+                0x00180E63, //920.75 MHz
+        };
+        private final int[] vietnam3FreqSortedIdx = new int[]{
+                2, 3, 1, 0};
+
+        public final int iCountryEnumInfoColumn = 7;
+        public String[] strCountryEnumInfo = {
+                "1", "Albania1", "-1", "4", "Fixed", "600", "865.7",
+                "2", "Albania2", "-2 RW", "23", "Hop", "250", "915.25",
+                "3", "Algeria1", "-1", "4", "Fixed", "600", "871.6",
+                "4", "Algeria2", "-1", "4", "Fixed", "600", "881.6",
+                "5", "Algeria3", "-9", "3", "Fixed", "1200", "916.3",
+                "6", "Algeria4", "-7", "2", "Fixed", "500", "925.25",
+                "7", "Argentina", "-2 RW", "50", "Hop", "500", "902.75",
+                "8", "Armenia", "-1", "4", "Fixed", "600", "865.7",
+                "9", "Australia1", "-2 AS", "10", "Hop", "500", "920.75",
+                "10", "Australia2", "-2 AS", "14", "Hop", "500", "918.75",
+                "11", "Austria1", "-1", "4", "Fixed", "600", "865.7",
+                "12", "Austria2", "-9", "3", "Fixed", "1200", "916.3",
+                "13", "Azerbaijan", "-1", "4", "Fixed", "600", "865.7",
+                "14", "Bahrain", "-1", "4", "Fixed", "600", "865.7",
+                "15", "Bangladesh", "-1", "4", "Fixed", "600", "865.7",
+                "16", "Belarus", "-1", "4", "Fixed", "600", "865.7",
+                "17", "Belgium1", "-1", "4", "Fixed", "600", "865.7",
+                "18", "Belgium2", "-9", "3", "Fixed", "1200", "916.3",
+                "19", "Bolivia", "-2", "50", "Hop", "500", "902.75",
+                "20", "Bosnia", "-1", "4", "Fixed", "600", "865.7",
+                "21", "Botswana", "-1", "4", "Fixed", "600", "865.7",
+                "22", "Brazil1", "-2 RW", "9", "Fixed", "500", "902.75",
+                "23", "Brazil2", "-2 RW", "24", "Fixed", "500", "915.75",
+                "24", "Brunei1", "-1", "4", "Fixed", "600", "865.7",
+                "25", "Brunei2", "-7", "7", "Fixed", "250", "923.25",
+                "26", "Blgaria1", "-1", "4", "Fixed", "600", "865.7",
+                "27", "Bulgaria2", "-9", "3", "Fixed", "1200", "916.3",
+                "28", "Cambodia", "-7", "16", "Hop", "250", "920.625",
+                "29", "Cameroon", "-1", "4", "Fixed", "600", "865.7",
+                "30", "Canada", "-2", "50", "Hop", "500", "902.75",
+                "31", "Chile1", "-2 RW", "3", "Fixed", "1200", "916.3",
+                "32", "Chile2", "-2 RW", "24", "Hop", "500", "915.75",
+                "33", "Chile3", "-2 RW", "4", "Hop", "500", "925.75",
+                "34", "China", "-7", "16", "Hop", "250", "920.625",
+                "35", "Colombia", "-2 RW", "50", "Hop", "500", "902.75",
+                "36", "Congo", "-1", "4", "Fixed", "600", "865.7",
+                "37", "CostaRica", "-2 RW", "50", "Hop", "500", "902.75",
+                "38", "Cotedlvoire", "-1", "4", "Fixed", "600", "865.7",
+                "39", "Croatia", "-1", "4", "Fixed", "600", "865.7",
+                "40", "Cuba", "-2 RW", "50", "Hop", "500", "902.75",
+                "41", "Cyprus1", "-1", "4", "Fixed", "600", "865.7",
+                "42", "Cyprus2", "-9", "3", "Fixed", "1200", "916.3",
+                "43", "Czech1", "-1", "4", "Fixed", "600", "865.7",
+                "44", "Czech2", "-9", "3", "Fixed", "1200", "916.3",
+                "45", "Denmark1", "-1", "4", "Fixed", "600", "865.7",
+                "46", "Denmark2", "-9", "3", "Fixed",  "1200", "916.3",
+                "47", "Dominican", "-2 RW", "50", "Hop", "500", "902.75",
+                "48", "Ecuador", "-2 RW", "50", "Hop", "500", "902.75",
+                "49", "Egypt", "-1", "4", "Fixed",  "600", "865.7",
+                "50", "ElSalvador", "-2 RW", "50", "Hop", "500", "902.75",
+                "51", "Estonia", "-1", "4", "Fixed", "600", "865.7",
+                "52", "Finland1", "-1", "4", "Fixed",  "600", "865.7",
+                "53", "Finland2", "-9", "3", "Fixed", "1200", "916.3",
+                "54", "France", "-1", "4", "Fixed", "600", "865.7",
+                "55", "Georgia", "-1", "4", "Fixed",  "600", "865.7",
+                "56", "Germany", "-1", "4", "Fixed", "600", "865.7",
+                "57", "Ghana", "-1", "4", "Fixed", "600", "865.7",
+                "58", "Greece", "-1", "4", "Fixed",  "600", "865.7",
+                "59", " Guatemala", "-2 RW", "50", "Hop", "500", "902.75",
+                "60", "HongKong1", "-1", "4", "Fixed", "600", "865.7",
+                "61", "HongKong2", "-2 OFCA", "50", "Hop", "50", "921.25",
+                "62", "Hungary1", "-1", "4", "Fixed", "600", "865.7",
+                "63", "Hungary2", "-9", "3", "Fixed", "1200", "916.3",
+                "64", "Iceland", "-1", "4", "Fixed", "600", "865.7",
+                "65", "India", "-1", "3", "Fixed", "600", "865.7",
+                "66", "Indonesia", "-7", "4", "Hop", "500", "923.75",
+                "67", "Iran", "-1", "4", "Fixed", "600", "865.7",
+                "68", "Ireland1", "-1", "4", "Fixed", "600", "865.7",
+                "69", "Ireland2", "-9", "3", "Fixed", "1200", "916.3",
+                "70", "Israel", "-9", "3", "Fixed", "500", "915.5",
+                "71", "Italy", "-1", "4", "Fixed", "600", "865.7",
+                "72", "Jamaica", "-2 RW", "50", "Hop", "500", "902.75",
+                "73", "Japan4", "-8", "4", "Fixed", "1200", "916.8",
+                "74", "Japan6", "-8", "6", "Fixed", "1200", "916.8",
+                "75", "Jordan", "-1", "4", "Fixed", "600", "865.7",
+                "76", "Kazakhstan", "-1", "4", "Fixed", "600", "865.7",
+                "77", "Kenya", "-1", "4", "Fixed", "600", "865.7",
+                "78", "Korea", "-6", "6", "Hop", "600", "917.3",
+                "79", "KoreaDPR", "-7", "16", "Hop", "250", "920.625",
+                "80", "Kuwait", "-1", "4", "Fixed", "600", "865.7",
+                "81", "Kyrgyz", "-1", "4", "Fixed", "600", "865.7",
+                "82", "Latvia", "-1", "4", "Fixed", "600", "865.7",
+                "83", "Lebanon", "-1", "4", "Fixed", "600", "865.7",
+                "84", "Libya", "-1", "4", "Fixed", "600", "865.7",
+                "85", "Liechtenstein1", "-1", "4", "Fixed", "600", "865.7",
+                "86", "Liechtenstein2", "-9", "3", "Fixed", "1200", "916.3",
+                "87", "Lithuania1", "-1", "4", "Fixed", "600", "865.7",
+                "88", "Lithuania2", "-9", "3", "Fixed", "1200", "916.3",
+                "89", "Luxembourg1", "-1", "4", "Fixed", "600", "865.7",
+                "90", "Luxembourg2", "-9", "3", "Fixed", "1200", "916.3",
+                "91", "Macao", "-7", "16", "Hop", "250", "920.625",
+                "92", "Macedonia", "-1", "4", "Fixed", "600", "865.7",
+                "93", "Malaysia", "-7", "6", "Hop", "500", "919.75",
+                "94", "Malta1", "-1", "4", "Fixed", "600", "865.7",
+                "95", "Malta2", "-9", "3", "Fixed", "1200", "916.3",
+                "96", "Mauritius", "-1", "4", "Fixed", "600", "865.7",
+                "97", "Mexico", "-2", "50", "Hop", "500", "902.75",
+                "98", "Moldova1", "-1", "4", "Fixed", "600", "865.7",
+                "99", "Moldova2", "-9", "3", "Fixed", "1200", "916.3",
+                "100", "Mongolia", "-7", "16", "Hop", "250", "920.625",
+                "101", "Montenegro", "-1", "4", "Fixed", "600", "865.7",
+                "102", "Morocco", "-1", "4", "Fixed", "600", "865.7",
+                "103", "Netherlands", "-1", "4", "Fixed", "600", "865.7",
+                "104", "NewZealand1", "-1", "4", "Hop", "500", "864.75",
+                "105", "NewZealand2", "-2 NZ", "14", "Hop", "500", "920.75",
+                "106", "Nicaragua", "-2 RW", "50", "Hop", "500", "902.75",
+                "107", "Nigeria", "-1", "4", "Fixed", "600", "865.7",
+                "108", "Norway1", "-1", "4", "Fixed", "600", "865.7",
+                "109", "Norway2", "-9", "3", "Fixed", "1200", "916.3",
+                "110", "Oman", "-1", "4", "Fixed", "600", "865.7",
+                "111", "Pakistan", "-1", "4", "Fixed", "600", "865.7",
+                "112", "Panama", "-2 RW", "50", "Hop", "500", "902.75",
+                "113", "Paraguay", "-2 RW", "50", "Hop", "500", "902.75",
+                "114", "Peru", "-2 RW", "24", "Hop", "500", "915.75",
+                "115", "Philippines", "-2 RW", "50", "Hop", "250", "918.125",
+                "116", "Poland", "-1", "4", "Fixed", "600", "865.7",
+                "117", "Portugal", "-1", "4", "Fixed", "600", "865.7",
+                "118", "Romania", "-1", "4", "Fixed", "600", "865.7",
+                "119", "Russia1", "-1", "4", "Fixed", "600", "866.3",
+                "120", "Russia3", "-9", "4", "Fixed", "1200", "915.6",
+                "121", "Senegal", "-1", "4", "Fixed", "600", "865.7",
+                "122", "Serbia", "-1", "4", "Fixed", "600", "865.7",
+                "123", "Singapore1", "-1", "4", "Fixed", "600", "865.7",
+                "124", "Singapore2", "-2 RW", "8", "Hop", "500", "920.75",
+                "125", "Slovak1", "-1", "4", "Fixed", "600", "865.7",
+                "126", "Slovak2", "-9", "3", "Fixed", "1200", "916.3",
+                "127", "Slovenia1", "-1", "4", "Fixed", "600", "865.7",
+                "128", "Solvenia2", "-9", "3", "Fixed", "1200", "916.3",
+                "129", "SAfrica1", "-1", "4", "Fixed", "600", "865.7",
+                "130", "SAfrica2", "-9", "7", "Fixed", "500", "915.7",
+                "131", "Spain", "-1", "4", "Fixed", "600", "865.7",
+                "132", "SriLanka", "-1", "4", "Fixed", "600", "865.7",
+                "133", "Sudan", "-1", "4", "Fixed", "600", "865.7",
+                "134", "Sweden1", "-1", "4", "Fixed", "600", "865.7",
+                "135", "Sweden2", "-9", "3", "Fixed", "1200", "916.3",
+                "136", "Switzerland1", "-1", "4", "Fixed", "600", "865.7",
+                "137", "Switzerland2", "-9", "3", "Fixed", "1200", "916.3",
+                "138", "Syria", "-1", "4", "Fixed", "600", "865.7",
+                "139", "Taiwan1", "-4", "12", "Hop", "375", "922.875",
+                "140", "Taiwan2", "-4", "12", "Hop", "375", "922.875",
+                "141", "Tajikistan", "-1", "4", "Fixed", "600", "865.7",
+                "142", "Tanzania", "-1", "4", "Fixed", "600", "865.7",
+                "143", "Thailand", "-2 RW", "8", "Hop", "500", "920.75",
+                "144", "Trinidad", "-2 RW", "50", "Hop", "500", "902.75",
+                "145", "Tunisia", "-1", "4", "Fixed", "600", "865.7",
+                "146", "Turkey", "-1", "4", "Fixed", "600", "865.7",
+                "147", "Turkmenistan", "-1", "4", "Fixed", "600", "865.7",
+                "148", "Uganda", "-1", "4", "Fixed", "600", "865.7",
+                "149", "Ukraine", "-1", "4", "Fixed", "600", "865.7",
+                "150", "UAE", "-1", "4", "Fixed", "600", "865.7",
+                "151", "UK1", "-1", "4", "Fixed", "600", "865.7",
+                "152", "UK2", "-9", "3", "Fixed", "1200", "916.3",
+                "153", "USA", "-2", "50", "Hop", "500", "902.75",
+                "154", "Uruguay", "-2 RW", "50", "Hop", "500", "902.75",
+                "155", "Venezuela", "-2 RW", "50", "Hop", "500", "902.75",
+                "156", "Vietnam1", "-1", "4", "Fixed", "600", "866.3",
+                "157", "Vietnam2", "-7", "16", "Hop", "500", "918.75",
+                "158", "Yemen", "-1", "4", "Fixed", "600", "865.7",
+                "159", "Zimbabwe", "-1", "4", "Fixed", "600", "865.7",
+                "160", "Vietnam3", "-7", "4", "Hop", "500", "920.75"
+        };
+    }
 /*
     boolean setChannelData(RegionCodes regionCode) {
         return true;
@@ -990,81 +1381,81 @@ public class RfidReader {
 //                    default:
 //                        return FCCTableOfFreq;
 //                }
-                return FCCTableOfFreq;
+                return countryChannelData.FCCTableOfFreq;
             case PR:
-                return PRTableOfFreq;
+                return countryChannelData.PRTableOfFreq;
             case VZ:
-                return VZTableOfFreq;
+                return countryChannelData.VZTableOfFreq;
             case AU:
-                return AUSTableOfFreq;
+                return countryChannelData.AUSTableOfFreq;
             case BR1:
-                return BR1TableOfFreq;
+                return countryChannelData.BR1TableOfFreq;
             case BR2:
-                return BR2TableOfFreq;
+                return countryChannelData.BR2TableOfFreq;
             case BR3:
-                return BR3TableOfFreq;
+                return countryChannelData.BR3TableOfFreq;
             case BR4:
-                return BR4TableOfFreq;
+                return countryChannelData.BR4TableOfFreq;
             case BR5:
-                return BR5TableOfFreq;
+                return countryChannelData.BR5TableOfFreq;
             case HK:
             case SG:
             case TH:
             case VN:
-                return HKTableOfFreq;
+                return countryChannelData.HKTableOfFreq;
             case VN1:
-                return VN1TableOfFreq;
+                return countryChannelData.VN1TableOfFreq;
             case VN2:
-                return VN2TableOfFreq;
+                return countryChannelData.VN2TableOfFreq;
             case VN3:
-                return VN3TableOfFreq;
+                return countryChannelData.VN3TableOfFreq;
             case BD:
-                return BDTableOfFreq;
+                return countryChannelData.BDTableOfFreq;
             case TW:
-                return TWTableOfFreq;
+                return countryChannelData.TWTableOfFreq;
             case MY:
-                return MYSTableOfFreq;
+                return countryChannelData.MYSTableOfFreq;
             case ZA:
-                return ZATableOfFreq;
+                return countryChannelData.ZATableOfFreq;
             case ID:
-                return IDTableOfFreq;
+                return countryChannelData.IDTableOfFreq;
             case IL:
-                return ILTableOfFreq;
+                return countryChannelData.ILTableOfFreq;
             case IL2019RW:
-                return IL2019RWTableOfFreq;
+                return countryChannelData.IL2019RWTableOfFreq;
             case PH:
-                return PHTableOfFreq;
+                return countryChannelData.PHTableOfFreq;
             case NZ:
-                return NZTableOfFreq;
+                return countryChannelData.NZTableOfFreq;
             case CN:
-                return CHNTableOfFreq;
+                return countryChannelData.CHNTableOfFreq;
 
             case UH1:
-                return UH1TableOfFreq;
+                return countryChannelData.UH1TableOfFreq;
             case UH2:
-                return UH2TableOfFreq;
+                return countryChannelData.UH2TableOfFreq;
             case LH:
-                return LHTableOfFreq;
+                return countryChannelData.LHTableOfFreq;
             case LH1:
-                return LH1TableOfFreq;
+                return countryChannelData.LH1TableOfFreq;
             case LH2:
-                return LH2TableOfFreq;
+                return countryChannelData.LH2TableOfFreq;
 
             case ETSI:
                 appendToLog("Got ETSI Table of Frequencies");
-                return ETSITableOfFreq;
+                return countryChannelData.ETSITableOfFreq;
             case IN:
-                return IDATableOfFreq;
+                return countryChannelData.IDATableOfFreq;
             case KR:
-                return KRTableOfFreq;
+                return countryChannelData.KRTableOfFreq;
             case KR2017RW:
-                return KR2017RwTableOfFreq;
+                return countryChannelData.KR2017RwTableOfFreq;
             case JP:
-                return JPN2012TableOfFreq;
+                return countryChannelData.JPN2012TableOfFreq;
             case JP6:
-                return JPN2012ATableOfFreq;
+                return countryChannelData.JPN2012ATableOfFreq;
             case ETSIUPPERBAND:
-                return ETSIUPPERBANDTableOfFreq;
+                return countryChannelData.ETSIUPPERBANDTableOfFreq;
 
             default:
                 return new double[0];
@@ -1073,21 +1464,21 @@ public class RfidReader {
         int iRegionEnum = regionCode.ordinal() - RegionCodes.Albania1.ordinal() + 1;
         if (DEBUG) appendToLog("regionCode = " + regionCode.toString() + ", iRegionEnum = " + iRegionEnum);
 
-        String strChannelCount = strCountryEnumInfo[(iRegionEnum - 1) * iCountryEnumInfoColumn + 3];
+        String strChannelCount = countryChannelData.strCountryEnumInfo[(iRegionEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 3];
         int iChannelCount = -1;
         try {
             iChannelCount = Integer.parseInt(strChannelCount);
         } catch (Exception ex) { }
         if (DEBUG) appendToLog("strChannelCount = " + strChannelCount + ", iChannelCount = " + iChannelCount);
 
-        String strChannelSeparation = strCountryEnumInfo[(iRegionEnum - 1) * iCountryEnumInfoColumn + 5];
+        String strChannelSeparation = countryChannelData.strCountryEnumInfo[(iRegionEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 5];
         int iChannelSeparation = -1;
         try {
             iChannelSeparation = Integer.parseInt(strChannelSeparation);
         } catch (Exception ex) { }
         if (DEBUG) appendToLog("strChannelSeparation = " + strChannelSeparation + ",iChannelSeparation = " + iChannelSeparation);
 
-        String strChannelFirst = strCountryEnumInfo[(iRegionEnum - 1) * iCountryEnumInfoColumn + 6];
+        String strChannelFirst = countryChannelData.strCountryEnumInfo[(iRegionEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 6];
         double dChannelFirst = -1;
         try {
             dChannelFirst = Double.parseDouble(strChannelFirst);
@@ -1124,10 +1515,10 @@ public class RfidReader {
 //                    default:
 //                        return fccFreqSortedIdx;
 //                }
-                return fccFreqSortedIdx;
+                return countryChannelData.fccFreqSortedIdx;
             case PR:
                 if (freqSortedIdx == null) {
-                    freqSortedIdx = new int[PRTableOfFreq.length];
+                    freqSortedIdx = new int[countryChannelData.PRTableOfFreq.length];
                     if (DEBUG) appendToLog("PR: freqSortedIdx size = " + freqSortedIdx.length);
                     ArrayList<Integer> list = new ArrayList<Integer>();
                     for (int i = 0; i < freqSortedIdx.length; i++) list.add(new Integer(i));
@@ -1139,76 +1530,76 @@ public class RfidReader {
                 }
                 return freqSortedIdx;
             case VZ:
-                return vzFreqSortedIdx;
+                return countryChannelData.vzFreqSortedIdx;
             case AU:
-                return ausFreqSortedIdx;
+                return countryChannelData.ausFreqSortedIdx;
             case BR1:
-                return br1FreqSortedIdx;
+                return countryChannelData.br1FreqSortedIdx;
             case BR2:
-                return br2FreqSortedIdx;
+                return countryChannelData.br2FreqSortedIdx;
             case BR3:
-                return br3FreqSortedIdx;
+                return countryChannelData.br3FreqSortedIdx;
             case BR4:
-                return br4FreqSortedIdx;
+                return countryChannelData.br4FreqSortedIdx;
             case BR5:
-                return br5FreqSortedIdx;
+                return countryChannelData.br5FreqSortedIdx;
             case HK:
             case SG:
             case TH:
             case VN:
-                return hkFreqSortedIdx;
+                return countryChannelData.hkFreqSortedIdx;
             case VN1:
-                return vietnam1FreqSortedIdx;
+                return countryChannelData.vietnam1FreqSortedIdx;
             case VN2:
-                return vietnam2FreqSortedIdx;
+                return countryChannelData.vietnam2FreqSortedIdx;
             case VN3:
-                return vietnam3FreqSortedIdx;
+                return countryChannelData.vietnam3FreqSortedIdx;
             case BD:
-                return bdFreqSortedIdx;
+                return countryChannelData.bdFreqSortedIdx;
             case TW:
-                return twFreqSortedIdx;
+                return countryChannelData.twFreqSortedIdx;
             case MY:
-                return mysFreqSortedIdx;
+                return countryChannelData.mysFreqSortedIdx;
             case ZA:
-                return zaFreqSortedIdx;
+                return countryChannelData.zaFreqSortedIdx;
             case ID:
-                return indonesiaFreqSortedIdx;
+                return countryChannelData.indonesiaFreqSortedIdx;
             case IL:
-                return ilFreqSortedIdx;
+                return countryChannelData.ilFreqSortedIdx;
             case IL2019RW:
-                return il2019RwFreqSortedIdx;
+                return countryChannelData.il2019RwFreqSortedIdx;
             case PH:
-                return phFreqSortedIdx;
+                return countryChannelData.phFreqSortedIdx;
             case NZ:
-                return nzFreqSortedIdx;
+                return countryChannelData.nzFreqSortedIdx;
             case CN:
-                return cnFreqSortedIdx;
+                return countryChannelData.cnFreqSortedIdx;
 
             case UH1:
-                return uh1FreqSortedIdx;
+                return countryChannelData.uh1FreqSortedIdx;
             case UH2:
-                return uh2FreqSortedIdx;
+                return countryChannelData.uh2FreqSortedIdx;
             case LH:
-                return lhFreqSortedIdx;
+                return countryChannelData.lhFreqSortedIdx;
             case LH1:
-                return lh1FreqSortedIdx;
+                return countryChannelData.lh1FreqSortedIdx;
             case LH2:
-                return lh2FreqSortedIdx;
+                return countryChannelData.lh2FreqSortedIdx;
 
             case ETSI:
-                return etsiFreqSortedIdx;
+                return countryChannelData.etsiFreqSortedIdx;
             case IN:
-                return indiaFreqSortedIdx;
+                return countryChannelData.indiaFreqSortedIdx;
             case KR:
-                return krFreqSortedIdx;
+                return countryChannelData.krFreqSortedIdx;
             case KR2017RW:
-                return kr2017RwFreqSortedIdx;
+                return countryChannelData.kr2017RwFreqSortedIdx;
             case JP:
-                return jpn2012FreqSortedIdx;
+                return countryChannelData.jpn2012FreqSortedIdx;
             case JP6:
-                return jpn2012AFreqSortedIdx;
+                return countryChannelData.jpn2012AFreqSortedIdx;
             case ETSIUPPERBAND:
-                return etsiupperbandFreqSortedIdx;
+                return countryChannelData.etsiupperbandFreqSortedIdx;
 
             default:
                 return null;
@@ -1257,7 +1648,7 @@ public class RfidReader {
 //                    if (DEBUG) appendToLog("i = " + i + ", freqSortedIdx = " + freqSortedIdx[i] + ", fccFreqTableIdx = " + fccFreqTableIdx[freqSortedIdx[i]] + ", freqTable[" + i + "] = " + freqTable[i]);
 //                }
 //                return freqTable;
-                return fccFreqTable;
+                return countryChannelData.fccFreqTable;
             case PR:
                 int[] freqSortedIndex = FreqIndex(regionCode);
                 int[] freqTable = null;
@@ -1265,88 +1656,88 @@ public class RfidReader {
                     freqTable = new int[freqSortedIndex.length];
                     for (int i = 0; i < freqSortedIndex.length; i++) {
                         int j = 0;
-                        for (; j < FCCTableOfFreq.length; j++) {
-                            if (FCCTableOfFreq[j] == PRTableOfFreq[freqSortedIndex[i]]) break;
+                        for (; j < countryChannelData.FCCTableOfFreq.length; j++) {
+                            if (countryChannelData.FCCTableOfFreq[j] == countryChannelData.PRTableOfFreq[freqSortedIndex[i]]) break;
                         }
-                        freqTable[i] = fccFreqTable[fccFreqTableIdx[j]];
+                        freqTable[i] = countryChannelData.fccFreqTable[countryChannelData.fccFreqTableIdx[j]];
                     }
                 } else
                 if (DEBUG) appendToLog("NULL freqSortedIndex");
                 return freqTable;   // return prFreqTable;
             case VZ:
-                return vzFreqTable;
+                return countryChannelData.vzFreqTable;
             case AU:
-                return AusFreqTable;
+                return countryChannelData.AusFreqTable;
 
             case BR1:
-                return br1FreqTable;
+                return countryChannelData.br1FreqTable;
             case BR2:
-                return br2FreqTable;
+                return countryChannelData.br2FreqTable;
             case BR3:
-                return br3FreqTable;
+                return countryChannelData.br3FreqTable;
             case BR4:
-                return br4FreqTable;
+                return countryChannelData.br4FreqTable;
             case BR5:
-                return br5FreqTable;
+                return countryChannelData.br5FreqTable;
 
             case HK:
             case SG:
             case TH:
             case VN:
-                return hkFreqTable;
+                return countryChannelData.hkFreqTable;
             case VN1:
-                return vietnam1FreqTable;
+                return countryChannelData.vietnam1FreqTable;
             case VN2:
-                return vietnam2FreqTable;
+                return countryChannelData.vietnam2FreqTable;
             case VN3:
-                return vietnam3FreqTable;
+                return countryChannelData.vietnam3FreqTable;
             case BD:
-                return bdFreqTable;
+                return countryChannelData.bdFreqTable;
             case TW:
-                return twFreqTable;
+                return countryChannelData.twFreqTable;
             case MY:
-                return mysFreqTable;
+                return countryChannelData.mysFreqTable;
             case ZA:
-                return zaFreqTable;
+                return countryChannelData.zaFreqTable;
 
             case ID:
-                return indonesiaFreqTable;
+                return countryChannelData.indonesiaFreqTable;
             case IL:
-                return ilFreqTable;
+                return countryChannelData.ilFreqTable;
             case IL2019RW:
-                return il2019RwFreqTable;
+                return countryChannelData.il2019RwFreqTable;
             case PH:
-                return phFreqTable;
+                return countryChannelData.phFreqTable;
             case NZ:
-                return nzFreqTable;
+                return countryChannelData.nzFreqTable;
             case CN:
-                return cnFreqTable;
+                return countryChannelData.cnFreqTable;
 
             case UH1:
-                return uh1FreqTable;
+                return countryChannelData.uh1FreqTable;
             case UH2:
-                return uh2FreqTable;
+                return countryChannelData.uh2FreqTable;
             case LH:
-                return lhFreqTable;
+                return countryChannelData.lhFreqTable;
             case LH1:
-                return lh1FreqTable;
+                return countryChannelData.lh1FreqTable;
             case LH2:
-                return lh2FreqTable;
+                return countryChannelData.lh2FreqTable;
 
             case ETSI:
-                return etsiFreqTable;
+                return countryChannelData.etsiFreqTable;
             case IN:
-                return indiaFreqTable;
+                return countryChannelData.indiaFreqTable;
             case KR:
-                return krFreqTable;
+                return countryChannelData.krFreqTable;
             case KR2017RW:
-                return kr2017RwFreqTable;
+                return countryChannelData.kr2017RwFreqTable;
             case JP:
-                return jpn2012FreqTable;
+                return countryChannelData.jpn2012FreqTable;
             case JP6:
-                return jpn2012AFreqTable;
+                return countryChannelData.jpn2012AFreqTable;
             case ETSIUPPERBAND:
-                return etsiupperbandFreqTable;
+                return countryChannelData.etsiupperbandFreqTable;
 
             default:
                 return null;
@@ -1518,9 +1909,11 @@ public class RfidReader {
                 (bis108 ? rfidReaderChipR2000.rx000Setting.getQuerySelect() : rfidReaderChipE710.rx000Setting.getQuerySelect()), getPwrlevel(), getInvAlgo(), getQValue());
         boolean result = true;
         if (index != (bis108 ? rfidReaderChipR2000.rx000Setting.getInvSelectIndex() : rfidReaderChipE710.rx000Setting.getInvSelectIndex())) {
+            appendToLog("BtDataOut: RfidReader.setSelectCriteria3 goes to setInvSelectIndex");
             result = (bis108 ? rfidReaderChipR2000.rx000Setting.setInvSelectIndex(index) : rfidReaderChipE710.rx000Setting.setInvSelectIndex(index));
             if (DEBUG) appendToLog("After setInvSelectIndex, result = " + result);
         }
+        appendToLog("BtDataOut: RfidReader.setSelectCriteria3 goes to setSelectEnable with result = " + result);
         if (result) result = (bis108 ? rfidReaderChipR2000.rx000Setting.setSelectEnable(enable ? 1 : 0, target, action, delay) : rfidReaderChipE710.rx000Setting.setSelectEnable(enable ? 1 : 0, target, action, delay));
         if (DEBUG) appendToLog("After setSelectEnable, result = " + result);
         if (result) result = (bis108 ? rfidReaderChipR2000.rx000Setting.setSelectMaskBank(bank) : rfidReaderChipE710.rx000Setting.setSelectMaskBank(bank));
@@ -1533,6 +1926,7 @@ public class RfidReader {
         if (result) result = (bis108 ? rfidReaderChipR2000.rx000Setting.setSelectMaskData(mask) : rfidReaderChipE710.rx000Setting.setSelectMaskData(mask));
         if (DEBUG) appendToLog("After setSelectMaskData, result = " + result);
         if (result) {
+            if (DEBUG) appendToLog("RfidReader.setSelectCriteria3 with enable = " + enable);
             if (enable) {
                 result = (bis108 ? rfidReaderChipR2000.rx000Setting.setTagSelect(1) : rfidReaderChipE710.rx000Setting.setTagSelect(1));
                 if (DEBUG) appendToLog("After setTagSelect[1], result = " + result);
@@ -1552,8 +1946,8 @@ public class RfidReader {
     }
     public PostMatchData postMatchDataOld; public boolean postMatchDataChanged = false;
     public RfidReader.PreMatchData preMatchDataOld; public boolean preMatchDataChanged = false;
-    public boolean setSelectedTag1(String selectMask, int selectBank, int selectOffset, int delay, long pwrlevel, int qValue, int matchRep) {
-        appendToLog("setSelectCriteria selectMask = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", delay = " + delay + ", pwrlevel = " + pwrlevel + ", qValue = " + qValue + ", matchRep = " + matchRep);
+    public boolean setSelectedTag1(boolean selectOne, String selectMask, int selectBank, int selectOffset, int delay, long pwrlevel, int qValue, int matchRep) {
+        appendToLog("BtDataOut: setSelectCriteria selectOne = " + selectOne + ", selectMask = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", delay = " + delay + ", pwrlevel = " + pwrlevel + ", qValue = " + qValue + ", matchRep = " + matchRep);
         boolean setSuccess = true, DEBUG = true;
         if (selectMask == null)   selectMask = "";
 
@@ -1566,17 +1960,19 @@ public class RfidReader {
             }
             preMatchDataOld = preMatchData;
         }
-        int index = 0;
         int indexCurrent = (bis108 ? rfidReaderChipR2000.rx000Setting.invSelectIndex : rfidReaderChipE710.rx000Setting.invSelectIndex);
         for (int i = 0; i < 7; i++) {
+            appendToLog("BtDataOut: RfidReader.setSelectTag1 1 goes to setInvSelectIndex with i = " + i);
             if (bis108) rfidReaderChipR2000.rx000Setting.setInvSelectIndex(i); else rfidReaderChipE710.rx000Setting.setInvSelectIndex(i);
-            if ((bis108 ? rfidReaderChipR2000.rx000Setting.getSelectEnable() : rfidReaderChipE710.rx000Setting.getSelectEnable()) == 0) {
-                appendToLog("free select when i = " + i + ". Going to setSelectCriteria");
+            int isEnabled = (bis108 ? rfidReaderChipR2000.rx000Setting.getSelectEnable() : rfidReaderChipE710.rx000Setting.getSelectEnable());
+            if (isEnabled == 0 || selectOne) {
+                appendToLog("BtDataOut setSelectTag1. free select when i = " + i + ". Going to setSelectCriteria");
                 setSuccess = setSelectCriteria3(i, true, 4, 0, delay, selectBank, selectOffset, selectMask, selectMask.length() * 4);
                 if (DEBUG) appendToLog("setSelectCriteria after setSelectCriteria, setSuccess = " + setSuccess);
                 break;
             }
         }
+        appendToLog("BtDataOut: RfidReader.setSelectTag1 2 goes to setInvSelectIndex with indexCurrent = " + indexCurrent);
         if (bis108) rfidReaderChipR2000.rx000Setting.setInvSelectIndex(indexCurrent); else rfidReaderChipE710.rx000Setting.setInvSelectIndex(indexCurrent);
 
         if (setSuccess) setSuccess = setOnlyPowerLevel(pwrlevel);
@@ -1599,6 +1995,26 @@ public class RfidReader {
         if (setSuccess) setSuccess = (bis108 ? rfidReaderChipR2000.rx000Setting.setInvModeCompact(false) : rfidReaderChipE710.rx000Setting.setInvModeCompact(false));
         if (DEBUG) appendToLog("setSelectCriteria after setInvModeCompact, setSuccess = " + setSuccess);
         return setSuccess;
+    }
+    public boolean setSelectedTag(boolean selectOne, String selectMask, int selectBank, int selectOffset, long pwrlevel, int qValue, int matchRep) {
+        appendToLog("cs108LibraryA: setSelectCriteria strTagId = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", pwrlevel = " + pwrlevel + ", qValue = " + qValue + ", matchRep = " + matchRep);
+        appendToLog("BtDataOut: RfidReader.setSelectedTag long goes to setSelectedTag1");
+        return setSelectedTag1(selectOne, selectMask, selectBank, selectOffset, 0, pwrlevel, qValue, matchRep);
+    }
+    public boolean setSelectedTag(String selectMask, int selectBank, long pwrlevel) {
+        boolean isValid = false;
+        if (selectBank < 0 || selectBank > 3) return false;
+        int selectOffset = (selectBank == 1 ? 32 : 0);
+        //appendToLog("BtDataOut: RfidReader.setSelectTag");
+        //isValid = setSelectCriteriaDisable(-1);
+        appendToLog("BtDataOut: RfidReader.setSelectedTag goes to setSelectedTag1");
+        isValid = setSelectedTag1(true, selectMask, selectBank, selectOffset, 0, pwrlevel, 0, 0);
+        return isValid;
+    }
+    public boolean setSelectedTagByTID(String selectMask, long pwrlevel) {
+        if (pwrlevel < 0) pwrlevel = pwrlevelSetting;
+        appendToLog("BtDataOut: RfidReader.setSelectedTagByTID goes to setSelectedTag1");
+        return setSelectedTag1(false, selectMask, 2, 0, 0, pwrlevel, 0, 0);
     }
 
     public final int modifyCodeAA = 0xAA;
@@ -1629,7 +2045,7 @@ public class RfidReader {
         Tajikistan, Tanzania, Thailand, Trinidad, Tunisia,    Turkey, Turkmenistan, Uganda, Ukraine, UAE,
         UK1, UK2, USA, Uruguay, Venezuela,                    Vietnam1, Vietnam2, Yemen, Zimbabwe, Vietnam3
     }
-    public String regionCode2StringArray(RegionCodes region) {
+    public String regionCode2StringArray(@NonNull RegionCodes region) {
         switch (region) {
             case AG:
                 return "Argentina";
@@ -1979,189 +2395,26 @@ public class RfidReader {
             return true;
         }
     }
-    public final int iCountryEnumInfoColumn = 7;
-    public String[] strCountryEnumInfo = {
-            "1", "Albania1", "-1", "4", "Fixed", "600", "865.7",
-            "2", "Albania2", "-2 RW", "23", "Hop", "250", "915.25",
-            "3", "Algeria1", "-1", "4", "Fixed", "600", "871.6",
-            "4", "Algeria2", "-1", "4", "Fixed", "600", "881.6",
-            "5", "Algeria3", "-9", "3", "Fixed", "1200", "916.3",
-            "6", "Algeria4", "-7", "2", "Fixed", "500", "925.25",
-            "7", "Argentina", "-2 RW", "50", "Hop", "500", "902.75",
-            "8", "Armenia", "-1", "4", "Fixed", "600", "865.7",
-            "9", "Australia1", "-2 AS", "10", "Hop", "500", "920.75",
-            "10", "Australia2", "-2 AS", "14", "Hop", "500", "918.75",
-            "11", "Austria1", "-1", "4", "Fixed", "600", "865.7",
-            "12", "Austria2", "-9", "3", "Fixed", "1200", "916.3",
-            "13", "Azerbaijan", "-1", "4", "Fixed", "600", "865.7",
-            "14", "Bahrain", "-1", "4", "Fixed", "600", "865.7",
-            "15", "Bangladesh", "-1", "4", "Fixed", "600", "865.7",
-            "16", "Belarus", "-1", "4", "Fixed", "600", "865.7",
-            "17", "Belgium1", "-1", "4", "Fixed", "600", "865.7",
-            "18", "Belgium2", "-9", "3", "Fixed", "1200", "916.3",
-            "19", "Bolivia", "-2", "50", "Hop", "500", "902.75",
-            "20", "Bosnia", "-1", "4", "Fixed", "600", "865.7",
-            "21", "Botswana", "-1", "4", "Fixed", "600", "865.7",
-            "22", "Brazil1", "-2 RW", "9", "Fixed", "500", "902.75",
-            "23", "Brazil2", "-2 RW", "24", "Fixed", "500", "915.75",
-            "24", "Brunei1", "-1", "4", "Fixed", "600", "865.7",
-            "25", "Brunei2", "-7", "7", "Fixed", "250", "923.25",
-            "26", "Blgaria1", "-1", "4", "Fixed", "600", "865.7",
-            "27", "Bulgaria2", "-9", "3", "Fixed", "1200", "916.3",
-            "28", "Cambodia", "-7", "16", "Hop", "250", "920.625",
-            "29", "Cameroon", "-1", "4", "Fixed", "600", "865.7",
-            "30", "Canada", "-2", "50", "Hop", "500", "902.75",
-            "31", "Chile1", "-2 RW", "3", "Fixed", "1200", "916.3",
-            "32", "Chile2", "-2 RW", "24", "Hop", "500", "915.75",
-            "33", "Chile3", "-2 RW", "4", "Hop", "500", "925.75",
-            "34", "China", "-7", "16", "Hop", "250", "920.625",
-            "35", "Colombia", "-2 RW", "50", "Hop", "500", "902.75",
-            "36", "Congo", "-1", "4", "Fixed", "600", "865.7",
-            "37", "CostaRica", "-2 RW", "50", "Hop", "500", "902.75",
-            "38", "Cotedlvoire", "-1", "4", "Fixed", "600", "865.7",
-            "39", "Croatia", "-1", "4", "Fixed", "600", "865.7",
-            "40", "Cuba", "-2 RW", "50", "Hop", "500", "902.75",
-            "41", "Cyprus1", "-1", "4", "Fixed", "600", "865.7",
-            "42", "Cyprus2", "-9", "3", "Fixed", "1200", "916.3",
-            "43", "Czech1", "-1", "4", "Fixed", "600", "865.7",
-            "44", "Czech2", "-9", "3", "Fixed", "1200", "916.3",
-            "45", "Denmark1", "-1", "4", "Fixed", "600", "865.7",
-            "46", "Denmark2", "-9", "3", "Fixed",  "1200", "916.3",
-            "47", "Dominican", "-2 RW", "50", "Hop", "500", "902.75",
-            "48", "Ecuador", "-2 RW", "50", "Hop", "500", "902.75",
-            "49", "Egypt", "-1", "4", "Fixed",  "600", "865.7",
-            "50", "ElSalvador", "-2 RW", "50", "Hop", "500", "902.75",
-            "51", "Estonia", "-1", "4", "Fixed", "600", "865.7",
-            "52", "Finland1", "-1", "4", "Fixed",  "600", "865.7",
-            "53", "Finland2", "-9", "3", "Fixed", "1200", "916.3",
-            "54", "France", "-1", "4", "Fixed", "600", "865.7",
-            "55", "Georgia", "-1", "4", "Fixed",  "600", "865.7",
-            "56", "Germany", "-1", "4", "Fixed", "600", "865.7",
-            "57", "Ghana", "-1", "4", "Fixed", "600", "865.7",
-            "58", "Greece", "-1", "4", "Fixed",  "600", "865.7",
-            "59", " Guatemala", "-2 RW", "50", "Hop", "500", "902.75",
-            "60", "HongKong1", "-1", "4", "Fixed", "600", "865.7",
-            "61", "HongKong2", "-2 OFCA", "50", "Hop", "50", "921.25",
-            "62", "Hungary1", "-1", "4", "Fixed", "600", "865.7",
-            "63", "Hungary2", "-9", "3", "Fixed", "1200", "916.3",
-            "64", "Iceland", "-1", "4", "Fixed", "600", "865.7",
-            "65", "India", "-1", "3", "Fixed", "600", "865.7",
-            "66", "Indonesia", "-7", "4", "Hop", "500", "923.75",
-            "67", "Iran", "-1", "4", "Fixed", "600", "865.7",
-            "68", "Ireland1", "-1", "4", "Fixed", "600", "865.7",
-            "69", "Ireland2", "-9", "3", "Fixed", "1200", "916.3",
-            "70", "Israel", "-9", "3", "Fixed", "500", "915.5",
-            "71", "Italy", "-1", "4", "Fixed", "600", "865.7",
-            "72", "Jamaica", "-2 RW", "50", "Hop", "500", "902.75",
-            "73", "Japan4", "-8", "4", "Fixed", "1200", "916.8",
-            "74", "Japan6", "-8", "6", "Fixed", "1200", "916.8",
-            "75", "Jordan", "-1", "4", "Fixed", "600", "865.7",
-            "76", "Kazakhstan", "-1", "4", "Fixed", "600", "865.7",
-            "77", "Kenya", "-1", "4", "Fixed", "600", "865.7",
-            "78", "Korea", "-6", "6", "Hop", "600", "917.3",
-            "79", "KoreaDPR", "-7", "16", "Hop", "250", "920.625",
-            "80", "Kuwait", "-1", "4", "Fixed", "600", "865.7",
-            "81", "Kyrgyz", "-1", "4", "Fixed", "600", "865.7",
-            "82", "Latvia", "-1", "4", "Fixed", "600", "865.7",
-            "83", "Lebanon", "-1", "4", "Fixed", "600", "865.7",
-            "84", "Libya", "-1", "4", "Fixed", "600", "865.7",
-            "85", "Liechtenstein1", "-1", "4", "Fixed", "600", "865.7",
-            "86", "Liechtenstein2", "-9", "3", "Fixed", "1200", "916.3",
-            "87", "Lithuania1", "-1", "4", "Fixed", "600", "865.7",
-            "88", "Lithuania2", "-9", "3", "Fixed", "1200", "916.3",
-            "89", "Luxembourg1", "-1", "4", "Fixed", "600", "865.7",
-            "90", "Luxembourg2", "-9", "3", "Fixed", "1200", "916.3",
-            "91", "Macao", "-7", "16", "Hop", "250", "920.625",
-            "92", "Macedonia", "-1", "4", "Fixed", "600", "865.7",
-            "93", "Malaysia", "-7", "6", "Hop", "500", "919.75",
-            "94", "Malta1", "-1", "4", "Fixed", "600", "865.7",
-            "95", "Malta2", "-9", "3", "Fixed", "1200", "916.3",
-            "96", "Mauritius", "-1", "4", "Fixed", "600", "865.7",
-            "97", "Mexico", "-2", "50", "Hop", "500", "902.75",
-            "98", "Moldova1", "-1", "4", "Fixed", "600", "865.7",
-            "99", "Moldova2", "-9", "3", "Fixed", "1200", "916.3",
-            "100", "Mongolia", "-7", "16", "Hop", "250", "920.625",
-            "101", "Montenegro", "-1", "4", "Fixed", "600", "865.7",
-            "102", "Morocco", "-1", "4", "Fixed", "600", "865.7",
-            "103", "Netherlands", "-1", "4", "Fixed", "600", "865.7",
-            "104", "NewZealand1", "-1", "4", "Hop", "500", "864.75",
-            "105", "NewZealand2", "-2 NZ", "14", "Hop", "500", "920.75",
-            "106", "Nicaragua", "-2 RW", "50", "Hop", "500", "902.75",
-            "107", "Nigeria", "-1", "4", "Fixed", "600", "865.7",
-            "108", "Norway1", "-1", "4", "Fixed", "600", "865.7",
-            "109", "Norway2", "-9", "3", "Fixed", "1200", "916.3",
-            "110", "Oman", "-1", "4", "Fixed", "600", "865.7",
-            "111", "Pakistan", "-1", "4", "Fixed", "600", "865.7",
-            "112", "Panama", "-2 RW", "50", "Hop", "500", "902.75",
-            "113", "Paraguay", "-2 RW", "50", "Hop", "500", "902.75",
-            "114", "Peru", "-2 RW", "24", "Hop", "500", "915.75",
-            "115", "Philippines", "-2 RW", "50", "Hop", "250", "918.125",
-            "116", "Poland", "-1", "4", "Fixed", "600", "865.7",
-            "117", "Portugal", "-1", "4", "Fixed", "600", "865.7",
-            "118", "Romania", "-1", "4", "Fixed", "600", "865.7",
-            "119", "Russia1", "-1", "4", "Fixed", "600", "866.3",
-            "120", "Russia3", "-9", "4", "Fixed", "1200", "915.6",
-            "121", "Senegal", "-1", "4", "Fixed", "600", "865.7",
-            "122", "Serbia", "-1", "4", "Fixed", "600", "865.7",
-            "123", "Singapore1", "-1", "4", "Fixed", "600", "865.7",
-            "124", "Singapore2", "-2 RW", "8", "Hop", "500", "920.75",
-            "125", "Slovak1", "-1", "4", "Fixed", "600", "865.7",
-            "126", "Slovak2", "-9", "3", "Fixed", "1200", "916.3",
-            "127", "Slovenia1", "-1", "4", "Fixed", "600", "865.7",
-            "128", "Solvenia2", "-9", "3", "Fixed", "1200", "916.3",
-            "129", "SAfrica1", "-1", "4", "Fixed", "600", "865.7",
-            "130", "SAfrica2", "-9", "7", "Fixed", "500", "915.7",
-            "131", "Spain", "-1", "4", "Fixed", "600", "865.7",
-            "132", "SriLanka", "-1", "4", "Fixed", "600", "865.7",
-            "133", "Sudan", "-1", "4", "Fixed", "600", "865.7",
-            "134", "Sweden1", "-1", "4", "Fixed", "600", "865.7",
-            "135", "Sweden2", "-9", "3", "Fixed", "1200", "916.3",
-            "136", "Switzerland1", "-1", "4", "Fixed", "600", "865.7",
-            "137", "Switzerland2", "-9", "3", "Fixed", "1200", "916.3",
-            "138", "Syria", "-1", "4", "Fixed", "600", "865.7",
-            "139", "Taiwan1", "-4", "12", "Hop", "375", "922.875",
-            "140", "Taiwan2", "-4", "12", "Hop", "375", "922.875",
-            "141", "Tajikistan", "-1", "4", "Fixed", "600", "865.7",
-            "142", "Tanzania", "-1", "4", "Fixed", "600", "865.7",
-            "143", "Thailand", "-2 RW", "8", "Hop", "500", "920.75",
-            "144", "Trinidad", "-2 RW", "50", "Hop", "500", "902.75",
-            "145", "Tunisia", "-1", "4", "Fixed", "600", "865.7",
-            "146", "Turkey", "-1", "4", "Fixed", "600", "865.7",
-            "147", "Turkmenistan", "-1", "4", "Fixed", "600", "865.7",
-            "148", "Uganda", "-1", "4", "Fixed", "600", "865.7",
-            "149", "Ukraine", "-1", "4", "Fixed", "600", "865.7",
-            "150", "UAE", "-1", "4", "Fixed", "600", "865.7",
-            "151", "UK1", "-1", "4", "Fixed", "600", "865.7",
-            "152", "UK2", "-9", "3", "Fixed", "1200", "916.3",
-            "153", "USA", "-2", "50", "Hop", "500", "902.75",
-            "154", "Uruguay", "-2 RW", "50", "Hop", "500", "902.75",
-            "155", "Venezuela", "-2 RW", "50", "Hop", "500", "902.75",
-            "156", "Vietnam1", "-1", "4", "Fixed", "600", "866.3",
-            "157", "Vietnam2", "-7", "16", "Hop", "500", "918.75",
-            "158", "Yemen", "-1", "4", "Fixed", "600", "865.7",
-            "159", "Zimbabwe", "-1", "4", "Fixed", "600", "865.7",
-            "160", "Vietnam3", "-7", "4", "Hop", "500", "920.75"
-    };
     public int getCountryCode() {
         if (bis108) return rfidReaderChipR2000.rx000OemSetting.getCountryCode();
         final boolean DEBUG = false;
         int iCountrycode = -1;
         int iValue = rfidReaderChipE710.rx000Setting.getCountryEnum();
         if (DEBUG) appendToLog("getCountryEnum 0x3014 = " + iValue);
-        if (iValue > 0 && iValue < strCountryEnumInfo.length/iCountryEnumInfoColumn) {
+        if (iValue > 0 && iValue < countryChannelData.strCountryEnumInfo.length/countryChannelData.iCountryEnumInfoColumn) {
             if (DEBUG) {
                 for (int i = 1; i <= 160; i++) {
-                    appendToLog("i = " + i + ", " + strCountryEnumInfo[(i - 1) * iCountryEnumInfoColumn + 0]
-                            + ", " + strCountryEnumInfo[(i - 1) * iCountryEnumInfoColumn + 1]
-                            + ", " + strCountryEnumInfo[(i - 1) * iCountryEnumInfoColumn + 2]
-                            + ", " + strCountryEnumInfo[(i - 1) * iCountryEnumInfoColumn + 3]
-                            + ", " + strCountryEnumInfo[(i - 1) * iCountryEnumInfoColumn + 4]
-                            + ", " + strCountryEnumInfo[(i - 1) * iCountryEnumInfoColumn + 5]
-                            + ", " + strCountryEnumInfo[(i - 1) * iCountryEnumInfoColumn + 6]
+                    appendToLog("i = " + i + ", " + countryChannelData.strCountryEnumInfo[(i - 1) * countryChannelData.iCountryEnumInfoColumn + 0]
+                            + ", " + countryChannelData.strCountryEnumInfo[(i - 1) * countryChannelData.iCountryEnumInfoColumn + 1]
+                            + ", " + countryChannelData.strCountryEnumInfo[(i - 1) * countryChannelData.iCountryEnumInfoColumn + 2]
+                            + ", " + countryChannelData.strCountryEnumInfo[(i - 1) * countryChannelData.iCountryEnumInfoColumn + 3]
+                            + ", " + countryChannelData.strCountryEnumInfo[(i - 1) * countryChannelData.iCountryEnumInfoColumn + 4]
+                            + ", " + countryChannelData.strCountryEnumInfo[(i - 1) * countryChannelData.iCountryEnumInfoColumn + 5]
+                            + ", " + countryChannelData.strCountryEnumInfo[(i - 1) * countryChannelData.iCountryEnumInfoColumn + 6]
                     );
                 }
             }
-            String strCountryCode = strCountryEnumInfo[(iValue - 1) * iCountryEnumInfoColumn + 2];
+            String strCountryCode = countryChannelData.strCountryEnumInfo[(iValue - 1) * countryChannelData.iCountryEnumInfoColumn + 2];
             if (DEBUG) appendToLog("strCountryCode 0 = " + strCountryCode);
             String[] countryCodePart = strCountryCode.split(" ");
             strCountryCode = countryCodePart[0].substring(1);
@@ -2314,11 +2567,15 @@ public class RfidReader {
     }
     public int getQueryTarget() {
         int iValue; boolean DEBUG = false;
-        if (DEBUG) appendToLog("1 getQueryTarget");
         iValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAlgoAbFlip() : rfidReaderChipE710.rx000Setting.getQueryTarget());
+        if (DEBUG) appendToLog("getQueryTarget with bis108 = " + bis108 + ", iValue = " + iValue);
         if (bis108) {
-            if (iValue > 0) return 2;
+            if (iValue > 0) {
+                rfidReaderChipR2000.rx000Setting.getQueryTarget();
+                return 2;
+            }
             else {
+                if (DEBUG) appendToLog("getQueryTarget");
                 iValue = rfidReaderChipR2000.rx000Setting.getQueryTarget();
                 if (iValue > 0) return 1;
                 return 0;
@@ -2340,6 +2597,7 @@ public class RfidReader {
             if (false) appendToLog("Hello6: invAlgo = " + rfidReaderChipR2000.rx000Setting.getInvAlgo());
             if (false) appendToLog("setTagGroup: going to setAlgoSelect with invAlgo = " + rfidReaderChipR2000.rx000Setting.getInvAlgo());
             rfidReaderChipR2000.rx000Setting.setAlgoSelect(rfidReaderChipR2000.rx000Setting.getInvAlgo()); //Must not delete this line
+            if (false) appendToLog("RfidReader.setTagGroup[" + target1 + ", " + session + ", " + sL);
             return rfidReaderChipR2000.rx000Setting.setQueryTarget(target1, session, sL);
         } else {
             //appendToLog("1d");
@@ -2540,80 +2798,80 @@ public class RfidReader {
                 case MX:
                 case PM:
                 case UG:
-                    return FCC_CHN_CNT;
+                    return countryChannelData.FCC_CHN_CNT;
                 case PR:
-                    return PRTableOfFreq.length;
+                    return countryChannelData.PRTableOfFreq.length;
                 case VZ:
-                    return VZ_CHN_CNT;
+                    return countryChannelData.VZ_CHN_CNT;
                 case AU:
-                    return AUS_CHN_CNT;
+                    return countryChannelData.AUS_CHN_CNT;
                 case BR1:
-                    return BR1_CHN_CNT;
+                    return countryChannelData.BR1_CHN_CNT;
                 case BR2:
-                    return BR2_CHN_CNT;
+                    return countryChannelData.BR2_CHN_CNT;
                 case BR3:
-                    return BR3_CHN_CNT;
+                    return countryChannelData.BR3_CHN_CNT;
                 case BR4:
-                    return BR4_CHN_CNT;
+                    return countryChannelData.BR4_CHN_CNT;
                 case BR5:
-                    return BR5_CHN_CNT;
+                    return countryChannelData.BR5_CHN_CNT;
                 case HK:
                 case SG:
                 case TH:
                 case VN:
-                    return HK_CHN_CNT;
+                    return countryChannelData.HK_CHN_CNT;
                 case VN1:
-                    return VN1_CHN_CNT;
+                    return countryChannelData.VN1_CHN_CNT;
                 case VN2:
-                    return VN2_CHN_CNT;
+                    return countryChannelData.VN2_CHN_CNT;
                 case VN3:
-                    return VN3_CHN_CNT;
+                    return countryChannelData.VN3_CHN_CNT;
                 case BD:
-                    return BD_CHN_CNT;
+                    return countryChannelData.BD_CHN_CNT;
                 case TW:
-                    return TW_CHN_CNT;
+                    return countryChannelData.TW_CHN_CNT;
                 case MY:
-                    return MYS_CHN_CNT;
+                    return countryChannelData.MYS_CHN_CNT;
                 case ZA:
-                    return ZA_CHN_CNT;
+                    return countryChannelData.ZA_CHN_CNT;
                 case ID:
-                    return ID_CHN_CNT;
+                    return countryChannelData.ID_CHN_CNT;
                 case IL:
-                    return IL_CHN_CNT;
+                    return countryChannelData.IL_CHN_CNT;
                 case IL2019RW:
-                    return IL2019RW_CHN_CNT;
+                    return countryChannelData.IL2019RW_CHN_CNT;
                 case PH:
-                    return PH_CHN_CNT;
+                    return countryChannelData.PH_CHN_CNT;
                 case NZ:
-                    return NZ_CHN_CNT;
+                    return countryChannelData.NZ_CHN_CNT;
                 case CN:
-                    return CN_CHN_CNT;
+                    return countryChannelData.CN_CHN_CNT;
 
                 case UH1:
-                    return UH1_CHN_CNT;
+                    return countryChannelData.UH1_CHN_CNT;
                 case UH2:
-                    return UH2_CHN_CNT;
+                    return countryChannelData.UH2_CHN_CNT;
                 case LH:
-                    return LH_CHN_CNT;
+                    return countryChannelData.LH_CHN_CNT;
                 case LH1:
-                    return LH1_CHN_CNT;
+                    return countryChannelData.LH1_CHN_CNT;
                 case LH2:
-                    return LH2_CHN_CNT;
+                    return countryChannelData.LH2_CHN_CNT;
 
                 case ETSI:
-                    return ETSI_CHN_CNT;
+                    return countryChannelData.ETSI_CHN_CNT;
                 case IN:
-                    return IDA_CHN_CNT;
+                    return countryChannelData.IDA_CHN_CNT;
                 case KR:
-                    return KR_CHN_CNT;
+                    return countryChannelData.KR_CHN_CNT;
                 case KR2017RW:
-                    return KR2017RW_CHN_CNT;
+                    return countryChannelData.KR2017RW_CHN_CNT;
                 case JP:
-                    return JPN2012_CHN_CNT;
+                    return countryChannelData.JPN2012_CHN_CNT;
                 case JP6:
-                    return JPN2012A_CHN_CNT;
+                    return countryChannelData.JPN2012A_CHN_CNT;
                 case ETSIUPPERBAND:
-                    return ETSIUPPERBAND_CHN_CNT;
+                    return countryChannelData.ETSIUPPERBAND_CHN_CNT;
 
                 default:
                     return 0;
@@ -2624,7 +2882,7 @@ public class RfidReader {
             iValue = regionCode.ordinal() - RegionCodes.Albania1.ordinal() + 1;
             if (DEBUG) appendToLog("regionCode = " + regionCode.toString() + ", regionCodeEnum = " + iValue);
             if (iValue > 0) {
-                String strFreqChnCnt = strCountryEnumInfo[(iValue - 1) * iCountryEnumInfoColumn + 3];
+                String strFreqChnCnt = countryChannelData.strCountryEnumInfo[(iValue - 1) * countryChannelData.iCountryEnumInfoColumn + 3];
                 if (DEBUG) appendToLog("strFreqChnCnt = " + strFreqChnCnt);
                 try {
                     iFreqChnCnt = Integer.parseInt(strFreqChnCnt);
@@ -2820,7 +3078,8 @@ public class RfidReader {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setHST_UNTRACEABLE_CFG(range, user, tid, epcLength, epc, uxpc) : rfidReaderChipE710.rx000Setting.setHST_UNTRACEABLE_CFG(range, user, tid, epcLength, epc, uxpc));
     }
     public boolean setAuthenticateConfiguration() {
-        boolean bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setHST_AUTHENTICATE_CFG(true, true, 1, 48)
+        boolean bValue = (bis108 ?
+                rfidReaderChipR2000.rx000Setting.setHST_AUTHENTICATE_CFG(true, true, 1, 48)
                 : rfidReaderChipE710.rx000Setting.setAuthenticateConfig((48 << 10) | (1 << 2) | 0x03));
         if (bis108) {
             if (bValue) {
@@ -2862,7 +3121,9 @@ public class RfidReader {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.getInvSelectIndex(): rfidReaderChipE710.rx000Setting.getInvSelectIndex());
     }
     public boolean getSelectEnable() {
-        int iValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getSelectEnable() : rfidReaderChipE710.rx000Setting.getSelectEnable());
+        int iValue = (bis108 ?
+                rfidReaderChipR2000.rx000Setting.getSelectEnable() :
+                rfidReaderChipE710.rx000Setting.getSelectEnable());
         return iValue > 0 ? true : false;
     }
     public int getSelectTarget() {
@@ -2890,9 +3151,25 @@ public class RfidReader {
         return strValue.substring(0, strLength);
     }
     public boolean setInvSelectIndex(int invSelect) {
+        appendToLog("BtDataOut: RfidReader.setSelectIndex goes to setInvSelectIndex");
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setInvSelectIndex(invSelect) : rfidReaderChipE710.rx000Setting.setInvSelectIndex(invSelect));
     }
+    public int findFirstEmptySelect() {
+        int iValue = -1, iSelectEnable;
+        for (int i = 0; i < 3; i++) {
+            appendToLog("BtDataOut: RfidReader.findFirstEmptySelect goes to setInvSelectIndex with i = " + i);
+            if (bis108) rfidReaderChipR2000.rx000Setting.setInvSelectIndex(i);
+            iSelectEnable = (bis108 ? rfidReaderChipR2000.rx000Setting.getSelectEnable() : rfidReaderChipE710.rx000Setting.selectConfiguration[i][0]);
+            if (iSelectEnable == 0) {
+                iValue = i;
+                appendToLog("cs710Library4A: setSelectCriteria 1 with New index = " + iValue);
+                break;
+            }
+        }
+        return iValue;
+    }
     public boolean setSelectCriteriaDisable(int index) {
+        if (false) appendToLog("RfidReader.setSelectCriteriaDisable with index = " + index);
         if (bis108) rfidReaderChipR2000.rx000Setting.setQuerySelect(0);
         else rfidReaderChipE710.rx000Setting.setQuerySelect(0);
         boolean bValue = false;
@@ -2908,19 +3185,6 @@ public class RfidReader {
             bValue = setSelectCriteria(index, false, 0, 0, 0, 0, 0, "");
         }
         return bValue;
-    }
-    public int findFirstEmptySelect() {
-        int iValue = -1, iSelectEnable;
-        for (int i = 0; i < 3; i++) {
-            if (bis108) rfidReaderChipR2000.rx000Setting.setInvSelectIndex(i);
-            iSelectEnable = (bis108 ? rfidReaderChipR2000.rx000Setting.getSelectEnable() : rfidReaderChipE710.rx000Setting.selectConfiguration[i][0]);
-            if (iSelectEnable == 0) {
-                iValue = i;
-                appendToLog("cs710Library4A: setSelectCriteria 1 with New index = " + iValue);
-                break;
-            }
-        }
-        return iValue;
     }
     public boolean setSelectCriteria(int index, boolean enable, int target, int action, int bank, int offset, String mask, boolean maskbit) {
         if (index == 0) settingData.preFilterData = new SettingData.PreFilterData(enable, target, action, bank, offset, mask, maskbit);
@@ -2947,6 +3211,7 @@ public class RfidReader {
             maskblen = mask.length();
             mask = maskHex;
         }
+        appendToLog("BtDataOut setSelectCriteria goes to setSelectCriteria3");
         return setSelectCriteria3(index, enable, target, action, 0, bank, offset, mask, maskblen);
     }
     public boolean setSelectCriteria(int index, boolean enable, int target, int action, int delay, int bank, int offset, String mask) {
@@ -2967,12 +3232,15 @@ public class RfidReader {
             if (index == 0)
                 preMatchData = new RfidReader.PreMatchData(enable, target, action, bank, offset, mask, mask.length() * 4, rfidReaderChipR2000.rx000Setting.getQuerySelect(), getPwrlevel(), getInvAlgo(), getQValue());
             boolean result = true;
-            if (index != rfidReaderChipR2000.rx000Setting.getInvSelectIndex())
+            if (index != rfidReaderChipR2000.rx000Setting.getInvSelectIndex()) {
+                appendToLog("BtDataOut: RfidReader.setSelectCriteria goes to setInvSelectIndex");
                 result = rfidReaderChipR2000.rx000Setting.setInvSelectIndex(index);
+            }
             if (rfidReaderChipR2000.rx000Setting.getSelectEnable() == 0 && enable == false) {
                 appendToLog("cs108Library4A: setSelectCriteria 2: no need to set as when index = " + index + ", getSelectEnable() = " + rfidReaderChipR2000.rx000Setting.getSelectEnable() + ", new enable = " + enable);
                 result = true;
             } else {
+                appendToLog("BtDataOut: RfidReader.setSelectCriteria goes to setSelectEnable with result = " + result);
                 if (result)
                     result = rfidReaderChipR2000.rx000Setting.setSelectEnable(enable ? 1 : 0, target, action, delay);
                 if (result) result = rfidReaderChipR2000.rx000Setting.setSelectMaskBank(bank);
@@ -2981,6 +3249,7 @@ public class RfidReader {
                 if (result)
                     result = rfidReaderChipR2000.rx000Setting.setSelectMaskLength(mask.length() * 4);
                 if (result) result = rfidReaderChipR2000.rx000Setting.setSelectMaskData(mask);
+                appendToLog("BtDataOut: RfidReader.setSelectCriteria with result = " + result + ", enable = " + enable);
                 if (result) {
                     if (enable) {
                         rfidReaderChipR2000.rx000Setting.setTagSelect(1);
@@ -3109,8 +3378,8 @@ public class RfidReader {
         String strSpecialCountryCode = null;
         int iValue = rfidReaderChipE710.rx000Setting.getCountryEnum();
         if (DEBUG) appendToLog("getCountryEnum 0x3014 = " + iValue);
-        if (iValue > 0 && iValue < strCountryEnumInfo.length/iCountryEnumInfoColumn) {
-            String strCountryCode = strCountryEnumInfo[(iValue - 1) * iCountryEnumInfoColumn + 2];
+        if (iValue > 0 && iValue < countryChannelData.strCountryEnumInfo.length/countryChannelData.iCountryEnumInfoColumn) {
+            String strCountryCode = countryChannelData.strCountryEnumInfo[(iValue - 1) * countryChannelData.iCountryEnumInfoColumn + 2];
             if (DEBUG) appendToLog("strCountryCode 0 = " + strCountryCode);
             String[] countryCodePart = strCountryCode.split(" ");
             if (DEBUG) appendToLog("countryCodePart.length = " + countryCodePart.length);
@@ -3221,22 +3490,6 @@ public class RfidReader {
         boolean bRetValue = (bis108 ? rfidReaderChipR2000.sendControlCommand(RfidReaderChipR2000.ControlCommands.ABORT) : rfidReaderChipE710.sendHostRegRequestHST_CMD(RfidReaderChipData.HostCommands.NULL));
         setInventoring(false);
         return bRetValue;
-    }
-    public boolean setSelectedTagByTID(String strTagId, long pwrlevel) {
-        if (pwrlevel < 0) pwrlevel = pwrlevelSetting;
-        return setSelectedTag1(strTagId, 2, 0, 0, pwrlevel, 0, 0);
-    }
-    public boolean setSelectedTag(String strTagId, int selectBank, long pwrlevel) {
-        boolean isValid = false;
-        if (selectBank < 0 || selectBank > 3) return false;
-        int selectOffset = (selectBank == 1 ? 32 : 0);
-        isValid = setSelectCriteriaDisable(-1);
-        if (isValid) isValid = setSelectedTag1(strTagId, selectBank, selectOffset, 0, pwrlevel, 0, 0);
-        return isValid;
-    }
-    public boolean setSelectedTag(String selectMask, int selectBank, int selectOffset, long pwrlevel, int qValue, int matchRep) {
-        appendToLog("cs108LibraryA: setSelectCriteria strTagId = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", pwrlevel = " + pwrlevel + ", qValue = " + qValue + ", matchRep = " + matchRep);
-        return setSelectedTag1(selectMask, selectBank, selectOffset, 0, pwrlevel, qValue, matchRep);
     }
     public boolean setMatchRep(int matchRep) {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setMatchRep(matchRep) : rfidReaderChipE710.rx000Setting.setMatchRep(matchRep));
@@ -3377,7 +3630,7 @@ public class RfidReader {
             int iValue = rfidReaderChipE710.rx000Setting.getCountryEnum(); //iValue--;
             if (DEBUG) appendToLog("getChannelHoppingStatus: countryEnum = " + iValue);
             if (iValue > 0) {
-                String strFixedHop = strCountryEnumInfo[(iValue - 1) * iCountryEnumInfoColumn + 4];
+                String strFixedHop = countryChannelData.strCountryEnumInfo[(iValue - 1) * countryChannelData.iCountryEnumInfoColumn + 4];
                 if (DEBUG) appendToLog("getChannelHoppingStatus: FixedHop = " + strFixedHop);
                 if (strFixedHop.matches("Hop")) {
                     if (DEBUG) appendToLog("getChannelHoppingStatus: matched");
@@ -3437,17 +3690,17 @@ public class RfidReader {
             boolean DEBUG = true;
             int iCountryEnum = rfidReaderChipE710.rx000Setting.getCountryEnum();
             appendToLog("countryEnum = " + iCountryEnum);
-            appendToLog("i = " + iCountryEnum + ", " + strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 0]
-                    + ", " + strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 1]
-                    + ", " + strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 2]
-                    + ", " + strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 3]
-                    + ", " + strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 4]
-                    + ", " + strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 5]
-                    + ", " + strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 6]
+            appendToLog("i = " + iCountryEnum + ", " + countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 0]
+                    + ", " + countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 1]
+                    + ", " + countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 2]
+                    + ", " + countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 3]
+                    + ", " + countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 4]
+                    + ", " + countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 5]
+                    + ", " + countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 6]
             );
-            int iFrequencyCount = Integer.valueOf(strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 3]);
-            int iFrequencyInterval = Integer.valueOf(strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 5]);
-            float iFrequencyStart = Float.valueOf(strCountryEnumInfo[(iCountryEnum - 1) * iCountryEnumInfoColumn + 6]);
+            int iFrequencyCount = Integer.valueOf(countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 3]);
+            int iFrequencyInterval = Integer.valueOf(countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 5]);
+            float iFrequencyStart = Float.valueOf(countryChannelData.strCountryEnumInfo[(iCountryEnum - 1) * countryChannelData.iCountryEnumInfoColumn + 6]);
             appendToLog("iFrequencyCount = " + iFrequencyCount + ", interval = " + iFrequencyInterval + ", start = " + iFrequencyStart);
 
             String[] strChannnelFrequencyList = new String[iFrequencyCount];
@@ -3746,10 +3999,12 @@ public class RfidReader {
         macWrite(0x11e, value);
     }
     public void setImpinJExtension(boolean tagFocus, boolean fastId) {
+        appendToLog("BtDataOut: setImpinJExtension");
         if (rfidReaderChipR2000 != null) {
             int iValue = 0;
             if (tagFocus) iValue |= 0x10;
             if (fastId) iValue |= 0x20;
+            appendToLog("BtDataOut: ivalue = " + iValue + ", impinjExtensionValue = " + rfidReaderChipR2000.rx000Setting.impinjExtensionValue);
             boolean bRetValue;
             bRetValue = macWrite(0x203, iValue);
         } else {
@@ -3773,7 +4028,6 @@ public class RfidReader {
         if (bis108) rfidReaderChipR2000.setInventoring(enable);
         else rfidReaderChipE710.setInventoring(enable);
     }
-
     void addRfidToWrite(RfidConnector.CsReaderRfidData csReaderRfidData) {
         if (bis108) rfidReaderChipR2000.addRfidToWrite(csReaderRfidData);
         else rfidReaderChipE710.addRfidToWrite(csReaderRfidData);

@@ -1,5 +1,13 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPC;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPCBRAND;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPCBRANDTID;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPCTID;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODEDNA;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,14 +52,16 @@ public class AccessUcode8Fragment extends CommonFragment {
                 TabLayout.TabView tabViewUntrace = tabLayout.getTabAt(3).view; tabViewUntrace.setVisibility(View.GONE);
                 LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessNxpUcode8Select); layout.setVisibility(View.GONE);
                 if (position == nxpTag.ucode8.ordinal()) {
-                    MainActivity.mDid = "E2806894";
+                    MainActivity.tagType = TAG_NXP_UCODE8; MainActivity.mDid = "E2806894";
                     if (MainActivity.csLibrary4A.get98XX() == 0) tabViewUntrace.setVisibility(View.VISIBLE);
                     layout.setVisibility(View.VISIBLE);
                 } else if (position == nxpTag.ucodeDNA.ordinal()) {
-                    MainActivity.mDid = "E2C06";
+                    MainActivity.tagType = TAG_NXP_UCODEDNA; MainActivity.mDid = "E2C06";
                     tabView.setVisibility(View.VISIBLE);
                     if (MainActivity.csLibrary4A.get98XX() == 0) tabViewUntrace.setVisibility(View.VISIBLE);
-                } else MainActivity.mDid = "E2806";
+                } else {
+                    MainActivity.tagType = TAG_NXP; MainActivity.mDid = "E2806";
+                }
                 MainActivity.csLibrary4A.appendToLog("new mDid = " + MainActivity.mDid);
             }
 
@@ -77,6 +87,7 @@ public class AccessUcode8Fragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
+        MainActivity.csLibrary4A.setSameCheck(true);
         super.onDestroy();
     }
 
@@ -93,19 +104,19 @@ public class AccessUcode8Fragment extends CommonFragment {
                 if (radioButtonSelectEpc != null && radioButtonSelectEpcTid != null && radioButtonSelectEpcBrand != null && radioButtonSelectEpcBrandTidCheck != null) {
                     if (radioButtonSelectEpc.isChecked()) {
                         MainActivity.csLibrary4A.appendToLog("Selected EPC");
-                        MainActivity.mDid = "E2806894A";
+                        MainActivity.tagType = TAG_NXP_UCODE8_EPC; MainActivity.mDid = "E2806894A";
                     }
                     if (radioButtonSelectEpcTid.isChecked()) {
                         MainActivity.csLibrary4A.appendToLog("Selected EPC+TID");
-                        MainActivity.mDid = "E2806894B";
+                        MainActivity.tagType = TAG_NXP_UCODE8_EPCTID; MainActivity.mDid = "E2806894B";
                     }
                     if (radioButtonSelectEpcBrand.isChecked()) {
                         MainActivity.csLibrary4A.appendToLog("Selected EPC+BRAND");
-                        MainActivity.mDid = "E2806894C";
+                        MainActivity.tagType = TAG_NXP_UCODE8_EPCBRAND; MainActivity.mDid = "E2806894C";
                     }
                     if (radioButtonSelectEpcBrandTidCheck.isChecked()) {
                         MainActivity.csLibrary4A.appendToLog("Selected EPC+BRAND");
-                        MainActivity.mDid = "E2806894d";
+                        MainActivity.tagType = TAG_NXP_UCODE8_EPCBRANDTID; MainActivity.mDid = "E2806894d";
                     }
                     MainActivity.csLibrary4A.appendToLog("newDid 1 = " + MainActivity.mDid);
                 }
