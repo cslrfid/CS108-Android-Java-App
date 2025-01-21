@@ -7,14 +7,13 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 public class ControllerConnector {
-    boolean DEBUG_PKDATA;
     final boolean DEBUG = false;
     boolean userDebugEnableDefault = false, userDebugEnable = userDebugEnableDefault;
 
     Context context; Utility utility;
     public ControllerConnector(Context context, Utility utility) {
         this.context = context;
-        this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
+        this.utility = utility;
     }
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
@@ -39,7 +38,7 @@ public class ControllerConnector {
     private byte[] controllerVersion = new byte[]{-1, -1, -1};
 
     public String getVersion() {
-        boolean DEBUG = true;
+        boolean DEBUG = false;
         if (controllerVersion[0] == -1) {
             boolean repeatRequest = false;
             if (controllerToWrite.size() != 0) {
@@ -49,7 +48,7 @@ public class ControllerConnector {
             }
             if (repeatRequest == false) {
                 controllerToWrite.add(ControllerPayloadEvents.CONTROLLER_GET_VERSION);
-                if (DEBUG_PKDATA || DEBUG) appendToLog("PkData: add GET_VERSION to controllerWrite with length = " + controllerToWrite.size());
+                if (utility.DEBUG_PKDATA || DEBUG) appendToLog("PkData: add GET_VERSION to controllerWrite with length = " + controllerToWrite.size());
             }
             return "";
         } else {
@@ -71,7 +70,7 @@ public class ControllerConnector {
             }
             if (repeatRequest == false) {
                 controllerToWrite.add(ControllerPayloadEvents.CONTROLLER_GET_SERIALNUMBER);
-                if (DEBUG_PKDATA) appendToLog("PkData: add GET_SERIALNUMBER to controllerToWrite with length = " + controllerToWrite.size());
+                if (utility.DEBUG_PKDATA) appendToLog("PkData: add GET_SERIALNUMBER to controllerToWrite with length = " + controllerToWrite.size());
             }
             return "";
         } else {
@@ -177,22 +176,22 @@ public class ControllerConnector {
             byte[] dataInCompare = new byte[]{(byte) 0xB0, 0};
             if (arrayTypeSet(dataInCompare, 1, controllerToWrite.get(0)) && (connectorData.dataValues.length >= dataInCompare.length + 1)) {
                 if (match = compareArray(connectorData.dataValues, dataInCompare, dataInCompare.length)) {
-                    if (DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply with payload = " + byteArrayToString(connectorData.dataValues) + " for writeData.Controller." + controllerToWrite.get(0).toString());
+                    if (utility.DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply with payload = " + byteArrayToString(connectorData.dataValues) + " for writeData.Controller." + controllerToWrite.get(0).toString());
                     if (controllerToWrite.get(0) == ControllerPayloadEvents.CONTROLLER_GET_VERSION) {
                         if (connectorData.dataValues.length >= 2 + controllerVersion.length) {
                             System.arraycopy(connectorData.dataValues, 2, controllerVersion, 0, controllerVersion.length);
-                            if (DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply.GetVersion with version = " + byteArrayToString(controllerVersion));
+                            if (utility.DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply.GetVersion with version = " + byteArrayToString(controllerVersion));
                         }
                     } else if (controllerToWrite.get(0) == ControllerPayloadEvents.CONTROLLER_GET_SERIALNUMBER) {
                         int length = connectorData.dataValues.length - 2;
                         serialNumber = new byte[length];
                         System.arraycopy(connectorData.dataValues, 2, serialNumber, 0, length);
-                        if (DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply.GetSerialNumber with serialNumber = " + byteArrayToString(serialNumber));
+                        if (utility.DEBUG_PKDATA) appendToLog("PkData: matched Controller.Reply.GetSerialNumber with serialNumber = " + byteArrayToString(serialNumber));
                     } else if (controllerToWrite.get(0) == ControllerPayloadEvents.CONTROLLER_GET_MODELNAME) {
                         int length = connectorData.dataValues.length - 2;
                         modelName = new byte[length];
                         System.arraycopy(connectorData.dataValues, 2, modelName, 0, length);
-                        if (DEBUG_PKDATA) appendToLog("PkData: matched controller.GetModelName.reply with modelName = " + byteArrayToString(modelName));
+                        if (utility.DEBUG_PKDATA) appendToLog("PkData: matched controller.GetModelName.reply with modelName = " + byteArrayToString(modelName));
                     } else if (controllerToWrite.get(0) == ControllerPayloadEvents.CONTROLLER_RESET) {
                         if (connectorData.dataValues[2] != 0) {
                             appendToLog("Controller RESET is found with error");
@@ -201,7 +200,7 @@ public class ControllerConnector {
                         appendToLog("matched controller.Other.reply data is found.");
                     }
                     controllerToWrite.remove(0); sendDataToWriteSent = 0;
-                    if (DEBUG_PKDATA) appendToLog("PkData: new controllerToWrite size = " + controllerToWrite.size());
+                    if (utility.DEBUG_PKDATA) appendToLog("PkData: new controllerToWrite size = " + controllerToWrite.size());
 
                 }
             }

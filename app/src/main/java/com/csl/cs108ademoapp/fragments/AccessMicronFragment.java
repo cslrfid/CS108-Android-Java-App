@@ -398,9 +398,7 @@ public class AccessMicronFragment extends CommonFragment {
                     int selectBank = 1;
                     int selectOffset = 32;
                     String selectMask = editTextRWTagID.getText().toString();
-                    accessTask = new AccessTask(
-                            buttonRead, null,
-                            invalid,
+                    accessTask = new AccessTask(buttonRead, null, invalid, true,
                             selectMask, selectBank, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),

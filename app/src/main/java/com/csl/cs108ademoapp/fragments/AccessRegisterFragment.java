@@ -223,6 +223,7 @@ public class AccessRegisterFragment extends CommonFragment {
                     long pwrlevel = Integer.parseInt(editTextAntennaPower.getText().toString());
                     MainActivity.csLibrary4A.setTagRead(0);
                     MainActivity.csLibrary4A.setSelectedTag(strTagId, selectBank, pwrlevel);
+                    MainActivity.csLibrary4A.appendToLog("Debug_Compact: AccessRegisterFragment.onActivityCreated.onClick");
                     MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY);
                     inventoryRfidTask = new InventoryRfidTask();
                     inventoryRfidTask.execute();
@@ -661,7 +662,7 @@ public class AccessRegisterFragment extends CommonFragment {
         MainActivity.csLibrary4A.appendToLog("invalidRequest1 = " + invalidRequest1
                 + ", selectMask = " + selectMask + ", selectBank1 = " + selectBank1 + ", selectOffset1 = " + selectOffset1
                 + ", password = " + password + ", power = " + antennaPower + ", repeatCount = " + repeatCount + ", resetCount = " + resetCount);
-        accessTask = new AccessTask(buttonWrite, textViewWriteCount, invalidRequest1,
+        accessTask = new AccessTask(buttonWrite, textViewWriteCount, invalidRequest1, true,
                 selectMask, selectBank1, selectOffset1,
                 password, antennaPower, RfidReaderChipData.HostCommands.CMD_18K6CWRITE,
                 selectQValue, repeatCount, resetCount, false,

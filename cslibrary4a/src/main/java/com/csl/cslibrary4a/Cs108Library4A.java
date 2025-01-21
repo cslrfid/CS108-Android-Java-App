@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
-import android.util.Log;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
@@ -122,7 +121,7 @@ public class Cs108Library4A {
     public String getlibraryVersion() {
         String version = BuildConfig.VERSION_NAME;
         //int iVersion = Integer.parseInt(version) + 10;
-        version = "14.18"; //+ String.valueOf(iVersion);
+        version = "14.20"; //+ String.valueOf(iVersion);
         appendToLog("version = " + version);
         return utility.getCombinedVersion(version);
     }
@@ -685,6 +684,7 @@ public class Cs108Library4A {
         return csReaderConnector.rfidReader.getFastId();
     }
     public boolean setFastId(boolean fastIdNew) {
+        appendToLog("bFastId: setFastId[" + fastIdNew);
         return csReaderConnector.rfidReader.setFastId(fastIdNew);
     }
     public boolean getInvAlgo() {
@@ -833,7 +833,7 @@ public class Cs108Library4A {
         return csReaderConnector.rfidReader.setInvSelectIndex(invSelect);
     }
     public boolean setSelectCriteriaDisable(int index) {
-        appendToLog("BtDataOut: Cs108Library4A.setSelectCriteriaDisable[" + index);
+        if (utility.DEBUG_SELECT) appendToLog("Debug_Select: Cs108Library4A.setSelectCriteriaDisable[" + index + "] goes to setSelectCriteriaDisable");
         return csReaderConnector.rfidReader.setSelectCriteriaDisable(index);
     }
     int findFirstEmptySelect() {
@@ -909,16 +909,16 @@ public class Cs108Library4A {
     }
     public void restoreAfterTagSelect() {
         if (!isBleConnected()) return;
-        appendToLog("Start");
+        if (utility.DEBUG_SELECT) appendToLog("Debug_Select: Cs108Library4A.restoreAfterTagSelect goes to setSelectCriteriaDisable");
         setSelectCriteriaDisable(0); setSelectCriteriaDisable(1); setSelectCriteriaDisable(2);
         loadSetting1File();
         setAccessCount(0);
         setRx000AccessPassword("00000000");
         if (checkHostProcessorVersion(getMacVer(), 2, 6, 8)) {
-            rfidReaderChip.rx000Setting.setMatchRep(0);
-            rfidReaderChip.rx000Setting.setTagDelay(csReaderConnector.rfidReader.tagDelaySetting);
-            rfidReaderChip.rx000Setting.setCycleDelay(csReaderConnector.rfidReader.cycleDelaySetting);
-            rfidReaderChip.rx000Setting.setInvModeCompact(true);
+            setMatchRep(0);
+            setTagDelay(csReaderConnector.rfidReader.tagDelaySetting);
+            setCycleDelay(csReaderConnector.rfidReader.cycleDelaySetting);
+            setInvModeCompact(true);
         }
         if (csReaderConnector.rfidReader.postMatchDataChanged) {
             csReaderConnector.rfidReader.postMatchDataChanged = false;
@@ -936,9 +936,10 @@ public class Cs108Library4A {
         return csReaderConnector.rfidReader.setSelectedTag(strTagId, selectBank, pwrlevel);
     }
     public boolean setSelectedTag(boolean selectOne, String selectMask, int selectBank, int selectOffset, long pwrlevel, int qValue, int matchRep) {
-        return csReaderConnector.rfidReader.setSelectedTag(selectOne, selectMask, selectBank, selectOffset, pwrlevel, qValue, matchRep);
+        return csReaderConnector.rfidReader.setSelectedTag4Access(selectOne, selectMask, selectBank, selectOffset, pwrlevel, qValue, matchRep);
     }
     public boolean setMatchRep(int matchRep) {
+        if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: Cs108Library4A.setMatchRep goes to setMatchRep with matchRep = " + matchRep);
         return csReaderConnector.rfidReader.setMatchRep(matchRep);
     }
     public String[] getCountryList() {
@@ -1042,6 +1043,7 @@ public class Cs108Library4A {
         return csReaderConnector.rfidReader.setAccessRetry(accessVerfiy, accessRetry);
     }
     public boolean setInvModeCompact(boolean invModeCompact) {
+        if (utility.DEBUG_COMPACT) appendToLog("Debug_Compact 1: Cs108Library4A.setInvModeCompact goes to setInvModeCompact");
         return csReaderConnector.rfidReader.setInvModeCompact(invModeCompact);
     }
     public boolean setAccessLockAction(int accessLockAction, int accessLockMask) {
@@ -1373,7 +1375,7 @@ public class Cs108Library4A {
     //============ Android General ============
     public void setSameCheck(boolean sameCheck1) {
         if (csReaderConnector.sameCheck == sameCheck1) return;
-        appendToLog("BtDataOut !!! new sameCheck = " + sameCheck1 + ", with old sameCheck = " + csReaderConnector.sameCheck);
+        if (false) appendToLog("new sameCheck = " + sameCheck1 + ", with old sameCheck = " + csReaderConnector.sameCheck);
         csReaderConnector.sameCheck = sameCheck1; //sameCheck = false;
     }
 
@@ -1915,13 +1917,13 @@ public class Cs108Library4A {
                 if (DEBUG) appendToLog("checkVersionRunnable: macVersion  = " + getMacVer());
                 if (checkHostProcessorVersion(getMacVer(), 2, 6, 8)) {
                     if (DEBUG) appendToLog("checkVersionRunnable: macVersion >= 2.6.8");
-                    rfidReaderChip.rx000Setting.setTagDelay(csReaderConnector.rfidReader.tagDelaySetting);
-                    rfidReaderChip.rx000Setting.setCycleDelay(csReaderConnector.rfidReader.cycleDelaySetting);
-                    rfidReaderChip.rx000Setting.setInvModeCompact(true);
+                    setTagDelay(csReaderConnector.rfidReader.tagDelaySetting);
+                    setCycleDelay(csReaderConnector.rfidReader.cycleDelaySetting);
+                    setInvModeCompact(true);
                 } else {
                     if (DEBUG) appendToLog("checkVersionRunnable: macVersion < 2.6.8");
-                    rfidReaderChip.rx000Setting.setTagDelay(csReaderConnector.rfidReader.tagDelayDefaultNormalSetting);
-                    rfidReaderChip.rx000Setting.setCycleDelay(csReaderConnector.rfidReader.cycleDelaySetting);
+                    setTagDelay(csReaderConnector.rfidReader.tagDelayDefaultNormalSetting);
+                    setCycleDelay(csReaderConnector.rfidReader.cycleDelaySetting);
                 }
                 rfidReaderChip.rx000Setting.setDiagnosticConfiguration(true);
                 if (DEBUG) appendToLog("checkVersionRunnable: Checkpoint 10");
@@ -2098,7 +2100,7 @@ public class Cs108Library4A {
                         appendToLog("preFilterData is valid. Going to setSelectCriteria");
                         setSelectCriteria(0, csReaderConnector.settingData.preFilterData.enable, csReaderConnector.settingData.preFilterData.target, csReaderConnector.settingData.preFilterData.action, csReaderConnector.settingData.preFilterData.bank, csReaderConnector.settingData.preFilterData.offset, csReaderConnector.settingData.preFilterData.mask, csReaderConnector.settingData.preFilterData.maskbit);
                     } else {
-                        appendToLog("preFilterData is null or disabled. Going to setSelectCriteriaDisable");
+                        appendToLog("Debug_Select: preFilterData is null or disabled. Going to setSelectCriteriaDisable");
                         setSelectCriteriaDisable(0);
                     }
                 }
@@ -2146,6 +2148,6 @@ public class Cs108Library4A {
     }
 
     public int setSelectData(RfidReader.TagType tagType, String mDid, boolean bNeedSelectedTagByTID, String stringProtectPassword, int selectFor, int selectHold) {
-        return csReaderConnector.rfidReader.setSelectData(tagType, mDid, bNeedSelectedTagByTID, stringProtectPassword, selectFor, selectHold);
+        return csReaderConnector.rfidReader.setSelectData4Inventory(tagType, mDid, bNeedSelectedTagByTID, stringProtectPassword, selectFor, selectHold);
     }
 }

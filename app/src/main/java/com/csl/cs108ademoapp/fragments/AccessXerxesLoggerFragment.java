@@ -262,8 +262,7 @@ public class AccessXerxesLoggerFragment extends CommonFragment {
                     int selectBank = 1;
                     int selectOffset = 32;
                     String selectMask = editTextRWTagID.getText().toString();
-                    accessTask = new AccessTask(
-                            (operationRead ? buttonRead : buttonWrite), null, invalid,
+                    accessTask = new AccessTask((operationRead ? buttonRead : buttonWrite), null, invalid, true,
                             selectMask, selectBank, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(), Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()), (operationRead ? RfidReaderChipData.HostCommands.CMD_18K6CREAD: RfidReaderChipData.HostCommands.CMD_18K6CWRITE),
                             0, 0, true, false,

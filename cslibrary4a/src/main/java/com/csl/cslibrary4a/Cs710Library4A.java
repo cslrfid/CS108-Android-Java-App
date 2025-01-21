@@ -950,7 +950,7 @@ public class Cs710Library4A {
         return csReaderConnector.rfidReader.setSelectedTag(strTagId, selectBank, pwrlevel);
     }
     public boolean setSelectedTag(String selectMask, int selectBank, int selectOffset, long pwrlevel, int qValue, int matchRep) {
-        return csReaderConnector.rfidReader.setSelectedTag(false, selectMask, selectBank, selectOffset, pwrlevel, qValue, matchRep);
+        return csReaderConnector.rfidReader.setSelectedTag4Access(false, selectMask, selectBank, selectOffset, pwrlevel, qValue, matchRep);
     }
     public boolean setMatchRep(int matchRep) {
         return csReaderConnector.rfidReader.setMatchRep(matchRep);
@@ -1103,6 +1103,7 @@ public class Cs710Library4A {
         return csReaderConnector.rfidReader.setAccessRetry(accessVerfiy, accessRetry);
     }
     public boolean setInvModeCompact(boolean invModeCompact) {
+        if (utility.DEBUG_COMPACT) appendToLog("Debug_Compact 2: Cs710Library4A.setInvModeCompact goes to setInvModeCompact");
         return csReaderConnector.rfidReader.setInvModeCompact(invModeCompact);
     }
     public boolean setAccessLockAction(int accessLockAction, int accessLockMask) {
@@ -2039,6 +2040,6 @@ public class Cs710Library4A {
     }
 
     public int setSelectData(RfidReader.TagType tagType, String mDid, boolean bNeedSelectedTagByTID, String stringProtectPassword, int selectFor, int selectHold) {
-        return csReaderConnector.rfidReader.setSelectData(tagType, mDid, bNeedSelectedTagByTID, stringProtectPassword, selectFor, selectHold);
+        return csReaderConnector.rfidReader.setSelectData4Inventory(tagType, mDid, bNeedSelectedTagByTID, stringProtectPassword, selectFor, selectHold);
     }
 }

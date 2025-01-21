@@ -187,7 +187,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         }
 
         checkBoxFilterByTid = (CheckBox) getActivity().findViewById(R.id.accessInventoryFilterByTid);
-        MainActivity.csLibrary4A.appendToLog("mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid);
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.onActivityCreated: mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid);
         if (mDid != null) {
             if (mDid.indexOf("E2827001") == 0) {
                 checkBoxFilterByTid.setVisibility(View.VISIBLE);
@@ -385,7 +385,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
 
     boolean needResetData = false;
     void resetSelectData() {
-        MainActivity.csLibrary4A.appendToLog("mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid);
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.resetSelectData: mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid);
         if (MainActivity.mDid != null && MainActivity.mDid.indexOf("E282405") == 0) { }
         else MainActivity.csLibrary4A.restoreAfterTagSelect();
         if (needResetData) {
@@ -482,16 +482,15 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             }
             boolean bNeedSelectedTagByTID = true;
             if (mDid.indexOf("E2806894") == 0) {
-                mDid = "E2806894";
-                Log.i(TAG, "HelloK: Find E2806894 with MainActivity.mDid = " + MainActivity.mDid);
-                if (MainActivity.mDid.matches("E2806894A")) {
+                Log.i(TAG, "HelloK: Find E2806894 with MainActivity.mDid = " + MainActivity.mDid + ", mDid = " + mDid);
+                if (mDid.matches("E2806894A")) {
                     Log.i(TAG, "HelloK: Find E2806894A");
                     MainActivity.csLibrary4A.setInvBrandId(false);
-                } else if (MainActivity.mDid.matches("E2806894B")) {
+                } else if (mDid.matches("E2806894B")) {
                     Log.i(TAG, "HelloK: Find E2806894B");
                     MainActivity.csLibrary4A.setInvBrandId(false);
                     if (true) bNeedSelectedTagByTID = false;
-                } else if (MainActivity.mDid.matches("E2806894C") || MainActivity.mDid.matches("E2806894d")) {
+                } else if (mDid.matches("E2806894C") || mDid.matches("E2806894d")) {
                     Log.i(TAG, "HelloK: Find " + MainActivity.mDid);
                     MainActivity.csLibrary4A.setInvBrandId(true);
                     if (true) bNeedSelectedTagByTID = false;
@@ -501,17 +500,25 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     bNeedSelectedTagByTID && checkBoxFilterByTid.isChecked(),
                     (checkBoxFilterByProtect.isChecked() ? editTextProtectPassword.getText().toString(): null),
                     MainActivity.selectFor, MainActivity.selectHold);
+            if (mDid.indexOf("E2806894") == 0) {
+                mDid = "E2806894";
+            }
             if (iValue123 > 0) MainActivity.selectFor = iValue123;
         }
 
+        MainActivity.csLibrary4A.appendToLog("bSgtinOnly: bMultiBank is " + bMultiBank + ", checkBoxFilterByEpc is " + (checkBoxFilterByEpc == null ? "null" : checkBoxFilterByEpc.isChecked()));
         if (bMultiBank == false) {
+            if (checkBoxFilterByEpc.isChecked()) {
+                MainActivity.csLibrary4A.appendToLog("bSgtinOnly: clearTagList");
+                clearTagsList();
+            }
             MainActivity.csLibrary4A.restoreAfterTagSelect();
             inventoryRfidTask = new InventoryRfidTask(getContext(), -1, -1, 0, 0, 0, 0,
                     false, MainActivity.csLibrary4A.getInventoryBeep(),
                     MainActivity.sharedObjects.tagsList, readerListAdapter, null, null,
                     rfidRunTime, null, rfidVoltageLevel, rfidYieldView, button, rfidRateView);
             inventoryRfidTask.bSgtinOnly = checkBoxFilterByEpc.isChecked();
-            if (checkBoxFilterByEpc.isChecked()) clearTagsList();
+            MainActivity.csLibrary4A.appendToLog("Debug_Compact 1: InventoryRfidMultiFragment.startInventoryTask");
             MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
         } else {
             boolean inventoryUcode8_bc = mDid != null && mDid.matches("E2806894") && MainActivity.mDid != null && (MainActivity.mDid.matches("E2806894B") || MainActivity.mDid.matches("E2806894C"));
@@ -540,10 +547,13 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     MainActivity.sharedObjects.tagsList, readerListAdapter, null, mDid,
                     rfidRunTime, null, rfidVoltageLevel, rfidYieldView, button, rfidRateView);
             inventoryRfidTask.bProtectOnly = checkBoxFilterByProtect.isChecked();
-            if (inventoryUcode8_bc)
+            if (inventoryUcode8_bc) {
+                MainActivity.csLibrary4A.appendToLog("Debug_Compact 2: InventoryRfidMultiFragment.startInventoryTask");
                 MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
-            else
+            } else {
+                MainActivity.csLibrary4A.appendToLog("Debug_Compact 3: InventoryRfidMultiFragment.startInventoryTask");
                 MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY);
+            }
         }
         inventoryRfidTask.execute();
     }

@@ -172,7 +172,7 @@ public class AccessImpinjFragment extends CommonFragment {
 
                     textViewAuthenticatedResult.setText("");
                     boolean invalidRequest = MainActivity.csLibrary4A.setAuthenticateConfiguration();
-                    accessTask = new AccessTask(button, null, false,
+                    accessTask = new AccessTask(button, null, false, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CAUTHENTICATE,
                             -1, -1, false, false,
@@ -206,7 +206,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     else if (itagSelect == impinjTag.monza_R6P.ordinal()) iAccOffset = 0x14;
                     MainActivity.csLibrary4A.appendToLog(String.format("AutoTune offset is 0x%X", iAccOffset));
                     if (set_before_access(0, itagSelect, 1) == false) invalidRequest = true;
-                    accessTask = new AccessTask(buttonAutoTuneValueRead, null, invalidRequest,
+                    accessTask = new AccessTask(buttonAutoTuneValueRead, null, invalidRequest, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                             -1, -1, false, checkProtectedBoxBeforeAccess(),
@@ -230,7 +230,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     textViewProtectValue.setText("");
                     boolean invalidRequest = false;
                     if (set_before_access(1, 2, 6) == false) invalidRequest = true;
-                    accessTask = new AccessTask(buttonProtectValueRead, null, invalidRequest,
+                    accessTask = new AccessTask(buttonProtectValueRead, null, invalidRequest, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                             -1, -1, false, checkProtectedBoxBeforeAccess(),
@@ -281,7 +281,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     textViewEpc128Value.setText("");
                     boolean invalidRequest = false;
                     if (set_before_access(1, 2, 8) == false) invalidRequest = true;
-                    accessTask = new AccessTask(buttonEpc128ValueRead, null, invalidRequest,
+                    accessTask = new AccessTask(buttonEpc128ValueRead, null, invalidRequest, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                             -1, -1, false, checkProtectedBoxBeforeAccess(),
@@ -419,7 +419,7 @@ public class AccessImpinjFragment extends CommonFragment {
         int iSelectBank = selectTag.spinnerSelectBank.getSelectedItemPosition() + 1;
         int iSelectOffset = 32;
         if (iSelectBank != 1) iSelectOffset = 0;
-        accessTask = new AccessTask(buttonRead, null, invalidRequest,
+        accessTask = new AccessTask(buttonRead, null, invalidRequest, true,
                 selectTag.editTextTagID.getText().toString(), iSelectBank, iSelectOffset,
                 selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                 -1, -1, false, checkProtectedBoxBeforeAccess(),
@@ -485,7 +485,7 @@ public class AccessImpinjFragment extends CommonFragment {
             }
         }
 
-        accessTask = new AccessTask(buttonWrite, null, invalidRequest,
+        accessTask = new AccessTask(buttonWrite, null, invalidRequest, true,
                 selectTag.editTextTagID.getText().toString(), 1, 32,
                 selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CWRITE,
                 -1, -1, false, checkProtectedBoxBeforeAccess(),
@@ -494,12 +494,15 @@ public class AccessImpinjFragment extends CommonFragment {
         mHandler.removeCallbacks(updateRunnable);
         iRunType = 6; mHandler.post(updateRunnable);
     }
+    boolean bReadySelected = false;
     boolean checkProtectedBoxBeforeAccess() {
+        bReadySelected = false;
         if (checkBoxProtectSelect.isChecked()) {
             MainActivity.csLibrary4A.appendToLog("Going to setSelectCriteria disable");
             MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
             MainActivity.csLibrary4A.appendToLog("Going to setSelectCriteria");
             MainActivity.csLibrary4A.setSelectCriteria(-1, true, 4, 0, 3, 0, selectTag.editTextAccessPassword.getText().toString(), false);
+            bReadySelected = true;
         }
         return checkBoxProtectSelect.isChecked();
     }

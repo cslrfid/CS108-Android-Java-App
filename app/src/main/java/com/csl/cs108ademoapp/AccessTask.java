@@ -73,7 +73,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         }
         preExecute();
     }
-    public AccessTask(Button button, TextView textViewWriteCount, boolean invalidRequest,
+    public AccessTask(Button button, TextView textViewWriteCount, boolean invalidRequest, boolean selectOne,
                       String selectMask, int selectBank, int selectOffset,
                       String strPassword, int powerLevel, RfidReaderChipData.HostCommands hostCommand,
                       int qValue, int repeat, boolean resetCount, boolean bSkipClearFilter,
@@ -87,6 +87,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         this.registerTotal = registerTotalView;
 
         this.invalidRequest = invalidRequest; MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest);
+        this.selectOne = selectOne;
         this.selectMask = selectMask;
         this.selectBank = selectBank;
         this.selectOffset = selectOffset;
@@ -97,6 +98,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         if (repeat > 255) repeat = 255;
         this.repeat = repeat;
         this.bSkipClearFilter = bSkipClearFilter;
+        if (bSkipClearFilter) this.selectOne = false;
         if (resetCount) {
             total = 0;
             tagList.clear();
@@ -152,7 +154,6 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 invalidRequest = true; MainActivity.csLibrary4A.appendToLog("setAccessRetry is failed");
             }
         }
-        MainActivity.csLibrary4A.appendToLog("setSelectCriteria: invalidRequest = " + invalidRequest + ", repeat = " + repeat + ", bSkipClearFilter = " + bSkipClearFilter + ", powerLevel = " + powerLevel + ", skipSelect = " + skipSelect);
         if (invalidRequest == false) {
             if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessTask(): powerLevel = " + powerLevel);
             int matchRep = 1;
@@ -163,7 +164,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             }
             if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
             else if (skipSelect == false) {
-                MainActivity.csLibrary4A.appendToLog("BtDataOut: AccessTask.preExecute goes to setSelectTag");
+                MainActivity.csLibrary4A.appendToLog("AccessTask.preExecute goes to setSelectTag");
                 if (MainActivity.csLibrary4A.setSelectedTag(selectOne, selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
                     invalidRequest = true; MainActivity.csLibrary4A.appendToLog("setSelectedTag is failed with selectMask = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", powerLevel = " + powerLevel);
                 }
@@ -179,6 +180,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             if (MainActivity.csLibrary4A.checkHostProcessorVersion(MainActivity.csLibrary4A.getMacVer(), 2, 6, 8)) {
                 MainActivity.csLibrary4A.setInvModeCompact(false);
             }
+            //MainActivity.csLibrary4A.setTagRead(0);
             MainActivity.csLibrary4A.sendHostRegRequestHST_CMD(hostCommand);
         }
     }
@@ -227,6 +229,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                     if (rx000pkgData.decodedError != null) { endingMessaage = rx000pkgData.decodedError; ending = true; }
                     else if (repeat > 0 && resultError.length() == 0) {
                         resultError = "";
+                        if (true) MainActivity.csLibrary4A.appendToLog("Debug_InvCfg: AccessTask.doInBackground goes to setMatchRep with repeat = " + repeat);
                         MainActivity.csLibrary4A.setMatchRep(repeat);
                         MainActivity.csLibrary4A.sendHostRegRequestHST_CMD(hostCommand);
                     } else {

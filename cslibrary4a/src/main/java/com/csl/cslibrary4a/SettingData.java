@@ -448,10 +448,11 @@ public class SettingData {
                     csReaderConnector.rfidReader.setTagGroup(querySelect, querySession, queryTarget);
                     csReaderConnector.rfidReader.setTagFocus(csReaderConnector.rfidReader.tagFocus > 0 ? true : false);
                     if (csReaderConnector.settingData.preFilterData != null && csReaderConnector.settingData.preFilterData.enable) {
-                        appendToLog("preFilterData is valid. Going to setSelectCriteria");
+                        if (utility.DEBUG_SELECT) appendToLog("Debug_Select: SettingData.loadingSettingFile. preFilterData is valid. Going to setSelectCriteria");
+                        appendToLog("BtDataOut BBB 5");
                         csReaderConnector.rfidReader.setSelectCriteria(0, csReaderConnector.settingData.preFilterData.enable, csReaderConnector.settingData.preFilterData.target, csReaderConnector.settingData.preFilterData.action, csReaderConnector.settingData.preFilterData.bank, csReaderConnector.settingData.preFilterData.offset, csReaderConnector.settingData.preFilterData.mask, csReaderConnector.settingData.preFilterData.maskbit);
                     } else {
-                        appendToLog("preFilterData is null or disabled. Going to setSelectCriteriaDisable");
+                        if (utility.DEBUG_SELECT) appendToLog("Debug_Select: SettingData.loadingSettingFile. preFilterData is null or disabled. Going to setSelectCriteriaDisable");
                         csReaderConnector.rfidReader.setSelectCriteriaDisable(0);
                     }
                 }

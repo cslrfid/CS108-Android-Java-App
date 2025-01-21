@@ -32,7 +32,6 @@ public class BluetoothGatt extends BluetoothGattCallback {
     boolean DEBUG_PKDATA, DEBUG_APDATA;
     public final boolean DEBUG_SCAN = false;
     public final boolean DEBUG_CONNECT = true;
-    final boolean DEBUG_BTDATA = true;
     final boolean DEBUG = true, DEBUG_BTOP = false;
     static final String TAG = "Hello";
 
@@ -400,7 +399,7 @@ public class BluetoothGatt extends BluetoothGattCallback {
             if (bValue == false) writeBleFailure++;
             else {
                 writeBleFailure = 0;
-                if (DEBUG_BTDATA || true) appendToLogView("BtDataOut: " + byteArrayToString(value));
+                if (utility.DEBUG_BTDATA || true) appendToLogView("BtDataOut: " + byteArrayToString(value));
                 writeDebug2File("Down " + byteArrayToString(value));
                 _writeCharacteristic_in_progress = true;
                 mStreamWriteCountOld = mStreamWriteCount;
@@ -459,7 +458,7 @@ public class BluetoothGatt extends BluetoothGattCallback {
                     streamInBytesMissing += v.length;
                 } else {
                     if (true) utility.writeDebug2File("Up1  " + byteArrayToString(v));
-                    if (DEBUG_BTDATA) Log.i(TAG, "BtDataIn= " + byteArrayToString(v));
+                    if (utility.DEBUG_BTDATA) Log.i(TAG, "BtDataIn= " + byteArrayToString(v));
                     if (isStreamInBufferRing) {
                         streamInBufferPush(v, 0, v.length);
                     } else {

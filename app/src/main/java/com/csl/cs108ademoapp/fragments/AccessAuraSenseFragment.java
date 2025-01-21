@@ -393,8 +393,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                         buttonAccess = buttonWrite;
                     }
                     MainActivity.csLibrary4A.appendToLog("hostCommand 1 = " + hostCommand.toString());
-                    accessTask = new AccessTask(
-                            buttonAccess, null, invalid,
+                    accessTask = new AccessTask(buttonAccess, null, invalid, true,
                             selectMask, selectBank, selectOffset,
                             selectTag.editTextAccessPassword.getText().toString(),
                             Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()),

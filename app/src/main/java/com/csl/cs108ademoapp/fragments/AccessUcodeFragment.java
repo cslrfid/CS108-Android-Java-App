@@ -683,8 +683,7 @@ public class AccessUcodeFragment extends CommonFragment {
                     else if (operationRead) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CREAD;
                     else hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CWRITE;
 
-                    accessTask = new AccessTask(
-                            button, null, invalid,
+                    accessTask = new AccessTask(button, null, invalid, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), hostCommand,
                             0, 0, true, false,

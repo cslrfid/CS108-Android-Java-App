@@ -5,10 +5,6 @@ import static java.lang.Math.pow;
 
 import android.content.Context;
 
-import com.csl.cslibrary4a.RfidConnector;
-import com.csl.cslibrary4a.RfidReaderChipData;
-import com.csl.cslibrary4a.Utility;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2698,7 +2694,7 @@ public class RfidReaderChipE710 {
         if (false) appendToLog("bytes = " + byteArrayToString(bytes) + ", iValue = " + iValue);
         return iValue;
     }
-    void mRx000UplinkHandler() {
+    void uplinkHandler() {
         boolean DEBUG = false;
         if (bRx000ToReading) return;
         bRx000ToReading = true;
@@ -2835,6 +2831,17 @@ public class RfidReaderChipE710 {
                                                     }
                                                 }
                                             }
+                                            int extraLength = 0;
+                                            if (dataA.decodedData1 != null) extraLength += dataA.decodedData1.length;
+                                            if (dataA.decodedData2 != null) extraLength += dataA.decodedData2.length;
+                                            if (extraLength != 0) {
+                                                byte[] decodedEpcNew = new byte[dataA.decodedEpc.length - extraLength];
+                                                System.arraycopy(dataA.decodedEpc, 0, decodedEpcNew, 0, decodedEpcNew.length);
+                                                dataA.decodedEpc = decodedEpcNew;
+                                            }
+                                            appendToLog("dataA.decodedPc,Epc = " + byteArrayToString(dataA.decodedPc) + "," + byteArrayToString(dataA.decodedEpc)
+                                            + ", decodedData1,2 = " + (dataA.decodedData1 == null ? "null" : byteArrayToString(dataA.decodedData1))
+                                                    + ", " + (dataA.decodedData2 == null ? "null" : byteArrayToString(dataA.decodedData2)));
                                             if (iDataOffset != iMbDataLength) appendToLog("!!! Some unhandled data as iDataOffset = " + iDataOffset + " for iMbDataLength = " + iMbDataLength);
                                             else if (DEBUG) appendToLog("iDataOffset = iMbDataLength = " + iMbDataLength);
                                         } else appendToLog("!!! iEpcLength " + iEpcLength + " is too long for the data " + byteArrayToString(dataA.dataValues));

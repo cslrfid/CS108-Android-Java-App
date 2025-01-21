@@ -228,16 +228,13 @@ public class UtraceFragment extends CommonFragment {
 
                 Button button = buttonUntrace; int selectBank = selectTag.spinnerSelectBank.getSelectedItemPosition() + 1; MainActivity.csLibrary4A.appendToLog("selectBank = " + selectBank);
                 //if (strUntraceButtonBackup == null) strUntraceButtonBackup = buttonUntrace.getText().toString(); buttonUntrace.setText("Show"); button = buttonUntrace;
-                accessTask = new AccessTask(
-                        button, null, invalid,
+                accessTask = new AccessTask(button, null, invalid, true,
                         selectTag.editTextTagID.getText().toString(), selectBank, (selectBank == 1 ? 32 : 0),
                         selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_UNTRACEABLE,
                         0, 0, true, false,
                         null, null, null, null, null);
-                MainActivity.csLibrary4A.appendToLog("setSelectCriteria: going to execute accessTask");
                 accessTask.execute();
                 rerunRequest = true;
-                MainActivity.csLibrary4A.appendToLog("setSelectCriteria: accessTask is executed");
             }
             if (rerunRequest) {
                 mHandler.postDelayed(updateRunnable, 500);

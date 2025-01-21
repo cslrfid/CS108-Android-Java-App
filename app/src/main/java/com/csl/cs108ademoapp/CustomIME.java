@@ -215,6 +215,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
                 inventoryBarcodeTask.execute();
             } else {
                 MainActivity.csLibrary4A.setPowerLevel(MainActivity.csLibrary4A.getWedgePower());
+                MainActivity.csLibrary4A.appendToLog("Debug_Compact: CustomIME.startStopHandler");
                 MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
                 inventoryRfidTask = new InventoryRfidTask();
                 inventoryRfidTask.execute();
