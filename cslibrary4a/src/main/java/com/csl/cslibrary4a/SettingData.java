@@ -27,7 +27,7 @@ public class SettingData {
                 + "\nthis.utility is " + (this.utility == null ? "null" : "valid")
                 + "\nthis.context is " + (this.context == null ? "null" : "valid")
         );
-        loadSettingFile0();
+        loadForegroundSettingFile();
     }
     public void setConnectedConnectors(NotificationConnector notificationConnector, RfidReader rfidReader) {
         this.notificationConnector = notificationConnector;
@@ -66,7 +66,6 @@ public class SettingData {
     //    this.inventoryBeep = inventoryBeep;
     //    return true;
     //}
-
 
     public int batteryDisplaySelectDefault = 1, batteryDisplaySelect = batteryDisplaySelectDefault;
     public int rssiDisplaySelectDefault = 1, rssiDisplaySelect = rssiDisplaySelectDefault;
@@ -128,7 +127,7 @@ public class SettingData {
 
     File file0;
     public String strForegroundReaderDefault = "", strForegroundReader = strForegroundReaderDefault;
-    boolean loadSettingFile0() {
+    boolean loadForegroundSettingFile() {
         File path = context.getFilesDir();
         String fileName = "csReaderA_Foreground";
         file0 = new File(path, fileName);
@@ -161,7 +160,7 @@ public class SettingData {
         }
         return true;
     }
-    public void saveSetting2File0() {
+    public void saveForegroundSetting2File() {
         boolean DEBUG = true;
         if (DEBUG) appendToLog("Start");
 
@@ -264,7 +263,7 @@ public class SettingData {
         }
     }
 
-    boolean loadSetting1File(String strlibraryVersion, boolean bChannelHoppingStatus, int iCurrentProfile) {
+    boolean loadSettingFile(String strlibraryVersion, boolean bChannelHoppingStatus, int iCurrentProfile) {
         File path = context.getFilesDir();
         String fileName = bluetoothGatt.getmBluetoothDevice().getAddress();
 
@@ -449,10 +448,11 @@ public class SettingData {
                     csReaderConnector.rfidReader.setTagGroup(querySelect, querySession, queryTarget);
                     csReaderConnector.rfidReader.setTagFocus(csReaderConnector.rfidReader.tagFocus > 0 ? true : false);
                     if (csReaderConnector.settingData.preFilterData != null && csReaderConnector.settingData.preFilterData.enable) {
-                        appendToLog("preFilterData is valid. Going to setSelectCriteria");
+                        if (utility.DEBUG_SELECT) appendToLog("Debug_Select: SettingData.loadingSettingFile. preFilterData is valid. Going to setSelectCriteria");
+                        appendToLog("BtDataOut BBB 5");
                         csReaderConnector.rfidReader.setSelectCriteria(0, csReaderConnector.settingData.preFilterData.enable, csReaderConnector.settingData.preFilterData.target, csReaderConnector.settingData.preFilterData.action, csReaderConnector.settingData.preFilterData.bank, csReaderConnector.settingData.preFilterData.offset, csReaderConnector.settingData.preFilterData.mask, csReaderConnector.settingData.preFilterData.maskbit);
                     } else {
-                        appendToLog("preFilterData is null or disabled. Going to setSelectCriteriaDisable");
+                        if (utility.DEBUG_SELECT) appendToLog("Debug_Select: SettingData.loadingSettingFile. preFilterData is null or disabled. Going to setSelectCriteriaDisable");
                         csReaderConnector.rfidReader.setSelectCriteriaDisable(0);
                     }
                 }
@@ -471,7 +471,6 @@ public class SettingData {
         }
         return bNeedDefault;
     }
-
     public void saveSetting2File(String strLibraryVersion, boolean bChannelHoppingStatus, int iCurrentProfile) {
         boolean DEBUG = true;
         if (DEBUG) appendToLog("Start");
@@ -549,6 +548,6 @@ public class SettingData {
         } catch (Exception ex){
             //
         }
-        csReaderConnector.settingData.saveSetting2File0();
+        csReaderConnector.settingData.saveForegroundSetting2File();
     }
 }

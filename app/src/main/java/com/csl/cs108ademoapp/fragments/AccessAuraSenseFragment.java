@@ -1,6 +1,12 @@
 package com.csl.cs108ademoapp.fragments;
 
 import static com.csl.cs108ademoapp.MainActivity.tagSelected;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_AURASENSE;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_AURASENSE_ATBOOT;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_AURASENSE_ATSELECT;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_BAP;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_COLDCHAIN;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -87,25 +93,25 @@ public class AccessAuraSenseFragment extends CommonFragment {
                 if (MainActivity.csLibrary4A.get98XX() == 2) tableRow.setVisibility(View.GONE);
                 LinearLayout layout4 = (LinearLayout) getActivity().findViewById(R.id.accessCustomReadWrite);
                 if (position == eMicroTag.emAuraSense.ordinal()) {
-                    MainActivity.mDid = "E280B12";
+                    MainActivity.tagType = TAG_EM_AURASENSE; MainActivity.mDid = "E280B12";
                     layout0.setVisibility(View.VISIBLE);
                     layout1.setVisibility(View.VISIBLE);
                     layout2.setVisibility(View.GONE);
                     layout4.setVisibility(View.VISIBLE);
                 } else if (position == eMicroTag.emColdChain.ordinal()) {
-                    MainActivity.mDid = "E280B0";
+                    MainActivity.tagType = TAG_EM_COLDCHAIN; MainActivity.mDid = "E280B0";
                     layout0.setVisibility(View.VISIBLE);
                     layout1.setVisibility(View.GONE);
                     layout2.setVisibility(View.VISIBLE);
                     layout4.setVisibility(View.VISIBLE);
                 } else if (position == eMicroTag.emBap.ordinal()) {
-                    MainActivity.mDid = "E200B0";
+                    MainActivity.tagType = TAG_EM_BAP; MainActivity.mDid = "E200B0";
                     layout0.setVisibility(View.GONE);
                     layout1.setVisibility(View.GONE);
                     layout2.setVisibility(View.GONE);
                     layout4.setVisibility(View.GONE);
                 } else {
-                    MainActivity.mDid = "E280B";
+                    MainActivity.tagType = TAG_EM; MainActivity.mDid = "E280B";
                     layout0.setVisibility(View.GONE);
                     layout1.setVisibility(View.GONE);
                     layout2.setVisibility(View.GONE);
@@ -282,6 +288,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
+        MainActivity.csLibrary4A.setSameCheck(true);
         super.onDestroy();
     }
 
@@ -308,8 +315,12 @@ public class AccessAuraSenseFragment extends CommonFragment {
         else {
             if (spinnerTagSelect != null && spinnerTagSelect.getSelectedItemPosition() == eMicroTag.emAuraSense.ordinal()) {
                 if (radioButtonAuraSensAtBoot != null && radioButtonAuraSensAtSelect != null) {
-                    if (radioButtonAuraSensAtBoot.isChecked()) MainActivity.mDid = "E280B12A";
-                    if (radioButtonAuraSensAtSelect.isChecked()) MainActivity.mDid = "E280B12B";
+                    if (radioButtonAuraSensAtBoot.isChecked()) {
+                        MainActivity.tagType = TAG_EM_AURASENSE_ATBOOT; MainActivity.mDid = "E280B12A";
+                    }
+                    if (radioButtonAuraSensAtSelect.isChecked()) {
+                        MainActivity.tagType = TAG_EM_AURASENSE_ATSELECT; MainActivity.mDid = "E280B12B";
+                    }
                 }
             }
             userVisibleHint = false;
@@ -382,8 +393,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                         buttonAccess = buttonWrite;
                     }
                     MainActivity.csLibrary4A.appendToLog("hostCommand 1 = " + hostCommand.toString());
-                    accessTask = new AccessTask(
-                            buttonAccess, null, invalid,
+                    accessTask = new AccessTask(buttonAccess, null, invalid, true,
                             selectMask, selectBank, selectOffset,
                             selectTag.editTextAccessPassword.getText().toString(),
                             Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()),

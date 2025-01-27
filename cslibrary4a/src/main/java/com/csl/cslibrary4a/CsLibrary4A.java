@@ -8,7 +8,7 @@ import java.util.List;
 
 public class CsLibrary4A {
     boolean DEBUG = false, DEBUG2 = false;
-    String stringVersion = "14.8";
+    String stringVersion = "14.9";
     Utility utility;
     Cs710Library4A cs710Library4A;
     Cs108Library4A cs108Library4A;
@@ -937,9 +937,9 @@ public class CsLibrary4A {
         else Log.i("Hello2", "setSelectedTag 1" + stringNOTCONNECT);
         return false;
     }
-    public boolean setSelectedTag(String selectMask, int selectBank, int selectOffset, long pwrlevel, int qValue, int matchRep) {
+    public boolean setSelectedTag(boolean selectOne, String selectMask, int selectBank, int selectOffset, long pwrlevel, int qValue, int matchRep) {
         appendToLog("csLibraryA: setSelectCriteria strTagId = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", pwrlevel = " + pwrlevel + ", qValue = " + qValue + ", matchRep = " + matchRep);
-        if (isCs108Connected()) return cs108Library4A.setSelectedTag(selectMask, selectBank, selectOffset, pwrlevel, qValue, matchRep);
+        if (isCs108Connected()) return cs108Library4A.setSelectedTag(selectOne, selectMask, selectBank, selectOffset, pwrlevel, qValue, matchRep);
         else if (isCs710Connected()) return cs710Library4A.setSelectedTag(selectMask, selectBank, selectOffset, pwrlevel, qValue, matchRep);
         else Log.i("Hello2", "setSelectedTag 2" + stringNOTCONNECT);
         return false;
@@ -2175,9 +2175,18 @@ public class CsLibrary4A {
         else Log.i("Hello2", "getValidata" + stringNOTCONNECT);
         return -1;
     }
+
     //============ not public ============
     int bConnectStatus = 0;
     int iServiceUuidConnectedBefore = -1;
     private boolean isCs108Connected() { return (bConnectStatus == 1); }
     private boolean isCs710Connected() { return (bConnectStatus == 7); }
+
+    public int setSelectData(RfidReader.TagType tagType, String mDid, boolean bNeedSelectedTagByTID, String stringProtectPassword, int selectFor, int selectHold) {
+        if (DEBUG2) Log.i("Hello2", "setSelectData");
+        if (isCs108Connected()) return cs108Library4A.setSelectData(tagType, mDid, bNeedSelectedTagByTID, stringProtectPassword, selectFor, selectHold);
+        else if (isCs710Connected()) return cs710Library4A.setSelectData(tagType, mDid, bNeedSelectedTagByTID, stringProtectPassword, selectFor, selectHold);
+        else Log.i("Hello2", "setSelectData" + stringNOTCONNECT);
+        return -1;
+    }
 }

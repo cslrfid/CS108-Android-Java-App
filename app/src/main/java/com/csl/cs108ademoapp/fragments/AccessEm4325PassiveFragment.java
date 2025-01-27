@@ -154,9 +154,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
                     else if (operationRead) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CREAD;
                     else hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CWRITE;
                     MainActivity.csLibrary4A.appendToLog("hostCommand = " + hostCommand.toString());
-                    accessTask = new AccessTask(
-                            buttonRead, null,
-                            invalid,
+                    accessTask = new AccessTask(buttonRead, null, invalid, true,
                             editTextRWTagID.getText().toString(), 1, 32,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),

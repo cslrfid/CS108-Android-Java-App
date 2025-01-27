@@ -2,7 +2,7 @@ package com.csl.cs108ademoapp.fragments;
 
 import android.os.Bundle;
 
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
@@ -18,7 +18,7 @@ import com.csl.cs108ademoapp.R;
 public class MicronFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    MyAdapter adapter;
+    AdapterTab adapter;
 
     private String[] tabs = { "Scan/Select", "Read" };
 
@@ -59,8 +59,8 @@ public class MicronFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
-        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, ""));
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, null, ""));
         adapter.setFragment(1, AccessMicronFragment.newInstance(false));
 
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);

@@ -196,7 +196,7 @@ public class AccessTask1 {
         }
         MainActivity.csLibrary4A.appendToLog("HelloA: accOffset=" + accOffset + ", accSizeNow=" + accSizeNow + ", accSize=" + accSize);
         MainActivity.csLibrary4A.appendToLog("HelloK: invalidRequest=" + invalidRequest);
-        accessTask = new AccessTask(button, invalidRequest,
+        accessTask = new AccessTask(button, invalidRequest, true,
                 selectMask, selectBank, selectOffset,
                 strPassword, powerLevel, hostCommand, tryCount==tryCountMax, updateRunnable);
     }

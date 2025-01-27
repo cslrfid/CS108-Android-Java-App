@@ -3,7 +3,7 @@ package com.csl.cs108ademoapp.fragments;
 import androidx.lifecycle.Lifecycle;
 import android.os.Bundle;
 
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
@@ -19,7 +19,7 @@ import com.csl.cs108ademoapp.R;
 public class AxzonFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    MyAdapter adapter;
+    AdapterTab adapter;
 
     private String[] tabs = { "Scan/Select", "Read" };
     private String[] tabsXerxes = { "Logger", "Security" };
@@ -72,8 +72,8 @@ public class AxzonFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), (bXervesTag ? 4 : 2));
-        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, ""));
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), (bXervesTag ? 4 : 2));
+        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, null, ""));
         adapter.setFragment(1, AccessMicronFragment.newInstance(true));
         adapter.setFragment(2, new AccessXerxesLoggerFragment());
         adapter.setFragment(3, new AccessUcodeFragment());

@@ -294,9 +294,7 @@ public class AccessColdChainFragment extends CommonFragment {
                     if (readWriteTypes == ReadWriteTypes.TEMPERATURE) hostCommand = RfidReaderChipData.HostCommands.CMD_GETSENSORDATA;
                     else if (operationRead) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CREAD;
                     else hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CWRITE;
-                    accessTask = new AccessTask(
-                            (operationRead ? buttonRead : buttonWrite), null,
-                            invalid,
+                    accessTask = new AccessTask((operationRead ? buttonRead : buttonWrite), null, invalid, true,
                             editTextRWTagID.getText().toString(), 1, 32,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),

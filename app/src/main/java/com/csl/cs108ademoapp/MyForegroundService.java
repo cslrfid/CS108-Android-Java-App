@@ -31,7 +31,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
 import com.csl.cs108ademoapp.fragments.AboutFragment;
-import com.csl.cslibrary4a.Cs108Library4A;
 import com.csl.cslibrary4a.BluetoothGatt;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
@@ -43,12 +42,12 @@ import java.util.List;
 import java.util.Random;
 
 public class MyForegroundService extends Service {
+    boolean DEBUG = false;
     Handler mHandler = new Handler();
     public static final String CHANNEL_ID = "ForegroundServiceChannelA";
     public static final int SERVICE_ID = 1;
     NotificationManager notificationManager;
     NotificationCompat.Builder notificationCompatBuilder;
-    Cs108Library4A csLibrary4A;
     ReaderDevice readerDevice;
     SaveList2ExternalTask saveExternalTask; boolean isHttpServerOpened;
     MyMqttClient myMqttClient;
@@ -74,8 +73,7 @@ public class MyForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //String input = intent.getStringExtra("inputExtra");
-        csLibrary4A = MainActivity.csLibrary4A; //new CsLibrary4A(this, null); //MainActivity.csLibrary4A
-        if (csLibrary4A != null) Log.i("Hello", "MyForegroundService onStartCommand: csLibrary4A is created");
+        if (MainActivity.csLibrary4A != null) Log.i("Hello", "MyForegroundService onStartCommand: csLibrary4A is created");
         else Log.i("Hello", "MyForegroundService onStartCommand: null csLibrary4A");
         Log.i("Hello", "MyForegroundService: onStartCommand");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -113,7 +111,7 @@ public class MyForegroundService extends Service {
                 new Runnable() {
                     @Override
                     public void run() {
-                        while (csLibrary4A != null) {
+                        while (MainActivity.csLibrary4A != null) {
                             int iRandom = getRandomNumber();
                             String strMessage = iRandom + ", ServiceState = " + foregroundServiceState.toString();
                             ForegroundServiceState foregroundServiceStateOld = foregroundServiceState;
@@ -132,8 +130,8 @@ public class MyForegroundService extends Service {
                                         } else if (MainActivity.activityActive == false) {
                                             MainActivity.csLibrary4A.appendToLog("runnableStartService: BLUETOOTH_CONNECT and BLUETOOTH_SCAN and (ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION) is permitted");
                                         } else {
-                                            csLibrary4A.appendToLog("Start ScanLeDevice");
-                                            csLibrary4A.scanLeDevice(true);
+                                            MainActivity.csLibrary4A.appendToLog("Start ScanLeDevice");
+                                            MainActivity.csLibrary4A.scanLeDevice(true);
                                             foregroundServiceState = SCAN;
                                         }
                                     }
@@ -144,8 +142,8 @@ public class MyForegroundService extends Service {
                                 } else if (isForegroundEnable()) {
                                     BluetoothGatt.Cs108ScanData cs108ScanData = null;
                                     while (true) {
-                                        cs108ScanData = csLibrary4A.getNewDeviceScanned();
-                                        csLibrary4A.appendToLog("cs108ScanData is " + (cs108ScanData == null ? "null" : "valid") + ", foregroundReader = " + MainActivity.csLibrary4A.getForegroundReader());
+                                        cs108ScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
+                                        MainActivity.csLibrary4A.appendToLog("cs108ScanData is " + (cs108ScanData == null ? "null" : "valid") + ", foregroundReader = " + MainActivity.csLibrary4A.getForegroundReader());
                                         if (cs108ScanData == null) break;
                                         strMessage += ("\n" + cs108ScanData.device.getAddress());
                                         if (cs108ScanData.device.getAddress().matches(MainActivity.csLibrary4A.getForegroundReader())) { //"84:C6:92:9D:DD:52")) {
@@ -156,8 +154,8 @@ public class MyForegroundService extends Service {
                                             }
                                             readerDevice.setDetails(strInfo + "scanRecord=" + MainActivity.csLibrary4A.byteArrayToString(cs108ScanData.scanRecord));
 
-                                            csLibrary4A.scanLeDevice(false);
-                                            csLibrary4A.connect(readerDevice);
+                                            MainActivity.csLibrary4A.scanLeDevice(false);
+                                            MainActivity.csLibrary4A.connect(readerDevice);
                                             foregroundServiceState = CONNECT; iConnectingCount = 0;
                                             break;
                                         }
@@ -165,30 +163,30 @@ public class MyForegroundService extends Service {
                                     if (foregroundServiceState != CONNECT && cs108ScanData != null)
                                         strMessage += ("\n" + cs108ScanData.device.getAddress());
                                 } else {
-                                    csLibrary4A.appendToLog("Stop ScanLeDevice");
-                                    csLibrary4A.scanLeDevice(false);
+                                    MainActivity.csLibrary4A.appendToLog("Stop ScanLeDevice");
+                                    MainActivity.csLibrary4A.scanLeDevice(false);
                                     foregroundServiceState = NULL;
                                 }
                             } else if (foregroundServiceState == CONNECT) {
-                                if (csLibrary4A.isBleConnected()) {
+                                if (MainActivity.csLibrary4A.isBleConnected()) {
                                     readerDevice.setConnected(true);
                                     readerDevice.setSelected(true);
                                     MainActivity.sharedObjects.readersList.add(readerDevice);
                                     foregroundServiceState = CONNECTED;
                                 } else if (++iConnectingCount > 10) {
-                                    csLibrary4A.disconnect(false);
+                                    MainActivity.csLibrary4A.disconnect(false);
                                     foregroundServiceState = NULL;
                                 }
                             } else if (foregroundServiceState == CLOUDCONNECT) {
-                                if (!csLibrary4A.isBleConnected()) foregroundServiceState = CONNECTED;
+                                if (!MainActivity.csLibrary4A.isBleConnected()) foregroundServiceState = CONNECTED;
                                 else if (!isForegroundEnable()) foregroundServiceState = CONNECTED;
-                                if (false && csLibrary4A.getInventoryCloudSave() == 1) {
+                                if (false && MainActivity.csLibrary4A.getInventoryCloudSave() == 1) {
                                     saveExternalTask = new SaveList2ExternalTask(false);
-                                    csLibrary4A.appendToLog("Server: new saveExternalTask");
+                                    MainActivity.csLibrary4A.appendToLog("Server: new saveExternalTask");
                                     isHttpServerOpened = saveExternalTask.openServer(false);
-                                    csLibrary4A.appendToLog("Server: openServer is " + isHttpServerOpened);
+                                    MainActivity.csLibrary4A.appendToLog("Server: openServer is " + isHttpServerOpened);
                                     foregroundServiceState = CONNECTED;
-                                } else if (csLibrary4A.getInventoryCloudSave() == 2) {
+                                } else if (MainActivity.csLibrary4A.getInventoryCloudSave() == 2) {
                                     if (myMqttClient != null && myMqttClient.isMqttServerConnected)
                                         foregroundServiceState = CONNECTED;
                                     else {
@@ -197,22 +195,22 @@ public class MyForegroundService extends Service {
                                     }
                                 } else foregroundServiceState = NULL;
                             } else if (foregroundServiceState == CONNECTED) {
-                                if (csLibrary4A.isBleConnected()) {
+                                if (MainActivity.csLibrary4A.isBleConnected()) {
                                     if (isForegroundEnable()) {
                                         boolean bStartInventory = false;
-                                        if (csLibrary4A.getInventoryCloudSave() == 1) {
+                                        if (MainActivity.csLibrary4A.getInventoryCloudSave() == 1) {
                                             if (false && !isHttpServerOpened) {
-                                                csLibrary4A.appendToLog("Server: going to CloudConnect");
+                                                MainActivity.csLibrary4A.appendToLog("Server: going to CloudConnect");
                                                 foregroundServiceState = CLOUDCONNECT;
-                                            } else if (csLibrary4A.getTriggerButtonStatus()) {
+                                            } else if (MainActivity.csLibrary4A.getTriggerButtonStatus()) {
                                                 strMessage += ("\n" + "H pressed trigger");
                                                 bStartInventory = true;
                                             } else strMessage += ("\n" + "H released trigger");
-                                        } else if (csLibrary4A.getInventoryCloudSave() == 2
-                                                && csLibrary4A.getServerMqttLocation().length() > 0 && csLibrary4A.getTopicMqtt().length() > 0) {
+                                        } else if (MainActivity.csLibrary4A.getInventoryCloudSave() == 2
+                                                && MainActivity.csLibrary4A.getServerMqttLocation().length() > 0 && MainActivity.csLibrary4A.getTopicMqtt().length() > 0) {
                                             if (myMqttClient == null || !myMqttClient.isMqttServerConnected)
                                                 foregroundServiceState = CLOUDCONNECT;
-                                            else if (csLibrary4A.getTriggerButtonStatus()) {
+                                            else if (MainActivity.csLibrary4A.getTriggerButtonStatus()) {
                                                 strMessage += ("\n" + "M pressed trigger");
                                                 bStartInventory = true;
                                             } else strMessage += ("\n" + "M released trigger");
@@ -220,28 +218,32 @@ public class MyForegroundService extends Service {
                                         if (bStartInventory) {
                                             //write2Server(messageStr); csLibrary4A.appendToLog("bImpinjServer: doInBackground after write2Server");
                                             //closeServer(); csLibrary4A.appendToLog("bImpinjServer: doInBackground after closeServer");
-                                            csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
-                                            csLibrary4A.appendToLog("Server:sss startOperation");
+                                            MainActivity.csLibrary4A.appendToLog("Debug_Compact: MyForegroundService.onStartCommand");
+                                            MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
+                                            MainActivity.csLibrary4A.appendToLog("Server:sss startOperation");
                                             inventoryStartTimeMillis = System.currentTimeMillis();
                                             foregroundServiceState = INVENTORY;
                                         }
                                     }
-                                    MainActivity.csLibrary4A.appendToLog("isForegroundEnable = " + isForegroundEnable() + ", getInventoryCloudSave = " + csLibrary4A.getInventoryCloudSave() + ", getServerMqttLocation = " + csLibrary4A.getServerMqttLocation() + ", getTopicMqtt = " + csLibrary4A.getTopicMqtt());
+                                    MainActivity.csLibrary4A.appendToLog("isForegroundEnable = " + isForegroundEnable()
+                                            + ", getInventoryCloudSave = " + MainActivity.csLibrary4A.getInventoryCloudSave()
+                                            + ", getServerMqttLocation = " + MainActivity.csLibrary4A.getServerMqttLocation()
+                                            + ", getTopicMqtt = " + MainActivity.csLibrary4A.getTopicMqtt());
                                 } else {
-                                    csLibrary4A.appendToLog("disconnect");
-                                    csLibrary4A.disconnect(false);
+                                    MainActivity.csLibrary4A.appendToLog("disconnect");
+                                    MainActivity.csLibrary4A.disconnect(false);
                                     if (isHttpServerOpened) {
-                                        if (saveExternalTask.closeServer()) csLibrary4A.appendToLog("Server: closeServer success");
-                                        else csLibrary4A.appendToLog("Server: closeServer failure");
+                                        if (saveExternalTask.closeServer()) MainActivity.csLibrary4A.appendToLog("Server: closeServer success");
+                                        else MainActivity.csLibrary4A.appendToLog("Server: closeServer failure");
                                         isHttpServerOpened = false;
                                     }
                                     if (myMqttClient != null) myMqttClient.disconnect(null);
                                     foregroundServiceState = NULL;
                                 }
                             } else if (foregroundServiceState == INVENTORY) {
-                                MainActivity.csLibrary4A.appendToLog("inventory: isBleConnected = " + csLibrary4A.isBleConnected());
+                                MainActivity.csLibrary4A.appendToLog("inventory: isBleConnected = " + MainActivity.csLibrary4A.isBleConnected());
                                 MainActivity.csLibrary4A.appendToLog("inventory: myMqttClient = " + (myMqttClient == null ? "null" : myMqttClient.isMqttServerConnected));
-                                if (!csLibrary4A.isBleConnected()) foregroundServiceState = CONNECTED;
+                                if (!MainActivity.csLibrary4A.isBleConnected()) foregroundServiceState = CONNECTED;
 //                                else if (csLibrary4A.getInventoryCloudSave() == 2 && (myMqttClient == null || !myMqttClient.isMqttServerConnected)) foregroundServiceState = CONNECTED;
                                 else {
                                     long timePeriod = System.currentTimeMillis() - startTimeMillis;
@@ -251,11 +253,11 @@ public class MyForegroundService extends Service {
                                         epcArrayList.clear();
                                     }
                                     timePeriod = System.currentTimeMillis() - inventoryStartTimeMillis;
-                                    if (csLibrary4A.getInventoryCloudSave() == 2) timePeriod = 0;
-                                    if (isForegroundEnable() && csLibrary4A.getTriggerButtonStatus() && timePeriod < 2000L) {
+                                    if (MainActivity.csLibrary4A.getInventoryCloudSave() == 2) timePeriod = 0;
+                                    if (isForegroundEnable() && MainActivity.csLibrary4A.getTriggerButtonStatus() && timePeriod < 2000L) {
                                         RfidReaderChipData.Rx000pkgData rx000pkgData = null, rx000pkgData1 = null;
-                                        while (csLibrary4A.getTriggerButtonStatus()) {
-                                            rx000pkgData = csLibrary4A.onRFIDEvent();
+                                        while (MainActivity.csLibrary4A.getTriggerButtonStatus()) {
+                                            rx000pkgData = MainActivity.csLibrary4A.onRFIDEvent();
                                             MainActivity.csLibrary4A.appendToLog("rx000pkgData is " + (rx000pkgData == null ? "null" : "valid") +
                                                     ", rx000pkgData1 is " + (rx000pkgData1 == null ? "null" : "valid"));
                                             if (rx000pkgData == null) {
@@ -280,10 +282,10 @@ public class MyForegroundService extends Service {
                                                     else rx000pkgData1 = null;
                                                 }
                                                 if (rx000pkgData1 != null) {
-                                                    csLibrary4A.appendToLog("Server: getInventoryCloudSave = " + MainActivity.csLibrary4A.getInventoryCloudSave());
+                                                    MainActivity.csLibrary4A.appendToLog("Server: getInventoryCloudSave = " + MainActivity.csLibrary4A.getInventoryCloudSave());
                                                     if (MainActivity.csLibrary4A.getInventoryCloudSave() == 1) {
-                                                        ReaderDevice readerDevice1 = new ReaderDevice("", csLibrary4A.byteArrayToString(rx000pkgData1.decodedEpc), false, null,
-                                                                csLibrary4A.byteArrayToString(rx000pkgData1.decodedPc), null, csLibrary4A.byteArrayToString(rx000pkgData1.decodedCrc), null,
+                                                        ReaderDevice readerDevice1 = new ReaderDevice("", MainActivity.csLibrary4A.byteArrayToString(rx000pkgData1.decodedEpc), false, null,
+                                                                MainActivity.csLibrary4A.byteArrayToString(rx000pkgData1.decodedPc), null, MainActivity.csLibrary4A.byteArrayToString(rx000pkgData1.decodedCrc), null,
                                                                 null, -1, -1,
                                                                 null, -1, -1,
                                                                 new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS").format(new Date()), new SimpleDateFormat("z").format(new Date()).replaceAll("GMT", ""),
@@ -298,25 +300,26 @@ public class MyForegroundService extends Service {
                                             }
                                         }
                                         if (rx000pkgData1 != null)
-                                            strMessage += ("\n " + csLibrary4A.byteArrayToString(rx000pkgData1.decodedEpc));
+                                            strMessage += ("\n " + MainActivity.csLibrary4A.byteArrayToString(rx000pkgData1.decodedEpc));
                                     } else { //isForegroundEnable() && csLibrary4A.getTriggerButtonStatus() && timePeriod
-                                        csLibrary4A.appendToLog("Server:sss abortOperation with isForegroundEnable = " + isForegroundEnable() + ", getTriggerButtonStatus = " + csLibrary4A.getTriggerButtonStatus() + ", timePeriod = " + timePeriod + ", ");
-                                        csLibrary4A.abortOperation();
+                                        MainActivity.csLibrary4A.appendToLog("Server:sss abortOperation with isForegroundEnable = " + isForegroundEnable()
+                                                + ", getTriggerButtonStatus = " + MainActivity.csLibrary4A.getTriggerButtonStatus() + ", timePeriod = " + timePeriod + ", ");
+                                        MainActivity.csLibrary4A.abortOperation();
                                         while (true) {
-                                            RfidReaderChipData.Rx000pkgData rx000pkgData = csLibrary4A.onRFIDEvent();
+                                            RfidReaderChipData.Rx000pkgData rx000pkgData = MainActivity.csLibrary4A.onRFIDEvent();
                                             if (rx000pkgData == null) break;
                                         }
                                         if (readerDeviceArrayList.size() != 0) {
                                             saveExternalTask = new SaveList2ExternalTask(false);
-                                            csLibrary4A.appendToLog("Server: new saveExternalTask");
+                                            MainActivity.csLibrary4A.appendToLog("Server: new saveExternalTask");
                                             isHttpServerOpened = saveExternalTask.openServer(false);
-                                            csLibrary4A.appendToLog("Server: openServer is " + isHttpServerOpened);
+                                            MainActivity.csLibrary4A.appendToLog("Server: openServer is " + isHttpServerOpened);
                                             String messageStr = saveExternalTask.createJSON(readerDeviceArrayList, null).toString();
                                             MainActivity.csLibrary4A.appendToLog("Server: Json = " + messageStr);
                                             saveExternalTask.write2Server(messageStr);
-                                            csLibrary4A.appendToLog("Server: write2Server success");
-                                            if (saveExternalTask.closeServer()) csLibrary4A.appendToLog("Server: closeServer success");
-                                            else csLibrary4A.appendToLog("Server: closeServer failure");
+                                            MainActivity.csLibrary4A.appendToLog("Server: write2Server success");
+                                            if (saveExternalTask.closeServer()) MainActivity.csLibrary4A.appendToLog("Server: closeServer success");
+                                            else MainActivity.csLibrary4A.appendToLog("Server: closeServer failure");
                                         }
                                         foregroundServiceState = CONNECTED;
                                     }
@@ -352,9 +355,9 @@ public class MyForegroundService extends Service {
     public void onDestroy() {
         Log.i("Hello1", "MyForegroundService: onDestroy");
         mHandler.removeCallbacks(serviceRunnable);
-        if (csLibrary4A != null) {
-            csLibrary4A.disconnect(false);
-            csLibrary4A.appendToLog("MyForegroundService: onDestroy 0");
+        if (MainActivity.csLibrary4A != null) {
+            MainActivity.csLibrary4A.disconnect(false);
+            MainActivity.csLibrary4A.appendToLog("MyForegroundService: onDestroy 0");
         }
         thread.stop();
         stopSelf();
@@ -364,13 +367,13 @@ public class MyForegroundService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        csLibrary4A.appendToLog("MyForegroundService: onBind");
+        MainActivity.csLibrary4A.appendToLog("MyForegroundService: onBind");
         return binder; // null;
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        csLibrary4A.appendToLog("MyForegroundService: onTaskRemoved");
+        MainActivity.csLibrary4A.appendToLog("MyForegroundService: onTaskRemoved");
         System.out.println("onTaskRemoved called");
         super.onTaskRemoved(rootIntent);
         //do something you want
@@ -381,7 +384,7 @@ public class MyForegroundService extends Service {
 
     Thread thread = null;
     Notification updateNotification(String string) {
-        Log.i("Hello","MyForegroundService updateNotification: " + string);
+        if (DEBUG) Log.i("Hello","MyForegroundService updateNotification: " + string);
         notificationCompatBuilder.setContentText(string);
         Notification notification = notificationCompatBuilder.build();
         notificationManager.notify(1, notification);
@@ -397,17 +400,17 @@ public class MyForegroundService extends Service {
             else if (MainActivity.activityActive == false && MainActivity.csLibrary4A.isBleConnected()) {
                 int batteryCount = MainActivity.csLibrary4A.getBatteryCount();
                 String strBatteryLow = MainActivity.csLibrary4A.isBatteryLow();
-                MainActivity.csLibrary4A.appendToLog("CustomIME Debug 11 with batteryCount = " + batteryCount + ", batteryCount_old = " + batteryCount_old);
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("CustomIME Debug 11 with batteryCount = " + batteryCount + ", batteryCount_old = " + batteryCount_old);
                 if (batteryCount_old != batteryCount) {
                     batteryCount_old = batteryCount;
-                    MainActivity.csLibrary4A.appendToLog("CustomIME Debug 110 with isBatteryLow as " + strBatteryLow + ", strBattteryLow_old = " + strBatteryLow_old);
+                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("CustomIME Debug 110 with isBatteryLow as " + strBatteryLow + ", strBattteryLow_old = " + strBatteryLow_old);
                     if (strBatteryLow == null || strBatteryLow_old == null)
                         strBatteryLow_old = strBatteryLow;
                     else if (!strBatteryLow.matches(strBatteryLow_old))
                         strBatteryLow_old = strBatteryLow;
                 }
                 if (strBatteryLow != null) {
-                    MainActivity.csLibrary4A.appendToLog("CustomIME Debug 112");
+                    if (false) MainActivity.csLibrary4A.appendToLog("CustomIME Debug 112");
                     Toast.makeText(mContext,
                             "Battery Low: " + strBatteryLow + "% Battery Life Left",
                             Toast.LENGTH_SHORT).show();
@@ -422,7 +425,7 @@ public class MyForegroundService extends Service {
     }
 
     boolean isForegroundEnable() {
-        MainActivity.csLibrary4A.appendToLog("isHomeFragment = " + MainActivity.isHomeFragment + ", getForegroundReader = " + MainActivity.csLibrary4A.getForegroundReader());
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("isHomeFragment = " + MainActivity.isHomeFragment + ", getForegroundReader = " + MainActivity.csLibrary4A.getForegroundReader());
         return (MainActivity.isHomeFragment && MainActivity.csLibrary4A.getForegroundReader().length() != 0);
     }
 

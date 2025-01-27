@@ -1,5 +1,10 @@
 package com.csl.cs108ademoapp;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_ALIEN;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_ASYGNTAG;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_CTESIUS;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_BAP;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -48,6 +53,7 @@ import com.csl.cs108ademoapp.fragments.Ucode8Fragment;
 import com.csl.cs108ademoapp.fragments.UcodeFragment;
 import com.csl.cslibrary4a.Cs108Library4A;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReader;
 
 public class MainActivity extends AppCompatActivity {
     final boolean DEBUG = false; final String TAG = "Hello";
@@ -73,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     Handler mHandler = new Handler();
 
     public static String mDid; public static int selectHold; public static int selectFor;
+    public static RfidReader.TagType tagType;
     public static class Config {
         public String configPassword, configPower, config0, config1, config2, config3;
     };
@@ -199,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new InventoryRfidSearchFragment(false);
                 break;
             case MULTIBANK:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, null);
+                fragment = InventoryRfidiMultiFragment.newInstance(true, null, null);
                 break;
             case SIMINVENTORY:
                 fragment = InventoryRfidSimpleFragment.newInstance(false, null);
@@ -224,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new ImpinjM775Fragment();
                 break;
             case ALIEN:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "E2003");
+                fragment = InventoryRfidiMultiFragment.newInstance(true, TAG_ALIEN, "E2003");
                 break;
             case UCODE8:
                 fragment = new Ucode8Fragment();
@@ -233,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new UcodeFragment();
                 break;
             case BAPCARD:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "E200B0");
+                fragment = InventoryRfidiMultiFragment.newInstance(true, TAG_EM_BAP, "E200B0");
                 break;
             case COLDCHAIN:
                 fragment = new ColdChainFragment();
@@ -257,10 +264,10 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new FdmicroFragment();
                 break;
             case CTESIUS:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "E203510");
+                fragment = InventoryRfidiMultiFragment.newInstance(true, TAG_CTESIUS, "E203510");
                 break;
             case ASYGNTAG:
-                fragment = InventoryRfidiMultiFragment.newInstance(true, "E283A");
+                fragment = InventoryRfidiMultiFragment.newInstance(true, TAG_ASYGNTAG, "E283A");
                 break;
 
             case REGISTER:

@@ -12,13 +12,13 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.google.android.material.tabs.TabLayout;
 
 public class HomeWFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    MyAdapter adapter;
+    AdapterTab adapter;
 
     private String[] tabs = {"Normal", "Simple"};
     int iTargetOld, iSessionOld;
@@ -66,7 +66,7 @@ public class HomeWFragment extends CommonFragment {
             adapter.fragment1.onDestroy();
         }
 
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
         adapter.setFragment(0, new HomeFragment());
         adapter.setFragment(1, new DirectWedgeFragment());
 

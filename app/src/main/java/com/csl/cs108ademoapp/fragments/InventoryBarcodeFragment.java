@@ -136,6 +136,8 @@ public class InventoryBarcodeFragment extends CommonFragment {
         });
 
         barcodeTotal = (TextView) getActivity().findViewById(R.id.inventoryBarcodeTotal);
+
+        MainActivity.csLibrary4A.getBarcodePreSuffix();
     }
 
     @Override

@@ -24,6 +24,7 @@ import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SaveList2ExternalTask;
 import com.csl.cs108ademoapp.SelectTag;
+import com.csl.cslibrary4a.AesCmac;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
@@ -682,8 +683,7 @@ public class AccessUcodeFragment extends CommonFragment {
                     else if (operationRead) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CREAD;
                     else hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CWRITE;
 
-                    accessTask = new AccessTask(
-                            button, null, invalid,
+                    accessTask = new AccessTask(button, null, invalid, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), hostCommand,
                             0, 0, true, false,

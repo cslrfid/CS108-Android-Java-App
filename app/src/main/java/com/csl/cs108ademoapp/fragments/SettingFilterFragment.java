@@ -11,13 +11,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.google.android.material.tabs.TabLayout;
 
 public class SettingFilterFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    MyAdapter adapter;
+    AdapterTab adapter;
 
     private String[] tabs = {"Pre-filter", "Post-filter", "Rssi-filter"};
 
@@ -37,7 +37,7 @@ public class SettingFilterFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
         adapter.setFragment(0, new SettingFilterPreFragment());
         adapter.setFragment(1, new SettingFilterPostFragment());
         adapter.setFragment(2, new SettingFilterRssiFragment());

@@ -143,7 +143,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
                             String strSgtin = null;
                             if (MainActivity.csLibrary4A.getWedgeOutput() == 1) {
                                 strSgtin = MainActivity.csLibrary4A.getUpcSerial(strEpc);
-                                MainActivity.csLibrary4A.appendToLog("strSgtin = " + (strSgtin == null ? "null" : strSgtin));
+                                appendToLog("strSgtin = " + (strSgtin == null ? "null" : strSgtin));
                                 if (strSgtin == null) strEpc = null;
                             }
                             boolean matched = false;
@@ -164,7 +164,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
                                     strValue = MainActivity.csLibrary4A.getWedgePrefix() + strValue;
                                 if (MainActivity.csLibrary4A.getWedgeSuffix() != null)
                                     strValue += MainActivity.csLibrary4A.getWedgeSuffix();
-                                MainActivity.csLibrary4A.appendToLog("CustomIME, serviceRunnable: wedgeDelimiter = " + MainActivity.csLibrary4A.getWedgeDelimiter());
+                                appendToLog("CustomIME, serviceRunnable: wedgeDelimiter = " + MainActivity.csLibrary4A.getWedgeDelimiter());
                                 switch (MainActivity.csLibrary4A.getWedgeDelimiter()) {
                                     default:
                                         strValue += "\n";
@@ -181,7 +181,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
                                     case -1:
                                         break;
                                 }
-                                MainActivity.csLibrary4A.appendToLog("CustomIME BtData to Keyboard: " + strValue);
+                                appendToLog("CustomIME BtData to Keyboard: " + strValue);
                                 ic.commitText(strValue, 1);
                             }
                         }
@@ -190,7 +190,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
             }
             int iDelayms = 500;
             if (inventoring) iDelayms = 100;
-            MainActivity.csLibrary4A.appendToLog("CustomIME BtData set next time as " + iDelayms);
+            appendToLog("CustomIME BtData set next time as " + iDelayms);
             mHandler.postDelayed(serviceRunnable, iDelayms);
         }
     };
@@ -215,6 +215,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
                 inventoryBarcodeTask.execute();
             } else {
                 MainActivity.csLibrary4A.setPowerLevel(MainActivity.csLibrary4A.getWedgePower());
+                MainActivity.csLibrary4A.appendToLog("Debug_Compact: CustomIME.startStopHandler");
                 MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
                 inventoryRfidTask = new InventoryRfidTask();
                 inventoryRfidTask.execute();

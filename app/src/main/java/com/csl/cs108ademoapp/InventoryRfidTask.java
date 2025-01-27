@@ -63,6 +63,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     Handler handler = new Handler(); boolean bValidVibrateNewAll = false; boolean bUseVibrateMode0 = false;
 
     void inventoryHandler_setup() {
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidTask.inventoryHandler_setup set runningInventoryRfidTask as true ");
         MainActivity.sharedObjects.runningInventoryRfidTask = true;
         total = 0; allTotal = 0; yield = 0;
         if (tagsList != null) {
@@ -165,6 +166,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     if (rx000pkgData.decodedError != null) endingMessaage = rx000pkgData.decodedError;
                     if (continousRequest) {
                         MainActivity.csLibrary4A.batteryLevelRequest();
+                        MainActivity.csLibrary4A.appendToLog("Debug_Compact: InventoryRfidTask.doInBackground");
                         MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
                     } else  ending = true;
                 }
@@ -293,14 +295,15 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                         if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryRfidTask: !!! rx000pkgData.Pc length = " + strPc.length());
                         continue;
                     }
-                    int extraLength = 0;
+                    /*int extraLength = 0;
                     if (extra1Bank != -1 && rx000pkgData.decodedData1 != null) extraLength += rx000pkgData.decodedData1.length;
                     if (extra2Bank != -1 && rx000pkgData.decodedData2 != null) extraLength += rx000pkgData.decodedData2.length;
                     if (extraLength != 0) {
                         byte[] decodedEpcNew = new byte[rx000pkgData.decodedEpc.length - extraLength];
                         System.arraycopy(rx000pkgData.decodedEpc, 0, decodedEpcNew, 0, decodedEpcNew.length);
                         rx000pkgData.decodedEpc = decodedEpcNew;
-                    }
+                    }*/
+                    MainActivity.csLibrary4A.appendToLog("ApData: decodedEpc = " + MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.decodedEpc) + ", data1,2 = " + MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.decodedData1) + ", " + MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.decodedData2));
                     String strEpc = MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.decodedEpc);
                     if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloC: decodePc = " + strPc + ", decodedEpc = " + strEpc + ", iFlags = " + String.format("%2X", iFlag));
                     portstatus = INVALID_CODEVALUE; backport1 = INVALID_CODEVALUE; backport2 = INVALID_CODEVALUE; codeSensor = INVALID_CODEVALUE; codeRssi = INVALID_CODEVALUE; codeTempC = INVALID_CODEVALUE; brand = null;
@@ -335,15 +338,19 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     }
 
                     boolean bFastId = false; boolean bTempId = false;
+                    MainActivity.csLibrary4A.appendToLog("bFastId is false with MainActivity.mDid = " + MainActivity.mDid + ", getFastId = " + MainActivity.csLibrary4A.getFastId());
                     if (MainActivity.mDid != null) {
-                        MainActivity.csLibrary4A.appendToLog("mDid = " + MainActivity.mDid);
                         if (MainActivity.mDid.indexOf("E28011") == 0) {
                             int iValue = Integer.valueOf(MainActivity.mDid.substring("E28011".length()), 16);
                             MainActivity.csLibrary4A.appendToLog(String.format("iValue = 0x%02X", iValue));
-                            if ((iValue & 0x20) != 0) bFastId = true;
+                            if ((iValue & 0x20) != 0) {
+                                bFastId = true; MainActivity.csLibrary4A.appendToLog("bFastId is true");
+                            }
                             if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloK: iValue = " + String.format("%02X", iValue));
                         }
-                    } else if (MainActivity.csLibrary4A.getFastId() > 0) bFastId = true;
+                    } else if (MainActivity.csLibrary4A.getFastId() > 0) {
+                        bFastId = true; MainActivity.csLibrary4A.appendToLog("bFastId is true");
+                    }
                     if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloK: strMdid = " + strMdid + ", MainMdid = " + MainActivity.mDid + ", bFastId = " + bFastId);
 
                     int iPc = Integer.parseInt(strPc, 16);
@@ -549,13 +556,14 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     if (ALLOW_WEDGE) MainActivity.sharedObjects.serviceArrayList.add(strEpc);
 
                     boolean bAddDevice = true; String strValue = null;
+                    MainActivity.csLibrary4A.appendToLog("bProtectOnly = " + bProtectOnly);
                     if (bSgtinOnly) {
                         strValue = MainActivity.csLibrary4A.getUpcSerial(strEpc);
                         MainActivity.csLibrary4A.appendToLog("bSgtinOnly = " + bSgtinOnly + ", strValue = " + (strValue == null ? "null" : strValue));
                         if (strValue == null) bAddDevice = false;
                     } else if (bProtectOnly) {
+                        bAddDevice = false;
                         if (strExtra1 != null) {
-                            bAddDevice = false;
                             strValue = strExtra1.substring(strExtra1.length() - 1);
                             int iValue = Integer.parseInt(strValue, 16);
                             MainActivity.csLibrary4A.appendToLog("bProtectOnly = " + bProtectOnly + ", strExtra1 = " + (strExtra1 == null ? "null" : strExtra1) + ", iValue = " + iValue);
@@ -833,7 +841,9 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
             MainActivity.csLibrary4A.appendToLog("INVENDING: Toasting");
             if (mytoast != null)    mytoast.show();
         }
-        if (button != null) button.setText("Start"); MainActivity.sharedObjects.runningInventoryRfidTask = false;
+        if (button != null) button.setText("Start");
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidTask.DeviceConnectTask4InventoryEnding set runningInventoryRfidTask as false ");
+        MainActivity.sharedObjects.runningInventoryRfidTask = false;
         if (endingMessaage != null) {
             CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
             customPopupWindow.popupStart(endingMessaage, false);

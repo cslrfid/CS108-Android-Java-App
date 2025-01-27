@@ -1,5 +1,10 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S2;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S3;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_XERXES;
+
 import androidx.lifecycle.Lifecycle;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -120,16 +125,16 @@ public class AccessMicronFragment extends CommonFragment {
 
                 switch (spinnerTagType.getSelectedItemPosition()) {
                     case 0:
-                        MainActivity.mDid = "E28240";
+                        MainActivity.tagType = TAG_AXZON; MainActivity.mDid = "E28240";
                         break;
                     case 1:
-                        MainActivity.mDid = "E282402";
+                        MainActivity.tagType = TAG_MAGNUS_S2; MainActivity.mDid = "E282402";
                         break;
                     case 2:
-                        MainActivity.mDid = "E282403";
+                        MainActivity.tagType = TAG_MAGNUS_S3; MainActivity.mDid = "E282403";
                         break;
                     case 3:
-                        MainActivity.mDid = "E282405";
+                        MainActivity.tagType = TAG_XERXES; MainActivity.mDid = "E282405";
                         break;
                 }
                 if (btagTypeSelected) {
@@ -393,9 +398,7 @@ public class AccessMicronFragment extends CommonFragment {
                     int selectBank = 1;
                     int selectOffset = 32;
                     String selectMask = editTextRWTagID.getText().toString();
-                    accessTask = new AccessTask(
-                            buttonRead, null,
-                            invalid,
+                    accessTask = new AccessTask(buttonRead, null, invalid, true,
                             selectMask, selectBank, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),

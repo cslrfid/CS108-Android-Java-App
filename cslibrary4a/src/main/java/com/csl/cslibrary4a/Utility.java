@@ -26,8 +26,13 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Utility {
+    public final boolean DEBUG_SELECT = false;
+    public final boolean DEBUG_INVCFG = false;
+    public final boolean DEBUG_BTDATA = false;
+    public final boolean DEBUG_FMDATA = false;
     public final boolean DEBUG_PKDATA = false;
     public final boolean DEBUG_APDATA = false;
+    public final boolean DEBUG_COMPACT = false;
     private Context mContext; private TextView mLogView;
     public Utility(Context context, TextView mLogView) {
         mContext = context;

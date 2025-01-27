@@ -12,13 +12,13 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.google.android.material.tabs.TabLayout;
 
 public class ImpinjFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    MyAdapter adapter;
+    AdapterTab adapter;
 
     private String[] tabs = {"Configure", "Scan", "Authenticate"};
     int iTargetOld, iSessionOld;
@@ -60,9 +60,9 @@ public class ImpinjFragment extends CommonFragment {
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
         adapter.setFragment(0, new AccessImpinjFragment(false));
-        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true,""));
+        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true, null, ""));
         adapter.setFragment(2, new AccessUcodeFragment());
 
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);

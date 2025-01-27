@@ -14,7 +14,7 @@ public class BarcodeConnector {
     Context context; Utility utility;
     public BarcodeConnector(Context context, Utility utility) {
         this.context = context;
-        this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
+        this.utility = utility;
     }
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }

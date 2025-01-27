@@ -143,8 +143,7 @@ public class AccessKilowayFragment extends CommonFragment {
                         if (checkBoxRepeat != null && checkBoxRepeat.isChecked()) { bankProcessing = 0; checkProcessing = 0; }
                         else rerunRequest = false;
                     } else {
-                        accessTask = new AccessTask(
-                                buttonRead, invalid,
+                        accessTask = new AccessTask(buttonRead, invalid, true,
                                 editTextRWTagID.getText().toString(), 1, 32,
                                 "00000000", Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                                 false, null);

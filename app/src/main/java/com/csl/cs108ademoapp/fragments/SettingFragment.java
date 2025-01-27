@@ -14,7 +14,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.csl.cs108ademoapp.MainActivity;
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.csl.cs108ademoapp.R;
 import com.google.android.material.tabs.TabLayout;
 
@@ -22,7 +22,7 @@ public class SettingFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
     FragmentStatePagerAdapter pagerAdapter;
-    MyAdapter adapter;
+    AdapterTab adapter;
     Fragment fragment0, fragment1;
 
     private String[] tabs = { "Operation", "Administration" };
@@ -69,7 +69,7 @@ public class SettingFragment extends CommonFragment {
                 return fragment;
             }
         };
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
         adapter.setFragment(0, new SettingOperateFragment());
         adapter.setFragment(1, new SettingAdminFragment());
 

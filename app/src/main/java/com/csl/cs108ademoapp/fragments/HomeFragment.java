@@ -103,7 +103,7 @@ public class HomeFragment extends CommonFragment {
 
             }
         }
-        MainActivity.mDid = null;
+        MainActivity.tagType = null; MainActivity.mDid = null;
         if (true || MainActivity.sharedObjects.versionWarningShown == false)
             mHandler.post(runnableConfiguring);
         mHandler.postDelayed(runnableStartService, 1000);

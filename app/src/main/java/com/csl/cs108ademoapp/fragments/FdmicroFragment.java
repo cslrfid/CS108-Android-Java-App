@@ -1,8 +1,10 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_FDMICRO;
+
 import android.os.Bundle;
 
-import com.csl.cs108ademoapp.adapters.MyAdapter;
+import com.csl.cslibrary4a.AdapterTab;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.viewpager.widget.ViewPager;
@@ -18,7 +20,7 @@ import com.csl.cs108ademoapp.R;
 public class FdmicroFragment extends CommonFragment {
     private ActionBar actionBar;
     private ViewPager viewPager;
-    MyAdapter adapter;
+    AdapterTab adapter;
 
     private String[] tabs = {"Scan", "Configuration"};
 
@@ -76,8 +78,8 @@ public class FdmicroFragment extends CommonFragment {
             }
         });
 
-        adapter = new MyAdapter(getActivity().getSupportFragmentManager(), tabs.length);
-        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true,"E2827001"));
+        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, TAG_FDMICRO, "E2827001"));
         adapter.setFragment(1, new AccessFdmicroFragment());
 
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);

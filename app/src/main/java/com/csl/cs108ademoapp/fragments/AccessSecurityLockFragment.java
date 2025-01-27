@@ -187,7 +187,7 @@ public class AccessSecurityLockFragment extends CommonFragment {
                 invalidRequest = true;
             }
         }
-        accessTask = new AccessTask(button, null, invalidRequest,
+        accessTask = new AccessTask(button, null, invalidRequest, true,
                 strTagID, 1, 32,
                 strPassword, powerLevel, RfidReaderChipData.HostCommands.CMD_18K6CLOCK,
                 0, 0, true, false,
