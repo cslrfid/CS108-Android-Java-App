@@ -367,9 +367,9 @@ public class DirectWedgeFragment extends CommonFragment {
                     listUpdated = true;
                 } else {
                     while (true) {
-                        BluetoothGatt.Cs108ScanData cs108ScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
-                        if (cs108ScanData != null) {
-                            BluetoothGatt.Cs108ScanData scanResultA = cs108ScanData;
+                        BluetoothGatt.CsScanData csScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
+                        if (csScanData != null) {
+                            BluetoothGatt.CsScanData scanResultA = csScanData;
                             if (getActivity() == null) continue;
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {

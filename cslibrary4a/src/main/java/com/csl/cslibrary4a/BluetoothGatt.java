@@ -1013,20 +1013,20 @@ public class BluetoothGatt extends BluetoothGattCallback {
         return bValue;
     }
 
-    public static class Cs108ScanData {
+    public static class CsScanData {
         public BluetoothDevice device; String name, address;
         public int rssi;
         public byte[] scanRecord;
         public ArrayList<byte[]> decoded_scanRecord;
         public int serviceUUID2p2;
 
-        public Cs108ScanData(BluetoothDevice device, int rssi, byte[] scanRecord) {
+        public CsScanData(BluetoothDevice device, int rssi, byte[] scanRecord) {
             this.device = device;
             this.rssi = rssi;
             this.scanRecord = scanRecord;
             decoded_scanRecord = new ArrayList<byte[]>();
         }
-        Cs108ScanData(String name, String address, int rssi, byte[] scanRecord) {
+        CsScanData(String name, String address, int rssi, byte[] scanRecord) {
             this.device = device; this.name = name; this.address = address;
             this.rssi = rssi;
             this.scanRecord = scanRecord;

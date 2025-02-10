@@ -1,7 +1,6 @@
 package com.csl.cs108ademoapp.fragments;
 
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP;
-import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPC;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPCBRAND;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPCBRANDTID;

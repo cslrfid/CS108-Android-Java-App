@@ -14,9 +14,9 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="androdi.permission.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+    <!--uses-permission android:name="android.permission.FOREGROUND_SERVICE"/-->
+    <!--uses-permission android:name="androdi.permission.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE"/-->
+    <!--uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/-->
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -35,12 +35,12 @@
         android:requestLegacyExternalStorage="true"
         android:theme="@style/AppTheme">
 
-        <service
+        <!--service
             android:enabled="true"
             android:name="MyForegroundService"
             android:foregroundServiceType="location"
             android:exported="false"
-            android:stopWithTask="true" />
+            android:stopWithTask="true" /-->
 
         <service android:name="CustomIME"
             android:label="@string/app_ime_cs108"

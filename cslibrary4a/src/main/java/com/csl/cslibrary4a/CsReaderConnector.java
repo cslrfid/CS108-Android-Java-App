@@ -308,7 +308,7 @@ public class CsReaderConnector {
 
     private int readData(byte[] buffer, int byteOffset, int byteCount) { return bluetoothGatt.readBleSteamIn(buffer, byteOffset, byteCount); }
 
-    public class Cs108ConnectorData {
+    public class CsConnectorData {
         public int getVoltageMv() { return notificationConnector.mVoltageValue; }
         public int getVoltageCnt() { return notificationConnector.mVoltageCount; }
         boolean getTriggerButtonStatus() { return notificationConnector.triggerButtonStatus; }
@@ -316,11 +316,11 @@ public class CsReaderConnector {
         Date timeStamp;
         String getTimeStamp() {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-            return sdf.format(mCs108ConnectorData.timeStamp);
+            return sdf.format(csConnectorData.timeStamp);
         }
 
     }
-    public Cs108ConnectorData mCs108ConnectorData;
+    public CsConnectorData csConnectorData;
     public SettingData settingData;
 
     RfidConnector rfidConnector; public RfidReader rfidReader;
@@ -331,7 +331,7 @@ public class CsReaderConnector {
 
     private Handler mHandler = new Handler();
 
-    public void cs108ConnectorDataInit() {
+    public void csConnectorDataInit() {
         connectorDataList = new ArrayList<>();
         cs108DataLeft = new byte[CS108DATALEFT_SIZE];
         cs108DataLeftOffset = 0;
@@ -343,7 +343,7 @@ public class CsReaderConnector {
 
         writeDataCount = 0;
 
-        mCs108ConnectorData = new Cs108ConnectorData();
+        csConnectorData = new CsConnectorData();
         notificationConnector = new NotificationConnector(context, utility, settingData.triggerReporting, settingData.triggerReportingCountSetting);
         controllerConnector = new ControllerConnector(context, utility);
         bluetoothConnector = new BluetoothConnector(context, utility, settingData.userDebugEnable);

@@ -237,7 +237,8 @@ public class HomeFragment extends CommonFragment {
             MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, POST_NOTIFICATIONS) = " + ActivityCompat.checkSelfPermission(mContext, POST_NOTIFICATIONS));
             if (NotificationManagerCompat.from(getActivity()).areNotificationsEnabled()) MainActivity.csLibrary4A.appendToLog("Notification is enabled");
             else MainActivity.csLibrary4A.appendToLog("Notification is disabled");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (!MainActivity.foregroundServiceEnable) { }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ActivityCompat.checkSelfPermission(mContext, POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                     MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions POST_NOTIFICATIONS");
                     requestPermissions(new String[] { POST_NOTIFICATIONS }, 10); //POST_NOTIFICATIONS, FOREGROUND_SERVICE_LOCATION

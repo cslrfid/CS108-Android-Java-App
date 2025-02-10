@@ -2665,7 +2665,7 @@ public class RfidReaderChipE710 {
         }
     }
 
-    public boolean bFirmware_reset_before = false;
+    //public boolean bFirmware_reset_before = false;
     final int RFID_READING_BUFFERSIZE = 600; //1024;
 
     byte[] mRfidToReading = new byte[RFID_READING_BUFFERSIZE];
@@ -3852,11 +3852,11 @@ public class RfidReaderChipE710 {
                 }
                                 /*
                                 int count = 0;
-                                if (mBarcodeToWrite.get(0).dataValues[0] == 0x1b) {
+                                if (barcodeToWrite.get(0).dataValues[0] == 0x1b) {
                                     commandType = BarcodeCommendTypes.COMMAND_COMMON;
                                     count = 1;
-                                    if (false) appendToLog("uplink data is processed with count = " + count + " for mBarcodeToWrite data = " + byteArrayToString(mBarcodeToWrite.get(0).dataValues));
-                                } else if (mBarcodeToWrite.get(0).dataValues[0] == 0x7E) {
+                                    if (false) appendToLog("uplink data is processed with count = " + count + " for barcodeToWrite data = " + byteArrayToString(barcodeToWrite.get(0).dataValues));
+                                } else if (barcodeToWrite.get(0).dataValues[0] == 0x7E) {
                                     matched = true;
                                     commandType = BarcodeCommendTypes.COMMAND_QUERY;
                                     int index = 0;
@@ -3865,7 +3865,7 @@ public class RfidReaderChipE710 {
                                             int length = dataValues[index+2] * 256 + dataValues[index+3];
                                             if (dataValues.length - index >= length + 4 + 1) {
                                                 matched = true;
-                                                if (mBarcodeToWrite.get(0).dataValues[5] == 0x37 && length >= 5) {
+                                                if (barcodeToWrite.get(0).dataValues[5] == 0x37 && length >= 5) {
                                                     matched = true;
                                                     int prefixLength = dataValues[index+6];
                                                     int suffixLength = 0;
@@ -3885,7 +3885,7 @@ public class RfidReaderChipE710 {
                                                         }
                                                     }
                                                     if (true) appendToLog("uplink data is processed as Barcode Prefix = " + byteArrayToString(bytesBarcodePrefix) + ", Suffix = " + byteArrayToString(bytesBarcodeSuffix));
-                                                } else if (mBarcodeToWrite.get(0).dataValues[5] == 0x47 && length > 1) {
+                                                } else if (barcodeToWrite.get(0).dataValues[5] == 0x47 && length > 1) {
                                                     matched = true;
                                                     byte[] byteVersion = new byte[length - 1];
                                                     System.arraycopy(dataValues, index + 5, byteVersion, 0, byteVersion.length);
@@ -3897,8 +3897,8 @@ public class RfidReaderChipE710 {
                                                     }
                                                     strVersion = versionNumber;
                                                     if (true) appendToLog("uplink data " + byteArrayToString(byteVersion) + " is processsed as version = " + versionNumber);
-                                                } else if (mBarcodeToWrite.get(0).dataValues[5] == 0x48 && length >= 5) {
-                                                    if (dataValues[index+5] == mBarcodeToWrite.get(0).dataValues[6] && dataValues[index+6] == mBarcodeToWrite.get(0).dataValues[7]) {
+                                                } else if (barcodeToWrite.get(0).dataValues[5] == 0x48 && length >= 5) {
+                                                    if (dataValues[index+5] == barcodeToWrite.get(0).dataValues[6] && dataValues[index+6] == barcodeToWrite.get(0).dataValues[7]) {
                                                         matched = true; //for ESN, S/N or Date
                                                         byte[] byteSN = new byte[length - 3];
                                                         System.arraycopy(dataValues, index + 7, byteSN, 0, byteSN.length);
@@ -3917,10 +3917,10 @@ public class RfidReaderChipE710 {
                                                         else if (dataValues[index+6] == (byte)0x33) strSerialNumber = serialNumber;
                                                         else if (dataValues[index+6] == (byte)0x34) strDate = serialNumber;
                                                     }
-                                                } else if (mBarcodeToWrite.get(0).dataValues[5] == 0x44 && length >= 3) {
-                                                    if (dataValues[index+5] == mBarcodeToWrite.get(0).dataValues[6] && dataValues[index+6] == mBarcodeToWrite.get(0).dataValues[7]) {
+                                                } else if (barcodeToWrite.get(0).dataValues[5] == 0x44 && length >= 3) {
+                                                    if (dataValues[index+5] == barcodeToWrite.get(0).dataValues[6] && dataValues[index+6] == barcodeToWrite.get(0).dataValues[7]) {
                                                         matched = true;
-                                                        if (mBarcodeToWrite.get(0).dataValues[6] == 0x30 && mBarcodeToWrite.get(0).dataValues[7] == 0x30  && mBarcodeToWrite.get(0).dataValues[8] == 0x30) {
+                                                        if (barcodeToWrite.get(0).dataValues[6] == 0x30 && barcodeToWrite.get(0).dataValues[7] == 0x30  && barcodeToWrite.get(0).dataValues[8] == 0x30) {
                                                             bBarcodeTriggerMode = dataValues[7];
                                                             if (dataValues[index + 7] == 0x30) {
                                                                 appendToLog("uplink data is processed as Barcode Reading mode TRIGGER");
@@ -3941,7 +3941,7 @@ public class RfidReaderChipE710 {
                                 } else {
                                     String strData = null;
                                     try {
-                                        strData = new String(mBarcodeToWrite.get(0).dataValues, "UTF-8");
+                                        strData = new String(barcodeToWrite.get(0).dataValues, "UTF-8");
                                     } catch (Exception ex) {
                                         strData = "";
                                     }
@@ -3956,7 +3956,7 @@ public class RfidReaderChipE710 {
                                     }
                                 }
                                 if (count != 0) {
-                                    if (false) appendToLog("dataValues.length = " + dataValues.length + ", okCount = " + iOkCount + ", count = " + count + " for mBarcodeToWrite data = " + byteArrayToString(mBarcodeToWrite.get(0).dataValues));
+                                    if (false) appendToLog("dataValues.length = " + dataValues.length + ", okCount = " + iOkCount + ", count = " + count + " for barcodeToWrite data = " + byteArrayToString(barcodeToWrite.get(0).dataValues));
                                     matched = false; boolean foundOk = false;
                                     for (int k = 0; k < dataValues.length; k++) {
                                         boolean match06 = false;
@@ -3965,8 +3965,8 @@ public class RfidReaderChipE710 {
                                         foundOk = true; found = true;
                                     }
                                     if (false) appendToLog("00 matcched = " + matched);
-                                    if (matched) appendToLog("uplink data is processed with matched = " + matched + ", OkCount = " + iOkCount + ", expected count = " + count + " for " + byteArrayToString(mBarcodeToWrite.get(0).dataValues));
-                                    else if (foundOk) appendToLog("uplink data is processed with matched = " + matched + ", but OkCount = " + iOkCount + ", expected count = " + count + " for " + byteArrayToString(mBarcodeToWrite.get(0).dataValues));
+                                    if (matched) appendToLog("uplink data is processed with matched = " + matched + ", OkCount = " + iOkCount + ", expected count = " + count + " for " + byteArrayToString(barcodeToWrite.get(0).dataValues));
+                                    else if (foundOk) appendToLog("uplink data is processed with matched = " + matched + ", but OkCount = " + iOkCount + ", expected count = " + count + " for " + byteArrayToString(barcodeToWrite.get(0).dataValues));
                                     else {
                                         mBarcodeDevice.mBarcodeToRead.add(cs108BarcodeData);
                                         appendToLog("uplink data Barcode.DataRead." + byteArrayToString(cs108BarcodeData.dataValues) + " is added to mBarcodeToRead");

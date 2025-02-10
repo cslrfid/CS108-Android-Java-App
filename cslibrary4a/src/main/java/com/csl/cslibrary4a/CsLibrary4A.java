@@ -8,7 +8,7 @@ import java.util.List;
 
 public class CsLibrary4A {
     boolean DEBUG = false, DEBUG2 = false;
-    String stringVersion = "14.9";
+    String stringVersion = "14.10";
     Utility utility;
     Cs710Library4A cs710Library4A;
     Cs108Library4A cs108Library4A;
@@ -104,22 +104,22 @@ public class CsLibrary4A {
         else Log.i("Hello2", "scanLeDevice: bValue1 = " + bValue1 + ", bValue7 = " + bValue7);
         return bValue;
     }
-    public BluetoothGatt.Cs108ScanData getNewDeviceScanned() {
+    public BluetoothGatt.CsScanData getNewDeviceScanned() {
         if (DEBUG2) Log.i("Hello2", "getNewDeviceScanned");
-        BluetoothGatt.Cs108ScanData cs108ScanData1;
-        BluetoothGatt.Cs108ScanData cs108ScanData7 = cs710Library4A.getNewDeviceScanned();
-        BluetoothGatt.Cs108ScanData cs108ScanData = null;
-        if (cs108ScanData7 == null) {
-            cs108ScanData1 = cs108Library4A.getNewDeviceScanned();
-            if (cs108ScanData1 != null) {
-                cs108ScanData = new BluetoothGatt.Cs108ScanData(cs108ScanData1.getDevice(), cs108ScanData1.rssi, cs108ScanData1.getScanRecord());
-                cs108ScanData.serviceUUID2p2 = cs108ScanData1.serviceUUID2p2;
+        BluetoothGatt.CsScanData csScanData1;
+        BluetoothGatt.CsScanData csScanData7 = cs710Library4A.getNewDeviceScanned();
+        BluetoothGatt.CsScanData csScanData = null;
+        if (csScanData7 == null) {
+            csScanData1 = cs108Library4A.getNewDeviceScanned();
+            if (csScanData1 != null) {
+                csScanData = new BluetoothGatt.CsScanData(csScanData1.getDevice(), csScanData1.rssi, csScanData1.getScanRecord());
+                csScanData.serviceUUID2p2 = csScanData1.serviceUUID2p2;
             }
         } else {
-            cs108ScanData = new BluetoothGatt.Cs108ScanData(cs108ScanData7.getDevice(), cs108ScanData7.rssi, cs108ScanData7.getScanRecord());
-            cs108ScanData.serviceUUID2p2 = cs108ScanData7.serviceUUID2p2;
+            csScanData = new BluetoothGatt.CsScanData(csScanData7.getDevice(), csScanData7.rssi, csScanData7.getScanRecord());
+            csScanData.serviceUUID2p2 = csScanData7.serviceUUID2p2;
         }
-        return cs108ScanData;
+        return csScanData;
     }
     public String getBluetoothDeviceAddress() {
         if (DEBUG) Log.i("Hello2", "getBluetoothDeviceAddress");

@@ -57,6 +57,7 @@ import com.csl.cslibrary4a.RfidReader;
 
 public class MainActivity extends AppCompatActivity {
     final boolean DEBUG = false; final String TAG = "Hello";
+    public static boolean foregroundServiceEnable = false;
     public static boolean activityActive = false;
     public static DrawerPositions drawerPositionsDefault = DrawerPositions.MAIN;
 
