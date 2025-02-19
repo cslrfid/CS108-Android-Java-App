@@ -15,6 +15,7 @@ import java.util.List;
 
 public class RfidReader {
     final boolean DEBUG = false;
+    public boolean bFirmware_reset_before = false;
     RfidConnector rfidConnector; public RfidReaderChipR2000 rfidReaderChipR2000; public RfidReaderChipE710 rfidReaderChipE710;
     ArrayList<RfidConnector.CsReaderRfidData> mRx000ToWrite;
     ArrayList<RfidReaderChipData.Rx000pkgData> mRx000ToRead;
@@ -299,7 +300,7 @@ public class RfidReader {
     public boolean setInvAlgo1(boolean dynamicAlgo) {
         boolean bValue = true, DEBUG = false;
         if (DEBUG) appendToLog("2 setInvAlgo1");
-        int iAlgo = (bis108 ? rfidReaderChipR2000.rx000Setting.getInvAlgo() : rfidReaderChipE710.rx000Setting.getInvAlgo());
+        int iAlgo = getInvAlgoInChip();
         int iRetry = getRetryCount();
         int iAbFlip = (bis108 ? rfidReaderChipR2000.rx000Setting.getAlgoAbFlip() : rfidReaderChipE710.rx000Setting.getAlgoAbFlip());
         if (DEBUG) appendToLog("2 setInvAlgo1: going to setInvAlgo with dynamicAlgo = " + dynamicAlgo + ", iAlgo = " + iAlgo + ", iRetry = " + iRetry + ", iabFlip = " + iAbFlip);
@@ -2490,7 +2491,7 @@ public class RfidReader {
         strValue = getSerialNumber();
         if (bis108 == false) {
             if (DEBUG) appendToLog("getSerialNumber 0xEF9C = " + strValue);
-            strValue1 = rfidReaderChipE710.rx000Setting.getProductSerialNumber();
+            strValue1 = getProductSerialNumber();
             if (DEBUG) appendToLog("getProductSerialNumber 0x5020 = " + strValue1);
             if (strValue1 != null && false) strValue = strValue1;
         }
@@ -2606,9 +2607,7 @@ public class RfidReader {
     }
     public boolean setTagGroup(int sL, int session, int target1) {
         if (bis108) {
-            if (false) appendToLog("Hello6: invAlgo = " + rfidReaderChipR2000.rx000Setting.getInvAlgo());
-            if (false) appendToLog("setTagGroup: going to setAlgoSelect with invAlgo = " + rfidReaderChipR2000.rx000Setting.getInvAlgo());
-            rfidReaderChipR2000.rx000Setting.setAlgoSelect(rfidReaderChipR2000.rx000Setting.getInvAlgo()); //Must not delete this line
+            rfidReaderChipR2000.rx000Setting.setAlgoSelect(getInvAlgoInChip()); //Must not delete this line
             if (false) appendToLog("RfidReader.setTagGroup[" + target1 + ", " + session + ", " + sL);
             return rfidReaderChipR2000.rx000Setting.setQueryTarget(target1, session, sL);
         } else {
@@ -2669,6 +2668,9 @@ public class RfidReader {
     public boolean invAlgoSetting = true;
     public boolean getInvAlgo() {
         return invAlgoSetting;
+    }
+    public int getInvAlgoInChip() {
+        return (bis108 ? rfidReaderChipR2000.rx000Setting.getInvAlgo() : rfidReaderChipE710.rx000Setting.getInvAlgo());
     }
     public boolean setInvAlgo(boolean dynamicAlgo) {
         boolean DEBUG = false;
@@ -3396,6 +3398,7 @@ public class RfidReader {
     }
     String getSpecialCountryVersion() {
         boolean DEBUG = false;
+        if (bis108) return rfidReaderChipR2000.rx000OemSetting.getSpecialCountryVersion();
         String strSpecialCountryCode = null;
         int iValue = rfidReaderChipE710.rx000Setting.getCountryEnum();
         if (DEBUG) appendToLog("getCountryEnum 0x3014 = " + iValue);
@@ -3739,7 +3742,6 @@ public class RfidReader {
             int channel = -1;
             if (rfidReaderChipR2000.rx000Setting.getFreqChannelConfig() != 0) {
                 channel = rfidReaderChipR2000.rx000Setting.getFreqChannelSelect();
-                appendToLog("loadSetting1File: getting channel = " + channel);
             }
             if (getChannelHoppingStatus()) {
                 channel = 0;
@@ -3806,7 +3808,7 @@ public class RfidReader {
         if (bis108) {
             boolean result = true;
             {
-                int invAlgo = rfidReaderChipR2000.rx000Setting.getInvAlgo();
+                int invAlgo = getInvAlgoInChip();
                 if (iValue != rfidReaderChipR2000.rx000Setting.getAlgoStartQ(invAlgo)) {
                     if (false)
                         appendToLog("setTagGroup: going to setAlgoSelect with invAlgo = " + invAlgo);
@@ -3983,7 +3985,10 @@ public class RfidReader {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setInvBrandId(invBrandId) : rfidReaderChipE710.rx000Setting.setInvBrandId(invBrandId));
     }
     public boolean sendHostRegRequestHST_CMD(RfidReaderChipData.HostCommands hostCommand) {
-        if (bis108) rfidReaderChipR2000.setPwrManagementMode(false);
+        if (bis108) {
+            rfidReaderChipR2000.setPwrManagementMode(false);
+            rfidReaderChipR2000.rx000Setting.setAlgoRetry(5);
+        }
         else rfidReaderChipE710.setPwrManagementMode(false);
         return (bis108 ? rfidReaderChipR2000.sendHostRegRequestHST_CMD(hostCommand) : rfidReaderChipE710.sendHostRegRequestHST_CMD(hostCommand));
     }
@@ -4066,5 +4071,23 @@ public class RfidReader {
     }
     public boolean setAntennaInvCount(long antennaInvCount) {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setAntennaInvCount(antennaInvCount) : rfidReaderChipE710.rx000Setting.setAntennaInvCount(antennaInvCount));
+    }
+    public int getFreqChannelConfig() {
+        return (bis108 ? rfidReaderChipR2000.rx000Setting.getFreqChannelConfig(): -1);
+    }
+    public int getDiagnosticConfiguration() {
+        return (bis108 ? rfidReaderChipR2000.rx000Setting.getDiagnosticConfiguration(): -1);
+    }
+    public boolean setDiagnosticConfiguration(boolean bCommmandActive) {
+        return (bis108 ? rfidReaderChipR2000.rx000Setting.setDiagnosticConfiguration(bCommmandActive): false);
+    }
+    public int getImpinjExtension() {
+        return (bis108 ? rfidReaderChipR2000.rx000Setting.getImpinjExtension(): rfidReaderChipE710.rx000Setting.getImpinjExtension());
+    }
+    public String getProductSerialNumber() {
+        return (bis108 ? rfidReaderChipR2000.rx000OemSetting.getProductSerialNumber(): rfidReaderChipE710.rx000Setting.getProductSerialNumber());
+    }
+    public boolean turnOn(boolean onStatus) {
+        return (bis108 ? rfidReaderChipR2000.turnOn(onStatus): rfidReaderChipE710.turnOn(onStatus));
     }
 }

@@ -60,7 +60,7 @@ public class Cs710Library4A {
                 public void onScanResult(int callbackType, ScanResult result) {
                     boolean DEBUG = false;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        BluetoothGatt.Cs108ScanData scanResultA = new BluetoothGatt.Cs108ScanData(result.getDevice(), result.getRssi(), result.getScanRecord().getBytes());
+                        BluetoothGatt.CsScanData scanResultA = new BluetoothGatt.CsScanData(result.getDevice(), result.getRssi(), result.getScanRecord().getBytes());
                         boolean found98 = true;
                         if (true) found98 = check9800(scanResultA);
                         if (DEBUG) appendToLog("found98 = " + found98 + ", mScanResultList 0 = " + (mScanResultList != null ? "VALID" : "NULL"));
@@ -77,7 +77,7 @@ public class Cs710Library4A {
                 @Override
                 public void onLeScan(final BluetoothDevice device, final int rssi, final byte[] scanRecord) {
                     if (true) appendToLog("onLeScan()");
-                    BluetoothGatt.Cs108ScanData scanResultA = new BluetoothGatt.Cs108ScanData(device, rssi, scanRecord);
+                    BluetoothGatt.CsScanData scanResultA = new BluetoothGatt.CsScanData(device, rssi, scanRecord);
                     boolean found98 = true;
                     if (true) found98 = check9800(scanResultA);
                     appendToLog("found98 = " + found98 + ", mScanResultList 1 = " + (mScanResultList != null ? "VALID" : "NULL"));
@@ -118,7 +118,7 @@ public class Cs710Library4A {
     public String getlibraryVersion() {
         String version = BuildConfig.VERSION_NAME;
         //int iVersion = Integer.parseInt(version) + 10;
-        version = "14.16"; //+ String.valueOf(iVersion);
+        version = "14.17"; //+ String.valueOf(iVersion);
         appendToLog("version = " + version);
         return utility.getCombinedVersion(version);
     }
@@ -134,7 +134,7 @@ public class Cs710Library4A {
 
         if (isRfidFailure() == false && checkHostProcessorVersion(macVersion, Integer.parseInt(strRFIDVersions[0].trim()), Integer.parseInt(strRFIDVersions[1].trim()), Integer.parseInt(strRFIDVersions[2].trim())) == false)
             stringPopup += "\nRFID processor firmware: V" + strVersionRFID;
-        if (icsModel == 108) {
+        if (icsModel != 463) {
             if (checkHostProcessorVersion(hostVersion, Integer.parseInt(strHostVersions[0].trim()), Integer.parseInt(strHostVersions[1].trim()), Integer.parseInt(strHostVersions[2].trim())) == false)
                 stringPopup += "\nAtmel firmware: V" + strVersionHost;
             if (checkHostProcessorVersion(bluetoothVersion, Integer.parseInt(strBTVersions[0].trim()), Integer.parseInt(strBTVersions[1].trim()), Integer.parseInt(strBTVersions[2].trim())) == false)
@@ -188,27 +188,33 @@ public class Cs710Library4A {
     }
 
     //============ android bluetooth ============
-    ArrayList<BluetoothGatt.Cs108ScanData> mScanResultList = new ArrayList<>();
+    ArrayList<BluetoothGatt.CsScanData> mScanResultList = new ArrayList<>();
     int check9800_serviceUUID2p1 = 0;
     boolean bleConnection = false;
     ReaderDevice readerDeviceConnect;
-    boolean bNeedReconnect = false; int iConnectStateTimer = 0;
-    boolean check9800(BluetoothGatt.Cs108ScanData scanResultA) {
+    boolean bNeedReconnect = false;
+    int iConnectStateTimer = 0;
+
+    boolean check9800(BluetoothGatt.CsScanData scanResultA) {
         boolean found98 = false, DEBUG = false;
         if (DEBUG) appendToLog("decoded data size = " + scanResultA.decoded_scanRecord.size());
         int iNewADLength = 0;
         byte[] newAD = new byte[0];
-        int iNewADIndex = 0; check9800_serviceUUID2p1 = -1;
+        int iNewADIndex = 0;
+        check9800_serviceUUID2p1 = -1;
         if (bluetoothGatt.isBLUETOOTH_CONNECTinvalid()) return true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) return true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)
+            return true;
         String strTemp = scanResultA.getDevice().getName();
-        if (strTemp != null && DEBUG) appendToLog("Found name = " + strTemp + ", length = " + String.valueOf(strTemp.length()));
+        if (strTemp != null && DEBUG)
+            appendToLog("Found name = " + strTemp + ", length = " + String.valueOf(strTemp.length()));
         for (byte bdata : scanResultA.getScanRecord()) {
             if (iNewADIndex >= iNewADLength && iNewADLength != 0) {
                 scanResultA.decoded_scanRecord.add(newAD);
                 iNewADIndex = 0;
                 iNewADLength = 0;
-                if (DEBUG) appendToLog("Size = " + scanResultA.decoded_scanRecord.size() + ", " + byteArrayToString(newAD));
+                if (DEBUG)
+                    appendToLog("Size = " + scanResultA.decoded_scanRecord.size() + ", " + byteArrayToString(newAD));
             }
             if (iNewADLength == 0) {
                 iNewADLength = bdata;
@@ -216,7 +222,7 @@ public class Cs710Library4A {
                 iNewADIndex = 0;
             } else newAD[iNewADIndex++] = bdata;
         }
-        if (DEBUG) appendToLog("device.getType = " + scanResultA.device.getType() + ", decoded data size = " + scanResultA.decoded_scanRecord.size());
+        if (DEBUG) appendToLog("decoded data size = " + scanResultA.decoded_scanRecord.size());
         for (int i = 0; /*scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE &&*/ i < scanResultA.decoded_scanRecord.size(); i++) {
             byte[] currentAD = scanResultA.decoded_scanRecord.get(i);
             if (DEBUG) appendToLog("Processing decoded data = " + byteArrayToString(currentAD));
@@ -224,22 +230,29 @@ public class Cs710Library4A {
                 if (DEBUG) appendToLog("Processing UUIDs 02");
                 if ((currentAD[1] == 2) && currentAD[2] == (byte) 0x98) {
                     if (DEBUG) appendToLog("Found 9802");
-                    found98 = true; check9800_serviceUUID2p1 = currentAD[1]; if (DEBUG) appendToLog("serviceUD1D2p1 = " + check9800_serviceUUID2p1);
+                    found98 = true;
+                    check9800_serviceUUID2p1 = currentAD[1];
+                    if (DEBUG) appendToLog("serviceUD1D2p1 = " + check9800_serviceUUID2p1);
                     break;
                 }
             }
         }
-        if (found98 == false && DEBUG) appendToLog("No 9800: with scanData = " + byteArrayToString(scanResultA.getScanRecord()));
-        else if (DEBUG_SCAN) appendToLog("Found 9800: with scanData = " + byteArrayToString(scanResultA.getScanRecord()));
+        if (found98 == false && DEBUG)
+            appendToLog("No 9800: with scanData = " + byteArrayToString(scanResultA.getScanRecord()));
+        else if (DEBUG_SCAN)
+            appendToLog("Found 9800: with scanData = " + byteArrayToString(scanResultA.getScanRecord()));
         return found98;
     }
     boolean connect1(ReaderDevice readerDevice) {
         boolean DEBUG = false;
-        if (DEBUG_CONNECT) appendToLog("Connect with NULLreaderDevice = " + (readerDevice == null) + ", NULLreaderDeviceConnect = " + (readerDeviceConnect == null));
-        if (readerDevice == null && readerDeviceConnect != null)    readerDevice = readerDeviceConnect;
+        if (DEBUG_CONNECT)
+            appendToLog("Connect with NULLreaderDevice = " + (readerDevice == null) + ", NULLreaderDeviceConnect = " + (readerDeviceConnect == null));
+        if (readerDevice == null && readerDeviceConnect != null) readerDevice = readerDeviceConnect;
         boolean result = false;
         if (readerDevice != null) {
-            bNeedReconnect = false; iConnectStateTimer = 0; bluetoothGatt.bDiscoverStarted = false;
+            bNeedReconnect = false;
+            iConnectStateTimer = 0;
+            bluetoothGatt.bDiscoverStarted = false;
             bluetoothGatt.setServiceUUIDType(readerDevice.getServiceUUID2p1());
             result = csReaderConnector.connectBle(readerDevice);
         }
@@ -248,15 +261,18 @@ public class Cs710Library4A {
     }
     final Runnable connectRunnable = new Runnable() {
         boolean DEBUG = false;
+
         @Override
         public void run() {
-            if (DEBUG_CONNECT) appendToLog("0 connectRunnable: mBluetoothConnectionState = " + bluetoothGatt.bluetoothConnectionState + ", bNeedReconnect = " + bNeedReconnect);
+            if (DEBUG_CONNECT)
+                appendToLog("0 connectRunnable: mBluetoothConnectionState = " + bluetoothGatt.bluetoothConnectionState + ", bNeedReconnect = " + bNeedReconnect);
             if (isBleScanning()) {
                 if (DEBUG) appendToLog("connectRunnable: still scanning. Stop scanning first");
                 scanLeDevice(false);
             } else if (bNeedReconnect) {
                 if (bluetoothGatt.bluetoothGatt != null) {
-                    if (DEBUG) appendToLog("connectRunnable: mBluetoothGatt is null before connect. disconnect first");
+                    if (DEBUG)
+                        appendToLog("connectRunnable: mBluetoothGatt is null before connect. disconnect first");
                     csReaderConnector.disconnect();
                 } else if (readerDeviceConnect == null) {
                     if (DEBUG) appendToLog("connectRunnable: exit with null readerDeviceConnect");
@@ -268,15 +284,18 @@ public class Cs710Library4A {
                 }
             } else if (bluetoothGatt.bluetoothConnectionState == BluetoothProfile.STATE_DISCONNECTED) { //mReaderStreamOutCharacteristic valid around 1500ms
                 iConnectStateTimer = 0;
-                if (DEBUG) appendToLog("connectRunnable: disconnect as disconnected connectionState is received");
+                if (DEBUG)
+                    appendToLog("connectRunnable: disconnect as disconnected connectionState is received");
                 bNeedReconnect = true;
                 if (bluetoothGatt.bluetoothGatt != null) {
                     if (DEBUG) appendToLog("disconnect F");
                     csReaderConnector.disconnect();
                 }
             } else if (bluetoothGatt.mReaderStreamOutCharacteristic == null) {
-                if (DEBUG_CONNECT) appendToLog("6 connectRunnable: wait as not yet discovery, with iConnectStateTimer = " + iConnectStateTimer);
-                if (++iConnectStateTimer > 10) { }
+                if (DEBUG_CONNECT)
+                    appendToLog("6 connectRunnable: wait as not yet discovery, with iConnectStateTimer = " + iConnectStateTimer);
+                if (++iConnectStateTimer > 10) {
+                }
             } else {
                 if (DEBUG_CONNECT) appendToLog("7 connectRunnable: end of ConnectRunnable");
                 return;
@@ -289,7 +308,8 @@ public class Cs710Library4A {
         public void run() {
             if (barcodeConnector == null) return;
             appendToLog("abcc disconnectRunnable with barcodeToWrite.size = " + barcodeConnector.barcodeToWrite.size());
-            if (barcodeConnector.barcodeToWrite.size() != 0) mHandler.postDelayed(disconnectRunnable, 100);
+            if (barcodeConnector.barcodeToWrite.size() != 0)
+                mHandler.postDelayed(disconnectRunnable, 100);
             else {
                 appendToLog("disconnect G");
                 csReaderConnector.disconnect();
@@ -305,17 +325,17 @@ public class Cs710Library4A {
 
         if (DEBUG_SCAN) appendToLog("scanLeDevice[" + enable + "]");
         if (bluetoothGatt.bluetoothDeviceConnectOld != null) {
-            //if (DEBUG) appendToLog("bluetoothDeviceConnectOld connection state = " + bluetoothGatt.bluetoothManager.getConnectionState(bluetoothGatt.bluetoothDeviceConnectOld, BluetoothProfile.GATT));
+            if (DEBUG) appendToLog("bluetoothDeviceConnectOld connection state = " + bluetoothGatt.bluetoothManager.getConnectionState(bluetoothGatt.bluetoothDeviceConnectOld, BluetoothProfile.GATT));
         }
         boolean bValue = bluetoothGatt.scanLeDevice(enable, this.mLeScanCallback, this.mScanCallback);
         if (DEBUG_SCAN) appendToLog("isScanning = " + isBleScanning());
         return bValue;
     }
-    public BluetoothGatt.Cs108ScanData getNewDeviceScanned() {
+    public BluetoothGatt.CsScanData getNewDeviceScanned() {
         if (mScanResultList.size() != 0) {
             if (DEBUG_SCAN) appendToLog("mScanResultList.size() = " + mScanResultList.size());
-            BluetoothGatt.Cs108ScanData cs108ScanData = mScanResultList.get(0); mScanResultList.remove(0);
-            return cs108ScanData;
+            BluetoothGatt.CsScanData csScanData = mScanResultList.get(0); mScanResultList.remove(0);
+            return csScanData;
         } else return null;
     }
     public String getBluetoothDeviceAddress() {
@@ -327,14 +347,15 @@ public class Cs710Library4A {
         return bluetoothGatt.getmBluetoothDevice().getName();
     }
     public boolean isBleConnected() {
-        boolean DEBUG = false;
+        boolean DEBUG = true;
         boolean bleConnectionNew = csReaderConnector.isBleConnected();
         if (bleConnectionNew) {
             if (bleConnection == false) {
                 bleConnection = bleConnectionNew;
-                if (DEBUG_CONNECT) appendToLog("Newly connected");
-                csReaderConnector.cs108ConnectorDataInit();
-                rfidReaderChip = csReaderConnector.rfidReader.rfidReaderChipE710; //rfidConnector = csReaderConnector.rfidConnector;
+                if (DEBUG_CONNECT || DEBUG) appendToLog("Newly connected");
+
+                csReaderConnector.csConnectorDataInit();
+                rfidReaderChip = csReaderConnector.rfidReader.rfidReaderChipE710;
                 barcodeNewland = csReaderConnector.barcodeNewland;
                 barcodeConnector = csReaderConnector.barcodeConnector;
                 notificationConnector = csReaderConnector.notificationConnector;
@@ -347,9 +368,9 @@ public class Cs710Library4A {
                 getBluetoothICFirmwareVersion();
                 csReaderConnector.rfidReader.channelOrderType = -1;
                 {
-                    getBarcodePreSuffix();
-                    getBarcodeReadingMode();
-                    getBarcodeSerial();
+                //    getBarcodePreSuffix();
+                //    getBarcodeReadingMode();
+                //    getBarcodeSerial();
                     //getBarcodeNoDuplicateReading();
                     //getBarcodeDelayTimeOfEachReading();
                     //getBarcodeEnable2dBarCodes();
@@ -357,11 +378,13 @@ public class Cs710Library4A {
                     //getBarcodeVersion();
                     //barcodeSendCommandLoadUserDefault();
                     //barcodeSendQuerySystem();
-                    barcodeNewland.barcodeSendCommandItf14Cksum();
+                //    barcodeNewland.barcodeSendCommandItf14Cksum();
 
                     notificationConnector.setBatteryAutoReport(true); //0xA003
                 }
                 abortOperation();
+                //getHostProcessorICSerialNumber(); //0xb004 (but access Oem as bluetooth version is not got)
+                //getMacVer();
                 if (true) {
                     rfidReaderChip.rx000Setting.getAntennaPortConfig(0);
                     rfidReaderChip.rx000Setting.getAntennaPortConfig(1);
@@ -379,12 +402,14 @@ public class Cs710Library4A {
                     rfidReaderChip.rx000Setting.getFrequencyChannelIndex();
                     rfidReaderChip.rx000Setting.getCurrentPort();
                 }
-                getHostProcessorICSerialNumber(); //0xb004 (but access Oem as bluetooth version is not got)
-                getMacVer();
                 csReaderConnector.rfidReader.regionCode = null;
-                getModelNumber(); //getCountryCode();
-                getSerialNumber();
-                if (DEBUG_CONNECT) appendToLog("Start checkVersionRunnable");
+                getModelNumber();
+                getCountryCode();
+                //getSerialNumber();
+                getQueryTarget();
+                csReaderConnector.rfidReader.getImpinjExtension();
+                csReaderConnector.rfidReader.getInvAlgoInChip();
+                if (DEBUG_CONNECT || DEBUG) appendToLog("Start checkVersionRunnable");
                 mHandler.postDelayed(checkVersionRunnable, 500);
 
                 if (csReaderConnector.settingData.strForegroundReader.trim().length() != 0) {
@@ -394,8 +419,8 @@ public class Cs710Library4A {
             } else if (rfidReaderChip == null) {
                 bleConnection = false;
                 appendToLog("rfidReaderChip is NULL");
-            } else if (rfidReaderChip.bFirmware_reset_before) {
-                rfidReaderChip.bFirmware_reset_before = false;
+            } else if (csReaderConnector.rfidReader.bFirmware_reset_before) {
+                csReaderConnector.rfidReader.bFirmware_reset_before = false;
                 mHandler.postDelayed(reinitaliseDataRunnable, 500);
             }
         } else if (bleConnection) {
@@ -461,8 +486,6 @@ public class Cs710Library4A {
     //============ Rfid ============
     //============ Rfid ============
     //============ Rfid ============
-    //============ Rfid ============
-    //============ Rfid ============
 
     boolean setInvAlgoNoSave(boolean dynamicAlgo) {
         return csReaderConnector.rfidReader.setInvAlgoNoSave(dynamicAlgo);
@@ -470,10 +493,6 @@ public class Cs710Library4A {
     boolean setInvAlgo1(boolean dynamicAlgo) {
         return csReaderConnector.rfidReader.setInvAlgo1(dynamicAlgo);
     }
-
-    //============ Rfid ============
-    //============ Rfid ============
-
     public String getAuthMatchData() {
         return csReaderConnector.rfidReader.getAuthMatchData();
     }
@@ -524,7 +543,6 @@ public class Cs710Library4A {
     public boolean getChannelHoppingDefault() {
         return csReaderConnector.rfidReader.getChannelHoppingDefault();
     }
-
     int getCountryCode() {
         return csReaderConnector.rfidReader.getCountryCode();
     }
@@ -535,6 +553,7 @@ public class Cs710Library4A {
         return csReaderConnector.rfidReader.getRfidOnStatus();
     }
     public boolean isRfidFailure() {
+        //appendToLog("BtDataOut: isRfidFailure rfidReader is " + (csReaderConnector.rfidReader == null ? "null" : csReaderConnector.rfidReader.isRfidFailure()));
         if (csReaderConnector.rfidReader == null) return false;
         return csReaderConnector.rfidReader.isRfidFailure();
     }
@@ -568,13 +587,13 @@ public class Cs710Library4A {
         //\\getRxGain() + "\n"));
         }
         //getBluetoothICFirmwareName() + "\n");
-        setBatteryDisplaySetting(csReaderConnector.settingData.batteryDisplaySelectDefault);
-        setRssiDisplaySetting(csReaderConnector.settingData.rssiDisplaySelectDefault);
         setTagDelay(csReaderConnector.rfidReader.tagDelaySettingDefault);
         setCycleDelay((long)0);
         setIntraPkDelay((byte)4);
         setDupDelay((byte)0);
 
+        setBatteryDisplaySetting(csReaderConnector.settingData.batteryDisplaySelectDefault);
+        setRssiDisplaySetting(csReaderConnector.settingData.rssiDisplaySelectDefault);
         notificationConnector.setTriggerReporting(csReaderConnector.settingData.triggerReportingDefault);
         notificationConnector.setTriggerReportingCount(csReaderConnector.settingData.triggerReportingCountSettingDefault);
         setInventoryBeep(csReaderConnector.settingData.inventoryBeepDefault);
@@ -679,6 +698,7 @@ public class Cs710Library4A {
         return csReaderConnector.rfidReader.getFastId();
     }
     public boolean setFastId(boolean fastIdNew) {
+        appendToLog("bFastId: setFastId[" + fastIdNew);
         return csReaderConnector.rfidReader.setFastId(fastIdNew);
     }
     public boolean getInvAlgo() {
@@ -691,30 +711,7 @@ public class Cs710Library4A {
         return csReaderConnector.rfidReader.getProfileList();
     }
     public int getCurrentProfile() {
-        if (true) return csReaderConnector.rfidReader.getCurrentProfile();
-        boolean DEBUG = false;
-        if (DEBUG) appendToLog("1 getCurrentProfile");
-        int iValue;
-        if (true) {
-            iValue = rfidReaderChip.rx000Setting.getCurrentProfile();
-            if (DEBUG) appendToLog("1A getCurrentProfile: getCurrentProfile = " + iValue);
-            if (iValue > 0) {
-                List<String> profileList = getProfileList();
-                if (DEBUG) appendToLog("1b getCurrentProfile: getProfileList = " + (profileList != null ? "valid" : ""));
-                int index = 0;
-                for (; index < profileList.size(); index++) {
-                    if (Integer.valueOf(profileList.get(index).substring(0, profileList.get(index).indexOf(":"))) == iValue)
-                        break;
-                }
-                if (index >= profileList.size()) {
-                    index = profileList.size()-1;
-                    setCurrentLinkProfile(index);
-                }
-                if (DEBUG) appendToLog("1C getCurrentProfile: index in the profileList = " + index);
-                iValue = index;
-            }
-        }
-        return iValue;
+        return csReaderConnector.rfidReader.getCurrentProfile();
     }
     public boolean setBasicCurrentLinkProfile() {
         return csReaderConnector.rfidReader.setBasicCurrentLinkProfile();
@@ -828,7 +825,8 @@ public class Cs710Library4A {
         if (true) return csReaderConnector.rfidReader.getSelectEnable();
         int iValue;
         iValue = rfidReaderChip.rx000Setting.getSelectEnable();
-        return iValue > 0 ? true : false;
+        if (iValue < 0) return false;
+        return iValue != 0 ? true : false;
     }
     public int getSelectTarget() {
         return csReaderConnector.rfidReader.getSelectTarget();
@@ -849,6 +847,7 @@ public class Cs710Library4A {
         return csReaderConnector.rfidReader.setInvSelectIndex(invSelect);
     }
     public boolean setSelectCriteriaDisable(int index) {
+        if (utility.DEBUG_SELECT) appendToLog("Debug_Select: Cs710Library4A.setSelectCriteriaDisable[" + index + "] goes to setSelectCriteriaDisable");
         return csReaderConnector.rfidReader.setSelectCriteriaDisable(index);
     }
     int findFirstEmptySelect() {
@@ -924,10 +923,11 @@ public class Cs710Library4A {
     }
     public void restoreAfterTagSelect() {
         if (!isBleConnected()) return;
-        appendToLog("Start");
+        if (utility.DEBUG_SELECT) appendToLog("Debug_Select: Cs710Library4A.restoreAfterTagSelect goes to setSelectCriteriaDisable");
         setSelectCriteriaDisable(0); setSelectCriteriaDisable(1); setSelectCriteriaDisable(2);
-        if (true) loadSetting1File();
-        else if (DEBUG) appendToLog("postMatchDataChanged = " + csReaderConnector.rfidReader.postMatchDataChanged + ",  preMatchDataChanged = " + csReaderConnector.rfidReader.preMatchDataChanged + ", macVersion = " + getMacVer());
+        loadSetting1File();
+        setAccessCount(0);
+        setRx000AccessPassword("00000000");
         if (checkHostProcessorVersion(getMacVer(), 2, 6, 8)) {
             rfidReaderChip.rx000Setting.setMatchRep(0);
             rfidReaderChip.rx000Setting.setTagDelay(csReaderConnector.rfidReader.tagDelaySetting);
@@ -953,6 +953,7 @@ public class Cs710Library4A {
         return csReaderConnector.rfidReader.setSelectedTag4Access(false, selectMask, selectBank, selectOffset, pwrlevel, qValue, matchRep);
     }
     public boolean setMatchRep(int matchRep) {
+        if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: Cs710Library4A.setMatchRep goes to setMatchRep with matchRep = " + matchRep);
         return csReaderConnector.rfidReader.setMatchRep(matchRep);
     }
     public String[] getCountryList() {
@@ -1216,13 +1217,11 @@ public class Cs710Library4A {
         boolean continuousAfterOn = false;
         if (retValue && on && continuousAfterOn) {
             if (checkHostProcessorVersion(getBluetoothICFirmwareVersion(), 1, 0, 2)) {
-//                retValue = setbarcodeWait(2);
-//                if (retValue)
                 if (DEBUG) appendToLog("to barcodeSendCommandConinuous()");
                 retValue = barcodeNewland.barcodeSendCommandConinuous();
             } else retValue = false;
         }
-        if (true) appendToLog("barcodeToWrite size = " + barcodeConnector.barcodeToWrite.size());
+        if (DEBUG) appendToLog("barcodeToWrite size = " + barcodeConnector.barcodeToWrite.size());
         return retValue;
     }
     int iModeSet = -1, iVibratieTimeSet = -1;
@@ -1246,7 +1245,7 @@ public class Cs710Library4A {
             csReaderBarcodeData.dataValues = barcodeCommandData;
         }
         retValue = barcodeConnector.barcodeToWrite.add(csReaderBarcodeData); appendToLog("barcodeToWrite added with size = " + barcodeConnector.barcodeToWrite.size());
-        appendToLog("add " + csReaderBarcodeData.barcodePayloadEvent.toString() + "." + byteArrayToString(csReaderBarcodeData.dataValues) + " to barcodeToWrite with length = " + barcodeConnector.barcodeToWrite.size());
+        if (DEBUG) appendToLog("barcodeToWrite size = " + barcodeConnector.barcodeToWrite.size());
         if (retValue) {
             iModeSet = mode; iVibratieTimeSet = getVibrateTime();
         }
@@ -1256,7 +1255,10 @@ public class Cs710Library4A {
         return csReaderConnector.settingData.inventoryVibrate;
     }
     public boolean setInventoryVibrate(boolean inventoryVibrate) {
+        boolean DEBUG = false;
+        if (DEBUG) appendToLog("this.inventoryVibrate = " + csReaderConnector.settingData.inventoryVibrate + ", inventoryVibrate = " + inventoryVibrate);
         csReaderConnector.settingData.inventoryVibrate = inventoryVibrate;
+        if (DEBUG) appendToLog("this.inventoryVibrate = " + csReaderConnector.settingData.inventoryVibrate + ", inventoryVibrate = " + inventoryVibrate);
         return true;
     }
     public int getVibrateTime() {
@@ -1434,7 +1436,7 @@ public class Cs710Library4A {
     //============ Android General ============
     public void setSameCheck(boolean sameCheck1) {
         if (csReaderConnector.sameCheck == sameCheck1) return;
-        appendToLog("!!! new sameCheck = " + sameCheck1 + ", with old sameCheck = " + csReaderConnector.sameCheck);
+        if (false) appendToLog("new sameCheck = " + sameCheck1 + ", with old sameCheck = " + csReaderConnector.sameCheck);
         csReaderConnector.sameCheck = sameCheck1; //sameCheck = false;
     }
 
@@ -1541,7 +1543,7 @@ public class Cs710Library4A {
     }
     public int getInventoryCloudSave() {
         int i = csReaderConnector.settingData.inventoryCloudSave;
-        appendToLog("getInventoryCloudSave710 = " + i);
+        if (false) appendToLog("getInventoryCloudSave710 = " + i);
         return i;
     }
     public boolean setInventoryCloudSave(int inventoryCloudSave) {
@@ -1557,10 +1559,12 @@ public class Cs710Library4A {
         return true;
     }
     public String getServerImpinjName() {
+        appendToLog("serverImpinjName = " + csReaderConnector.settingData.serverImpinjName);
         return csReaderConnector.settingData.serverImpinjName;
     }
     public boolean setServerImpinjName(String serverImpinjName) {
         csReaderConnector.settingData.serverImpinjName = serverImpinjName;
+        appendToLog("serverImpinjName = " + serverImpinjName);
         return true;
     }
     public String getServerImpinjPassword() {
@@ -1574,6 +1578,7 @@ public class Cs710Library4A {
         return csReaderConnector.settingData.batteryDisplaySelect;
     }
     public boolean setBatteryDisplaySetting(int batteryDisplaySelect) {
+        if (true) return csReaderConnector.settingData.setBatteryDisplaySetting(batteryDisplaySelect);
         if (batteryDisplaySelect < 0 || batteryDisplaySelect > 1)   return false;
         csReaderConnector.settingData.batteryDisplaySelect = batteryDisplaySelect;
         return true;
@@ -1583,6 +1588,7 @@ public class Cs710Library4A {
         return csReaderConnector.settingData.rssiDisplaySelect;
     }
     public boolean setRssiDisplaySetting(int rssiDisplaySelect) {
+        if (true) return csReaderConnector.settingData.setRssiDisplaySetting(rssiDisplaySelect);
         if (rssiDisplaySelect < 0 || rssiDisplaySelect > 1)   return false;
         csReaderConnector.settingData.rssiDisplaySelect = rssiDisplaySelect;
         return true;
@@ -1599,12 +1605,13 @@ public class Cs710Library4A {
         return csReaderConnector.settingData.savingFormatSelect;
     }
     public boolean setSavingFormatSetting(int savingFormatSelect) {
+        if (false) appendToLog("savingFormatSelect = " + savingFormatSelect);
         if (savingFormatSelect < 0 || savingFormatSelect > 1)   return false;
         csReaderConnector.settingData.savingFormatSelect = savingFormatSelect;
         return true;
     }
     public int getCsvColumnSelectSetting() {
-    	return csReaderConnector.settingData.csvColumnSelect;
+        return csReaderConnector.settingData.csvColumnSelect;
     }
     public boolean setCsvColumnSelectSetting(int csvColumnSelect) {
         csReaderConnector.settingData.csvColumnSelect = csvColumnSelect;
@@ -1812,7 +1819,17 @@ public class Cs710Library4A {
         }
     }
     public int getBatteryLevel() {
-        return csReaderConnector.mCs108ConnectorData.getVoltageMv();
+        int iValue = csReaderConnector.csConnectorData.getVoltageMv();
+        String hostVersion = hostProcessorICGetFirmwareVersion(); //false if lower, true if equal or higher
+        String strVersionHost = "2.1.5";
+        String[] strHostVersions = strVersionHost.split("\\.");
+        boolean bResult = checkHostProcessorVersion(hostVersion, Integer.parseInt(strHostVersions[0].trim()), Integer.parseInt(strHostVersions[1].trim()), Integer.parseInt(strHostVersions[2].trim()));
+        appendToLog("getBatteryLevel: hostVersion = " + hostVersion + ", bResult = " + bResult + ", level = " + iValue);
+        if (!bResult) {
+            if (iValue >= 4450) iValue -= 430;
+            else if (iValue > 350) iValue -= 350;
+        }
+        return iValue;
     }
     public boolean setAutoTriggerReporting(byte timeSecond) {
         return notificationConnector.setAutoTriggerReporting(timeSecond);
@@ -1843,7 +1860,7 @@ public class Cs710Library4A {
     public final int iNO_SUCH_SETTING = 10000;
     public short getTriggerReportingCount() {
         boolean bValue = false;
-        if (getcsModel() == 108) bValue = checkHostProcessorVersion(hostProcessorICGetFirmwareVersion(),  1, 0, 16);
+        if (getcsModel() != 463) bValue = checkHostProcessorVersion(hostProcessorICGetFirmwareVersion(),  1, 0, 16);
         if (bValue == false) return iNO_SUCH_SETTING; else
             return csReaderConnector.settingData.triggerReportingCountSetting;
     }
@@ -1893,13 +1910,13 @@ public class Cs710Library4A {
         return null;
     }
     public int getBatteryCount() {
-        return csReaderConnector.mCs108ConnectorData.getVoltageCnt();
+        return csReaderConnector.csConnectorData.getVoltageCnt();
     }
     public boolean getTriggerButtonStatus() {
         return notificationConnector.getTriggerStatus();
     }
     public int getTriggerCount() {
-        return csReaderConnector.mCs108ConnectorData.getTriggerCount();
+        return csReaderConnector.csConnectorData.getTriggerCount();
     }
     //public interface NotificationListener { void onChange(); }
     public void setNotificationListener(NotificationConnector.NotificationListener listener) {
@@ -1939,7 +1956,7 @@ public class Cs710Library4A {
         return rfidReaderChip.rx000Setting.getBoardSerialNumber();
     }
     public boolean setRfidOn(boolean onStatus) {
-        return rfidReaderChip.turnOn(onStatus);
+        return csReaderConnector.rfidReader.turnOn(onStatus);
     }
     private final Runnable reinitaliseDataRunnable = new Runnable() {
         @Override
@@ -1976,18 +1993,14 @@ public class Cs710Library4A {
                         appendToLog("4 checkVersionRunnable");
                         setAntennaDwell(2000);
                         setAntennaInvCount(0);
-                    } else if (bluetoothConnector.getCsModel() == 108) {
+                    } else {
                         if (DEBUG_CONNECT) appendToLog("5 checkVersionRunnable"); ///8
                         setAntennaDwell(0);
                         setAntennaInvCount(0xfffffffeL);
                     }
-                    //mRfidDevice.mRfidReaderChip.mRfidReaderChip.mRx000Setting.setDiagnosticConfiguration(false);
                 }
                 csReaderConnector.settingData.loadWedgeSettingFile();
-                if (loadSetting1File()) {
-                    if (DEBUG_CONNECT) appendToLog("6 checkVersionRunnable");
-                    loadSetting1File();
-                }
+                if (loadSetting1File()) loadSetting1File();
                 if (checkHostProcessorVersion(getMacVer(), 2, 6, 8)) {
                     if (DEBUG_CONNECT) appendToLog("7 checkVersionRunnable: macVersion [" + getMacVer() + "] >= 2.6.8");
                     appendToLog("0a setTagDelay[" + csReaderConnector.rfidReader.tagDelaySetting + "]");
@@ -2000,13 +2013,13 @@ public class Cs710Library4A {
                     rfidReaderChip.rx000Setting.setTagDelay(csReaderConnector.rfidReader.tagDelayDefaultNormalSetting);
                     rfidReaderChip.rx000Setting.setCycleDelay(csReaderConnector.rfidReader.cycleDelaySetting);
                 }
-                setSameCheck(true);
                 if (DEBUG_CONNECT) appendToLog("9 checkVersionRunnable: end of CheckVersionRunnable with mRfidToWrite.size = " + csReaderConnector.rfidReader.mRfidToWrite.size());
+                setSameCheck(true);
             }
         }
     };
 
-    public boolean loadSetting1File() {
+    boolean loadSetting1File() {
         return csReaderConnector.settingData.loadSettingFile(getlibraryVersion(), getChannelHoppingStatus(), getCurrentProfile());
     }
     public void saveSetting2File() {

@@ -459,75 +459,129 @@
                 style="@style/style_normal_font" />
         </TableRow>
 
-        <TableRow
+        <LinearLayout
+            android:id="@+id/settingAdminForegroundLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
+            android:gravity="center|bottom"
+            android:orientation="vertical" >
 
-            <TextView
-                android:layout_width="wrap_content"
-                style="@style/style_normal_font"
-                android:text="Inventory Cloud Saving" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
 
-            <RadioGroup
+            <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation='horizontal'>
+                android:layout_gravity="center_vertical"
+                android:visibility="visible">
 
-                <RadioButton
-                    android:id="@+id/settingAdminCloudSaveNone"
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="none"
-                    android:checked="true"/>
+                    style="@style/style_normal_font"
+                    android:text="Foreground Service:" />
 
-                <RadioButton
-                    android:id="@+id/settingAdminCloudSaveHttp"
+                <CheckBox
+                    android:id="@+id/settingAdminForegroundEnable"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Enable" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/settingAdminDupElimDelayLabel"
+                    android:layout_width="0dp"
+                    android:layout_weight="5"
+                    style="@style/style_normal_font"
+                    android:text="Foreground Duplication Elimination in seconds" />
+
+                <EditText
+                    android:id="@+id/settingAdminDupElimDelay"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:inputType="numberDecimal"
+                    android:text="1"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="HTTP" />
+                    style="@style/style_normal_font"
+                    android:text="Inventory Cloud Saving" />
 
-                <RadioButton
-                    android:id="@+id/settingAdminCloudSaveMqtt"
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation='horizontal'>
+
+                    <RadioButton
+                        android:id="@+id/settingAdminCloudSaveNone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="none"
+                        android:checked="true"/>
+
+                    <RadioButton
+                        android:id="@+id/settingAdminCloudSaveHttp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="HTTP" />
+
+                    <RadioButton
+                        android:id="@+id/settingAdminCloudSaveMqtt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="MQTT" />
+                </RadioGroup>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MQTT" />
-            </RadioGroup>
-        </TableRow>
+                    style="@style/style_normal_font"
+                    android:text="MQTT address" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
+                <EditText
+                    android:id="@+id/settingAdminMqttServer"
+                    style="@style/style_normal_font"
+                    android:inputType="textNoSuggestions|textVisiblePassword|textMultiLine"
+                    android:gravity="center" />
+            </TableRow>
 
-            <TextView
-                android:layout_width="wrap_content"
-                style="@style/style_normal_font"
-                android:text="MQTT address" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
 
-            <EditText
-                android:id="@+id/settingAdminMqttServer"
-                style="@style/style_normal_font"
-                android:inputType="textNoSuggestions|textVisiblePassword|textMultiLine"
-                android:gravity="center" />
-        </TableRow>
+                <TextView
+                    android:layout_width="wrap_content"
+                    style="@style/style_normal_font"
+                    android:text="MQTT topic" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                style="@style/style_normal_font"
-                android:text="MQTT topic" />
-
-            <EditText
-                android:id="@+id/settingAdminTopicMqtt"
-                style="@style/style_normal_font"
-                android:inputType="textNoSuggestions|textVisiblePassword|textMultiLine"
-                android:gravity="center" />
-        </TableRow>
+                <EditText
+                    android:id="@+id/settingAdminTopicMqtt"
+                    style="@style/style_normal_font"
+                    android:inputType="textNoSuggestions|textVisiblePassword|textMultiLine"
+                    android:gravity="center" />
+            </TableRow>
+        </LinearLayout>
 
         <TableRow
             android:layout_width="match_parent"
@@ -616,52 +670,6 @@
                 android:id="@+id/settingAdminServerImpinjPassword"
                 style="@style/style_normal_font"
                 android:gravity="center" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray" />
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:visibility="visible">
-
-            <TextView
-                android:layout_width="wrap_content"
-                style="@style/style_normal_font"
-                android:text="Foreground Service:" />
-
-            <CheckBox
-                android:id="@+id/settingAdminForegroundEnable"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Enable" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/settingAdminDupElimDelayLabel"
-                android:layout_width="0dp"
-                android:layout_weight="5"
-                style="@style/style_normal_font"
-                android:text="Foreground Duplication Elimination in seconds" />
-
-            <EditText
-                android:id="@+id/settingAdminDupElimDelay"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                android:text="1"
-                style="@style/style_normal_font" />
         </TableRow>
 
         <View

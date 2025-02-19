@@ -3,6 +3,7 @@ package com.csl.cs108ademoapp.fragments;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputFilter;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -377,6 +378,10 @@ public class SettingAdminFragment extends CommonFragment {
         checkBoxDebugEnable = (CheckBox) getActivity().findViewById(R.id.settingAdminDebugEnable);
         checkBoxForegroundService = (CheckBox) getActivity().findViewById(R.id.settingAdminForegroundEnable);
 
+        if (!MainActivity.foregroundServiceEnable) {
+            LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.settingAdminForegroundLayout);
+            linearLayout.setVisibility(View.GONE);
+        }
         if (sameCheck == false) MainActivity.csLibrary4A.setSameCheck(false);
         mHandler.post(updateRunnable);
     }
@@ -702,7 +707,7 @@ public class SettingAdminFragment extends CommonFragment {
                     invalidRequest = true;
             }
         }
-        if (invalidRequest == false && checkBoxForegroundService != null) {
+        if (invalidRequest == false && checkBoxForegroundService != null && MainActivity.foregroundServiceEnable) {
             MainActivity.csLibrary4A.appendToLog("getForegroundServiceEnable = " + MainActivity.csLibrary4A.getForegroundServiceEnable() + ", foregroundServiceEnable = " + foregroundServiceEnable);
             if (MainActivity.csLibrary4A.getForegroundServiceEnable() != foregroundServiceEnable || sameCheck == false) {
                 sameSetting = false;

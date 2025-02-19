@@ -88,7 +88,7 @@ public class AccessTask1 {
         return strOut;
     }
 
-    boolean isResultReady = false; int tryCount = 0, tryCountMax = 3;
+    boolean isResultReady = false; int tryCount = 0, tryCountMax = 8;
     public boolean isResultReady() {
         boolean bValue = false;
         if (accessTask == null) { }

@@ -37,7 +37,7 @@ public class ConnectionFragment extends CommonFragment {
     private ScanCallback mScanCallback;
     private ArrayList<ReaderDevice> readersList = MainActivity.sharedObjects.readersList;
 
-    private ArrayList<BluetoothGatt.Cs108ScanData> mScanResultList = new ArrayList<>();
+    private ArrayList<BluetoothGatt.CsScanData> mScanResultList = new ArrayList<>();
     private Handler mHandler = new Handler();
     private DeviceConnectTask deviceConnectTask;
 
@@ -179,8 +179,8 @@ public class ConnectionFragment extends CommonFragment {
         protected String doInBackground(Void... a) {
             while (isCancelled() == false) {
                 if (wait4process == false) {
-                    BluetoothGatt.Cs108ScanData cs108ScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
-                    if (cs108ScanData != null) mScanResultList.add(cs108ScanData);
+                    BluetoothGatt.CsScanData csScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
+                    if (csScanData != null) mScanResultList.add(csScanData);
                     if (scanning == false || mScanResultList.size() != 0 || System.currentTimeMillis() - timeMillisUpdate > 10000) {
                         wait4process = true; publishProgress("");
                     }
@@ -198,7 +198,7 @@ public class ConnectionFragment extends CommonFragment {
             }
             boolean listUpdated = false;
             while (mScanResultList.size() != 0) {
-                BluetoothGatt.Cs108ScanData scanResultA = mScanResultList.get(0);
+                BluetoothGatt.CsScanData scanResultA = mScanResultList.get(0);
                 mScanResultList.remove(0);
                 if (getActivity() == null) continue;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

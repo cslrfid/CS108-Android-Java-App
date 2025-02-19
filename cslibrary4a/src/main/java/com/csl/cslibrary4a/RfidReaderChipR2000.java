@@ -1893,7 +1893,6 @@ public class RfidReaderChipR2000 {
         final int FREQCHANCONFIG_INVALID = -1; final int FREQCHANCONFIG_MIN = 0; final int FREQCHANCONFIG_MAX = 1;
         int freqChannelConfig = FREQCHANCONFIG_INVALID;
         public int getFreqChannelConfig() {
-            //appendToLog("BtDataOut: getFreqChannelConfig with freqChannelConfig = " + freqChannelConfig);
             if (freqChannelConfig < FREQCHANCONFIG_MIN || freqChannelConfig > FREQCHANCONFIG_MAX) {
                 byte[] msgBuffer = new byte[]{(byte) 0x70, 0, 2, 0x0C, 0, 0, 0, 0};
                 sendHostRegRequest(HostRegRequests.HST_RFTC_FRQCH_CFG, false, msgBuffer);
@@ -2907,7 +2906,7 @@ public class RfidReaderChipR2000 {
             sendHostRegRequestHST_CMD(RfidReaderChipData.HostCommands.CMD_WROEM);
         }
     }
-    public boolean bFirmware_reset_before = false;
+    //public boolean bFirmware_reset_before = false;
     final int RFID_READING_BUFFERSIZE = 1024;
     enum RfidDataReadTypes {
         RFID_DATA_READ_SOFTRESET, RFID_DATA_READ_ABORT, RFID_DATA_READ_RESETTOBOOTLOADER,
@@ -3668,7 +3667,7 @@ public class RfidReaderChipR2000 {
                                                                 }
                                                             }
                                                             if (lValue < expected_firmware_ontime_ms) {
-                                                                bFirmware_reset_before = true;
+                                                                csReaderConnector.rfidReader.bFirmware_reset_before = true;
                                                                 if (DEBUG)
                                                                     appendToLogView("command COMMAND_BEGIN --- Firmware reset before !!!");
                                                             }

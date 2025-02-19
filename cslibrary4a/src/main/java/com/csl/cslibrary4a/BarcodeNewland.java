@@ -263,7 +263,7 @@ public class BarcodeNewland {
             count = 1;
             if (DEBUG) appendToLog("0x1b, Common response with  count = " + count);
         } else if (barcodeConnector.barcodeToWrite.get(0).dataValues[0] == 0x7E) {
-            if (DEBUG) appendToLog("0x7E, Barcode response with 0x7E mBarcodeToWrite.get(0).dataValues[0] and response data = " + byteArrayToString(dataValues));
+            if (DEBUG) appendToLog("0x7E, Barcode response with 0x7E barcodeToWrite.get(0).dataValues[0] and response data = " + byteArrayToString(dataValues));
             matched = true;
             commandType = BarcodeCommandTypes.COMMAND_QUERY;
             int index = 0;
@@ -365,7 +365,7 @@ public class BarcodeNewland {
             if (matched) { if (DEBUG) appendToLog("Matched Query response"); }
             else { if (DEBUG) appendToLog("Mis-matched Query response"); }
         } else {
-            if (DEBUG) appendToLog("BarStream: Barcode response with mBarcodeToWrite.get(0).dataValues[0] =  Others");
+            if (DEBUG) appendToLog("BarStream: Barcode response with barcodeToWrite.get(0).dataValues[0] =  Others");
             String strData = null;
             try {
                 strData = new String(barcodeConnector.barcodeToWrite.get(0).dataValues, "UTF-8");
@@ -384,7 +384,7 @@ public class BarcodeNewland {
             if (DEBUG) appendToLog("Setting strData = " + strData + ", count = " + count);
         }
         if (count != 0) {
-            if (false) appendToLog("dataValues.length = " + dataValues.length + ", okCount = " + barcodeConnector.iOkCount + ", count = " + count + " for mBarcodeToWrite data = " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues));
+            if (false) appendToLog("dataValues.length = " + dataValues.length + ", okCount = " + barcodeConnector.iOkCount + ", count = " + count + " for barcodeToWrite data = " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues));
             matched = false; boolean foundOk = false;
             for (int k = 0; k < dataValues.length; k++) {
                 boolean match06 = false;
@@ -403,7 +403,7 @@ public class BarcodeNewland {
         if (matched) {
             found = true;
             barcodeConnector.barcodeToWrite.remove(0); barcodeConnector.sendDataToWriteSent = 0; barcodeConnector.mDataToWriteRemoved = true; appendToLog("barcodeToWrite remove0 with length = " + barcodeConnector.barcodeToWrite.size());
-            if (utility.DEBUG_PKDATA) appendToLog("PkData: new mBarcodeToWrite size = " + barcodeConnector.barcodeToWrite.size());
+            if (utility.DEBUG_PKDATA) appendToLog("PkData: new barcodeToWrite size = " + barcodeConnector.barcodeToWrite.size());
         }
         appendToLog("decodeBarcodeUplinkData found = " + found);
         return found;
