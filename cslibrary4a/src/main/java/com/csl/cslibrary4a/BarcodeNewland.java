@@ -1,7 +1,6 @@
 package com.csl.cslibrary4a;
 
 import android.content.Context;
-import android.widget.TextView;
 
 import androidx.annotation.Keep;
 
@@ -21,7 +20,6 @@ public class BarcodeNewland {
         this.utility = utility;
     }
 
-    void appendToLog(String s) { utility.appendToLog(s); }
     String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
 
     public boolean barcodeSendCommand(byte[] barcodeCommandData) {
@@ -29,11 +27,9 @@ public class BarcodeNewland {
         csReaderBarcodeData.barcodePayloadEvent = BarcodeConnector.BarcodePayloadEvents.BARCODE_COMMAND;
         csReaderBarcodeData.waitUplinkResponse = true;
         csReaderBarcodeData.dataValues = barcodeCommandData;
-        barcodeConnector.barcodeToWrite.add(csReaderBarcodeData); appendToLog("barcodeToWrite added with size = " + barcodeConnector.barcodeToWrite.size());
-        if (utility.DEBUG_PKDATA) {
-            //if (barcodeCommandData[0] == 'n')
-            appendToLog("PkData: add " + csReaderBarcodeData.barcodePayloadEvent.toString() + "." + byteArrayToString(csReaderBarcodeData.dataValues) + " to barcodeToWrite with length = " + barcodeConnector.barcodeToWrite.size());
-        }
+        barcodeConnector.barcodeToWrite.add(csReaderBarcodeData);
+        Logger.info("barcodeToWrite added with size = {}", barcodeConnector.barcodeToWrite.size());
+        Logger.pkData("PkData: add {}.{} to barcodeToWrite with length = ", csReaderBarcodeData.barcodePayloadEvent, byteArrayToString(csReaderBarcodeData.dataValues), barcodeConnector.barcodeToWrite.size());
         return true;
     }
 
@@ -44,13 +40,14 @@ public class BarcodeNewland {
         csReaderBarcodeData.barcodePayloadEvent = BarcodeConnector.BarcodePayloadEvents.BARCODE_SCAN_START;
         csReaderBarcodeData.waitUplinkResponse = false;
         barcode2TriggerMode = false;
-        boolean bValue = barcodeConnector.barcodeToWrite.add(csReaderBarcodeData); appendToLog("barcodeToWrite added with size = " + barcodeConnector.barcodeToWrite.size());
-        appendToLog("add " + csReaderBarcodeData.barcodePayloadEvent.toString() + " to barcodeToWrite with length = " + barcodeConnector.barcodeToWrite.size());
+        boolean bValue = barcodeConnector.barcodeToWrite.add(csReaderBarcodeData);
+        Logger.info("barcodeToWrite added with size = {}", barcodeConnector.barcodeToWrite.size());
+        Logger.pkData("add {} to barcodeToWrite with length = {}", csReaderBarcodeData.barcodePayloadEvent, barcodeConnector.barcodeToWrite.size());
         return bValue;
     }
     public boolean barcodeSendCommandTrigger() {
         boolean retValue = true;
-        barcode2TriggerMode = true; bBarcodeTriggerMode = 0x30; if (false) appendToLog("Set trigger reading mode to TRIGGER");
+        barcode2TriggerMode = true; bBarcodeTriggerMode = 0x30; Logger.trace("Set trigger reading mode to TRIGGER");
         if (retValue) retValue = barcodeSendCommand("nls0006010;".getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0302000;".getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0313000=3000;nls0313010=1000;nls0313040=1000;nls0302000;nls0007010;".getBytes());
@@ -62,15 +59,17 @@ public class BarcodeNewland {
     public byte[] suffixRef = { 0x05, 0x01, 0x11, 0x16, 0x03, 0x04 };
     public boolean barcodeSendCommandSetPreSuffix() {
         boolean retValue = true;
-        appendToLog("BarStream: BarcodePrefix BarcodeSuffix are SET");
+        Logger.info("BarStream: BarcodePrefix BarcodeSuffix are SET");
         if (retValue) retValue = barcodeSendCommand("nls0006010;".getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0311010;".getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0317040;".getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0305010;".getBytes());
-        String string = "nls0300000=0x" + byteArrayToString(prefixRef) + ";"; appendToLog("Set Prefix string = " + string);
+        String string = "nls0300000=0x" + byteArrayToString(prefixRef) + ";";
+        Logger.info("Set Prefix string = {}", string);
         if (retValue) retValue = barcodeSendCommand(string.getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0306010;".getBytes());
-        string = "nls0301000=0x" + byteArrayToString(suffixRef) + ";"; appendToLog("Set Suffix string = " + string);
+        string = "nls0301000=0x" + byteArrayToString(suffixRef) + ";";
+        Logger.info("Set Suffix string = {}", string);
         if (retValue) retValue = barcodeSendCommand(string.getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0308030;".getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0307010;".getBytes());
@@ -130,7 +129,7 @@ public class BarcodeNewland {
         for (int i = 2; i < data.length - 1; i++) {
             bytelrc ^= data[i];
         }
-        if (false) appendToLog(String.format("BarStream: bytelrc = %02X, last = %02X", (byte)bytelrc, data[data.length-1]));
+        Logger.trace(String.format("BarStream: bytelrc = %02X, last = %02X", bytelrc, data[data.length-1]));
         data[data.length-1] = bytelrc;
         return barcodeSendCommand(data);
     }
@@ -255,15 +254,15 @@ public class BarcodeNewland {
         return result;
     }
     public boolean decodeBarcodeUplinkData(byte[] dataValues, BarcodeConnector.CsReaderBarcodeData csReaderBarcodeData) {
-        appendToLog("decodeBarcodeUplinkData starts");
-        boolean found = false, DEBUG = false;
+        Logger.info("decodeBarcodeUplinkData starts");
+        boolean found = false;
         int count = 0; boolean matched = true;
         if (barcodeConnector.barcodeToWrite.get(0).dataValues[0] == 0x1b) {
             commandType = BarcodeCommandTypes.COMMAND_COMMON;
             count = 1;
-            if (DEBUG) appendToLog("0x1b, Common response with  count = " + count);
+            Logger.debug("0x1b, Common response with  count = {}", count);
         } else if (barcodeConnector.barcodeToWrite.get(0).dataValues[0] == 0x7E) {
-            if (DEBUG) appendToLog("0x7E, Barcode response with 0x7E barcodeToWrite.get(0).dataValues[0] and response data = " + byteArrayToString(dataValues));
+            Logger.debug("0x7E, Barcode response with 0x7E barcodeToWrite.get(0).dataValues[0] and response data = {}", byteArrayToString(dataValues));
             matched = true;
             commandType = BarcodeCommandTypes.COMMAND_QUERY;
             int index = 0;
@@ -276,7 +275,7 @@ public class BarcodeNewland {
                         System.arraycopy(dataValues, index + 5, bytes, 0, bytes.length);
                         byte[] requestBytes = new byte[barcodeConnector.barcodeToWrite.get(0).dataValues.length - 6];
                         System.arraycopy(barcodeConnector.barcodeToWrite.get(0).dataValues, 5, requestBytes, 0, requestBytes.length);
-                        if (utility.DEBUG_PKDATA) appendToLog("PkData: found Barcode.Uplink.DataRead.QueryResponse with payload data1 = " + byteArrayToString(bytes) + " for QueryInput data1 = " + byteArrayToString(requestBytes));
+                        Logger.pkData("PkData: found Barcode.Uplink.DataRead.QueryResponse with payload data1 = {} for QueryInput data1 = {}", byteArrayToString(bytes), byteArrayToString(requestBytes));
                         if (barcodeConnector.barcodeToWrite.get(0).dataValues[5] == 0x37 && length >= 5) {
                             matched = true;
                             int prefixLength = dataValues[index+6];
@@ -295,11 +294,11 @@ public class BarcodeNewland {
                                     bytesBarcodeSuffix = new byte[suffixLength];
                                     System.arraycopy(dataValues, index + 7 + prefixLength + 2, bytesBarcodeSuffix, 0, bytesBarcodeSuffix.length);
                                 }
-                                if (DEBUG) appendToLog("BarStream: BarcodePrefix = " + byteArrayToString(bytesBarcodePrefix) + ", BarcodeSuffix = " + byteArrayToString(bytesBarcodeSuffix));
+                                Logger.debug("BarStream: BarcodePrefix = {}, BarcodeSuffix = {}", byteArrayToString(bytesBarcodePrefix), byteArrayToString(bytesBarcodeSuffix));
                             }
-                            if (utility.DEBUG_PKDATA) appendToLog("PkData: Barcode.Uplink.DataRead.QueryResponse.SelfPrefix_SelfSuffix is processed as Barcode Prefix = " + byteArrayToString(bytesBarcodePrefix) + ", Suffix = " + byteArrayToString(bytesBarcodeSuffix));
+                            Logger.pkData("PkData: Barcode.Uplink.DataRead.QueryResponse.SelfPrefix_SelfSuffix is processed as Barcode Prefix = {}, Suffix = ", byteArrayToString(bytesBarcodePrefix), byteArrayToString(bytesBarcodeSuffix));
                         } else if (barcodeConnector.barcodeToWrite.get(0).dataValues[5] == 0x47 && length > 1) {
-                            if (DEBUG) appendToLog("versionNumber is detected with length = " + length);
+                            Logger.debug("versionNumber is detected with length = {}", length);
                             matched = true;
                             byte[] byteVersion = new byte[length - 1];
                             System.arraycopy(dataValues, index + 5, byteVersion, 0, byteVersion.length);
@@ -310,7 +309,7 @@ public class BarcodeNewland {
                                 versionNumber = null;
                             }
                             strVersion = versionNumber;
-                            if (utility.DEBUG_PKDATA) appendToLog("PkData: uplink data " + byteArrayToString(byteVersion) + " is processsed as version = " + versionNumber);
+                            Logger.pkData("PkData: uplink data {} is processsed as version = {}", byteArrayToString(byteVersion), versionNumber);
                         } else if (barcodeConnector.barcodeToWrite.get(0).dataValues[5] == 0x48 && length >= 5) {
                             if (dataValues[index+5] == barcodeConnector.barcodeToWrite.get(0).dataValues[6] && dataValues[index+6] == barcodeConnector.barcodeToWrite.get(0).dataValues[7]) {
                                 matched = true; //for ESN, S/N or Date
@@ -320,15 +319,14 @@ public class BarcodeNewland {
                                 try {
                                     serialNumber = new String(byteSN, "UTF-8");
                                     int snLength = Integer.parseInt(serialNumber.substring(0, 2));
-                                    if (DEBUG)
-                                        appendToLog("BarStream: serialNumber = " + serialNumber + ", snLength = " + snLength + ", serialNumber.length = " + serialNumber.length());
+                                    Logger.debug("BarStream: serialNumber = {}, snLength = {}, serialNumber.length = {}", serialNumber, snLength, serialNumber.length());
                                     if (snLength + 2 == serialNumber.length()) {
                                         serialNumber = serialNumber.substring(2);
                                     } else serialNumber = null;
                                 } catch (Exception e) {
                                     serialNumber = null;
                                 }
-                                if (false) appendToLog("debug index = " + index + ", " + byteArrayToString(dataValues));
+                                Logger.trace("debug index = {}, {}", index, byteArrayToString(dataValues));
                                 String strResponseType = "";
                                 if (dataValues[index+6] == (byte)0x32) {
                                     strESN = serialNumber;
@@ -340,11 +338,11 @@ public class BarcodeNewland {
                                     strDate = serialNumber;
                                     strResponseType = "DataCode";
                                 }
-                                if (false) appendToLog("strResponseType = " + strResponseType);
-                                if (utility.DEBUG_PKDATA) appendToLog(String.format("PkData: Barcode.Uplink.DataRead.QueryResponse.%s is processed as %s[%s]", strResponseType, byteArrayToString(byteSN).substring(4), serialNumber));
-                            } else appendToLog("Barcode.Uplink.DataRead.QueryResponse has mis-matched values");
+                                Logger.trace("strResponseType = {}", strResponseType);
+                                Logger.pkData("PkData: Barcode.Uplink.DataRead.QueryResponse.{} is processed as {}[{}]", strResponseType, byteArrayToString(byteSN).substring(4), serialNumber);
+                            } else Logger.info("Barcode.Uplink.DataRead.QueryResponse has mis-matched values");
                         } else if (barcodeConnector.barcodeToWrite.get(0).dataValues[5] == 0x44 && length >= 3) {
-                            if (DEBUG) appendToLog("BarStream: dataValue = " + byteArrayToString(dataValues) + ", writeDataValue = " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues));
+                            Logger.debug("BarStream: dataValue = {}, writeDataValue = {}", byteArrayToString(dataValues), byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues));
                             if (dataValues[index+5] == barcodeConnector.barcodeToWrite.get(0).dataValues[6] && dataValues[index+6] == barcodeConnector.barcodeToWrite.get(0).dataValues[7]) {
                                 matched = true;
                                 if (barcodeConnector.barcodeToWrite.get(0).dataValues[6] == 0x30 && barcodeConnector.barcodeToWrite.get(0).dataValues[7] == 0x30  && barcodeConnector.barcodeToWrite.get(0).dataValues[8] == 0x30) {
@@ -354,18 +352,18 @@ public class BarcodeNewland {
                                     else if (dataValues[index+7] == 0x31) strModeType = "auto_Scan";
                                     else if (dataValues[index+7] == 0x32) strModeType = "continue_Scan";
                                     else if (dataValues[index+7] == 0x33) strModeType = "batch_Scan";
-                                    if (utility.DEBUG_PKDATA) appendToLog(String.format("PkData: Barcode.Uplink.DataRead.QueryResponse.ReadingMode is processed as last 0x%X[%s]", dataValues[index+7], strModeType));
-                                } else appendToLog("Barcode.Uplink.DataRead.QueryResponse has mis-matched values");
-                            } else appendToLog("Barcode.Uplink.DataRead.QueryResponse has mis-matched values");
-                        } else appendToLog("Barcode.Uplink.DataRead.QueryResponse has mis-matched values");
+                                    Logger.pkData(String.format("PkData: Barcode.Uplink.DataRead.QueryResponse.ReadingMode is processed as last 0x%X[%s]", dataValues[index+7], strModeType));
+                                } else Logger.info("Barcode.Uplink.DataRead.QueryResponse has mis-matched values");
+                            } else Logger.info("Barcode.Uplink.DataRead.QueryResponse has mis-matched values");
+                        } else Logger.info("Barcode.Uplink.DataRead.QueryResponse has mis-matched values");
                         index += (length + 5);
                     } else break;
                 } else index++;
             }
-            if (matched) { if (DEBUG) appendToLog("Matched Query response"); }
-            else { if (DEBUG) appendToLog("Mis-matched Query response"); }
+            if (matched) { Logger.debug("Matched Query response"); }
+            else { Logger.debug("Mis-matched Query response"); }
         } else {
-            if (DEBUG) appendToLog("BarStream: Barcode response with barcodeToWrite.get(0).dataValues[0] =  Others");
+            Logger.info("BarStream: Barcode response with barcodeToWrite.get(0).dataValues[0] =  Others");
             String strData = null;
             try {
                 strData = new String(barcodeConnector.barcodeToWrite.get(0).dataValues, "UTF-8");
@@ -381,10 +379,10 @@ public class BarcodeNewland {
                     lastIndex += findStr.length();
                 }
             }
-            if (DEBUG) appendToLog("Setting strData = " + strData + ", count = " + count);
+            Logger.info("Setting strData = {}, count = {}", strData, count);
         }
         if (count != 0) {
-            if (false) appendToLog("dataValues.length = " + dataValues.length + ", okCount = " + barcodeConnector.iOkCount + ", count = " + count + " for barcodeToWrite data = " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues));
+            Logger.trace("dataValues.length = {}, okCount = {}, count = {} for barcodeToWrite data = {}", dataValues.length, barcodeConnector.iOkCount, count, byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues));
             matched = false; boolean foundOk = false;
             for (int k = 0; k < dataValues.length; k++) {
                 boolean match06 = false;
@@ -392,20 +390,21 @@ public class BarcodeNewland {
                 if (match06 == false) break;
                 foundOk = true; found = true;
             }
-            if (false) appendToLog("00 matcched = " + matched);
-            if (matched) { if (utility.DEBUG_PKDATA) appendToLog("PkData: Barcode.Uplink.DataRead." + byteArrayToString(dataValues) + " is processed with matched = " + matched + ", OkCount = " + barcodeConnector.iOkCount + ", expected count = " + count + " for " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues)); }
-            else if (foundOk) { if (utility.DEBUG_PKDATA) appendToLog("PkData: Barcode.Uplink.DataRead." + byteArrayToString(dataValues) + " is processed with matched = " + matched + ", but OkCount = " + barcodeConnector.iOkCount + ", expected count = " + count + " for " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues)); }
+            Logger.trace("00 matcched = {}", matched);
+            if (matched) { Logger.pkData("PkData: Barcode.Uplink.DataRead.{} is processed with matched = {}, OkCount = {}, expected count = {} for {}", byteArrayToString(dataValues), matched, barcodeConnector.iOkCount, count, byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues)); }
+            else if (foundOk) { Logger.pkData("PkData: Barcode.Uplink.DataRead.{} is processed with matched = {}, but OkCount = {}, expected count = {} for {}", byteArrayToString(dataValues), matched, barcodeConnector.iOkCount, count, byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues)); }
             else {
                 barcodeConnector.mBarcodeToRead.add(csReaderBarcodeData);
-                if (utility.DEBUG_PKDATA) appendToLog("PkData: uplink data Barcode.DataRead." + byteArrayToString(csReaderBarcodeData.dataValues) + " is added to mBarcodeToRead");
+                Logger.pkData("PkData: uplink data Barcode.DataRead.{} is added to mBarcodeToRead", byteArrayToString(csReaderBarcodeData.dataValues));
             }
         }
         if (matched) {
             found = true;
-            barcodeConnector.barcodeToWrite.remove(0); barcodeConnector.sendDataToWriteSent = 0; barcodeConnector.mDataToWriteRemoved = true; appendToLog("barcodeToWrite remove0 with length = " + barcodeConnector.barcodeToWrite.size());
-            if (utility.DEBUG_PKDATA) appendToLog("PkData: new barcodeToWrite size = " + barcodeConnector.barcodeToWrite.size());
+            barcodeConnector.barcodeToWrite.remove(0); barcodeConnector.sendDataToWriteSent = 0; barcodeConnector.mDataToWriteRemoved = true;
+            Logger.info("barcodeToWrite remove0 with length = {}", barcodeConnector.barcodeToWrite.size());
+            Logger.pkData("PkData: new barcodeToWrite size = {}", barcodeConnector.barcodeToWrite.size());
         }
-        appendToLog("decodeBarcodeUplinkData found = " + found);
+        Logger.info("decodeBarcodeUplinkData found = {}", found);
         return found;
     }
 }

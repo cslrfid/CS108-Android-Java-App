@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.csl.cslibrary4a.Logger;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessTask1 {
@@ -24,7 +25,7 @@ public class AccessTask1 {
                        String strPassword, int powerLevel, RfidReaderChipData.HostCommands hostCommand, Runnable updateRunnable) {
         this.button = button;
         this.invalidRequest = invalidRequest;
-        MainActivity.csLibrary4A.appendToLog("HelloK: invalidRequest=" + invalidRequest);
+        Logger.trace("HelloK: invalidRequest={}", invalidRequest);
         this.accBank = accBank;
         this.accOffset = accOffset;
         if (hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CWRITE) { if (accBlockCount > 16) accBlockCount = 16; }
@@ -32,7 +33,7 @@ public class AccessTask1 {
         this.accBlockCount = accBlockCount;
         if (accWriteData == null) accWriteData = "";
         if (hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CWRITE) {
-            MainActivity.csLibrary4A.appendToLog("strOut: accWriteData=" + accWriteData);
+            Logger.trace("strOut: accWriteData={}", accWriteData);
             accWriteData = deformatWriteAccessData(accWriteData);
             if (accWriteData.length() < accSize * 4) {
                 accSize = accWriteData.length()/4;
@@ -52,7 +53,7 @@ public class AccessTask1 {
         this.powerLevel = powerLevel;
         this.hostCommand = hostCommand;
         this.updateRunnable = updateRunnable;
-        MainActivity.csLibrary4A.appendToLog("HelloA, AccessTask1");
+        Logger.trace("HelloA, AccessTask1");
         CustomMediaPlayer playerN = MainActivity.sharedObjects.playerN;
         playerN.start();
         setup();
@@ -73,18 +74,18 @@ public class AccessTask1 {
     }
 
     public String deformatWriteAccessData(String strIn) {
-        MainActivity.csLibrary4A.appendToLog("strOut: strIn=" + strIn);
+        Logger.trace("strOut: strIn={}", strIn);
         String strOut = strIn.replaceAll("\\P{Print}", "");
-        MainActivity.csLibrary4A.appendToLog("strOut=" + strOut);
+        Logger.trace("strOut={}", strOut);
         while (strOut.indexOf(":") > 0) {
             int index = strOut.indexOf(":");
             String writeDataTemp = "";
             if (index > 4) writeDataTemp = strOut.substring(0, index - 3);
             writeDataTemp += strOut.substring(index + 1);
             strOut = writeDataTemp;
-            MainActivity.csLibrary4A.appendToLog("strOut=" + strOut);
+            Logger.trace("strOut={}", strOut);
         }
-        MainActivity.csLibrary4A.appendToLog("strOut=" + strOut);
+        Logger.trace("strOut={}", strOut);
         return strOut;
     }
 
@@ -112,13 +113,13 @@ public class AccessTask1 {
                             strAccessResult += accessTask.accessResult.substring(i * 4, (i + word4line) * 4);
                     }
                     strAccessResult += "\n";
-                    MainActivity.csLibrary4A.appendToLog("i=" + i + ", formatted accessTask.accessResult=" + strAccessResult);
+                    Logger.trace("i={}, formatted accessTask.accessResult={}", i, strAccessResult);
                     }
                }
             if (accessResult == null) accessResult = strAccessResult;
             else accessResult += strAccessResult;
 
-            MainActivity.csLibrary4A.appendToLog("HelloA: accessResult=" + accessTask.accessResult);
+            Logger.trace("HelloA: accessResult={}", accessTask.accessResult);
             if (accessTask.accessResult != null && accSizeNow >= accSize) {
                 bValue = true;
                 Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
@@ -130,31 +131,30 @@ public class AccessTask1 {
                     if (accWriteData != null) { if (accWriteData.length() >= accSizeNow*4) accWriteData = accWriteData.substring(accSizeNow*4); }
                     tryCount = 0;
                 }
-                MainActivity.csLibrary4A.appendToLog("HelloA: Going to retry with TryCount=" + tryCount + ", resultError = " + accessTask.resultError);
+                Logger.trace("HelloA: Going to retry with TryCount={}, resultError = {}", tryCount, accessTask.resultError);
                 if (tryCount < tryCountMax) {
-                    MainActivity.csLibrary4A.appendToLog("HelloA: re-setup");
+                    Logger.trace("HelloA: re-setup");
                     setup();
                     execute();
                 } else bValue = true;
             }
         } else bValue = true;
-        //MainActivity.csLibrary4A.appendToLog("HelloA: bValue=" + bValue);
         isResultReady = bValue;
         return bValue;
     }
     public String accessResult;
     public String getResult() {
-        MainActivity.csLibrary4A.appendToLog("HelloA: accessResult = " + accessResult);
+        Logger.trace("HelloA: accessResult = {}", accessResult);
         if (accessTask == null) {
-            MainActivity.csLibrary4A.appendToLog("accessTask is null");
+            Logger.trace("accessTask is null");
             return null;
         }
         if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
-            MainActivity.csLibrary4A.appendToLog("accessTask.getStatus is not finished");
+            Logger.trace("accessTask.getStatus is not finished");
             return null;
         }
         if (button.getText().toString().indexOf("ING") > 0) {
-            MainActivity.csLibrary4A.appendToLog("button is still ing");
+            Logger.trace("button is still ing");
             return null;
         }
         return accessResult;
@@ -164,24 +164,24 @@ public class AccessTask1 {
         tryCount++;
         if (invalidRequest == false) {
             if (MainActivity.csLibrary4A.setAccessBank(accBank) == false) {
-                MainActivity.csLibrary4A.appendToLog("HelloK: accBank, invalidRequest=" + invalidRequest);
+                Logger.trace("HelloK: accBank, invalidRequest={}",   invalidRequest);
                 invalidRequest = true;
             }
         }
         if (invalidRequest == false) {
             if (MainActivity.csLibrary4A.setAccessOffset(accOffset) == false) {
-                MainActivity.csLibrary4A.appendToLog("HelloK: accOffset, invalidRequest=" + invalidRequest);
+                Logger.trace("HelloK: accOffset, invalidRequest={}",   invalidRequest);
                 invalidRequest = true;
             }
         }
         if (invalidRequest == false) {
             if (accSize == 0) {
-                MainActivity.csLibrary4A.appendToLog("HelloK: accSize0, invalidRequest=" + invalidRequest);
+                Logger.trace("HelloK: accSize0, invalidRequest={}",   invalidRequest);
                 invalidRequest = true;
             } else {
                 if (accSize > accBlockCount) accSizeNow = accBlockCount;
                 else accSizeNow = accSize;
-                MainActivity.csLibrary4A.appendToLog("HelloA: accSize=" + accSize + ", accSizeNow=" + accSizeNow);
+                Logger.trace("HelloA: accSize={}, accSizeNow={}", accSize, accSizeNow);
                 if (MainActivity.csLibrary4A.setAccessCount(accSizeNow) == false) {
                     invalidRequest = true;
                 }
@@ -194,8 +194,8 @@ public class AccessTask1 {
                 invalidRequest = true;
             }
         }
-        MainActivity.csLibrary4A.appendToLog("HelloA: accOffset=" + accOffset + ", accSizeNow=" + accSizeNow + ", accSize=" + accSize);
-        MainActivity.csLibrary4A.appendToLog("HelloK: invalidRequest=" + invalidRequest);
+        Logger.trace("HelloA: accOffset={}, accSizeNow={}, accSize={}", accOffset, accSizeNow, accSize);
+        Logger.trace("HelloK: invalidRequest={}", invalidRequest);
         accessTask = new AccessTask(button, invalidRequest, true,
                 selectMask, selectBank, selectOffset,
                 strPassword, powerLevel, hostCommand, tryCount==tryCountMax, updateRunnable);

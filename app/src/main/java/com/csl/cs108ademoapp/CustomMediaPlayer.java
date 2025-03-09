@@ -5,6 +5,8 @@ import android.content.res.AssetFileDescriptor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 
+import com.csl.cslibrary4a.Logger;
+
 import java.io.IOException;
 
 public class CustomMediaPlayer {
@@ -24,11 +26,11 @@ public class CustomMediaPlayer {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     starting = false;
-                    if (DEBUG) MainActivity.csLibrary4A.appendToLog("MediaPlayer is completed.");
+                    Logger.debug("MediaPlayer is completed.");
                 }
             });
         } catch (IOException e) {
-            MainActivity.csLibrary4A.appendToLog("mp3 setup FAIL");
+            Logger.warn("mp3 setup FAIL");
         }
     }
 
@@ -48,7 +50,7 @@ public class CustomMediaPlayer {
             AudioManager audioManager = ((AudioManager) context.getSystemService(Context.AUDIO_SERVICE));
             int iVolumeMax = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
             int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-            MainActivity.csLibrary4A.appendToLog("Hello8: currentVolume = " + currentVolume);
+            Logger.trace("Hello8: currentVolume = {}", currentVolume);
             if (currentVolume > 0) {
                 int volume12 = volume1 + volume2;
                 volume12 = ( volume12 * iVolumeMax ) / 600;

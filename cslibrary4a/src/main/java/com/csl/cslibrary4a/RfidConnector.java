@@ -14,8 +14,6 @@ public class RfidConnector {
     }
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
-    private void appendToLog(String s) { utility.appendToLog(s); }
-    private void appendToLogView(String s) { utility.appendToLogView(s); }
 
     public enum RfidPayloadEvents {
         RFID_POWER_ON, RFID_POWER_OFF, RFID_COMMAND,
@@ -82,70 +80,75 @@ public class RfidConnector {
                 }
             }*/
         if (arrayTypeSet(dataOut, 9, data.rfidPayloadEvent)) {
-            if (false) appendToLogView(byteArrayToString(dataOut));
-            if (utility.DEBUG_PKDATA) appendToLog(String.format("PkData: write Rfid.%s.%s with mRfidDevice.sendRfidToWriteSent = %d", data.rfidPayloadEvent.toString(), byteArrayToString(data.dataValues), sendRfidToWriteSent));
-            if (sendRfidToWriteSent != 0) appendToLog("!!! mRfidDevice.sendRfidToWriteSent = " + sendRfidToWriteSent);
+            // Logger.toLogView(byteArrayToString(dataOut)).trace();
+            Logger.pkData(String.format("PkData: write Rfid.%s.%s with mRfidDevice.sendRfidToWriteSent = %d", data.rfidPayloadEvent.toString(), byteArrayToString(data.dataValues), sendRfidToWriteSent));
+            if (sendRfidToWriteSent != 0) Logger.trace("!!! mRfidDevice.sendRfidToWriteSent = {}", sendRfidToWriteSent);
             return dataOut;
         }
         return null;
     }
     public int rfidPowerOnTimeOut = 0; //int barcodePowerOnTimeOut = 0;
     public boolean isMatchRfidToWrite(ConnectorData connectorData) {
-        boolean match = false, DEBUG = false;
-        if (mRfidToWrite.size() != 0 && connectorData.dataValues[0] == (byte)0x80) {
+        boolean match = false;
+        if (!mRfidToWrite.isEmpty() && connectorData.dataValues[0] == (byte)0x80) {
             byte[] dataInCompare = new byte[]{(byte) 0x80, 0};
             if (arrayTypeSet(dataInCompare, 1, mRfidToWrite.get(0).rfidPayloadEvent) && (connectorData.dataValues.length == dataInCompare.length + 1)) {
                 if (match = compareArray(connectorData.dataValues, dataInCompare, dataInCompare.length)) {
                     boolean bprocessed = false;
                     byte[] data1 = new byte[connectorData.dataValues.length - 2]; System.arraycopy(connectorData.dataValues, 2, data1, 0, data1.length);
-                    if (utility.DEBUG_PKDATA) appendToLog("PkData: matched Rfid.Reply with payload = " + byteArrayToString(connectorData.dataValues) + " for writeData Rfid." + mRfidToWrite.get(0).rfidPayloadEvent.toString() + "." + byteArrayToString(mRfidToWrite.get(0).dataValues));
+                    Logger.pkData("PkData: matched Rfid.Reply with payload = {} for writeData Rfid.{}.{}", byteArrayToString(connectorData.dataValues), mRfidToWrite.get(0).rfidPayloadEvent, byteArrayToString(mRfidToWrite.get(0).dataValues));
                     if (connectorData.dataValues[2] != 0) {
-                        if (DEBUG) appendToLog("Rfid.reply data is found with error");
+                        Logger.debug("Rfid.reply data is found with error");
                     } else {
                         if (mRfidToWrite.get(0).rfidPayloadEvent == RfidConnector.RfidPayloadEvents.RFID_POWER_ON) {
                             rfidPowerOnTimeOut = 3000;
                             onStatus = true;
-                            if (utility.DEBUG_PKDATA) appendToLog("PkData: matched Rfid.Reply.PowerOn with result 0 and onStatus = " + onStatus);
+                            Logger.pkData("PkData: matched Rfid.Reply.PowerOn with result 0 and onStatus = {}", onStatus);
                             bprocessed = true;
                         } else if (mRfidToWrite.get(0).rfidPayloadEvent == RfidConnector.RfidPayloadEvents.RFID_POWER_OFF) {
                             onStatus = false;
-                            if (utility.DEBUG_PKDATA) appendToLog("PkData: matched Rfid.Reply.PowerOff with result 0 and onStatus = " + onStatus);
+                            Logger.pkData("PkData: matched Rfid.Reply.PowerOff with result 0 and onStatus = {}", onStatus);
                             bprocessed = true;
                         } else {
                             bprocessed = true;
-                            if (utility.DEBUG_PKDATA) appendToLog("PkData: matched Rfid.Other.Reply data is found.");
+                            Logger.pkData("PkData: matched Rfid.Other.Reply data is found.");
                         }
                         RfidConnector.CsReaderRfidData csReaderRfidData = mRfidToWrite.get(0);
                         if (csReaderRfidData.waitUplinkResponse) {
                             csReaderRfidData.downlinkResponded = true;
                             mRfidToWrite.set(0, csReaderRfidData);
-                            if (utility.DEBUG_PKDATA) appendToLog("PkData: mRfidToWrite.downlinkResponsed is set and waiting uplink data");
+                            Logger.pkData("PkData: mRfidToWrite.downlinkResponsed is set and waiting uplink data");
                     /*if (false) {
                         for (int i = 0; i < rfidReaderChip.mRfidReaderChip.mRx000ToRead.size(); i++) {
                             if (rfidReaderChip.mRfidReaderChip.mRx000ToRead.get(i).responseType == Cs710Library4A.HostCmdResponseTypes.TYPE_COMMAND_END)
-                                if (DEBUG) appendToLog("mRx0000ToRead with COMMAND_END is removed");
+                                Logger.debug("mRx0000ToRead with COMMAND_END is removed");
                         }
-                        if (DEBUG) appendToLog("mRx000ToRead.clear !!!");
+                        Logger.debug("mRx000ToRead.clear !!!");
                     }
-                    rfidReaderChip.mRfidReaderChip.mRx000ToRead.clear(); if (DEBUG) appendToLog("mRx000ToRead.clear !!!");*/
+                    rfidReaderChip.mRfidReaderChip.mRx000ToRead.clear();
+                    Logger.debug("mRx000ToRead.clear !!!");*/
                             utility.writeDebug2File("Up31 " + mRfidToWrite.get(0).rfidPayloadEvent.toString() + ", " + byteArrayToString(data1));
                             return true;
                         }
-                        if (DEBUG) appendToLog("matched Rfid.reply data is found with mRfidToWrite.size=" + mRfidToWrite.size());
+                        Logger.debug("matched Rfid.reply data is found with mRfidToWrite.size={}", mRfidToWrite.size());
                     }
 
                     String string = "Up31 " + (bprocessed ? "" : "Unprocessed, ") + mRfidToWrite.get(0).rfidPayloadEvent.toString() + ", " + byteArrayToString(data1);
                     utility.writeDebug2File(string);
-                    mRfidToWrite.remove(0); sendRfidToWriteSent = 0; mRfidToWriteRemoved = true; if (DEBUG) appendToLog("mmRfidToWrite remove 1 with remained write size = " + mRfidToWrite.size());
-                    if (utility.DEBUG_PKDATA) appendToLog("PkData: new mRfidToWrite size = " + mRfidToWrite.size());
+                    mRfidToWrite.remove(0);
+                    sendRfidToWriteSent = 0;
+                    mRfidToWriteRemoved = true;
+                    Logger.debug("mmRfidToWrite remove 1 with remained write size = {}", mRfidToWrite.size());
+                    Logger.pkData("PkData: new mRfidToWrite size = {}", mRfidToWrite.size());
                     /*if (false) {
                         for (int i = 0; i < rfidReaderChip.mRfidReaderChip.mRx000ToRead.size(); i++) {
                             if (rfidReaderChip.mRfidReaderChip.mRx000ToRead.get(i).responseType == Cs710Library4A.HostCmdResponseTypes.TYPE_COMMAND_END)
-                                if (DEBUG) appendToLog("mRx0000ToRead with COMMAND_END is removed");
+                                Logger.debug("mRx0000ToRead with COMMAND_END is removed");
                         }
-                        if (DEBUG) appendToLog("mRx000ToRead.clear !!!");
+                        Logger.debug("mRx000ToRead.clear !!!");
                     }
-                    rfidReaderChip.mRfidReaderChip.mRx000ToRead.clear(); if (DEBUG) appendToLog("mRx000ToRead.clear !!!");*/
+                    rfidReaderChip.mRfidReaderChip.mRx000ToRead.clear();
+                    Logger.debug("mRx000ToRead.clear !!!");*/
                 }
             }
         }
@@ -155,34 +158,33 @@ public class RfidConnector {
     public int sendRfidToWriteSent = 0; public boolean mRfidToWriteRemoved = false;
     public boolean rfidFailure = false; public boolean rfidValid = false;
     public byte[] sendRfidToWrite() {
-        boolean DEBUG = false;
         boolean bValue = false;
-        //if (DEBUG) appendToLog("Timeout: btSendTimeOut = " + btSendTimeOut);
+        //Logger.debug("Timeout: btSendTimeOut = {}", btSendTimeOut);
         RfidConnector.RfidPayloadEvents rfidPayloadEvents = mRfidToWrite.get(0).rfidPayloadEvent;
         int sendRfidToWriteSentMax = 5;
         if (rfidPayloadEvents == RfidConnector.RfidPayloadEvents.RFID_COMMAND /*&& mRfidToWrite.get(0).dataValues[0] == 0x40*/) sendRfidToWriteSentMax = 5;
         if (sendRfidToWriteSent >= sendRfidToWriteSentMax) {
-            mRfidToWrite.remove(0); sendRfidToWriteSent = 0; mRfidToWriteRemoved = true; if (DEBUG) appendToLog("mmRfidToWrite remove 2");
-            if (DEBUG) appendToLog("Removed after sending count-out.");
+            mRfidToWrite.remove(0); sendRfidToWriteSent = 0; mRfidToWriteRemoved = true;
+            Logger.debug("mmRfidToWrite remove 2");
+            Logger.debug("Removed after sending count-out.");
             if (true) {
-                appendToLog("Rfdid data transmission failure !!! clear mRfidToWrite buffer !!!");
+                Logger.trace("Rfdid data transmission failure !!! clear mRfidToWrite buffer !!!");
                 //utility.writeDebug2File("Down fails to transmit " + byteArrayToString(mRfidToWrite.get(0).dataValues));
-                //appendToLog("BtDataOut: sendRfidToWrite 1 set rfidFailure as true with dataValues as " + byteArrayToString(mRfidToWrite.get(0).dataValues));
+                //Logger.trace("BtDataOut: sendRfidToWrite 1 set rfidFailure as true with dataValues as " + byteArrayToString(mRfidToWrite.get(0).dataValues));
                 rfidFailure = true;
                 mRfidToWrite.clear();
             } else if (rfidValid == false) {
                 Toast.makeText(context, "Problem in sending data to Rfid Module. Rfid is disabled.", Toast.LENGTH_SHORT).show();
-                appendToLog("BtDataOut: sendRfidToWrite 2 set rfidFailure as true");
+                Logger.trace("BtDataOut: sendRfidToWrite 2 set rfidFailure as true");
                 rfidFailure = true;
             } /*else {
                 Toast.makeText(context, "Problem in Sending Commands to RFID Module.  Bluetooth Disconnected.  Please Reconnect", Toast.LENGTH_SHORT).show();
-                appendToLog("disconnect d");
+                Logger.trace("disconnect d");
                 disconnect();
             }*/
-            if (DEBUG) appendToLog("done");
+            Logger.debug("done");
         } else {
-            if (DEBUG)
-                appendToLog("size = " + mRfidToWrite.size() + ", PayloadEvents = " + rfidPayloadEvents.toString() + ", data=" + byteArrayToString(mRfidToWrite.get(0).dataValues));
+            Logger.debug("size = {}, PayloadEvents = {}, data={}", mRfidToWrite.size(), rfidPayloadEvents, byteArrayToString(mRfidToWrite.get(0).dataValues));
             boolean retValue = false;
             return writeRfid(mRfidToWrite.get(0));
         }
@@ -192,7 +194,6 @@ public class RfidConnector {
     public boolean found;
     public int invalidUpdata;
     public boolean isRfidToRead(ConnectorData connectorData) {
-        boolean DEBUG = false;
         found = false;
         if (connectorData.dataValues[0] == (byte) 0x81) {
             RfidConnector.CsReaderRfidData cs108RfidReadData = new RfidConnector.CsReaderRfidData();
@@ -208,12 +209,12 @@ public class RfidConnector {
                     cs108RfidReadData.invalidSequence = connectorData.invalidSequence;
                     cs108RfidReadData.milliseconds = connectorData.milliseconds;
                     mRfidToRead.add(cs108RfidReadData);
-                    if (utility.DEBUG_PKDATA) appendToLog("PkData: Got Rfid.Uplink.DataRead with updated mRfidToRead data as " + byteArrayToString(dataValues));
+                    Logger.pkData("PkData: Got Rfid.Uplink.DataRead with updated mRfidToRead data as {}", byteArrayToString(dataValues));
                     found = true;
                     break;
                 default:
                     invalidUpdata++;
-                    if (utility.DEBUG_PKDATA) appendToLog("PkData: !!! found INVALID Rfid.Uplink with payload = " + byteArrayToString(connectorData.dataValues));
+                    Logger.pkData("PkData: !!! found INVALID Rfid.Uplink with payload = {}", byteArrayToString(connectorData.dataValues));
                     break;
             }
             if (found) {

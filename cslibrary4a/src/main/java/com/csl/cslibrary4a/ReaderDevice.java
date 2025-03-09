@@ -13,7 +13,8 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     private int phase, channel, port;
     public final int INVALID_STATUS = -1;
     private int status = INVALID_STATUS;
-    public static final int INVALID_BACKPORT = -1, INVALID_CODESENSOR = -1, INVALID_CODERSSI = -1, INVALID_BRAND = -1, INVALID_SENSORDATA = 0x1000; public final float INVALID_CODETEMPC = -300;
+    public static final int INVALID_BACKPORT = -1, INVALID_CODESENSOR = -1, INVALID_CODERSSI = -1, INVALID_BRAND = -1, INVALID_SENSORDATA = 0x1000;
+    public final float INVALID_CODETEMPC = -300;
     private int backport1 = INVALID_BACKPORT, backport2 = INVALID_BACKPORT;
     private int codeSensor = INVALID_CODESENSOR, codeSensorMax = INVALID_CODESENSOR, codeRssi = INVALID_CODERSSI, sensorData = INVALID_SENSORDATA; private float codeTempC = INVALID_CODETEMPC; private String brand;
     private boolean isConnected;
