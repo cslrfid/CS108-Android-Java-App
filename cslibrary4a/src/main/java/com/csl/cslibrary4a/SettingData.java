@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class SettingData {
-    final boolean DEBUG_FILE = true;
 
     public int channel = -1;
     int antennaPower = -1;
@@ -22,30 +21,26 @@ public class SettingData {
         this.utility = utility;
         this.bluetoothGatt = bluetoothGatt;
         this.csReaderConnector = csReaderConnector;
-        appendToLog("SettingData: this.bluetoothGatt is " + (this.bluetoothGatt == null ? "null" : "valid")
-                + "\nthis.csReaderConnector is " + (this.csReaderConnector == null ? "null" : "valid")
-                + "\nthis.utility is " + (this.utility == null ? "null" : "valid")
-                + "\nthis.context is " + (this.context == null ? "null" : "valid")
+        Logger.trace("SettingData: this.bluetoothGatt is {}\nthis.csReaderConnector is {}\nthis.utility is {}\nthis.context is {}",
+            this.bluetoothGatt == null ? "null" : "valid",
+            this.csReaderConnector == null ? "null" : "valid",
+            this.utility == null ? "null" : "valid",
+            this.context == null ? "null" : "valid"
         );
         loadForegroundSettingFile();
     }
     public void setConnectedConnectors(NotificationConnector notificationConnector, RfidReader rfidReader) {
         this.notificationConnector = notificationConnector;
         this.rfidReader = rfidReader;
-        appendToLog("SettingData: this.notificationConnector is " + (this.notificationConnector == null ? "null" : "valid")
-                + "\nthis.rfidReader is " + (this.rfidReader == null ? "null" : "valid")
-        );
+        Logger.trace("SettingData: this.notificationConnector is {}\nthis.rfidReader is {}", this.notificationConnector == null ? "null" : "valid",
+                this.rfidReader == null ? "null" : "valid");
     }
 
-    private void appendToLog(String s) {
-        utility.appendToLog(s);
-    }
 
     public void write2FileStream(FileOutputStream stream, String string) {
-        boolean DEBUG = true;
         try {
             stream.write(string.getBytes());
-            if (true) appendToLog("FileA outData = " + string);
+            Logger.trace("FileA outData = {}", string);
         } catch (Exception ex) {
         }
     }
@@ -149,8 +144,8 @@ public class SettingData {
 
         fileName = "csReaderA_" + fileName.replaceAll(":", "");
         fileSetting = new File(path, fileName);
-        boolean bNeedDefault = true, DEBUG = false;
-        if (DEBUG_FILE) utility.appendToLogView("FileName = " + fileName + ".exits = " + fileSetting.exists() + ", with beepEnable = " + inventoryBeep);
+        boolean bNeedDefault = true;
+        Logger.toLogView("FileName = {}.exits = {}, with beepEnable = {}", fileName, fileSetting.exists(), inventoryBeep).debug();
         if (fileSetting.exists()) {
             InputStream instream = null;
             try {
@@ -176,11 +171,11 @@ public class SettingData {
                         //
                     }
                     if (line == null) break;
-                    if (DEBUG_FILE || true) appendToLog("FileA Data read = " + line);
+                    Logger.debug("FileA Data read = {}", line);
                     String[] dataArray = line.split(",");
                     if (dataArray.length == 2) {
                         if (dataArray[0].matches("appVersion")) {
-                            appendToLog("datArray[1] = " + dataArray[1] + ", strlibraryVersion = " + strlibraryVersion);
+                            Logger.trace("datArray[1] = {}, strlibraryVersion = {}", dataArray[1], strlibraryVersion);
                             if (dataArray[1].matches(strlibraryVersion)) bNeedDefault = false;
                         } else if (bNeedDefault == true) {
                         } else if (dataArray[0].matches("countryInList")) {
@@ -232,9 +227,9 @@ public class SettingData {
                             csReaderConnector.rfidReader.setDupDelay(Byte.valueOf(dataArray[1]));
 
                         } else if (dataArray[0].matches(("triggerReporting"))) {
-                            appendToLog("FileA: going to setTriggerReporting with notificationConnector as " + (notificationConnector == null ? "null" : "valid"));
+                            Logger.trace("FileA: going to setTriggerReporting with notificationConnector as {}", notificationConnector == null ? "null" : "valid");
                             notificationConnector.setTriggerReporting(dataArray[1].matches("true") ? true : false);
-                            appendToLog("FileA: setTriggerReporting is done");
+                            Logger.trace("FileA: setTriggerReporting is done");
                         } else if (dataArray[0].matches(("triggerReportingCount"))) {
                             notificationConnector.setTriggerReportingCount(Short.valueOf(dataArray[1]));
                         } else if (dataArray[0].matches(("inventoryBeep"))) {
@@ -311,29 +306,28 @@ public class SettingData {
                 csReaderConnector.rfidReader.setTagGroup(querySelect, querySession, queryTarget);
                 csReaderConnector.rfidReader.setTagFocus(csReaderConnector.rfidReader.tagFocus > 0 ? true : false);
                 if (preFilterData != null && preFilterData.enable) {
-                    if (utility.DEBUG_SELECT) appendToLog("Debug_Select: SettingData.loadingSettingFile. preFilterData is valid. Going to setSelectCriteria");
-                    appendToLog("BtDataOut BBB 5");
+                    Logger.select("Debug_Select: SettingData.loadingSettingFile. preFilterData is valid. Going to setSelectCriteria");
+                    Logger.trace("BtDataOut BBB 5");
                     csReaderConnector.rfidReader.setSelectCriteria(0, preFilterData.enable, preFilterData.target, preFilterData.action, preFilterData.bank, preFilterData.offset, preFilterData.mask, preFilterData.maskbit);
                 } else {
-                    if (utility.DEBUG_SELECT) appendToLog("Debug_Select: SettingData.loadingSettingFile. preFilterData is null or disabled. Going to setSelectCriteriaDisable");
+                    Logger.select("Debug_Select: SettingData.loadingSettingFile. preFilterData is null or disabled. Going to setSelectCriteriaDisable");
                     csReaderConnector.rfidReader.setSelectCriteriaDisable(0);
                 }
             }
             try {
                 instream.close();
             } catch (Exception ex) { }
-            if (DEBUG_FILE) appendToLog("Data is read from FILE.");
+            Logger.debug("Data is read from FILE.");
         }
         if (bNeedDefault) {
-            appendToLog("saveSetting2File default !!!");
+            Logger.trace("saveSetting2File default !!!");
             csReaderConnector.rfidReader.setReaderDefault();
             saveSetting2File(strlibraryVersion, bChannelHoppingStatus, iCurrentProfile);
         }
         return bNeedDefault;
     }
     public void saveSetting2File(String strLibraryVersion, boolean bChannelHoppingStatus, int iCurrentProfile) {
-        boolean DEBUG = true;
-        if (DEBUG) appendToLog("Start");
+        Logger.debug("Start");
         FileOutputStream stream;
         try {
             stream = new FileOutputStream(fileSetting);
@@ -403,7 +397,7 @@ public class SettingData {
                 write2FileStream(stream, "preFilterData.maskbit," + String.valueOf(preFilterData.maskbit + "\n"));
             }
 
-            write2FileStream(stream, "End of data\n"); //.getBytes()); if (DEBUG) appendToLog("outData = " + outData);
+            write2FileStream(stream, "End of data\n"); //.getBytes()); Logger.debug("outData = " + outData);
             stream.close();
         } catch (Exception ex){
             //
@@ -417,24 +411,24 @@ public class SettingData {
         File path = context.getFilesDir();
         String fileName = "csReaderA_Foreground";
         fileForegroundSetting = new File(path, fileName);
-        appendToLog("file0.exists = " + fileForegroundSetting.exists());
+        Logger.trace("file0.exists = {}", fileForegroundSetting.exists());
         if (fileForegroundSetting.exists()) {
             try {
                 InputStream instream = new FileInputStream(fileForegroundSetting);
-                appendToLog("file0.instream is " + (instream == null ? "null" : "valid"));
+                Logger.trace("file0.instream is {}", instream == null ? "null" : "valid");
                 if (instream != null) {
                     InputStreamReader inputStreamReader = new InputStreamReader(instream);
                     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                     String line;
                     while ((line = bufferedReader.readLine()) != null) {
-                        appendToLog("file0.line: " + line);
+                        Logger.trace("file0.line: {}", line);
                         String[] dataArray = line.split(",");
                         if (dataArray.length == 2) {
                             if (dataArray[0].matches("foreground.reader")) {
-                                appendToLog("foregroundReader: set 5");
+                                Logger.trace("foregroundReader: set 5");
                                 strForegroundReader = dataArray[1];
-                                appendToLog("file0.foreground.reader = " + strForegroundReader);
-                                appendToLog("loaded strForegroundReader is " + this.strForegroundReader);
+                                Logger.trace("file0.foreground.reader = {}", strForegroundReader);
+                                Logger.trace("loaded strForegroundReader is {}", this.strForegroundReader);
                             }
                         }
                     }
@@ -447,8 +441,7 @@ public class SettingData {
         return true;
     }
     public void saveForegroundSetting2File() {
-        boolean DEBUG = true;
-        if (DEBUG) appendToLog("Start");
+        Logger.debug("Start");
 
         FileOutputStream stream;
         try {
@@ -456,7 +449,7 @@ public class SettingData {
             write2FileStream(stream, "Start of File0 data\n");
 
             write2FileStream(stream, "foreground.enable," + "true" + "\n");
-            appendToLog("strForegroundReader = " + strForegroundReader);
+            Logger.trace("strForegroundReader = {}", strForegroundReader);
             write2FileStream(stream, "foreground.reader," + strForegroundReader + "\n");
             write2FileStream(stream, "End of File0 data\n");
             stream.close();
@@ -472,11 +465,11 @@ public class SettingData {
     public int wedgeOutput = 0, wedgeDelimiter = 0x0a, wedgePower = 300;
     public String fileNameWedgeSetting = "csReaderA_SimpleWedge";
     void loadWedgeSettingFile() {
-        appendToLog("KKK: loadWedgeSettingFile starts");
+        Logger.trace("KKK: loadWedgeSettingFile starts");
         File path = context.getFilesDir();
         File file = new File(path, fileNameWedgeSetting);
-        boolean bNeedDefault = true, DEBUG = false;
-        appendToLog(fileNameWedgeSetting + "file.exists = " + file.exists());
+        boolean bNeedDefault = true;
+        Logger.trace("{} file.exists = {}", fileNameWedgeSetting, file.exists());
         if (file.exists()) {
             int length = (int) file.length();
             byte[] bytes = new byte[length];
@@ -487,7 +480,7 @@ public class SettingData {
                     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                     String line;
                     while ((line = bufferedReader.readLine()) != null) {
-                        if (true) appendToLog("Data read = " + line);
+                        Logger.trace("Data read = {}", line);
                         String[] dataArray = line.split(",");
                         if (dataArray.length == 2) {
                             if (dataArray[0].matches("wedgeDeviceName")) {
@@ -504,7 +497,7 @@ public class SettingData {
                                 wedgeSuffix = dataArray[1];
                             } else if (dataArray[0].matches("wedgeDelimiter")) {
                                 wedgeDelimiter = Integer.valueOf(dataArray[1]);
-                                appendToLog("MainActivity, loadWedgeSettingFile: wedgeDelimiter = " + wedgeDelimiter);
+                                Logger.trace("MainActivity, loadWedgeSettingFile: wedgeDelimiter = {}", wedgeDelimiter);
                             } else if (dataArray[0].matches("wedgeOutput")) {
                                 wedgeOutput = Integer.valueOf(dataArray[1]);
                             }
@@ -518,7 +511,7 @@ public class SettingData {
         }
     }
     void saveWedgeSetting2File() {
-        appendToLog("KKK: saveWedgeSetting2File starts");
+        Logger.trace("KKK: saveWedgeSetting2File starts");
         File path = context.getFilesDir();
         File file = new File(path, fileNameWedgeSetting);
         FileOutputStream stream;
@@ -531,7 +524,8 @@ public class SettingData {
             write2FileStream(stream, "wedgePower," + wedgePower + "\n");
             write2FileStream(stream, "wedgePrefix," + wedgePrefix + "\n");
             write2FileStream(stream, "wedgeSuffix," + wedgeSuffix + "\n");
-            write2FileStream(stream, "wedgeDelimiter," + String.valueOf(wedgeDelimiter) + "\n"); appendToLog("SettingWedgeFragment, saveWedgeFragment: wedgeDelimiter = " + wedgeDelimiter);
+            write2FileStream(stream, "wedgeDelimiter," + String.valueOf(wedgeDelimiter) + "\n");
+            Logger.trace("SettingWedgeFragment, saveWedgeFragment: wedgeDelimiter = {}", wedgeDelimiter);
             write2FileStream(stream, "wedgeOutput," + String.valueOf(wedgeOutput) + "\n");
             write2FileStream(stream, "End of data\n");
             stream.close();

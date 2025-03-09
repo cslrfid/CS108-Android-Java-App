@@ -25,24 +25,21 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import info.mqtt.android.service.BuildConfig;
+
 public class Utility {
-    public final boolean DEBUG_SELECT = false;
-    public final boolean DEBUG_INVCFG = false;
-    public final boolean DEBUG_BTDATA = false;
-    public final boolean DEBUG_FMDATA = false;
-    public final boolean DEBUG_PKDATA = false;
-    public final boolean DEBUG_APDATA = false;
-    public final boolean DEBUG_COMPACT = false;
-    private Context mContext; private TextView mLogView;
+    private Context mContext;
+    private TextView mLogView;
     public Utility(Context context, TextView mLogView) {
         mContext = context;
+        Logger.mLogView = mLogView;
         this.mLogView = mLogView;
     }
     private static long mReferenceTimeMs;
     public void setReferenceTimeMs() {
         mReferenceTimeMs = System.currentTimeMillis();
     }
-    public long getReferencedCurrentTimeMs() { return System.currentTimeMillis() - mReferenceTimeMs; }
+    public static long getReferencedCurrentTimeMs() { return System.currentTimeMillis() - mReferenceTimeMs; }
 
     public boolean compareByteArray(byte[] array1, byte[] array2, int length) {
         int i = 0;
@@ -60,7 +57,7 @@ public class Utility {
     }
 
     public String byteArray2DisplayString(byte[] byteData) {
-        if (false) appendToLog("String0 = " + byteArrayToString(byteData));
+        Logger.trace("String0 = {}", byteArrayToString(byteData));
         String str = "";
         try {
             str = new String(byteData, "UTF-8");
@@ -69,7 +66,7 @@ public class Utility {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        if (false) appendToLog("String1 = " + str);
+        Logger.trace("String1 = {}", str);
         return str;
     }
     public String byteArrayToString(byte[] packet) {
@@ -117,7 +114,7 @@ public class Utility {
                 bytesNew[bytesNew.length - 1] = (byte) (sValue & 0xFF);
                 bytes = bytesNew;
             } catch (Exception ex) {
-                appendToLog("Exception in i = " + i + ", substring = " + string.substring(i, i+2));
+                Logger.error("Exception in i = {}, substring = {}", i,  string.substring(i, i+2));
                 break;
             }
         }
@@ -133,50 +130,13 @@ public class Utility {
         return iValue;
     }
 
-    private static Handler mHandler = new Handler();
-    public void appendToLogRunnable(final String s) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                appendToLog(s);
-            }
-        });
-    }
-    public String appendToLog(String s) {
-        String TAG = "";
-        StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
-        boolean foundMe = false;
-        for(int i=0; i<stacktrace.length; i++) {
-            StackTraceElement e = stacktrace[i];
-            String methodName = e.getMethodName();
-            if (methodName.contains("appendToLog")) {
-                foundMe = true;
-            } else if (foundMe) {
-                if (!methodName.startsWith("access$")) {
-                    //TAG = String.format(Locale.US, "%s.%s", e.getClassName(), methodName);
-                    TAG = String.format(Locale.US, "%s", methodName);
-                    break;
-                }
-            }
-        }
-        Log.i(TAG + ".Hello", s);
-        String string = "\n" + getReferencedCurrentTimeMs() + "." + s;
-        return (string);
-    }
-
-    public void appendToLogView(String s) {
-        appendToLog(s);
-        String string = "\n" + getReferencedCurrentTimeMs() + "." + s;
-        if (Looper.myLooper() == Looper.getMainLooper() && mLogView != null && string != null)   mLogView.append(string);
-    }
-
     private static File fileDebug; private static boolean enableFileDebug = false;
     public void debugFileSetup() {
         boolean writeExtPermission = true;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 writeExtPermission = false;
-                //appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
+                //Logger.trace("requestPermissions WRITE_EXTERNAL_STORAGE 1");
                 //requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 //if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
                 //return;
@@ -197,7 +157,7 @@ public class Utility {
                 if (fileDebug == null) errorDisplay = "Error in making directory !!!";
             }
         }
-        if (errorDisplay != null) appendToLog("Error in saving file with " + errorDisplay);
+        if (errorDisplay != null) Logger.warn("Error in saving file with {}", errorDisplay);
     }
     public void debugFileClose() {
         if (fileDebug != null) {
@@ -215,7 +175,7 @@ public class Utility {
             try {
                 FileOutputStream outputStreamDebug = new FileOutputStream(fileDebug, true);
                 PrintWriter printWriterDebug = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(outputStreamDebug), "UTF-8"));
-                if (false) appendToLog(stringDebug);
+                Logger.trace(stringDebug);
                 printWriterDebug.println(stringDebug);
                 printWriterDebug.flush(); printWriterDebug.close();
                 outputStreamDebug.close();
@@ -240,14 +200,22 @@ public class Utility {
 
     public String getCombinedVersion(String string0) {
         String string1 = BuildConfig.VERSION_NAME;
-        int iValue1 = Integer.parseInt(string1);
-        appendToLog("string1 = " + string1 + ", iValue1 = " + iValue1);
-        int iPos0 = string0.indexOf(".");
-        int iPos1 = string0.substring(iPos0 + 1).indexOf(".");
-        int iValue0 = Integer.parseInt(string0.substring(iPos0 + iPos1 + 2));
-        appendToLog("stringVersion = " + string0 + ", iPos0 = " + iPos0 + ", iPos1 = " + iPos1 + ", iValue0 = " + iValue0);
-        iValue0 += iValue1;
-        return string0.substring(0, iPos0 + iPos1 + 2) + String.valueOf(iValue0);
+        try {
+            int iValue1 = Integer.parseInt(string1);
+            Logger.info("string1 = {}, iValue1 = {}", string1, iValue1);
+            int iPos0 = string0.indexOf(".");
+            int iPos1 = string0.substring(iPos0 + 1).indexOf(".");
+            int iValue0 = Integer.parseInt(string0.substring(iPos0 + iPos1 + 2));
+            Logger.info("stringVersion = {}, iPos0 = {}, iPos1 = {}, iValue0 = {}", string0, iPos0, iPos1, iValue0);
+            iValue0 += iValue1;
+            return string0.substring(0, iPos0 + iPos1 + 2) + iValue0;
+        } catch (NumberFormatException e) {
+            int iPos0 = string0.indexOf(".");
+            int iPos1 = string0.substring(iPos0 + 1).indexOf(".");
+            int iValue0 = Integer.parseInt(string0.substring(iPos0 + iPos1 + 2));
+            Logger.info("stringVersion = {}, iPos0 = {}, iPos1 = {}, iValue0 = {}", string0, iPos0, iPos1, iValue0);
+            return string0.substring(0, iPos0 + iPos1 + 2) + iValue0;
+        }
     }
 
     public boolean isVersionGreaterEqual(String version, int majorVersion, int minorVersion, int buildVersion) {
@@ -285,14 +253,14 @@ public class Utility {
     float fTemperature_old = -500;
     public float decodeCtesiusTemperature(String strActData, String strCalData) {
         float fTemperature = -500; boolean invalid = false;
-        appendToLog("Hello9: strActData = " + strActData + ", strCalData = " + strCalData);
+        Logger.info("Hello9: strActData = {}, strCalData = {}", strActData, strCalData);
         if (strActData.length() != 8 || strCalData.length() != 8) {
-            if (strActData.length() != 8) appendToLogView("Warning: Invalid length of sensing data = " + strActData);
-            else appendToLogView("Warning: Invalid length of calibration data = " + strCalData);
+            if (strActData.length() != 8) Logger.toLogView("Warning: Invalid length of sensing data = {}", strActData).warn();
+            else Logger.toLogView("Warning: Invalid length of calibration data = {}", strCalData).warn();
             invalid = true;
         }
         else if ((strActData.substring(0, 1).matches("F") && strActData.substring(4, 5).matches("F")) == false) {
-            appendToLogView("Warning: Not F header of sensing data = " + strActData);
+            Logger.toLogView("Warning: Not F header of sensing data = {}", strActData).warn();
             invalid = true;
         }
         else {
@@ -303,16 +271,16 @@ public class Utility {
                 iChecksum ^= (iTemp & 0x7);
             }
             if (iChecksum != 0) {
-                appendToLogView("Warning: Invalid checksum(" + String.valueOf(iChecksum) + ") for strActData = " + strActData);
+                Logger.toLogView("Warning: Invalid checksum({}) for strActData = {}", iChecksum, strActData).warn();
                 invalid = true;
             }
         }
         if (true || invalid == false) {
             int iDelta1 = Integer.parseInt(strCalData.substring(0,4), 16);
             if ((iDelta1 & 0x8000) != 0) { iDelta1 ^= 0xFFFF; iDelta1++; iDelta1 *= -1; }
-            appendToLog(String.format("iDelta1 = %d", iDelta1));
+            Logger.trace("iDelta1 = {}", iDelta1);
             int iVersion = Integer.parseInt(strCalData.substring(4,5), 16);
-            appendToLog("Hello9: " + String.format("iDelta1 = %X, iVersion = %X", iDelta1, iVersion));
+            Logger.trace(String.format("Hello9: iDelta1 = %X, iVersion = %X", iDelta1, iVersion));
             float fDelta2 = ((float) iDelta1) / 100 - 101;
             String strTemp = strActData.substring(1,4) + strActData.substring(5,8);
             int iTemp = Integer.parseInt(strTemp, 16);
@@ -322,8 +290,8 @@ public class Utility {
             else if (iVersion == 2) {
                 fTemperature = (float) (11109.6 / (24 + (iD2 + iDelta1)/375.3) - 290);
                 if (fTemperature >= 125) fTemperature = (float) (fTemperature * 1.2 - 25);
-            } else appendToLogView("Warning: Invalid version " + String.valueOf(iVersion));
-            if (invalid) appendToLogView(String.format("Temperature = %f", fTemperature));
+            } else Logger.toLogView("Warning: Invalid version {}", iVersion).warn();
+            if (invalid) Logger.toLogView("Temperature = {}", fTemperature).info();
         }
         if (fTemperature != -1) fTemperature_old = fTemperature;
         return fTemperature;
@@ -388,27 +356,27 @@ public class Utility {
                 break;
         }
         float temperature = -1;
-        appendToLog("input string " + string + ", user1 = " + stringUser1 + ", user5 = " + stringUser5 + ", user6 = " + stringUser6);
+        Logger.trace("input string {}, user1 = {}, user5 = {}, user6 = {}", string, stringUser1, stringUser5, stringUser6);
         //iUser1 = 495; iUser6 = 3811;
-        appendToLog("iUser1 = " + iUser1 + ", iUser5 = " + iUser5 + ", iUser6 = " + iUser6);
+        Logger.trace("iUser1 = {}, iUser5 = {}, iUser6 = {}", iUser1, iUser5, iUser6);
         if (iUser5 == 3000) {
             float calibOffset = (float) 3860.27 - (float) iUser6;
-            appendToLog("calibOffset = " + calibOffset);
+            Logger.trace("calibOffset = {}", calibOffset);
             float acqTempCorrected = (float) iUser1 + calibOffset / 8;
-            appendToLog("acqTempCorrected = " + acqTempCorrected);
+            Logger.trace("acqTempCorrected = {}", acqTempCorrected);
             temperature = (float) 0.3378 * acqTempCorrected - (float) 133;
-            appendToLog("temperature = " + temperature);
+            Logger.trace("temperature = {}", temperature);
         } else if (iUser5 == 1835) {
             float expAcqTemp = (float) 398.54 - (float) iUser5 / (float) 100;
-            appendToLog("expAcqTemp = " + expAcqTemp);
+            Logger.trace("expAcqTemp = {}", expAcqTemp);
             expAcqTemp /= (float) 0.669162;
-            appendToLog("expAcqTemp = " + expAcqTemp);
+            Logger.trace("expAcqTemp = {}", expAcqTemp);
             float calibOffset = ((float) 8 * expAcqTemp) - (float) iUser6;
             float acqTempCorrected = (float) iUser1 + calibOffset;
             acqTempCorrected /= 8;
             temperature = (float) -0.669162 * acqTempCorrected;
             temperature += 398.54;
-            appendToLog("expAcqTemp = " + expAcqTemp + ". calibOffset = " + calibOffset + ", acqTempCorrected = " + acqTempCorrected + ", temperature = " + temperature);
+            Logger.trace("expAcqTemp = {}, calibOffset = {}, acqTempCorrected = {}, temperature = {}", expAcqTemp, calibOffset, acqTempCorrected, temperature);
         }
         return temperature;
     } //4278
@@ -444,7 +412,7 @@ public class Utility {
         String strValue = null;
         ParseSGTIN parseSGTIN = null;
         String strURI = "urn:epc:tag:";
-        appendToLog("epcClass is " + epcClass.toString());
+        Logger.trace("epcClass is {}", epcClass);
         switch (epcClass) {
             default:
                 strURI += "sgtin-96:";
@@ -476,7 +444,7 @@ public class Utility {
             String strHeader = "urn:epc:tag:";
             if (strValue.indexOf(strHeader) == 0) strValue = strValue.substring(strHeader.length());
         } catch (Exception e) {
-            appendToLog("parseSSCC exception: " + e.getMessage());
+            Logger.trace("parseSSCC exception: {}", e.getMessage());
             //throw new RuntimeException(e);
         }
         return strValue;
@@ -520,7 +488,7 @@ public class Utility {
         if (version.length() == 0) return false;
         String[] versionPart = version.split("\\.");
 
-        if (versionPart == null) { appendToLog("NULL VersionPart"); return false; }
+        if (versionPart == null) { Logger.trace("NULL VersionPart"); return false; }
         try {
             int value = Integer.valueOf(versionPart[0]);
             if (value < majorVersion) return false;
@@ -558,7 +526,7 @@ public class Utility {
                 fValue *= (1 + ((float)iMant / 1024));
                 if (iSign != 0) fValue *= -1;
             }
-            if (true) appendToLog("strData = " + strData + ", iValue = " + iValue + ", iSign = " + iSign + ", iExp = " + iExp + ", iMant = " + iMant + ", fValue = " + fValue);
+            Logger.trace("strData = {}, iValue = {}, iSign = {}, iExp = {}, iMant = {}, fValue = {}", strData, iValue, iSign, iExp, iMant, fValue);
         }
         return fValue;
     }
@@ -591,7 +559,7 @@ public class Utility {
             }
             int iValue = (bSign ? 0x8000 : 0) + (iExp << 10) + iMant;
             strValue = String.format("%04X", iValue);
-            if (true) appendToLog("bSign = " + bSign + ", iExp = " + iExp + ", iMant = " + iMant + ", iValue = " + iValue + ", strValue = " + strValue);
+            Logger.trace("bSign = {}, iExp = {}, iMant = {}, iValue = {}, strValue = {}", bSign, iExp, iMant, iValue, strValue);
         }
         return strValue;
     }

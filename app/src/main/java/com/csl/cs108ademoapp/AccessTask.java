@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.csl.cslibrary4a.Logger;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         this.registerTagGot = registerTagGot;
         this.registerVoltageLevel = registerVoltageLevel;
 
-        this.invalidRequest = invalidRequest; MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest);
+        this.invalidRequest = invalidRequest;
         this.selectOne = selectOne;
         this.selectMask = selectMask;
         this.selectBank = selectBank;
@@ -86,7 +87,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         this.registerYield = registerYieldView;
         this.registerTotal = registerTotalView;
 
-        this.invalidRequest = invalidRequest; MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest);
+        this.invalidRequest = invalidRequest;
         this.selectOne = selectOne;
         this.selectMask = selectMask;
         this.selectBank = selectBank;
@@ -110,7 +111,8 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     }
 
     void preExecute() {
-        accessResult = null; MainActivity.csLibrary4A.appendToLog("accessResult is set null");
+        accessResult = null;
+        Logger.trace("accessResult is set null");
         playerO = MainActivity.sharedObjects.playerO;
         playerN = MainActivity.sharedObjects.playerN;
         //playerN.start();
@@ -138,35 +140,40 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         accessError = 0; backscatterError = 0; timeoutError = false; crcError = false;
         success = false;
 
-        if (invalidRequest == false) {
-            if (strPassword.length() != 8) { invalidRequest = true; MainActivity.csLibrary4A.appendToLog("strPassword.length = " + strPassword.length() + " (not 8)."); }
-            else if (hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CKILL) {
-                if (MainActivity.csLibrary4A.setRx000KillPassword(strPassword) == false) {
-                    invalidRequest = true; MainActivity.csLibrary4A.appendToLog("setRx000KillPassword is failed");
-                }
-            } else if (MainActivity.csLibrary4A.setRx000AccessPassword(strPassword) == false) {
+        if (!invalidRequest) {
+            if (strPassword.length() != 8) {
                 invalidRequest = true;
-                MainActivity.csLibrary4A.appendToLog("setRx000AccessPassword is failed");
+                Logger.trace("strPassword.length = {} (not 8).", strPassword.length());
+            } else if (hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CKILL) {
+                if (!MainActivity.csLibrary4A.setRx000KillPassword(strPassword)) {
+                    invalidRequest = true;
+                    Logger.trace("setRx000KillPassword is failed");
+                }
+            } else if (!MainActivity.csLibrary4A.setRx000AccessPassword(strPassword)) {
+                invalidRequest = true;
+                Logger.trace("setRx000AccessPassword is failed");
             }
         }
-        if (invalidRequest == false) {
-            if (MainActivity.csLibrary4A.setAccessRetry(true, 7) == false) {
-                invalidRequest = true; MainActivity.csLibrary4A.appendToLog("setAccessRetry is failed");
+        if (!invalidRequest) {
+            if (!MainActivity.csLibrary4A.setAccessRetry(true, 7)) {
+                invalidRequest = true;
+                Logger.trace("setAccessRetry is failed");
             }
         }
-        if (invalidRequest == false) {
-            if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessTask(): powerLevel = " + powerLevel);
+        if (!invalidRequest) {
+            Logger.debug("AccessTask(): powerLevel = {}", powerLevel);
             int matchRep = 1;
             if (repeat > 1) matchRep = repeat;
             if (false && bSkipClearFilter == false) {
-                MainActivity.csLibrary4A.appendToLog("Going to setSelectCriteria disable");
+                Logger.info("Going to setSelectCriteria disable");
                 MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
             }
             if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
             else if (skipSelect == false) {
-                MainActivity.csLibrary4A.appendToLog("AccessTask.preExecute goes to setSelectTag");
+                Logger.info("AccessTask.preExecute goes to setSelectTag");
                 if (MainActivity.csLibrary4A.setSelectedTag(selectOne, selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
-                    invalidRequest = true; MainActivity.csLibrary4A.appendToLog("setSelectedTag is failed with selectMask = " + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", powerLevel = " + powerLevel);
+                    invalidRequest = true;
+                    Logger.info("setSelectedTag is failed with selectMask = {}, selectBank = {}, selectOffset = {}, powerLevel = {}", selectMask, selectBank, selectOffset, powerLevel);
                 }
             }
         }
@@ -175,7 +182,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         if (invalidRequest) {
             cancel(true);
             taskCancelReason = TaskCancelRReason.INVALD_REQUEST;
-            MainActivity.csLibrary4A.appendToLog("invalidRequest A= " + invalidRequest);
+            Logger.trace("invalidRequest A= {}", invalidRequest);
         } else {
             if (MainActivity.csLibrary4A.checkHostProcessorVersion(MainActivity.csLibrary4A.getMacVer(), 2, 6, 8)) {
                 MainActivity.csLibrary4A.setInvModeCompact(false);
@@ -211,11 +218,11 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                     publishProgress("null response");
                 } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_18K6C_TAG_ACCESS) {
                     accessCompleteReceived = true;
-                    MainActivity.csLibrary4A.appendToLog("rx000pkgData.dataValues = " + MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.dataValues));
+                    Logger.trace("rx000pkgData.dataValues = {}", MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.dataValues));
                     if (rx000pkgData.decodedError == null) {
                         if (done == false) {
                             accessResult = rx000pkgData.decodedResult;
-                            MainActivity.csLibrary4A.appendToLog("responseType = " + rx000pkgData.responseType.toString() + ", accessResult = " + accessResult);
+                            Logger.trace("responseType = {}, accessResult = {}", rx000pkgData.responseType, accessResult);
                             if (repeat > 0) repeat--;
                             if (updateRunnable != null) mHandler.post(updateRunnable);
                             publishProgress(null, rx000pkgData.decodedResult);
@@ -225,11 +232,11 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                     iTimeOut = 1000;
                 } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_COMMAND_END) {
                     if (hostCommand == RfidReaderChipData.HostCommands.CMD_18K6CKILL && accessCompleteReceived == false) accessResult = "";
-                    MainActivity.csLibrary4A.appendToLog("BtData: repeat = " + repeat + ", decodedError = " + rx000pkgData.decodedError + ", resultError = " + resultError);
+                    Logger.btdData("BtData: repeat = {}, decodedError = {}, resultError = {}", repeat, rx000pkgData.decodedError, resultError);
                     if (rx000pkgData.decodedError != null) { endingMessaage = rx000pkgData.decodedError; ending = true; }
                     else if (repeat > 0 && resultError.length() == 0) {
                         resultError = "";
-                        if (true) MainActivity.csLibrary4A.appendToLog("Debug_InvCfg: AccessTask.doInBackground goes to setMatchRep with repeat = " + repeat);
+                        Logger.invCfg("Debug_InvCfg: AccessTask.doInBackground goes to setMatchRep with repeat = {}", repeat);
                         MainActivity.csLibrary4A.setMatchRep(repeat);
                         MainActivity.csLibrary4A.sendHostRegRequestHST_CMD(hostCommand);
                     } else {
@@ -268,7 +275,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     @Override
     protected void onProgressUpdate(String... output) {
         if (output[0] != null) {
-            MainActivity.csLibrary4A.appendToLog("onProgressUpdate output[0] = " + output[0]);
+            Logger.trace("onProgressUpdate output[0] = {}", output[0]);
             if (output[0].length() == 2) {
                 if (output[0].contains("TT")) {
                     gotInventory = true;
@@ -291,11 +298,10 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 }
             } else {
                 resultError += output[0];
-                if (true)
-                    MainActivity.csLibrary4A.appendToLog("output[0]: " + output[0] + ", resultError = " + resultError);
+                Logger.trace("output[0]: {}, resultError = {}", output[0], resultError);
             }
         } else {
-            MainActivity.csLibrary4A.appendToLog("onProgressUpdate output[1] = " + output[1]);
+            Logger.trace("onProgressUpdate output[1] = {}", output[1]);
             if (registerYield != null) {
                 if (tagInventoried != null) {
                     tagList.add(tagInventoried);
@@ -310,7 +316,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog("endingMesssage: taskCancelReason = " + taskCancelReason);
+        Logger.debug("endingMesssage: taskCancelReason = {}", taskCancelReason);
         MainActivity.csLibrary4A.abortOperation();
         if (taskCancelReason == TaskCancelRReason.NULL)  taskCancelReason = TaskCancelRReason.DESTORY;
         DeviceConnectTask4RegisterEnding();
@@ -318,7 +324,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessSecurityLockFragment.InventoryRfidTask.onPostExecute(): " + result);
+        Logger.debug("AccessSecurityLockFragment.InventoryRfidTask.onPostExecute(): {}", result);
         DeviceConnectTask4RegisterEnding();
     }
 
@@ -327,22 +333,24 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         String strErrorMessage = "";
         if (false) {
             boolean success = false;
-            MainActivity.csLibrary4A.appendToLog("repeat = " + repeat + ", taskCancelReason = " + taskCancelReason.toString()
-                    + ", backscatterError = " + backscatterError + ", accessError =" + accessError + ", accessResult = " + accessResult + ", resultError = " + resultError);
+            Logger.trace("repeat = {}, taskCancelReason = {}, backscatterError = {}, accessError = {}, accessResult = {}, resultError = {}",
+                    repeat, taskCancelReason, backscatterError, accessError, accessResult, resultError);
             if ((repeat <= 1 && taskCancelReason != TaskCancelRReason.NULL) || backscatterError != 0 || accessError != 0 || accessResult == null || resultError.length() != 0) {
-                MainActivity.csLibrary4A.appendToLog("FAILURE"); Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_FAILURE, Toast.LENGTH_SHORT).show();
+                Logger.info("FAILURE");
+                Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_FAILURE, Toast.LENGTH_SHORT).show();
                 playerO.start();
             } else {
-                MainActivity.csLibrary4A.appendToLog("SUCCESS"); Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
+                Logger.info("SUCCESS");
+                Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
                 playerN.start();
             }
         } else {
             strErrorMessage = "";
             switch (taskCancelReason) {
                 case NULL:
-                    if (accessResult == null) MainActivity.csLibrary4A.appendToLog("taskCancelReason: NULL accessResult");
-                    if (resultError != null) MainActivity.csLibrary4A.appendToLog("taskCancelReason: resultError = " + resultError);
-                    if (endingMessaage != null) MainActivity.csLibrary4A.appendToLog("taskCancelReason: endingMessaage = " + endingMessaage);
+                    if (accessResult == null) Logger.info("taskCancelReason: NULL accessResult");
+                    if (resultError != null) Logger.info("taskCancelReason: resultError = {}", resultError);
+                    if (endingMessaage != null) Logger.info("taskCancelReason: endingMessaage = {}", endingMessaage);
                     if (accessResult == null || (resultError != null && resultError.length() != 0) || (endingMessaage != null && endingMessaage.length() != 0)) strErrorMessage += ("Finish as COMMAND END is received " + (gotInventory ? "WITH" : "WITHOUT") + " tag response");
                     //else Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
                     break;
@@ -362,7 +370,8 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                     strErrorMessage += "Invalid request. Operation is cancelled. ";
                     break;
             }
-            MainActivity.csLibrary4A.appendToLog("taskCancelReason = " + taskCancelReason.toString() + ", accessResult = " + (accessResult == null ? "NULL": accessResult) + ", endingMessaage = " + (endingMessaage == null ? "NULL" : endingMessaage) + ", resultError = " + (resultError == null ? "NULL" : resultError));
+            Logger.trace("taskCancelReason = {}, accesResult = {}, endingMessaage = {}, resultError = {}",
+                    taskCancelReason, accessResult == null ? "NULL": accessResult, endingMessaage == null ? "NULL" : endingMessaage, resultError == null ? "NULL" : resultError);
             if (resultError.length() != 0) {
                 if (strErrorMessage.trim().length() == 0) strErrorMessage = resultError;
                 else strErrorMessage += (". " + resultError);
@@ -374,7 +383,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
         button.setText(buttonText);
         if (endingMessaage != null) {
             if (endingMessaage.length() != 0) {
-                MainActivity.csLibrary4A.appendToLog("endingMessage=" + endingMessaage);
+                Logger.trace("endingMessage={}", endingMessaage);
                 if (bEnableErrorPopWindow) {
                     CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
                     customPopupWindow.popupStart(endingMessaage, false);
