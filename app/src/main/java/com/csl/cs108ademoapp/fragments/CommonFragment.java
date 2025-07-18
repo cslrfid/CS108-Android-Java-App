@@ -16,8 +16,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 
 import com.csl.cs108ademoapp.CustomAlertDialog;
@@ -33,7 +35,7 @@ public abstract class CommonFragment extends Fragment {
     boolean fragmentActive = false;
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         if (DEBUG) {
         if (fragmentName == null) Log.i(TAG, "CommonFragment.onAttach: NULL fragmentName");
         else Log.i(TAG, "CommonFragment.onAttach: fragmentName = " + fragmentName);
@@ -51,9 +53,9 @@ public abstract class CommonFragment extends Fragment {
     }
 
     boolean menuFragment = false;
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, boolean menuFragment) {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
-        this.menuFragment = menuFragment;
 
         bleConnected = false; if (MainActivity.csLibrary4A.isBleConnected()) bleConnected = true;
         rfidFailure = false; if (MainActivity.csLibrary4A.isRfidFailure()) rfidFailure = true;
@@ -62,9 +64,7 @@ public abstract class CommonFragment extends Fragment {
         if (fragmentName.matches("HomeFragment")) bHomeAsUpEnabled = false;
         if (fragmentName.matches("HomeWFragment")) bHomeAsUpEnabled = false;
         actionBar.setDisplayHomeAsUpEnabled(bHomeAsUpEnabled);
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog("CommonFragment: onCreateView with fragmentName = " + fragmentName + " , onOptionsItemSelected = " + menuFragment + ", DisplayHomeAsUpEnabled = " + bHomeAsUpEnabled);
-
-        if (menuFragment)   setHasOptionsMenu(true);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("CommonFragment.onCreateView with fragmentName = " + fragmentName + " , menuFragment = " + menuFragment + ", DisplayHomeAsUpEnabled = " + bHomeAsUpEnabled);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -84,10 +84,14 @@ public abstract class CommonFragment extends Fragment {
             }
 
             mHandler.postDelayed(updateTriggerRunnable, reportCount * 1100);
+            MainActivity.csLibrary4A.appendToLog(fragmentName + ".CommonFragment: menuTriggerItem is " + (menuTriggerItem == null ? "null" : "valid"));
             if (menuTriggerItem == null) return;
+            MainActivity.csLibrary4A.appendToLog(fragmentName + ".CommonFragment: 1");
             if (MainActivity.csLibrary4A.isBleConnected() == false) { menuTriggerItem.setTitle("");  return; }
+            MainActivity.csLibrary4A.appendToLog(fragmentName + ".CommonFragment: 2");
 
             int triggerCount = MainActivity.csLibrary4A.getTriggerCount();
+            MainActivity.csLibrary4A.appendToLog(fragmentName + ".CommonFragment: triggerCount = " + triggerCount + ", triggerCount_old = " + triggerCount_old);
             if (triggerCount != triggerCount_old) {
                 triggerCount_old = triggerCount;
                 if (MainActivity.csLibrary4A.getTriggerButtonStatus()) menuTriggerItem.setTitle("Ton");
@@ -192,12 +196,94 @@ public abstract class CommonFragment extends Fragment {
         }
     };
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
-        super.onActivityCreated(savedInstanceState);
+    public void onCreateMenuA(@org.jspecify.annotations.NonNull Menu menu, @org.jspecify.annotations.NonNull MenuInflater menuInflater) {
+        MainActivity.csLibrary4A.appendToLog("CommonFragment.onCreateMenuA: " + fragmentName + " with fragmentActive = " + fragmentActive);
+        if (fragmentActive == false) return;
+        if (fragmentName.matches("ConnectionFragment")) {
+            menuInflater.inflate(R.menu.menu_connection, menu);
+            if (MainActivity.csLibrary4A.isBleScanning()) {
+                menu.findItem(R.id.action_refresh).setActionView(R.layout.actionbar_indeterminate_progress);
+            } else {
+                menu.findItem(R.id.action_refresh).setActionView(null);
+            }
+        } else {
+            menuInflater.inflate(R.menu.menu_home, menu);
+            menuBatteryVoltageItem = menu.findItem(R.id.home_voltage);;
+            menuTriggerItem = menu.findItem(R.id.home_trigger);
+            menu.removeItem(R.id.home_menu);
+            if (fragmentName.matches("InventoryFragment")
+                    || fragmentName.contains("InventoryRfidiMultiFragment")
+                    || fragmentName.contains("InventoryRfidSimpleFragment")
+                    || fragmentName.contains("InventoryRfidBarFragment")
+
+                    || fragmentName.contains("ImpinjFragment")
+                    || fragmentName.contains("Ucode8Fragment")
+                    || fragmentName.contains("UcodeFragment")
+                    || fragmentName.contains("ColdChainFragment")
+                    || fragmentName.contains("AuraSenseFragment")
+                    || fragmentName.contains("AxzonFragment")
+                    || fragmentName.contains("MicronFragment")
+                    || fragmentName.contains("FdmicroFragment")
+                    || fragmentName.contains("LedTagFragment")
+
+                    || fragmentName.contains("InventoryRfidSimpleFragment")
+            ) {
+                MainActivity.csLibrary4A.appendToLog("CommonFragment.onCreateMenuA: going to set text");
+                menu.findItem(R.id.menuAction_clear).setTitle("Clear");
+                menu.findItem(R.id.menuAction_save).setTitle("Save");
+                menu.findItem(R.id.menuAction_share).setTitle("Share");
+                menu.findItem(R.id.menuAction_share).setIcon(android.R.drawable.ic_menu_share);
+                if (fragmentName.contains("InventoryBarcodeFragment")) {
+                    menu.removeItem(R.id.menuAction_sort);
+                    menu.removeItem(R.id.menuAction_sortRssi);
+                } else {
+                    menu.findItem(R.id.menuAction_sort).setTitle("Sort by EPC");
+                    menu.findItem(R.id.menuAction_sortRssi).setTitle("Sort by Rssi");
+                }
+            } else {
+                menu.removeItem(R.id.menuAction_clear);
+                menu.removeItem(R.id.menuAction_save);
+                menu.removeItem(R.id.menuAction_share);
+                menu.removeItem(R.id.menuAction_sort);
+                menu.removeItem(R.id.menuAction_sortRssi);
+            }
+        }
+    }
+    public boolean onMenuItemSelectedA(@org.jspecify.annotations.NonNull MenuItem item) {
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog("CommonFragment.onMenuItemSelectedA: in fragment " + fragmentName);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName + " with fragmentActive = " + fragmentActive);
+        if (fragmentActive == false) return false;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("CommonFragment.onMenuItemSelectedA: getActivity().onBackPressed");
+                getActivity().onBackPressed();
+                return true;
+            default:
+                return false;
+        }
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
+        if (menuFragment) {
+            MainActivity.csLibrary4A.appendToLog("CommonFragment.onViewCreated: going to addMenuProvider with fragment as " + fragmentName);
+            getActivity().addMenuProvider(new MenuProvider() {
+                @Override
+                public void onCreateMenu(@org.jspecify.annotations.NonNull Menu menu, @org.jspecify.annotations.NonNull MenuInflater menuInflater) {
+                    MainActivity.csLibrary4A.appendToLog("CommonFragment.onViewCreated.onCreateMenu: in fragment " + fragmentName);
+                    onCreateMenuA(menu, menuInflater);
+                }
+
+                @Override
+                public boolean onMenuItemSelected(@org.jspecify.annotations.NonNull MenuItem item) {
+                    MainActivity.csLibrary4A.appendToLog("CommonFragment.onViewCreated.onMenuItemSelected: in fragment " + fragmentName);
+                    return onMenuItemSelectedA(item);
+                }
+            }, getViewLifecycleOwner());
+        }
+        super.onViewCreated(view, savedInstanceState);
+    }
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
@@ -223,74 +309,6 @@ public abstract class CommonFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName + " with fragmentActive = " + fragmentActive);
-        if (fragmentActive == false) return;
-        if (fragmentName.matches("ConnectionFragment")) {
-            inflater.inflate(R.menu.menu_connection, menu);
-            if (MainActivity.csLibrary4A.isBleScanning()) {
-                menu.findItem(R.id.action_refresh).setActionView(R.layout.actionbar_indeterminate_progress);
-            } else {
-                menu.findItem(R.id.action_refresh).setActionView(null);
-            }
-        } else {
-            inflater.inflate(R.menu.menu_home, menu);
-            menuBatteryVoltageItem = menu.findItem(R.id.home_voltage);;
-            menuTriggerItem = menu.findItem(R.id.home_trigger);
-            menu.removeItem(R.id.home_menu);
-            if (fragmentName.matches("InventoryFragment")
-                    || fragmentName.contains("InventoryRfidiMultiFragment")
-                    || fragmentName.contains("InventoryRfidSimpleFragment")
-
-                    || fragmentName.contains("ImpinjFragment")
-                    || fragmentName.contains("Ucode8Fragment")
-                    || fragmentName.contains("UcodeFragment")
-                    || fragmentName.contains("ColdChainFragment")
-                    || fragmentName.contains("AuraSenseFragment")
-                    || fragmentName.contains("AxzonFragment")
-                    || fragmentName.contains("MicronFragment")
-                    || fragmentName.contains("FdmicroFragment")
-                    || fragmentName.contains("LedTagFragment")
-
-                    || fragmentName.contains("InventoryRfidSimpleFragment")
-                    ) {
-                menu.findItem(R.id.menuAction_clear).setTitle("Clear");
-                menu.findItem(R.id.menuAction_save).setTitle("Save");
-                menu.findItem(R.id.menuAction_share).setTitle("Share");
-                menu.findItem(R.id.menuAction_share).setIcon(android.R.drawable.ic_menu_share);
-                if (fragmentName.contains("InventoryBarcodeFragment")) {
-                    menu.removeItem(R.id.menuAction_sort);
-                    menu.removeItem(R.id.menuAction_sortRssi);
-                } else {
-                    menu.findItem(R.id.menuAction_sort).setTitle("Sort by EPC");
-                    menu.findItem(R.id.menuAction_sortRssi).setTitle("Sort by Rssi");
-                }
-            } else {
-                menu.removeItem(R.id.menuAction_clear);
-                menu.removeItem(R.id.menuAction_save);
-                menu.removeItem(R.id.menuAction_share);
-                menu.removeItem(R.id.menuAction_sort);
-                menu.removeItem(R.id.menuAction_sortRssi);
-            }
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog("CommonFragment: onOptionsItemSelected");
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName + " with fragmentActive = " + fragmentActive);
-        if (fragmentActive == false) return false;
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                if (DEBUG) MainActivity.csLibrary4A.appendToLog("CommonFragment: onOptionsItemSelected: getActivity().onBackPressed");
-                getActivity().onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
     public void onPause() {
         fragmentActive = false;
         if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
@@ -306,20 +324,26 @@ public abstract class CommonFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onDestroyView() {
-        if (false) MainActivity.csLibrary4A.appendToLog(fragmentName);
+        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
         super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
+        if (DEBUG && MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.appendToLog(fragmentName);
         super.onDestroy();
     }
 
     @Override
     public void onDetach() {
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
+        if (DEBUG && MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.appendToLog(fragmentName);
         super.onDetach();
     }
 

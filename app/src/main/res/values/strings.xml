@@ -30,6 +30,9 @@
     <string name="title_activity_impinj">Impinj</string>
     <string name="title_activity_m775">ImpinJ M775</string>
     <string name="title_activity_autotune">ImpinJ Autotune</string>
+
+    <string name="title_activity_alien">Alien</string>
+
     <string name="title_activity_ucode8">NXP UCODE 8</string>
     <string name="title_activity_ucodeDNA">UCODE DNA</string>
     <string name="title_activity_bap">BAP</string>
@@ -49,6 +52,7 @@
     <string name="title_activity_registertag">Register tag</string>
     <string name="title_activity_readWriteUser">Long Read / Write</string>
     <string name="title_activity_simpleInventory">Simple Inventory</string>
+    <string name="title_activity_tagBarInventory">TagBar Inventory</string>
 
     <!-- Items for lock privilege state -->
     <string-array name="access_lock_privilege_array">
@@ -308,6 +312,7 @@
 
     <string-array name="sensor_unit_options">
         <item>code</item>
+        <item>%</item>
         <item>humidity</item>
     </string-array>
 
@@ -324,7 +329,7 @@
 
     <string-array name="micronDetect_options">
         <item>temperature</item>
-        <item>snsor</item>
+        <item>sensor</item>
     </string-array>
 
     <string-array name="delimiter_options">
@@ -409,7 +414,9 @@
     <string name="password_title">Password</string>
     <string name="memory_bank_title">Memory Bank</string>
     <string name="read_title">READ</string>
+    <string name="readkey_title">READ KEY</string>
     <string name="write_title">WRITE</string>
+    <string name="writekey_title">WRITE KEY</string>
     <string name="reserve_title">Reserved Memory</string>
     <string name="readWriteOffset_title">Offset</string>
     <string name="readWriteSize_title">Size</string>

@@ -93,13 +93,16 @@ public class MyForegroundService extends Service {
         Intent notificationIntent = new Intent(this, AboutFragment.class);
         //notificationIntent.setFlags((Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
-        notificationCompatBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("CsReader Foreground Service")
-                .setSmallIcon(R.drawable.csl_logo);
-                //.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                //.setContentIntent(pendingIntent)
-                //.setAutoCancel(true)
-                //.build();
+        notificationCompatBuilder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        if (getPackageName().contains("cs710ademoapp")) {
+            notificationCompatBuilder.setContentTitle("Cs710Reader Foreground Service").setSmallIcon(R.drawable.csl_logo_230510);
+        } else {
+            notificationCompatBuilder.setContentTitle("CsReader Foreground Service").setSmallIcon(R.drawable.csl_logo);
+            //.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            //.setContentIntent(pendingIntent)
+            //.setAutoCancel(true)
+            //.build();
+        }
         Notification notification = updateNotification("MyForegroundService starts");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(SERVICE_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
@@ -302,7 +305,7 @@ public class MyForegroundService extends Service {
                                                     Log.i(TAG, "Server: getInventoryCloudSave = " + MainActivity.csLibrary4A.getInventoryCloudSave());
                                                     if (MainActivity.csLibrary4A.getInventoryCloudSave() == 1) {
                                                         ReaderDevice readerDevice1 = new ReaderDevice("", MainActivity.csLibrary4A.byteArrayToString(rx000pkgData1.decodedEpc), false, null,
-                                                                MainActivity.csLibrary4A.byteArrayToString(rx000pkgData1.decodedPc), null, MainActivity.csLibrary4A.byteArrayToString(rx000pkgData1.decodedCrc), null,
+                                                                MainActivity.csLibrary4A.byteArrayToString(rx000pkgData1.decodedPc), null, MainActivity.csLibrary4A.byteArrayToString(rx000pkgData1.decodedCrc), null, null,
                                                                 null, -1, -1,
                                                                 null, -1, -1,
                                                                 new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS").format(new Date()), new SimpleDateFormat("z").format(new Date()).replaceAll("GMT", ""),

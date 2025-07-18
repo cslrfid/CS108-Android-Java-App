@@ -1,7 +1,6 @@
 package com.csl.cs108ademoapp.fragments;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SelectTag;
@@ -36,13 +38,13 @@ public class UtraceFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_utrace, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         selectTag = new SelectTag((Activity)getActivity(), 2);
 
@@ -199,7 +201,7 @@ public class UtraceFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
+            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -248,7 +250,7 @@ public class UtraceFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             //if (strUntraceButtonBackup != null) buttonUntrace.setText(strUntraceButtonBackup); strUntraceButtonBackup = null;

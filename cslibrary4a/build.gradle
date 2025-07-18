@@ -6,12 +6,15 @@ android {
         buildConfig true
     }
 
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
-        minSdk 23
-        targetSdk 35
-        buildConfigField 'String', 'VERSION_NAME', "\"0\""
+        minSdk 26
+        targetSdk 36
+        buildConfigField 'String', 'VERSION_NAME', "\"4\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            debugSymbolLevel = 'FULL'
+        }
     }
 
     buildTypes {
@@ -27,7 +30,7 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.12.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'

@@ -29,7 +29,7 @@ public class MyMqttClient {
         //String serverMqttLocation = "tcp://localhost:1883";
         String serverMqttLocation = "tcp://" + MainActivity.csLibrary4A.getServerMqttLocation() + ":1883";
         Log.i(TAG, "MQTT: serverLocation is " + serverMqttLocation);
-        client = new MqttAndroidClient(context, serverMqttLocation, clientId, Ack.AUTO_ACK);
+        client = new MqttAndroidClient(context, serverMqttLocation, clientId, Ack.AUTO_ACK, null, true, 1);
         Log.i(TAG, "MQTT: client is " + (client == null ? "null"  : "valid"));
 
         if (true) {

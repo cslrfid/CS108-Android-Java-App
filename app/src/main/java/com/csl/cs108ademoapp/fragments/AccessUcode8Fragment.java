@@ -17,6 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
+
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.google.android.material.tabs.TabLayout;
@@ -31,13 +33,13 @@ public class AccessUcode8Fragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_access_ucode8, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         spinnerTagSelect = (Spinner) getActivity().findViewById(R.id.accessNxpTagSelect);
         ArrayAdapter<CharSequence> targetAdapter1 = ArrayAdapter.createFromResource(getActivity(), R.array.nxp_options, R.layout.custom_spinner_layout);
@@ -56,12 +58,12 @@ public class AccessUcode8Fragment extends CommonFragment {
                     if (MainActivity.csLibrary4A.get98XX() == 0) tabViewUntrace.setVisibility(View.VISIBLE);
                     layout.setVisibility(View.VISIBLE);
                 } else if (position == nxpTag.ucodeDNA.ordinal()) {
-                    MainActivity.tagType = TAG_NXP_UCODEDNA; MainActivity.mDid = "E2C06";
+                    MainActivity.tagType = TAG_NXP_UCODEDNA; MainActivity.mDid = "" /*"E2C06"*/;
                     MainActivity.csLibrary4A.appendToLog("AccessUcode8Fragment.onItemSelected set MainActivity.mDid as E2C06");
                     tabView.setVisibility(View.VISIBLE);
                     if (MainActivity.csLibrary4A.get98XX() == 0) tabViewUntrace.setVisibility(View.VISIBLE);
                 } else {
-                    MainActivity.tagType = TAG_NXP; MainActivity.mDid = "E2806";
+                    MainActivity.tagType = TAG_NXP; MainActivity.mDid = "" /*"E2806"*/;
                     MainActivity.csLibrary4A.appendToLog("AccessUcode8Fragment.onItemSelected set MainActivity.mDid as E2806");
                 }
                 MainActivity.csLibrary4A.appendToLog("new mDid = " + MainActivity.mDid);
@@ -114,22 +116,22 @@ public class AccessUcode8Fragment extends CommonFragment {
             if (radioButtonSelectEpc != null && radioButtonSelectEpcTid != null && radioButtonSelectEpcBrand != null && radioButtonSelectEpcBrandTidCheck != null) {
                 if (radioButtonSelectEpc.isChecked()) {
                     MainActivity.csLibrary4A.appendToLog("Selected EPC");
-                    MainActivity.tagType = TAG_NXP_UCODE8_EPC; MainActivity.mDid = "E2806894A";
+                    MainActivity.tagType = TAG_NXP_UCODE8_EPC; MainActivity.mDid = "" /*"E2806894A"*/;
                     MainActivity.csLibrary4A.appendToLog("AccessUcode8Fragment.setUserVisibleHint set MainActivity.mDid as E2806894A");
                 }
                 if (radioButtonSelectEpcTid.isChecked()) {
                     MainActivity.csLibrary4A.appendToLog("Selected EPC+TID");
-                    MainActivity.tagType = TAG_NXP_UCODE8_EPCTID; MainActivity.mDid = "E2806894B";
+                    MainActivity.tagType = TAG_NXP_UCODE8_EPCTID; MainActivity.mDid = "" /*"E2806894B"*/;
                     MainActivity.csLibrary4A.appendToLog("AccessUcode8Fragment.setUserVisibleHint set MainActivity.mDid as E2806894b");
                 }
                 if (radioButtonSelectEpcBrand.isChecked()) {
                     MainActivity.csLibrary4A.appendToLog("Selected EPC+BRAND");
-                    MainActivity.tagType = TAG_NXP_UCODE8_EPCBRAND; MainActivity.mDid = "E2806894C";
+                    MainActivity.tagType = TAG_NXP_UCODE8_EPCBRAND; MainActivity.mDid = "" /*"E2806894C"*/;
                     MainActivity.csLibrary4A.appendToLog("AccessUcode8Fragment.setUserVisibleHint set MainActivity.mDid as E2806894C");
                 }
                 if (radioButtonSelectEpcBrandTidCheck.isChecked()) {
                     MainActivity.csLibrary4A.appendToLog("Selected EPC+BRAND");
-                    MainActivity.tagType = TAG_NXP_UCODE8_EPCBRANDTID; MainActivity.mDid = "E2806894d";
+                    MainActivity.tagType = TAG_NXP_UCODE8_EPCBRANDTID; MainActivity.mDid = "" /*"E2806894d"*/;
                     MainActivity.csLibrary4A.appendToLog("AccessUcode8Fragment.setUserVisibleHint set MainActivity.mDid as E2806894d");
                 }
                 MainActivity.csLibrary4A.appendToLog("newDid 1 = " + MainActivity.mDid);

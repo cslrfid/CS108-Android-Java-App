@@ -1,6 +1,5 @@
 package com.csl.cs108ademoapp;
 
-import android.os.AsyncTask;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -67,8 +66,8 @@ public class AccessTask1 {
         return accessTask.cancel(bCancel);
     }
 
-    public AsyncTask.Status getStatus() {
-        if (accessTask == null) return AsyncTask.Status.FINISHED;
+    public AsyncTaskA.Status getStatus() {
+        if (accessTask == null) return AsyncTaskA.Status.FINISHED;
         return accessTask.getStatus();
     }
 
@@ -92,7 +91,7 @@ public class AccessTask1 {
     public boolean isResultReady() {
         boolean bValue = false;
         if (accessTask == null) { }
-        else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) { }
+        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) { }
         else if (button.getText().toString().indexOf("ING") > 0) { }
         else if (isResultReady == false) {
             String strAccessResult = "";
@@ -149,7 +148,7 @@ public class AccessTask1 {
             MainActivity.csLibrary4A.appendToLog("accessTask is null");
             return null;
         }
-        if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
+        if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
             MainActivity.csLibrary4A.appendToLog("accessTask.getStatus is not finished");
             return null;
         }

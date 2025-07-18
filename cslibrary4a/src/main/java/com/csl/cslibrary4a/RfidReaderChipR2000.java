@@ -98,6 +98,7 @@ public class RfidReaderChipR2000 {
                 tagDelay = mDefault.tagDelay;
                 invModeCompact = mDefault.tagJoin;
                 invBrandId = mDefault.brandid;
+                invAuthenticate = mDefault.invAuthenticate;
             }
 
             if (set_default_setting)    algoSelect = 3;
@@ -175,6 +176,7 @@ public class RfidReaderChipR2000 {
             int tagDelay = 0;
             int tagJoin = 0;
             int brandid = 0;
+            int invAuthenticate = 0;
             int algoSelect = 3;
 
             int rssiFilterType = 0;
@@ -676,24 +678,6 @@ public class RfidReaderChipR2000 {
             else if (queryTarget >= 0) { rx000Setting.setAlgoAbFlip(0); }
 
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 0, 9, 0, 0, 0, 0};
-            /*
-            if (queryTarget != 2 && (queryTarget < QUERYTARGET_MIN || queryTarget > QUERYTARGET_MAX)) {
-                if (this.queryTarget >= QUERYTARGET_MIN && this.queryTarget <= QUERYTARGET_MAX)
-                    queryTarget = this.queryTarget;
-                else queryTarget = mDefault.queryTarget;
-            }
-
-            if (querySession < QUERYSESSION_MIN || querySession > QUERYSESSION_MAX) {
-                if (this.querySession >= QUERYSESSION_MIN && this.querySession <= QUERYSESSION_MAX)
-                    querySession = this.querySession;
-                else querySession = mDefault.querySession;
-            }
-
-            if (querySelect < QUERYSELECT_MIN || querySelect > QUERYSELECT_MAX) {
-                if (this.querySelect >= QUERYSELECT_MIN && this.querySelect <= QUERYSELECT_MAX) querySelect = this.querySelect;
-                else querySelect = mDefault.querySelect;
-            }
-            */
 
             if ((this.queryTarget == queryTarget || queryTarget == 2 || queryTarget == -1)
                     && (this.querySession == querySession || querySession == -1)
@@ -760,7 +744,7 @@ public class RfidReaderChipR2000 {
         }
         public boolean setInvAlgo(int invAlgo) {
             if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: RfidReaderChipR2000.Rx000setting.setInvAlog goes to setInvAlgo with invAlgo = " + invAlgo);
-            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact,invBrandId);
+            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId, invAuthenticate);
         }
 
         final int MATCHREP_INVALID = -1; final int MATCHREP_MIN = 0; final int MATCHREP_MAX = 255;
@@ -771,7 +755,7 @@ public class RfidReaderChipR2000 {
         }
         public boolean setMatchRep(int matchRep) {
             if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: RfidReaderChipR2000.Rx000setting.setMatchRep goes to setInvAlgo with matchRep = " + matchRep);
-            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId);
+            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId, invAuthenticate);
         }
 
         final int TAGSELECT_INVALID = -1; final int TAGSELECT_MIN = 0; final int TAGSELECT_MAX = 1;
@@ -782,7 +766,7 @@ public class RfidReaderChipR2000 {
         }
         public boolean setTagSelect(int tagSelect) {
             if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: RfidReaderChipR2000.Rx000setting.setTagSelect goes to setInvAlgo with tagSelect = " + tagSelect);
-            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId);
+            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId, invAuthenticate);
         }
 
         final int NOINVENTORY_INVALID = -1; final int NOINVENTORY_MIN = 0; final int NOINVENTORY_MAX = 1;
@@ -793,7 +777,7 @@ public class RfidReaderChipR2000 {
         }
         boolean setNoInventory(int noInventory) {
             if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: RfidReaderChipR2000.Rx000setting.setNoInventory goes to setInvAlgo with noInventory = " + noInventory);
-            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId);
+            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId, invAuthenticate);
         }
 
         final int TAGREAD_INVALID = -1; final int TAGREAD_MIN = 0; final int TAGREAD_MAX = 2;
@@ -804,7 +788,7 @@ public class RfidReaderChipR2000 {
         }
         public boolean setTagRead(int tagRead) {
             if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: RfidReaderChipR2000.Rx000setting.setTagRead goes to setInvAlgo with tagRead = " + tagRead);
-            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId);
+            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId, invAuthenticate);
         }
 
         final int TAGDELAY_INVALID = -1; final int TAGDELAY_MIN = 0; final int TAGDELAY_MAX = 63;
@@ -815,7 +799,7 @@ public class RfidReaderChipR2000 {
         }
         public boolean setTagDelay2RfidReader(int tagDelay) {
             if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: RfidReaderChipR2000.Rx000setting.setTagDelay goes to setInvAlgo with tagDelay = " + tagDelay);
-            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId);
+            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId, invAuthenticate);
         }
 
         byte intraPacketDelay = 4;
@@ -991,29 +975,40 @@ public class RfidReaderChipR2000 {
         int invModeCompact = TAGJOIN_INVALID;
         boolean getInvModeCompact() {
             if (invModeCompact < TAGDELAY_MIN || invModeCompact > TAGDELAY_MAX) { getHST_INV_CFG(); return false; }
-            return (invModeCompact == 1 ? true : false);
+            return (invModeCompact == 1);
         }
         public boolean setInvModeCompact(boolean invModeCompact) {
             if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: RfidReaderChipR2000.Rx000setting.setInvModeCompact goes to setInvAlgo with invModeCompact = " + invModeCompact);
-            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, (invModeCompact ? 1 : 0), invBrandId);
+            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, (invModeCompact ? 1 : 0), invBrandId, invAuthenticate);
         }
 
         final int BRAND_INVALID = -1; final int BRANDID_MIN = 0; final int BRANDID_MAX = 1;
         int invBrandId = BRAND_INVALID;
         boolean getInvBrandId() {
             if (invBrandId < BRANDID_MIN || invBrandId > BRANDID_MAX) { getHST_INV_CFG(); return false; }
-            return (invModeCompact == 1 ? true : false);
+            return (invModeCompact == 1);
         }
         public boolean setInvBrandId(boolean invBrandId) {
             if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: RfidReaderChipR2000.Rx000setting.setInvBrandId goes to setInvAlgo with invBrandId = " + invBrandId);
-            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, (invBrandId ? 1 : 0));
+            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, (invBrandId ? 1 : 0), invAuthenticate);
+        }
+
+        final int INVAUTHENTICATE_INVALID = -1; final int INVAUTHENTICATE_MIN = 0; final int INVAUTHENTICATE_MAX = 1;
+        int invAuthenticate = INVAUTHENTICATE_INVALID;
+        boolean getInvAuthenticate() {
+            if (invAuthenticate < INVAUTHENTICATE_MIN || invAuthenticate > INVAUTHENTICATE_MAX) { getHST_INV_CFG(); return false; }
+            return (invAuthenticate == 1);
+        }
+        public boolean setInvAuthenticate(boolean invAuthenticate) {
+            if (utility.DEBUG_INVCFG) appendToLog("Debug_InvCfg: RfidReaderChipR2000.Rx000setting.setInvBrandId goes to setInvAlgo with invBrandId = " + invBrandId);
+            return setInvAlgo(invAlgo, matchRep, tagSelect, noInventory, tagRead, tagDelay, invModeCompact, invBrandId, (invAuthenticate ? 1: 0));
         }
 
         private boolean getHST_INV_CFG() {
             byte[] msgBuffer = new byte[]{(byte) 0x70, 0, 1, 9, 0, 0, 0, 0};
             return sendHostRegRequest(HostRegRequests.HST_INV_CFG, false, msgBuffer);
         }
-        boolean setInvAlgo(int invAlgo, int matchRep, int tagSelect, int noInventory, int tagRead, int tagDelay, int invModeCompact, int invBrandId) {
+        boolean setInvAlgo(int invAlgo, int matchRep, int tagSelect, int noInventory, int tagRead, int tagDelay, int invModeCompact, int invBrandId, int invAuthenticate) {
             boolean DEBUG = utility.DEBUG_INVCFG;
             if (DEBUG) appendToLog("Debug_InvCfg: 0 tagRead is " + tagRead);
             if (invAlgo < INVALGO_MIN || invAlgo > INVALGO_MAX) invAlgo = mDefault.invAlgo;
@@ -1023,9 +1018,10 @@ public class RfidReaderChipR2000 {
             if (tagDelay < TAGDELAY_MIN || tagDelay > TAGDELAY_MAX) tagDelay = mDefault.tagDelay;
             if (invModeCompact < TAGJOIN_MIN || invModeCompact > TAGJOIN_MAX) invModeCompact = mDefault.tagJoin;
             if (invBrandId < BRANDID_MIN || invBrandId > BRANDID_MAX) invBrandId = mDefault.brandid;
+            if (invAuthenticate < INVAUTHENTICATE_MIN || invAuthenticate > INVAUTHENTICATE_MAX) invAuthenticate = mDefault.invAuthenticate;
             if (tagRead < TAGREAD_MIN || tagRead > TAGREAD_MAX) tagRead = mDefault.tagRead;
-            if (DEBUG) appendToLog("Debug_InvCfg: Old invAlgo = " + this.invAlgo + ", matchRep = " + this.matchRep + ", tagSelect = " + this.tagSelect + ", noInventory = " + this.noInventory + ", tagRead = " + this.tagRead + ", tagDelay = " + this.tagDelay + ", invModeCompact = " + this.invModeCompact + ", invBrandId = " + this.invBrandId);
-            if (DEBUG) appendToLog("Debug_InvCfg: New invAlgo = " + invAlgo + ", matchRep = " + matchRep + ", tagSelect = " + tagSelect + ", noInventory = " + noInventory + ", tagRead = " + tagRead + ", tagDelay = " + tagDelay + ", invModeCompact = " + invModeCompact + ", invBrandId = " + invBrandId + ", sameCheck = " + sameCheck);
+            if (DEBUG) appendToLog("Debug_InvCfg: Old invAlgo = " + this.invAlgo + ", matchRep = " + this.matchRep + ", tagSelect = " + this.tagSelect + ", noInventory = " + this.noInventory + ", tagRead = " + this.tagRead + ", tagDelay = " + this.tagDelay + ", invModeCompact = " + this.invModeCompact + ", invBrandId = " + this.invBrandId + ", invAuthenticate = " + this.invAuthenticate);
+            if (DEBUG) appendToLog("Debug_InvCfg: New invAlgo = " + invAlgo + ", matchRep = " + matchRep + ", tagSelect = " + tagSelect + ", noInventory = " + noInventory + ", tagRead = " + tagRead + ", tagDelay = " + tagDelay + ", invModeCompact = " + invModeCompact + ", invBrandId = " + invBrandId + ", invAuthenticate = " + invAuthenticate + ", sameCheck = " + sameCheck);
             boolean bool1 = this.invAlgo == invAlgo;
             boolean bool2 = this.matchRep == matchRep;
             boolean bool3 = this.tagSelect == tagSelect;
@@ -1035,8 +1031,9 @@ public class RfidReaderChipR2000 {
             boolean bool6 = this.tagDelay == tagDelay;
             boolean bool7 = this.invModeCompact == invModeCompact;
             boolean bool8 = this.invBrandId == invBrandId;
-            if (bool1 && bool2 && bool3 && bool4 && bool5 && bool6 && bool7 && bool8 && sameCheck) return true;
-            if (DEBUG) appendToLog("Debug_InvCfg: There is difference with " + bool1 + "," + bool2 + "," + bool3 + "," + bool4 + "," + bool5 + "," + bool6 + "," + bool7 + "," + bool8);
+            boolean bool9 = this.invAuthenticate == invAuthenticate;
+            if (bool1 && bool2 && bool3 && bool4 && bool5 && bool6 && bool7 && bool8 && bool9 && sameCheck) return true;
+            if (DEBUG) appendToLog("Debug_InvCfg: There is difference with " + bool1 + "," + bool2 + "," + bool3 + "," + bool4 + "," + bool5 + "," + bool6 + "," + bool7 + "," + bool8 + "," + bool9);
             this.invAlgo = invAlgo; if (DEBUG) appendToLog("Hello6: invAlgo = " + invAlgo + ", queryTarget = " + queryTarget);
             this.matchRep = matchRep;
             this.tagSelect = tagSelect;
@@ -1045,6 +1042,8 @@ public class RfidReaderChipR2000 {
             this.tagDelay = tagDelay;
             this.invModeCompact = invModeCompact;
             this.invBrandId = invBrandId;
+            this.invAuthenticate = invAuthenticate;
+            appendToLog("BtDataOut: 1, invAuthenticate = " + rx000Setting.invAuthenticate);
             if (DEBUG) appendToLog("Debug_InvCfg: Stored tagDelay = " + this.tagDelay);
 
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 1, 9, 0, 0, 0, 0};
@@ -1071,6 +1070,9 @@ public class RfidReaderChipR2000 {
             }
             if (invBrandId == 1) {
                 msgBuffer[7] |= 0x08;
+            }
+            if (invAuthenticate == 1) {
+                msgBuffer[7] |= 0x10;
             }
             return sendHostRegRequest(HostRegRequests.HST_INV_CFG, true, msgBuffer);
         }
@@ -2990,7 +2992,7 @@ public class RfidReaderChipR2000 {
                 if (utility.DEBUG_APDATA && bLooping == false) appendToLog("ApData: Entering loop with mRfidToRead.size as " + csReaderConnector.rfidConnector.mRfidToRead.size());
                 bLooping = true;
 
-                if (csReaderConnector.isBleConnected() == false) {
+                if (csReaderConnector.isConnected() == false) {
                     csReaderConnector.rfidConnector.mRfidToRead.clear();
                 } else if (System.currentTimeMillis() - lTime > (intervalRx000UplinkHandler / 2)) {
                     writeDebug2File("Up4  " + String.valueOf(intervalRx000UplinkHandler) + "ms Timeout");
@@ -3342,7 +3344,10 @@ public class RfidReaderChipR2000 {
                                                     rx000Setting.noInventory = ((dataIn[startIndex + 5] & 0x80) >> 7);
                                                     rx000Setting.tagRead = dataIn[startIndex + 6] & 0x03;
                                                     rx000Setting.tagDelay = ((dataIn[startIndex + 7] & 0x03) * 16 + ((dataIn[startIndex + 6] & 0xF0) >> 4));
-                                                    rx000Setting.invModeCompact = (dataIn[startIndex + 7] & 0x04);
+                                                    rx000Setting.invModeCompact = ((dataIn[startIndex + 7] & 0x04) >> 2);
+                                                    appendToLog("BtDataOut: invAuthenticate = " + rx000Setting.invAuthenticate);
+                                                    rx000Setting.invAuthenticate = ((dataIn[startIndex + 7] & 0x10) >> 4);
+                                                    appendToLog("BtDataOut: invAuthenticate = " + rx000Setting.invAuthenticate);
                                                     if (DEBUG)
                                                         appendToLog("found inventory configuration: " + byteArrayToString(dataInPayload) + ", algorithm=" + rx000Setting.invAlgo + ", matchRep=" + rx000Setting.matchRep + ", tagSelect=" + rx000Setting.tagSelect + ", noInventory=" + rx000Setting.noInventory + ", tagRead=" + rx000Setting.tagRead + ", tagDelay=" + rx000Setting.tagDelay);
                                                     break;
@@ -4197,7 +4202,7 @@ public class RfidReaderChipR2000 {
         public boolean sendControlCommand(ControlCommands controlCommands) {
             byte[] msgBuffer = new byte[]{(byte) 0x40, 6, 0, 0, 0, 0, 0, 0};
             boolean needResponse = false;
-            if (csReaderConnector.isBleConnected() == false) return false;
+            if (csReaderConnector.isConnected() == false) return false;
             switch (controlCommands) {
                 default:
                     msgBuffer = null;
@@ -4484,7 +4489,7 @@ public class RfidReaderChipR2000 {
             boolean needResponse = false;
             boolean validRequest = false;
 
-            if (csReaderConnector.isBleConnected() == false) return false;
+            if (csReaderConnector.isConnected() == false) return false;
             addMacAccessHistory(msgBuffer);
             switch (hostRegRequests) {
                 case MAC_OPERATION:
@@ -4592,9 +4597,6 @@ public class RfidReaderChipR2000 {
                 }
             }
             if (repeatRequest == false) {
-                if (false)
-                    appendToLog("add cs108RfidData to mRfidToWrite with rfidPayloadEvent = " + csReaderRfidData.rfidPayloadEvent);
-                //appendToLog("BtDataOut: addRfidToWrite csReaderRfidData " + byteArrayToString(csReaderRfidData.dataValues));
                 byte[] bytesCmd = new byte[] { 0x70, 1, 0, 0x09 };
                 byte[] bytesCmd1 = new byte[] { 0x70, 1, 1, 0x09 };
                 if (csReaderRfidData.dataValues != null) {
@@ -4615,8 +4617,8 @@ public class RfidReaderChipR2000 {
                         }
                     }
                 }
-                csReaderConnector.rfidConnector.mRfidToWrite.add(csReaderRfidData);
             }
+            csReaderConnector.rfidConnector.mRfidToWrite.add(csReaderRfidData);
         }
     //}
 

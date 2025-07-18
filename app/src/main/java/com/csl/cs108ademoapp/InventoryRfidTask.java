@@ -1,7 +1,6 @@
 package com.csl.cs108ademoapp;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.widget.Button;
 import android.widget.TextView;
@@ -9,6 +8,7 @@ import android.widget.Toast;
 
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReader;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.text.SimpleDateFormat;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-public class InventoryRfidTask extends AsyncTask<Void, String, String> {
+public class InventoryRfidTask extends AsyncTaskA {
     final boolean DEBUG = false; final boolean ALLOW_WEDGE = true; boolean ALLOW_RTSAVE = false;
     public enum TaskCancelRReason {
         NULL, INVALD_REQUEST, DESTORY, STOP, BUTTON_RELEASE, TIMEOUT, RFID_RESET, ERROR
@@ -26,6 +26,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
 
     Context context;
     public TaskCancelRReason taskCancelReason;
+    public RfidReaderChipData.Rx000pkgData rx000pkgDataResult = null;
     public boolean bSgtinOnly = false, bProtectOnly;
     private boolean invalidRequest;
     boolean beepEnable;
@@ -40,7 +41,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     CustomMediaPlayer playerO, playerN; int requestSoundCount;
 
     int extra1Bank = -1, extra2Bank = -1;
-    String strMdid;
+    RfidReader.TagType tagType; String strMdid;
 
     final boolean invalidDisplay = false;
     private int total, allTotal;
@@ -146,7 +147,13 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                         else {
                             if (firstTime == 0) firstTime = rx000pkgData.decodedTime;
                             else lastTime = rx000pkgData.decodedTime;
-                            rx000pkgDataArrary.add(rx000pkgData); publishProgress(null, "", "");
+                            if (tagsList == null && geigerTagRssiView == null) {
+                                rx000pkgDataResult = rx000pkgData;
+                                break;
+                            } else {
+                                rx000pkgDataArrary.add(rx000pkgData);
+                                publishProgress(null, "", "");
+                            }
                         }
                     }
                 } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_18K6C_INVENTORY_COMPACT) {
@@ -154,7 +161,13 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                         if (rx000pkgData.decodedError != null)  publishProgress(rx000pkgData.decodedError);
                         else {
                             if (firstTime == 0) firstTime = rx000pkgData.decodedTime;
-                            rx000pkgDataArrary.add(rx000pkgData); publishProgress(null, "", "");
+                            if (tagsList == null && geigerTagRssiView == null) {
+                                rx000pkgDataResult = rx000pkgData;
+                                break;
+                            } else {
+                                rx000pkgDataArrary.add(rx000pkgData);
+                                publishProgress(null, "", "");
+                            }
                         }
                     }
                 } else if (rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_ANTENNA_CYCLE_END) {
@@ -310,13 +323,13 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     String strExtra2 = null; if (rx000pkgData.decodedData2 != null) strExtra2 = MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.decodedData2);
                     if (strExtra2 != null && strMdid != null) {
                         if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloK: strExtra2 = " + strExtra2 + ", strMdid = " + strMdid);
-                        if (strMdid.contains("E200B0")) portstatus = Integer.parseInt(strExtra2.substring(3, 4), 16);
+                        if (strMdid.contains(MainActivity.csLibrary4A.getsTid(RfidReader.TagType.TAG_EM_BAP) /*"E200B0"*/)) portstatus = Integer.parseInt(strExtra2.substring(3, 4), 16);
                     }
                     String strExtra1 = null; if (rx000pkgData.decodedData1 != null) {
                         strExtra1 = MainActivity.csLibrary4A.byteArrayToString(rx000pkgData.decodedData1);
                         if (strMdid != null && strExtra1 != null && strExtra2 != null) {
                             MainActivity.csLibrary4A.appendToLog("strExtra1 = " + strExtra1 + ", strExtra2 = " + strExtra2);
-                            decodeMicronData(strExtra1, strExtra2);
+                            decodeMicronData(MainActivity.tagType, strExtra1, strExtra2);
                         }
                     }
                     String strAddresss = strEpc;
@@ -326,13 +339,13 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     int data1_offset = this.data1_offset;
 
                     if (strMdid != null) {
-                        if (strMdid.indexOf("E203510") == 0) {
+                        if (tagType == RfidReader.TagType.TAG_CTESIUS /*strMdid.indexOf("E203510") == 0*/) {
                             if (strEpc.length() == 24 && strExtra2 != null) {
                                 codeTempC = MainActivity.csLibrary4A.decodeCtesiusTemperature(strEpc.substring(16, 24), strExtra2);
                                 strEpc = strEpc.substring(0, 16); strAddresss = strEpc;
                             }
-                        } else if (strMdid.indexOf("E283A") == 0) {
-                            MainActivity.csLibrary4A.appendToLog("E283A is found with extra1Bank = " + extra1Bank + ", strExtra1 = " + strExtra1 + ", extra2Bank = " + extra2Bank + ", strExtra2 = " + strExtra2);
+                        } else if (tagType == RfidReader.TagType.TAG_ASYGN /*strMdid.indexOf("E283A") == 0*/) {
+                            MainActivity.csLibrary4A.appendToLog("TAG_ASYGN is found with extra1Bank = " + extra1Bank + ", strExtra1 = " + strExtra1 + ", extra2Bank = " + extra2Bank + ", strExtra2 = " + strExtra2);
                             if (strExtra2 != null && strExtra2.length() >= 28) codeTempC = MainActivity.csLibrary4A.decodeAsygnTemperature(strExtra2);
                         }
                     }
@@ -361,7 +374,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             strXpc = strEpc.substring(0, 8);
                             strEpc = strEpc.substring(8); strAddresss = strEpc;
                             if (strMdid != null) {
-                                if (strMdid.indexOf("E280B12") == 0) {
+                                if (tagType == RfidReader.TagType.TAG_EM_AURASENSE || tagType == RfidReader.TagType.TAG_EM_AURASENSE_ATBOOT || tagType == RfidReader.TagType.TAG_EM_AURASENSE_ATSELECT /*strMdid.indexOf("E280B12") == 0*/) {
                                     int iXpcw2 = Integer.parseInt(strXpc.substring(4, 8), 16);
                                     if ((iXpcw1 & 0x8100) != 0 && (iXpcw2 & 0xF000) == 0) {
                                         if ((iXpcw2 & 0x0C00) == 0x0C00) {
@@ -398,8 +411,8 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                         if (bValidFastId == false) return;
                         if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloK: Doing IMPINJ Inventory  with strMdid = " + strMdid + ", strEpc1 = " + strEpc1 + ":, strTid = " + strTid);
                     } else if (MainActivity.mDid != null) {
-                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloK: MainActivity.mDid = " + MainActivity.mDid);
-                        if (MainActivity.mDid.matches("E2806894B")) {
+                        if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloK: MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + MainActivity.tagType.toString());
+                        if (MainActivity.tagType == RfidReader.TagType.TAG_NXP_UCODE8_EPCTID /*MainActivity.mDid.matches("E2806894B")*/) {
                             if (strEpc.length() >= 24) {
                                 String strEpc1 = strEpc.substring(0, strEpc.length() - 24);
                                 String strTid = strEpc.substring(strEpc.length() - 24, strEpc.length());
@@ -420,14 +433,14 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                                     return;
                                 }*/
                             }
-                        } else if (MainActivity.mDid.matches("E2806894C") || MainActivity.mDid.matches("E2806894d")) {
+                        } else if (MainActivity.tagType == RfidReader.TagType.TAG_NXP_UCODE8_EPCBRAND /*MainActivity.mDid.matches("E2806894C")*/ || MainActivity.tagType == RfidReader.TagType.TAG_NXP_UCODE8_EPCBRANDTID /*MainActivity.mDid.matches("E2806894d")*/) {
                             if (strEpc.length() >= 4) {
                                 String strEpc1 = strEpc.substring(0, strEpc.length() - 4);
                                 String strBrand = strEpc.substring(strEpc.length() - 4, strEpc.length());
                                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloK: matched E2806894B with strEpc = " + strEpc + ", strEpc1 = " + strEpc1 + ", strBrand = " + strBrand + ", strExtra1 = " + strExtra1);
                                 boolean matched = true;
-                                if (strExtra1 != null || MainActivity.mDid.matches("E2806894d")) {
-                                    if (!(strExtra1 != null && strExtra1.length() == 8 && strExtra1.contains("E2806894"))) {
+                                if (strExtra1 != null || MainActivity.tagType == RfidReader.TagType.TAG_NXP_UCODE8_EPCBRANDTID /*MainActivity.mDid.matches("E2806894d")*/) {
+                                    if (!(strExtra1 != null && strExtra1.length() == 8 && strExtra1.contains(MainActivity.csLibrary4A.getsTid(RfidReader.TagType.TAG_NXP_UCODE8) /*"E2806894"*/))) {
                                         matched = false;
                                         /*if (MainActivity.mDid.matches("E2806894d")) {
                                             MainActivity.csLibrary4A.appendToLog("HelloK: Skip the record without strExtra1 E2806894: " + strEpc);
@@ -446,7 +459,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
 
                     if (DEBUG || true) MainActivity.csLibrary4A.appendToLog("strMdid = " + strMdid + ", strTidCompared = " + strMdid + ", MainActivity.mDid = " + MainActivity.mDid + ", strExtra1 = " + strExtra1 + ", strExtra2 = " + strExtra2);
                     if (strMdid != null) {
-                        String strTidCompared = strMdid;
+                        String strTidCompared = MainActivity.csLibrary4A.getsTid(tagType); //strMdid;
                         if (strTidCompared.indexOf("E28011") == 0) {
                             int iValue = Integer.valueOf(MainActivity.mDid.substring("E28011".length()), 16);
                             MainActivity.csLibrary4A.appendToLog(String.format("iValue = 0x%02X", iValue));
@@ -454,13 +467,18 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                             else if ((iValue & 0x80) != 0) strTidCompared = "E280117";
                             else strTidCompared = "E28011";
                         }
-                        MainActivity.csLibrary4A.appendToLog("strTidCompared = " + strTidCompared);
+                        MainActivity.csLibrary4A.appendToLog("strTidCompared = " + strTidCompared + ", tagType = " + tagType.toString() + ", strExtra1 = " + (strExtra1 == null ? "null" : "valid") + ", strExtra2 = " + (strExtra2 == null ? "null" : "valid"));
                         if (strTidCompared.matches("E28011")) { }
-                        else if (strTidCompared.matches("E2806894") && MainActivity.mDid.matches("E2806894C")) { }
-                        else if (strTidCompared.matches("E281D")) { }
-                        else if (strTidCompared.matches("E282402")) { }
-                        else if (strTidCompared.matches("E282403")) { }
-                        else if (strTidCompared.matches("E282405")) { }
+                        else if (tagType == RfidReader.TagType.TAG_NXP_UCODE8_EPCBRAND) { }
+                        //else if (strTidCompared.matches(MainActivity.csLibrary4A.getsTid(RfidReader.TagType.TAG_NXP_UCODE8)/*"E2806894"*/) && MainActivity.tagType == RfidReader.TagType.TAG_NXP_UCODE8_EPCBRAND /*MainActivity.mDid.matches("E2806894C")*/) { }
+                        else if (tagType == RfidReader.TagType.TAG_KILOWAY) { }
+                        //else if (strTidCompared.matches(MainActivity.csLibrary4A.getsTid(RfidReader.TagType.TAG_KILOWAY) /*"E281D"*/)) { }
+                        else if (tagType == RfidReader.TagType.TAG_MAGNUS_S2) { }
+                        //else if (strTidCompared.matches(MainActivity.csLibrary4A.getsTid(RfidReader.TagType.TAG_MAGNUS_S2) /*"E282402"*/)) { }
+                        else if (tagType == RfidReader.TagType.TAG_MAGNUS_S3) { }
+                        //else if (strTidCompared.matches(MainActivity.csLibrary4A.getsTid(RfidReader.TagType.TAG_MAGNUS_S3) /*"E282403"*/)) { }
+                        else if (tagType == RfidReader.TagType.TAG_AXZON_XERXES) { }
+                        //else if (strTidCompared.matches(MainActivity.csLibrary4A.getsTid(RfidReader.TagType.TAG_AXZON_XERXES) /*"E282405"*/)) { }
                         else { //if (strMdid.matches("E280B0"))
                             boolean bMatched = false;
                             if (strExtra1 != null && strExtra1.indexOf(strTidCompared) == 0) {
@@ -578,15 +596,16 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                         } else {
                             MainActivity.csLibrary4A.appendToLog("HelloK: New Epc = " + strEpc + ", brand = " + brand);
                             ReaderDevice readerDevice = new ReaderDevice("", strEpc, false, null,
-                                    strPc, strXpc, strCrc16, strMdid,
+                                    strPc, strXpc, strCrc16, strMdid, tagType,
                                     strExtra1, extra1Bank, data1_offset,
                                     strExtra2, extra2Bank, data2_offset,
                                     new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS").format(new Date()), new SimpleDateFormat("z").format(new Date()).replaceAll("GMT", ""),
                                     MainActivity.mSensorConnector.mLocationDevice.getLocation(), MainActivity.mSensorConnector.mSensorDevice.getEcompass(),
                                     1, rssi, phase, chidx, port, portstatus, backport1, backport2, codeSensor, codeRssi, codeTempC, brand, iSensorData);
                             if (bSgtinOnly && strValue != null) readerDevice.setUpcSerial(strValue);
-                            if (strMdid != null) {
-                                if (strMdid.indexOf("E282402") == 0) readerDevice.setCodeSensorMax(0x1F);
+                            MainActivity.csLibrary4A.appendToLog("InventoryRfidTask.tagHandler: strMdid = " + strMdid + ", tagType = " + tagType.toString());
+                            if (tagType /*strMdid*/ != null) {
+                                if (tagType == RfidReader.TagType.TAG_MAGNUS_S2 /*strMdid.indexOf("E282402") == 0*/) readerDevice.setCodeSensorMax(0x1F);
                                 else readerDevice.setCodeSensorMax(0x1FF);
                             }
                             if (bAdd2End) tagsList.add(readerDevice);
@@ -630,35 +649,39 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                 if (rfidRateView != null) rfidRateView.setText(String.valueOf(MainActivity.csLibrary4A.getInvalidata()) + "," + String.valueOf(MainActivity.csLibrary4A.getInvalidUpdata()));
             } else {
                 String stringTemp = "Unique:" + String.valueOf(yield);
-                if (true) {
-                    float fErrorRate = (float) MainActivity.csLibrary4A.getInvalidata() / ((float) MainActivity.csLibrary4A.getValidata() + (float) MainActivity.csLibrary4A.getInvalidata()) * 100;
-                    stringTemp += "\nE" + String.valueOf(MainActivity.csLibrary4A.getInvalidata()) + "/" + String.valueOf(MainActivity.csLibrary4A.getValidata()) + "/" + String.valueOf((int) fErrorRate);
-                } else if (true) {
-                    stringTemp += "\nE" + String.valueOf(MainActivity.csLibrary4A.getInvalidata()) + "," + String.valueOf(MainActivity.csLibrary4A.getInvalidUpdata()) + "/" + String.valueOf(MainActivity.csLibrary4A.getValidata());
-                }
+                stringTemp += "\nTotal:" + String.valueOf(allTotal) + "\n";
                 if (rfidYieldView != null) rfidYieldView.setText(stringTemp);
                 if (total != 0 && currentTime - firstTimeOld > 500) {
                     if (firstTimeOld == 0) firstTimeOld = firstTime;
                     if (totalOld == 0) totalOld = total;
-                    String strRate = "Total:" + String.valueOf(allTotal) + "\n";
 
+                    String strRate = "Error:" + String.valueOf(MainActivity.csLibrary4A.getInvalidata()) + "/";
+                    if (true) {
+                        float fErrorRate = (float) MainActivity.csLibrary4A.getInvalidata() / ((float) MainActivity.csLibrary4A.getValidata() + (float) MainActivity.csLibrary4A.getInvalidata()) * 100;
+                        strRate += String.valueOf(MainActivity.csLibrary4A.getValidata()) + "/" + String.valueOf((int) fErrorRate) + "%";
+                    } else if (true) {
+                        strRate += String.valueOf(MainActivity.csLibrary4A.getInvalidUpdata()) + "/" + String.valueOf(MainActivity.csLibrary4A.getValidata());
+                    }
+
+                    strRate += "\nRate/New:";
                     if (firstTimeOld != 0) {
                         long tagRate = MainActivity.csLibrary4A.getTagRate();
                         long tagRate2 = -1;
                         if (currentTime > firstTimeOld) tagRate2 = totalOld * 1000 / (currentTime - firstTimeOld);
                         if (tagRate >= 0 || bGotTagRate) {
                             bGotTagRate = true;
-                            strRate += String.valueOf(yieldRate) + "/";
-                            strRate += (tagRate != -1 ? String.valueOf(tagRate) : "___") + "/" + String.valueOf(tagRate2);
+                            if (true) strRate += (tagRate != -1 ? String.valueOf(tagRate) : "___");
+                            else strRate += (tagRate != -1 ? String.valueOf(tagRate) : "___") + "/" + String.valueOf(tagRate2);
+                            strRate += "/" + String.valueOf(yieldRate);
                         } else {
                             if (lastTime == 0) {
                                 tagRate = MainActivity.csLibrary4A.getStreamInRate() / 17;
-                                strRate += "rAte";
+                                //strRate += "rAte";
                             } else if (currentTime > firstTimeOld) {
                                 tagRate = totalOld * 1000 / (currentTime - firstTimeOld);
-                                strRate += "Rate";
+                                //strRate += "Rate";
                             }
-                            strRate += ":" + String.valueOf(yieldRate) + "/" + String.valueOf(tagRate);
+                            strRate += String.valueOf(tagRate) + "/" + String.valueOf(yieldRate);
                         }
                     }
 
@@ -764,9 +787,10 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
     }
     public InventoryRfidTask(Context context, int extra1Bank, int extra2Bank, int data1_count, int data2_count, int data1_offset, int data2_offset,
                              boolean invalidRequest, boolean beepEnable,
-                             ArrayList<ReaderDevice> tagsList, ReaderListAdapter readerListAdapter, TextView geigerTagRssiView,
-                             String strMdid,
-                             TextView rfidRunTime, TextView geigerTagGotView, TextView rfidVoltageLevel,
+                             ArrayList<ReaderDevice> tagsList, ReaderListAdapter readerListAdapter,
+                             RfidReader.TagType tagType, String strMdid,
+                             TextView geigerTagRssiView, TextView geigerTagGotView,
+                             TextView rfidRunTime, TextView rfidVoltageLevel,
                              TextView rfidYieldView, Button button, TextView rfidRateView) {
         this.context = context;
         this.extra1Bank = extra1Bank;
@@ -782,6 +806,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         this.geigerTagRssiView = geigerTagRssiView;
         this.tagsList = tagsList;
         this.readerListAdapter = readerListAdapter;
+        this.tagType = tagType;
         this.strMdid = strMdid; MainActivity.csLibrary4A.appendToLog("HelloK: strMdid = " + strMdid);
 
         this.rfidRunTime = rfidRunTime;
@@ -823,7 +848,7 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
                     mytoast = Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_STOP, Toast.LENGTH_SHORT);
                     break;
                 case BUTTON_RELEASE:
-                    mytoast = Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_BUTTON, Toast.LENGTH_SHORT);
+                    if (false) mytoast = Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_BUTTON, Toast.LENGTH_SHORT);
                     break;
                 case TIMEOUT:
                     mytoast = Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_TIMEOUT, Toast.LENGTH_SHORT);
@@ -854,12 +879,12 @@ public class InventoryRfidTask extends AsyncTask<Void, String, String> {
         MainActivity.csLibrary4A.setVibrateOn(0);
     }
 
-    String decodeMicronData(String strActData, String strCalData) {
+    String decodeMicronData(RfidReader.TagType tagType, String strActData, String strCalData) {
         int iTag35 = -1;
-        if (strMdid.contains("E282402")) iTag35 = 2;
-        else if (strMdid.contains("E282403")) iTag35 = 3;
-        else if (strMdid.contains("E282405")) iTag35 = 5;
-        if (iTag35 < 2) return "";
+        if (tagType == RfidReader.TagType.TAG_MAGNUS_S2 /*strMdid.contains("E282402")*/) iTag35 = 2;
+        else if (tagType == RfidReader.TagType.TAG_MAGNUS_S3 /*strMdid.contains("E282403")*/) iTag35 = 3;
+        else if (tagType == RfidReader.TagType.TAG_AXZON_XERXES /*strMdid.contains("E282405")*/) iTag35 = 5;
+        else return ""; //if (iTag35 < 2) return "";
 
         if (iTag35 == 5) {
             backport1 = Integer.parseInt(strActData.substring(0, 4), 16); backport2 = Integer.parseInt(strActData.substring(4, 8), 16);

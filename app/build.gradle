@@ -6,13 +6,23 @@ android {
         buildConfig true
     }
 
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
         applicationId "com.csl.cs108ademoapp"
-        minSdk 23
-        targetSdk 35
-        versionCode 44
-        versionName "2.15.0"
+        minSdk 26
+        targetSdk 36
+        versionCode 45
+        versionName "2.18.5"
+        ndk {
+            debugSymbolLevel = 'FULL'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
 }
 
@@ -21,6 +31,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.github.hannesa2:paho.mqtt.android:4.3.beta2'
+    implementation 'com.github.hannesa2:paho.mqtt.android:4.4'
     implementation project(':cslibrary4a')
 }

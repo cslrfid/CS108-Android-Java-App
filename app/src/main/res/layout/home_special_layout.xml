@@ -39,6 +39,15 @@
                 android:layout_marginTop="@dimen/home_icon_margin_1"
                 android:background="@drawable/btn_back"
                 android:gravity="center"
+                android:text="TagBar Inventory"
+                android:onClick="tagBarInventoryClicked"/>
+
+            <Button
+                style="@style/DashboardButton"
+                android:layout_height="50dp"
+                android:layout_marginTop="@dimen/home_icon_margin_1"
+                android:background="@drawable/btn_back"
+                android:gravity="center"
                 android:text="Impinj Monza X-8K"
                 android:onClick="rrUserClicked"/>
 
@@ -50,16 +59,6 @@
                 android:gravity="center"
                 android:text="Impinj Special Features"
                 android:onClick="impInventoryClicked"/>
-
-            <Button
-                style="@style/DashboardButton"
-                android:layout_height="50dp"
-                android:layout_marginTop="@dimen/home_icon_margin_1"
-                android:background="@drawable/btn_back"
-                android:gravity="center"
-                android:visibility="gone"
-                android:text="Impinj M775"
-                android:onClick="m775Clicked"/>
 
             <Button
                 style="@style/DashboardButton"

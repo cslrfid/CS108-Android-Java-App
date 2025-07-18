@@ -1,6 +1,5 @@
 package com.csl.cs108ademoapp.fragments;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +9,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -34,13 +36,13 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_access_em4325passive, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessCCPTagID);
         editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessCCPAccPasswordValue);
@@ -112,7 +114,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
             Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
             return true;
         } else if (accessTask != null) {
-            if (accessTask.getStatus() == AsyncTask.Status.RUNNING) {
+            if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) {
                 Toast.makeText(MainActivity.mContext, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -136,7 +138,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
+            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -211,7 +213,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             MainActivity.csLibrary4A.appendToLog("accessResult 2 bankProcessing = " + bankProcessing + ", accessResult = " + accessTask.accessResult );

@@ -3,8 +3,9 @@ package com.csl.cs108ademoapp.fragments;
 import static com.csl.cs108ademoapp.MainActivity.mContext;
 
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.InventoryBarcodeTask;
 import com.csl.cs108ademoapp.InventoryRfidTask;
@@ -58,13 +60,14 @@ public class AccessRegisterFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, true);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_access_register, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        menuFragment = true;
+        super.onViewCreated(view, savedInstanceState);
 
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_access);
@@ -156,7 +159,7 @@ public class AccessRegisterFragment extends CommonFragment {
                 }
 
                 if (inventoryBarcodeTask != null) {
-                    if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) {
                         barcodeReadDone = true; MainActivity.csLibrary4A.appendToLog("barcodeReadDone = true in textChanged");
                         MainActivity.csLibrary4A.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(false);
                     }
@@ -279,7 +282,7 @@ public class AccessRegisterFragment extends CommonFragment {
         buttonWrite3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (accessTask != null) if (accessTask.getStatus() == AsyncTask.Status.RUNNING) return;
+                if (accessTask != null) if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) return;
                 runningAuto123 = 0; startStopAccessHandler(false);
             }
         });
@@ -288,7 +291,7 @@ public class AccessRegisterFragment extends CommonFragment {
         buttonAuto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (accessTask != null) if (accessTask.getStatus() == AsyncTask.Status.RUNNING) return;
+                if (accessTask != null) if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) return;
                 runningAuto123 = 1; startStopAccessHandler(false);
             }
         });
@@ -297,7 +300,7 @@ public class AccessRegisterFragment extends CommonFragment {
         buttonAuto123.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (accessTask != null) if (accessTask.getStatus() == AsyncTask.Status.RUNNING) return;
+                if (accessTask != null) if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) return;
                 runningAuto123 = 2; mHandler.post(runnableAuto123);
             }
         });
@@ -401,9 +404,9 @@ public class AccessRegisterFragment extends CommonFragment {
                 }
             }
             MainActivity.csLibrary4A.appendToLog("runnableAuto123: runningAuto123 = " + runningAuto123 + ", inventoryBarcodeTask = " + (inventoryBarcodeTask != null ? "valid" : "null"));
-            if (runningAuto123 == 2 && inventoryBarcodeTask != null) { if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) running = true; }
+            if (runningAuto123 == 2 && inventoryBarcodeTask != null) { if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) running = true; }
             MainActivity.csLibrary4A.appendToLog("runnableAuto123: accessTask = " + (accessTask != null ? "valid" : "null"));
-            if (accessTask != null) { if (accessTask.getStatus() == AsyncTask.Status.RUNNING) running = true; }
+            if (accessTask != null) { if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) running = true; }
             MainActivity.csLibrary4A.appendToLog("runnableAuto123: running = " + running);
             if (running == false) {
                 int totalTagNew = getTotalTag();
@@ -487,7 +490,7 @@ public class AccessRegisterFragment extends CommonFragment {
         }
 
         boolean started = false;
-        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) started = true;
+        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
         if (buttonTrigger && ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) return;
         if (started == false) {
             if (MainActivity.csLibrary4A.isBleConnected() == false) {
@@ -508,14 +511,14 @@ public class AccessRegisterFragment extends CommonFragment {
     boolean startStopAccessHandler(boolean buttonTrigger) {
         boolean runningBarcode = false;
         if (inventoryBarcodeTask != null) {
-            if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) {
+            if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) {
                 MainActivity.csLibrary4A.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(buttonTrigger);
                 runningBarcode = true;
             }
         }
 
         boolean runningAccessTask = false;
-        if (accessTask != null) { if (accessTask.getStatus() == AsyncTask.Status.RUNNING) runningAccessTask = true; }
+        if (accessTask != null) { if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) runningAccessTask = true; }
         if (buttonTrigger && ((runningAccessTask && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (runningAccessTask == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) {
             return true;
         }

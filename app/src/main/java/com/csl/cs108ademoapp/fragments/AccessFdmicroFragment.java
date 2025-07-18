@@ -1,7 +1,6 @@
 package com.csl.cs108ademoapp.fragments;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -18,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -29,6 +29,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static com.csl.cs108ademoapp.MainActivity.mContext;
+
+import androidx.annotation.NonNull;
 
 public class AccessFdmicroFragment extends CommonFragment {
     SelectTag selectTag;
@@ -47,13 +49,13 @@ public class AccessFdmicroFragment extends CommonFragment {
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_access_fdmicro, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         selectTag = new SelectTag((Activity)getActivity(), 0);
 
@@ -360,7 +362,7 @@ public class AccessFdmicroFragment extends CommonFragment {
 
     boolean isOperationRunning() {
         if (accessTask != null) {
-            if (accessTask.getStatus() == AsyncTask.Status.RUNNING) {
+            if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) {
                 Toast.makeText(MainActivity.mContext, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -561,7 +563,7 @@ public class AccessFdmicroFragment extends CommonFragment {
         public void run() {
             if (accessTask == null) return;
             if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "accessTask.status = " + accessTask.getStatus().toString());
-            if (accessTask.getStatus() == AsyncTask.Status.RUNNING) {
+            if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) {
                 mHandler.postDelayed(updateRunnable, 100);
                 return;
             }

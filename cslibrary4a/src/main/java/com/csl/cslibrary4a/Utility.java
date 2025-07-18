@@ -26,6 +26,8 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Utility {
+    public final boolean DEBUG_SCAN = false;
+    public final boolean DEBUG_CONNECT = false;
     public final boolean DEBUG_SELECT = false;
     public final boolean DEBUG_INVCFG = false;
     public final boolean DEBUG_BTDATA = false;
@@ -33,6 +35,7 @@ public class Utility {
     public final boolean DEBUG_PKDATA = false;
     public final boolean DEBUG_APDATA = false;
     public final boolean DEBUG_COMPACT = false;
+    public final boolean ENABLE_USBDATA = false;
     private Context mContext; private TextView mLogView;
     public Utility(Context context, TextView mLogView) {
         mContext = context;
@@ -238,6 +241,7 @@ public class Utility {
         return null;
     }
 
+    public String StringVersionHeader = "18.";
     public String getCombinedVersion(String string0) {
         String string1 = BuildConfig.VERSION_NAME;
         int iValue1 = Integer.parseInt(string1);
@@ -516,27 +520,32 @@ public class Utility {
     }
 
     public boolean checkHostProcessorVersion(String version, int majorVersion, int minorVersion, int buildVersion) {
-        if (version == null) return false;
-        if (version.length() == 0) return false;
-        String[] versionPart = version.split("\\.");
+        boolean DEBUG = false;
+        if (DEBUG) appendToLog("version = " + version + ", majorVersion = " + majorVersion + ", minorVersion = " + minorVersion + ", buildVersion = " + buildVersion);
+        if (version == null) { if (DEBUG) appendToLog("return false 1"); return false; }
+        if (version.length() == 0) { if (DEBUG) appendToLog("return false 2"); return false; }
+        String[] versionPart = version.split(" |\\.");
 
-        if (versionPart == null) { appendToLog("NULL VersionPart"); return false; }
+        if (versionPart == null) { if (DEBUG) appendToLog("return false 3"); return false; }
         try {
+            if (DEBUG) appendToLog("checkpoint 1");
             int value = Integer.valueOf(versionPart[0]);
-            if (value < majorVersion) return false;
+            if (value < majorVersion) { if (DEBUG) appendToLog("return false 4"); return false; }
             if (value > majorVersion) return true;
 
+            if (DEBUG) appendToLog("checkpoint 2");
             if (versionPart.length < 2) return true;
             value = Integer.valueOf(versionPart[1]);
-            if (value < minorVersion) return false;
+            if (value < minorVersion) { if (DEBUG) appendToLog("return false 5"); return false; }
             if (value > minorVersion) return true;
 
+            if (DEBUG) appendToLog("checkpoint 3");
             if (versionPart.length < 3) return true;
             value = Integer.valueOf(versionPart[2]);
-            if (value < buildVersion) return false;
+            if (value < buildVersion) { if (DEBUG) appendToLog("return false 6"); return false; }
             return true;
         } catch (Exception ex) {
-            return false;
+            if (DEBUG) appendToLog("return false 7"); return false;
         }
     }
 

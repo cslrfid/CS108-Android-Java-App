@@ -50,10 +50,10 @@ public class BarcodeNewland {
     }
     public boolean barcodeSendCommandTrigger() {
         boolean retValue = true;
-        barcode2TriggerMode = true; bBarcodeTriggerMode = 0x30; if (false) appendToLog("Set trigger reading mode to TRIGGER");
+        barcode2TriggerMode = true; bBarcodeTriggerMode = 0x30; if (true) appendToLog("Set trigger reading mode to TRIGGER");
         if (retValue) retValue = barcodeSendCommand("nls0006010;".getBytes());
         if (retValue) retValue = barcodeSendCommand("nls0302000;".getBytes());
-        if (retValue) retValue = barcodeSendCommand("nls0313000=3000;nls0313010=1000;nls0313040=1000;nls0302000;nls0007010;".getBytes());
+        if (retValue) retValue = barcodeSendCommand("nls0313000=3000;nls0313010=200;nls0313040=200;nls0313030;nls0302000;nls0007010;".getBytes()); //nls0312040=4 default, 50 max
         if (retValue) retValue = barcodeSendCommand("nls0001150;nls0006000;".getBytes());
         return retValue;
     }
@@ -123,7 +123,9 @@ public class BarcodeNewland {
 //        return barcodeSendQuery(datat);
         return barcodeSendCommand(datat);
     }
-    public boolean barcodeSendCommandItf14Cksum() { return barcodeSendCommand("nls0006010;nls0405100;nls0006000".getBytes()); }
+    public boolean barcodeSendCommandItf14Cksum() {
+        return barcodeSendCommand("nls0006010;nls0405100;nls0006000".getBytes());
+    }
 
     boolean barcodeSendQuery(byte[] data) {
         byte bytelrc = (byte)0xff;

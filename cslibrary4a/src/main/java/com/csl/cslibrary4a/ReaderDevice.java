@@ -1,5 +1,7 @@
 package com.csl.cslibrary4a;
 
+import android.util.Log;
+
 public class ReaderDevice implements Comparable<ReaderDevice>  {
     private String name;
     private String address; private String upcSerial;
@@ -7,6 +9,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     private String details;
     int extra1Bank, extra2Bank, extra1Offset, extra2Offset;
     String strPc, strXpc, strCrc16, strMdid, strExtra1, strExtra2;
+    RfidReader.TagType tagTypeExpected;
     private int count;
     private double rssi;
     private int serviceUUID2p1;
@@ -22,7 +25,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     private String compass;
 
     public ReaderDevice(String name, String address, boolean selected, String details,
-                        String strPc, String strXpc, String strCrc16, String strMdid,
+                        String strPc, String strXpc, String strCrc16, String strMdid, RfidReader.TagType tagTypeExpected,
                         String strExtra1, int extra1Bank, int extra1Offset,
                         String strExtra2, int extra2Bank, int extra2Offset,
                         String strTimeOfRead, String strTimeZone, String strLocation, String strCompass,
@@ -34,10 +37,12 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.strPc = strPc;
         this.strXpc = strXpc;
         this.strCrc16 = strCrc16;
-        this.strMdid = strMdid;
+        this.strMdid = strMdid; this.tagTypeExpected = tagTypeExpected;
+        Log.i("Hello", "ReaderDevice.ReadderDevice: strExtra1 = " + strExtra1 + ", extra1Bank = " + extra1Bank + ", extra1Offset = " + extra1Offset);
         this.strExtra1 = strExtra1;
         this.extra1Bank = extra1Bank;
         this.extra1Offset = extra1Offset;
+        Log.i("Hello", "ReaderDevice.ReadderDevice: strExtra2 = " + strExtra2 + ", extra2Bank = " + extra2Bank + ", extra2Offset = " + extra2Offset);
         this.strExtra2 = strExtra2;
         this.extra2Bank = extra2Bank;
         this.extra2Offset = extra2Offset;
@@ -203,6 +208,9 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     public String getMdid() {
         return strMdid;
     }
+    public RfidReader.TagType getTagTypeExpected() {
+        return tagTypeExpected;
+    }
 
     public int getCount() {
         return count;
@@ -219,6 +227,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     }
 
     public int getServiceUUID2p1() { return serviceUUID2p1; }
+    public void setServiceUUID2p1(int serviceUUID2p1) { this.serviceUUID2p1 = serviceUUID2p1; }
 
     public int getPhase() { return phase; }
     public void setPhase(int phase) { this.phase = phase; }
@@ -289,6 +298,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
 
     public String getstrExtra1() { return strExtra1; }
     public void setExtra1(String strExtra1, int extra1Bank, int extra1Offset) {
+        Log.i("Hello", "ReaderDevice.setExtra1: strExtra1 = " + strExtra1 + ", extra1Bank = " + extra1Bank + ", extra1Offset = " + extra1Offset);
         this.strExtra1 = strExtra1;
         this.extra1Bank = extra1Bank;
         this.extra1Offset = extra1Offset;

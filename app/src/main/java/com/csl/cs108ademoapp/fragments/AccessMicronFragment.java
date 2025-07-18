@@ -1,13 +1,14 @@
 package com.csl.cs108ademoapp.fragments;
 
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S1;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S2;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S3;
-import static com.csl.cslibrary4a.RfidReader.TagType.TAG_XERXES;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON_XERXES;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,10 +24,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReader;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessMicronFragment extends CommonFragment {
@@ -54,13 +57,13 @@ public class AccessMicronFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_access_micron, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessMNTagID);
         editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessMNAccPasswordValue);
@@ -75,7 +78,8 @@ public class AccessMicronFragment extends CommonFragment {
         editText = (EditText) getActivity().findViewById(R.id.accessMNHumidityThreshold);
         editText.setText(MainActivity.config.config3);
         TableRow tableRow = (TableRow) getActivity().findViewById(R.id.accessMNHumidityThresholdRow);
-        if (MainActivity.mDid.matches("E28240")) tableRow.setVisibility(View.GONE);
+        MainActivity.csLibrary4A.appendToLog("AccessMicronFragment.onViewCreated: DebugABC, MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + MainActivity.tagType.toString());
+        if (MainActivity.tagType == TAG_AXZON /*MainActivity.mDid.matches("E2824")*/) tableRow.setVisibility(View.GONE);
 
         textViewConfigOk = (TextView) getActivity().findViewById(R.id.accessMNModelCodeOK);
         textViewCalibrationOk = (TextView) getActivity().findViewById(R.id.accessMNCalibrationOK);
@@ -110,10 +114,10 @@ public class AccessMicronFragment extends CommonFragment {
         spinnerTagType.setAdapter(arrayAdapterTagType);
         spinnerTagType.setEnabled(false);
         if (MainActivity.mDid != null) {
-            if (MainActivity.mDid.matches("E28240")) spinnerTagType.setSelection(0);
-            else if (MainActivity.mDid.matches("E282402")) spinnerTagType.setSelection(1);
-            else if (MainActivity.mDid.matches("E282403")) spinnerTagType.setSelection(2);
-            else if (MainActivity.mDid.matches("E282405")) spinnerTagType.setSelection(3);
+            if (MainActivity.tagType == TAG_AXZON /*MainActivity.mDid.matches("E2824")*/) spinnerTagType.setSelection(0);
+            else if (MainActivity.tagType == TAG_MAGNUS_S2 /*MainActivity.mDid.matches("E282402")*/) spinnerTagType.setSelection(1);
+            else if (MainActivity.tagType == TAG_MAGNUS_S3 /*MainActivity.mDid.matches("E282403")*/) spinnerTagType.setSelection(2);
+            else if (MainActivity.tagType == TAG_AXZON_XERXES /*MainActivity.mDid.matches("E282405")*/) spinnerTagType.setSelection(3);
         }
         spinnerTagType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -125,16 +129,16 @@ public class AccessMicronFragment extends CommonFragment {
 
                 switch (spinnerTagType.getSelectedItemPosition()) {
                     case 0:
-                        MainActivity.tagType = TAG_AXZON; MainActivity.mDid = "E28240";
+                        MainActivity.tagType = TAG_AXZON; MainActivity.mDid = ""; //""E2824";
                         break;
                     case 1:
-                        MainActivity.tagType = TAG_MAGNUS_S2; MainActivity.mDid = "E282402";
+                        MainActivity.tagType = TAG_MAGNUS_S2; MainActivity.mDid = ""; //""E282402";
                         break;
                     case 2:
-                        MainActivity.tagType = TAG_MAGNUS_S3; MainActivity.mDid = "E282403";
+                        MainActivity.tagType = TAG_MAGNUS_S3; MainActivity.mDid = ""; //""E282403";
                         break;
                     case 3:
-                        MainActivity.tagType = TAG_XERXES; MainActivity.mDid = "E282405";
+                        MainActivity.tagType = TAG_AXZON_XERXES; MainActivity.mDid = ""; //""E282405";
                         break;
                 }
                 if (btagTypeSelected) {
@@ -202,7 +206,7 @@ public class AccessMicronFragment extends CommonFragment {
 
             }
         });
-        if (MainActivity.mDid.matches("E28240")) spinnerSensorUnit.setEnabled(false);
+        if (MainActivity.tagType == TAG_AXZON /*MainActivity.mDid.matches("E2824")*/) spinnerSensorUnit.setEnabled(false);
 
         ArrayAdapter<CharSequence> arrayAdapterTemperatureUnit = ArrayAdapter.createFromResource(getActivity(), R.array.temperature_unit_options, R.layout.custom_spinner_layout);
         arrayAdapterTemperatureUnit.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -307,15 +311,19 @@ public class AccessMicronFragment extends CommonFragment {
                 }
                 bSelected = true;
                 if (editTextRWTagID != null) editTextRWTagID.setText(tagSelected.getAddress());
-
                 if (setModelCode(tagSelected.getTid())) {
                     textViewModelCode.setText(tagSelected.getTid().substring(5));
-                } else if (tagSelected.getMdid() == null) {
-                } else if (tagSelected.getMdid().contains("E282402")) {
+
+                } else if (tagSelected.getTagTypeExpected() == null) {
+//                } else if (tagSelected.getMdid() == null) {
+                } else if (tagSelected.getTagTypeExpected() == TAG_MAGNUS_S2) {
+//              } else if (tagSelected.getMdid().contains(MainActivity.csLibrary4A.getmDid(TAG_MAGNUS_S2) /*"E282402"*/)) {
                     textViewModelCode.setText("02"); modelCode = 2;
-                } else if (tagSelected.getMdid().contains("E282403")) {
+                } else if (tagSelected.getTagTypeExpected() == TAG_MAGNUS_S3) {
+//              } else if (tagSelected.getMdid().contains(MainActivity.csLibrary4A.getmDid(TAG_MAGNUS_S3) /*"E282403"*/)) {
                     textViewModelCode.setText("03"); modelCode = 3;
-                } else if (tagSelected.getMdid().contains("E282405")) {
+                } else if (tagSelected.getTagTypeExpected() == TAG_AXZON_XERXES) {
+//              } else if (tagSelected.getMdid().contains(MainActivity.csLibrary4A.getmDid(TAG_AXZON_XERXES) /*"E282405"*/)) {
                     textViewModelCode.setText("05"); modelCode = 5;
                 }
 
@@ -382,7 +390,7 @@ public class AccessMicronFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessMicronFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
+            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessMicronFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -420,15 +428,22 @@ public class AccessMicronFragment extends CommonFragment {
     };
 
     boolean setModelCode(String strTid) {
+        MainActivity.csLibrary4A.appendToLog("AccesssMicronFragment.setModelCode: DebugABC, strTid = " + strTid + ", MainActivity.tagType = " + MainActivity.tagType.toString() + ", tagSelected = " + MainActivity.tagSelected.getMdid());
         if (strTid == null) return false;
         if (strTid.length() <= 7) return false;
-        if (strTid.substring(0, 7).matches("E282401")) {
-            modelCode = 1; return true;
-        } else if (strTid.substring(0, 7).matches("E282402")) {
+        RfidReader.TagType tagType = MainActivity.csLibrary4A.getagType(strTid);
+        if (tagType == TAG_MAGNUS_S1) {
+        //if (strTid.substring(0, 7).matches("E282401")) {
+            modelCode = 1;
+            return true;
+        } else if (tagType == TAG_MAGNUS_S2) {
+        //} else if (strTid.substring(0, 7).matches(MainActivity.csLibrary4A.getsTid(TAG_MAGNUS_S2) /*"E282402"*/)) {
             modelCode = 2; return true;
-        } else if (strTid.substring(0, 7).matches("E282403")) {
+        } else if (tagType == TAG_MAGNUS_S3) {
+        //} else if (strTid.substring(0, 7).matches(MainActivity.csLibrary4A.getsTid(TAG_MAGNUS_S3) /*"E282403"*/)) {
             modelCode = 3; return true;
-        } else if (strTid.substring(0, 7).matches("E282405")) {
+        } else if (tagType == TAG_AXZON_XERXES) {
+        //} else if (strTid.substring(0, 7).matches(MainActivity.csLibrary4A.getsTid(TAG_AXZON_XERXES) /*"E282405"*/)) {
             modelCode = 5; return true;
         }
         return false;
@@ -488,9 +503,9 @@ public class AccessMicronFragment extends CommonFragment {
         if (strData.length() < 4) return false;
         strSensorCode0 = strData;
         strData = str2Decimal(strData);
-        if (spinnerSensorUnit.getSelectedItemPosition() == 1) {
+        if (spinnerSensorUnit.getSelectedItemPosition() > 0) {
             float fValue = (float) Integer.parseInt(strData);
-            if (true) {
+            if (spinnerSensorUnit.getSelectedItemPosition() == 2) {
                 EditText editText = (EditText) getActivity().findViewById(R.id.accessMNHumidityThreshold);
                 int iValue = Integer.parseInt(editText.getText().toString());
                 MainActivity.csLibrary4A.appendToLog("iValue for Dry/Wet comparision = " + iValue);
@@ -544,7 +559,7 @@ public class AccessMicronFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
         else {
             if (changedSelectIndex) {
                 changedSelectIndex = false; MainActivity.selectFor = 0;

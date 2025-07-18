@@ -1,8 +1,6 @@
 package com.csl.cs108ademoapp.fragments;
 
 import android.content.Intent;
-import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -14,6 +12,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.InventoryBarcodeTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -31,11 +32,15 @@ public class InventoryBarcodeFragment extends CommonFragment {
     private TextView barcodeYieldView, barcodeTotal;
     private Button button;
 
-    MediaPlayer playerO, playerN;
-
     private ReaderListAdapter readerListAdapter;
 
     InventoryBarcodeTask inventoryBarcodeTask;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        return inflater.inflate(R.layout.fragment_inventory_barcode, container, false);
+    }
 
     void clearTagsList() {
         barcodeYieldView.setText(""); barcodeTotal.setText("");
@@ -62,13 +67,8 @@ public class InventoryBarcodeFragment extends CommonFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
-        return inflater.inflate(R.layout.fragment_inventory_barcode, container, false);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemSelectedA(MenuItem item) {
+        MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment.onMenuItemSelectedA");
         if (item.getItemId() == R.id.menuAction_clear) {
             clearTagsList();
             return true;
@@ -84,17 +84,19 @@ public class InventoryBarcodeFragment extends CommonFragment {
         } else if (item.getItemId() == R.id.menuAction_share) {
             shareTagsList();
             return true;
-        } else return super.onOptionsItemSelected(item);
+        } else return super.onMenuItemSelectedA(item);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         barcodeListView = (ListView) getActivity().findViewById(R.id.inventoryBarcodeList);
         barcodeEmptyView = (TextView) getActivity().findViewById(R.id.inventoryBarcodeEmpty);
         barcodeListView.setEmptyView(barcodeEmptyView);
+
         readerListAdapter = new ReaderListAdapter(getActivity(), R.layout.readers_list_item, MainActivity.sharedObjects.barsList, true, false);
+
         barcodeListView.setAdapter(readerListAdapter);
         barcodeListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         barcodeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -108,8 +110,8 @@ public class InventoryBarcodeFragment extends CommonFragment {
                     readerDevice.setSelected(true);
                 }
                 MainActivity.sharedObjects.barsList.set(position, readerDevice);
-                if (readerDevice.getSelected()) MainActivity.tagSelected = readerDevice;
-                else MainActivity.tagSelected = null;
+                //if (readerDevice.getSelected()) MainActivity.tagSelected = readerDevice;
+                //else MainActivity.tagSelected = null;
                 for (int i = 0; i < MainActivity.sharedObjects.barsList.size(); i++) {
                     if (i != position) {
                         ReaderDevice readerDevice1 = MainActivity.sharedObjects.barsList.get(i);
@@ -151,18 +153,20 @@ public class InventoryBarcodeFragment extends CommonFragment {
 
     @Override
     public void onPause() {
-        MainActivity.csLibrary4A.setNotificationListener(null);
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setNotificationListener(null);
         if (inventoryBarcodeTask != null) {
-            if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment().onDestory(): VALID inventoryBarcodeTask");
+            if (DEBUG && MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment().onDestory(): VALID inventoryBarcodeTask");
             inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.DESTORY;
         }
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment().onDestory(): onDestory()");
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        MainActivity.csLibrary4A.setAutoBarStartSTop(false); MainActivity.csLibrary4A.setNotificationListener(null);
+        if (MainActivity.csLibrary4A != null) {
+            MainActivity.csLibrary4A.setAutoBarStartSTop(false);
+            MainActivity.csLibrary4A.setNotificationListener(null);
+        }
         super.onDestroy();
     }
 
@@ -201,7 +205,7 @@ public class InventoryBarcodeFragment extends CommonFragment {
             return;
         }
         boolean started = false;
-        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) started = true;
+        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
         if (buttonTrigger && ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) {
             MainActivity.csLibrary4A.appendToLog("BARTRIGGER: trigger ignore");
             return;

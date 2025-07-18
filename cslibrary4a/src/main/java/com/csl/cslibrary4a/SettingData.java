@@ -14,18 +14,17 @@ public class SettingData {
 
     public int channel = -1;
     int antennaPower = -1;
-    Context context; Utility utility; BluetoothGatt bluetoothGatt; NotificationConnector notificationConnector; RfidReader rfidReader; CsReaderConnector csReaderConnector;
+    Context context; Utility utility; NotificationConnector notificationConnector; RfidReader rfidReader; CsReaderConnector csReaderConnector;
     //CsReaderConnector csReaderConnector;
 
-    public SettingData(Context context, Utility utility, BluetoothGatt bluetoothGatt, CsReaderConnector csReaderConnector) {
+    public SettingData(Context context, Utility utility, CsReaderConnector csReaderConnector) {
         this.context = context;
         this.utility = utility;
-        this.bluetoothGatt = bluetoothGatt;
         this.csReaderConnector = csReaderConnector;
-        appendToLog("SettingData: this.bluetoothGatt is " + (this.bluetoothGatt == null ? "null" : "valid")
-                + "\nthis.csReaderConnector is " + (this.csReaderConnector == null ? "null" : "valid")
-                + "\nthis.utility is " + (this.utility == null ? "null" : "valid")
+        appendToLog("SettingData:"
                 + "\nthis.context is " + (this.context == null ? "null" : "valid")
+                + "\nthis.utility is " + (this.utility == null ? "null" : "valid")
+                + "\nthis.csReaderConnector is " + (this.csReaderConnector == null ? "null" : "valid")
         );
         loadForegroundSettingFile();
     }
@@ -143,13 +142,20 @@ public class SettingData {
     public PreFilterData preFilterData;
 
     public File fileSetting;
-    boolean loadSettingFile(String strlibraryVersion, boolean bChannelHoppingStatus, int iCurrentProfile) {
-        File path = context.getFilesDir();
-        String fileName = bluetoothGatt.getmBluetoothDevice().getAddress();
+    boolean loadSettingFile(String stringMacAddress, String strlibraryVersion, boolean bChannelHoppingStatus, int iCurrentProfile) {
+        boolean DEBUG = true;
+        appendToLog("SettingData.loadSettingFile:"
+                + "\nstringMacAddress = " + stringMacAddress
+                + "\nstrlibraryVersion = " + strlibraryVersion
+                + "\nbChannelHoppingStatus = " + bChannelHoppingStatus
+                + "\niCurrentProfile = " + iCurrentProfile);
 
-        fileName = "csReaderA_" + fileName.replaceAll(":", "");
+        File path = context.getFilesDir();
+        String fileName = stringMacAddress; //bluetoothGatt.getmBluetoothDevice().getAddress(); //stringMacAddress
+
+        fileName = "csReaderA_" + fileName.replaceAll(":", "").replaceAll(" ", "");
         fileSetting = new File(path, fileName);
-        boolean bNeedDefault = true, DEBUG = false;
+        boolean bNeedDefault = true;
         if (DEBUG_FILE) utility.appendToLogView("FileName = " + fileName + ".exits = " + fileSetting.exists() + ", with beepEnable = " + inventoryBeep);
         if (fileSetting.exists()) {
             InputStream instream = null;
@@ -194,6 +200,11 @@ public class SettingData {
                         } else if (dataArray[0].matches("antennaPower")) {
                             long lValue = Long.valueOf(dataArray[1]);
                             if (lValue >= 0) csReaderConnector.rfidReader.setPowerLevel(lValue);
+                        } else if (dataArray[0].matches("antennaDwell")) {
+                            long lValue = Long.valueOf(dataArray[1]);
+                            if (lValue >= 0) {
+                                csReaderConnector.rfidReader.setAntennaDwell(lValue);
+                            }
                         } else if (dataArray[0].matches("population")) {
                             population = Integer.valueOf(dataArray[1]);
                         } else if (dataArray[0].matches("querySession")) {
@@ -213,6 +224,7 @@ public class SettingData {
                             retry = Integer.valueOf(dataArray[1]);
                         } else if (dataArray[0].matches("currentProfile")) {
                             int iValue = Integer.valueOf(dataArray[1]);
+                            appendToLog("SettingData.loadSettingFile setCurrentLinkProfile as " + iValue);
                             if (iValue >= 0) csReaderConnector.rfidReader.setCurrentLinkProfile(iValue);
                         } else if (dataArray[0].matches("rxGain")) {
                             csReaderConnector.rfidReader.setRxGain(Integer.valueOf(dataArray[1]));
@@ -332,7 +344,7 @@ public class SettingData {
         return bNeedDefault;
     }
     public void saveSetting2File(String strLibraryVersion, boolean bChannelHoppingStatus, int iCurrentProfile) {
-        boolean DEBUG = true;
+        boolean DEBUG = false;
         if (DEBUG) appendToLog("Start");
         FileOutputStream stream;
         try {
@@ -344,6 +356,7 @@ public class SettingData {
             if (!bChannelHoppingStatus) write2FileStream(stream, "channel," + String.valueOf(channel + "\n"));
 
             write2FileStream(stream, "antennaPower," + String.valueOf(csReaderConnector.rfidReader.getPwrlevel() + "\n"));
+            write2FileStream(stream, "antennaDwell," + String.valueOf(csReaderConnector.rfidReader.getAntennaDwell() + "\n"));
             write2FileStream(stream, "population," + String.valueOf(csReaderConnector.rfidReader.getPopulation() +"\n"));
             write2FileStream(stream, "querySession," + String.valueOf(csReaderConnector.rfidReader.getQuerySession() + "\n"));
             write2FileStream(stream, "queryTarget," + String.valueOf(csReaderConnector.rfidReader.getQueryTarget() + "\n"));
@@ -351,7 +364,9 @@ public class SettingData {
             write2FileStream(stream, "fastId," + String.valueOf(csReaderConnector.rfidReader.getFastId() + "\n"));
             write2FileStream(stream, "invAlgo," + String.valueOf(csReaderConnector.rfidReader.getInvAlgo() + "\n"));
             write2FileStream(stream, "retry," + String.valueOf(csReaderConnector.rfidReader.getRetryCount() + "\n"));
-            write2FileStream(stream, "currentProfile," + String.valueOf(csReaderConnector.rfidReader.getCurrentProfile() + "\n"));
+            int iValue = csReaderConnector.rfidReader.getCurrentProfile();
+            appendToLog("SettingData.saveSettingFile getCurrentProfile as " + iValue);
+            write2FileStream(stream, "currentProfile," + String.valueOf(iValue + "\n"));
             write2FileStream(stream, "rxGain," + String.valueOf(csReaderConnector.rfidReader.getRxGain() + "\n"));
 
             write2FileStream(stream, "deviceName," + csReaderConnector.bluetoothConnector.getBluetoothIcName() + "\n");
@@ -447,7 +462,7 @@ public class SettingData {
         return true;
     }
     public void saveForegroundSetting2File() {
-        boolean DEBUG = true;
+        boolean DEBUG = false;
         if (DEBUG) appendToLog("Start");
 
         FileOutputStream stream;

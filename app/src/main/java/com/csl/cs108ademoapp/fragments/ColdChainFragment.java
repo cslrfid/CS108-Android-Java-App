@@ -4,12 +4,16 @@ import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_COLDCHAIN;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import com.csl.cs108ademoapp.MainActivity;
@@ -26,12 +30,12 @@ public class ColdChainFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, true);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemSelectedA(MenuItem item) {
         InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) adapter.fragment0;
         if (item.getItemId() == R.id.menuAction_clear) {
             fragment1.clearTagsList();
@@ -48,12 +52,26 @@ public class ColdChainFragment extends CommonFragment {
         } else if (item.getItemId() == R.id.menuAction_share) {
             fragment1.shareTagsList();
             return true;
-        } else return super.onOptionsItemSelected(item);
+        } else return super.onMenuItemSelectedA(item);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        MainActivity.csLibrary4A.appendToLog("ColdChainFragment.onViewCreated: going to addMenuProvider");
+        getActivity().addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@org.jspecify.annotations.NonNull Menu menu, @org.jspecify.annotations.NonNull MenuInflater menuInflater) {
+                MainActivity.csLibrary4A.appendToLog("ColdChainFragment.onViewCreated.onCreateMenu");
+                onCreateMenuA(menu, menuInflater);
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@org.jspecify.annotations.NonNull MenuItem item) {
+                MainActivity.csLibrary4A.appendToLog("ColdChainFragment.onViewCreated.onMenuItemSelected");
+                return onMenuItemSelectedA(item);
+            }
+        }, getViewLifecycleOwner());
+        super.onViewCreated(view, savedInstanceState);
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
@@ -62,7 +80,7 @@ public class ColdChainFragment extends CommonFragment {
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
         adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
-        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, TAG_EM_COLDCHAIN, "E280B0"));
+        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, TAG_EM_COLDCHAIN, "" /*"E280B0"*/));
         adapter.setFragment(1, new AccessColdChainFragment());
         adapter.setFragment(2, new AccessEm4325PassiveFragment());
 

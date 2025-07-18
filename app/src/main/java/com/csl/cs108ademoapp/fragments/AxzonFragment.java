@@ -1,14 +1,19 @@
 package com.csl.cs108ademoapp.fragments;
 
+import androidx.annotation.NonNull;
+import androidx.core.view.MenuProvider;
 import androidx.lifecycle.Lifecycle;
 import android.os.Bundle;
 
 import com.csl.cslibrary4a.AdapterTab;
+import com.csl.cslibrary4a.RfidReader;
 import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,16 +27,17 @@ public class AxzonFragment extends CommonFragment {
     AdapterTab adapter;
 
     private String[] tabs = { "Scan/Select", "Read" };
+    private String[] tabsXerxes0 = { "Logger" };
     private String[] tabsXerxes = { "Logger", "Security" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, true);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemSelectedA(MenuItem item) {
         InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) adapter.fragment0;
         if (item.getItemId() == R.id.menuAction_clear) {
             fragment.clearTagsList();
@@ -48,12 +54,26 @@ public class AxzonFragment extends CommonFragment {
         } else if (item.getItemId() == R.id.menuAction_share) {
             fragment.shareTagsList();
             return true;
-        } else return super.onOptionsItemSelected(item);
+        } else return super.onMenuItemSelectedA(item);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        MainActivity.csLibrary4A.appendToLog("AxzonFragment.onViewCreated: going to addMenuProvider");
+        getActivity().addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@org.jspecify.annotations.NonNull Menu menu, @org.jspecify.annotations.NonNull MenuInflater menuInflater) {
+                MainActivity.csLibrary4A.appendToLog("AxzonFragment.onViewCreated.onCreateMenu");
+                onCreateMenuA(menu, menuInflater);
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@org.jspecify.annotations.NonNull MenuItem item) {
+                MainActivity.csLibrary4A.appendToLog("AxzonFragment.onViewCreated.onMenuItemSelected");
+                return onMenuItemSelectedA(item);
+            }
+        }, getViewLifecycleOwner());
+        super.onViewCreated(view, savedInstanceState);
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
@@ -61,14 +81,14 @@ public class AxzonFragment extends CommonFragment {
         if (false) actionBar.setTitle(R.string.title_activity_axzon);
         else {
             String stringTitle = getResources().getString(R.string.title_activity_axzon);
-            if (MainActivity.mDid.matches("E282402")) stringTitle = "S2";
-            else if (MainActivity.mDid.matches("E282403")) stringTitle = "S3";
-            if (MainActivity.mDid.matches("E282405")) stringTitle = "Xerxes";
+            if (MainActivity.tagType == RfidReader.TagType.TAG_MAGNUS_S2 /*MainActivity.mDid.matches("E282402")*/) stringTitle = "S2";
+            else if (MainActivity.tagType == RfidReader.TagType.TAG_MAGNUS_S3 /*MainActivity.mDid.matches("E282403")*/) stringTitle = "S3";
+            if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES /*MainActivity.mDid.matches("E282405")*/) stringTitle = "Xerxes";
             actionBar.setTitle(stringTitle);
          }
 
         boolean bXervesTag = false;
-        if (MainActivity.mDid != null) if (MainActivity.mDid.matches("E282405")) bXervesTag = true;
+        if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES /*MainActivity.mDid != null) if (MainActivity.mDid.matches("E282405")*/) bXervesTag = true;
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
@@ -86,8 +106,14 @@ public class AxzonFragment extends CommonFragment {
             tabLayout.addTab(tabLayout.newTab().setText(tab_name));
         }
         if (bXervesTag) {
-            for (String tab_name : tabsXerxes) {
-                tabLayout.addTab(tabLayout.newTab().setText(tab_name));
+            if (MainActivity.csLibrary4A.get98XX() == 2 && MainActivity.csLibrary4A.getMacVer().indexOf("1.2") != 0) {
+                for (String tab_name : tabsXerxes0) {
+                    tabLayout.addTab(tabLayout.newTab().setText(tab_name));
+                }
+            } else {
+                for (String tab_name : tabsXerxes) {
+                    tabLayout.addTab(tabLayout.newTab().setText(tab_name));
+                }
             }
         }
 

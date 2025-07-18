@@ -37,7 +37,7 @@ public class CustomMediaPlayer {
         if (false) starting = true;
     }
     public boolean isPlaying() {
-        return (player.isPlaying() | starting) ;
+        return (player.isPlaying()); // | starting) ;
     }
     public void pause() {
         player.pause();

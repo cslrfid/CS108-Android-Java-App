@@ -155,7 +155,8 @@ public class ControllerConnector {
         return validEvent;
     }
 
-    private byte[] writeController(ControllerPayloadEvents event) {
+    private byte[] writeController(ControllerPayloadEvents event, boolean usbConnection) {
+        boolean DEBUG = false;
         byte[] dataOut = null;
         if (event == ControllerPayloadEvents.CONTROLLER_GET_VERSION) {
             dataOut = new byte[]{(byte) 0xA7, (byte) 0xB3, 2, (byte) 0xE8, (byte) 0x82, (byte) 0x37, 0, 0, (byte) 0xB0, 0};
@@ -166,6 +167,7 @@ public class ControllerConnector {
         } else if (event == ControllerPayloadEvents.CONTROLLER_RESET) {
             dataOut = new byte[]{(byte) 0xA7, (byte) 0xB3, 2, (byte) 0xE8, (byte) 0x82, (byte) 0x37, 0, 0, (byte) 0xB0, 12};
         }
+        if (usbConnection && dataOut != null) dataOut[1] = (byte) 0xE6;
         if (DEBUG) appendToLog(byteArrayToString(dataOut) + " for " + event.toString());
         return dataOut;
     }
@@ -210,7 +212,7 @@ public class ControllerConnector {
 
     public int sendDataToWriteSent = 0;
     boolean controllerFailure = false;
-    public byte[] sendControllerToWrite() {
+    public byte[] sendControllerToWrite(boolean usbConnection) {
         if (controllerFailure) {
             controllerToWrite.remove(0); sendDataToWriteSent = 0;
         } else if (sendDataToWriteSent >= 5) {
@@ -225,7 +227,7 @@ public class ControllerConnector {
         } else {
             if (DEBUG) appendToLog("size = " + controllerToWrite.size());
             sendDataToWriteSent++;
-            return writeController(controllerToWrite.get(0));
+            return writeController(controllerToWrite.get(0), usbConnection);
         }
         return null;
     }

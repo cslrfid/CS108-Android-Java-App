@@ -576,14 +576,14 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 style="@style/style_button_font"
-                android:text="@string/read_title" />
+                android:text="@string/readkey_title" />
 
             <Button
                 android:id="@+id/accessUCWriteButton"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 style="@style/style_button_font"
-                android:text="@string/write_title" />
+                android:text="@string/writekey_title" />
         </TableRow>
     </LinearLayout>
 </LinearLayout>

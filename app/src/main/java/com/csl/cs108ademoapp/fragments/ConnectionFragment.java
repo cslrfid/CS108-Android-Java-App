@@ -1,18 +1,20 @@
 package com.csl.cs108ademoapp.fragments;
 
 import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.le.ScanCallback;
+
+import android.bluetooth.BluetoothDevice;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import android.os.ParcelUuid;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.CustomProgressDialog;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -33,33 +36,38 @@ import java.util.ArrayList;
 public class ConnectionFragment extends CommonFragment {
     private DeviceScanTask deviceScanTask;
     private ReaderListAdapter readerListAdapter;
-    private BluetoothAdapter.LeScanCallback mLeScanCallback;
-    private ScanCallback mScanCallback;
     private ArrayList<ReaderDevice> readersList = MainActivity.sharedObjects.readersList;
 
     private ArrayList<BluetoothGatt.CsScanData> mScanResultList = new ArrayList<>();
     private Handler mHandler = new Handler();
     private DeviceConnectTask deviceConnectTask;
+    private TextView textview;
+    String string710S = "For CS710S, Please use Only Bluetooth 5.0 Phone";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, true);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_connection, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        menuFragment = true;
+        super.onViewCreated(view, savedInstanceState);
 
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_rdl);
         actionBar.setTitle(R.string.title_activity_connection);
 
-        TextView textview = (TextView) getActivity().findViewById(R.id.connection_warning);
-        MainActivity.csLibrary4A.appendToLog("getActivity().getPackageName() = " + getActivity().getPackageName());
-        if (getActivity().getPackageName().contains("com.csl.cs710ademoapp")) textview.setVisibility(View.VISIBLE);
-
-        if (MainActivity.csLibrary4A.isBleConnected() == false) readersList.clear();
+        textview = (TextView) getActivity().findViewById(R.id.connection_warning);
+        if (MainActivity.csLibrary4A.isBleConnected() == false) {
+            readersList.clear();
+            String string = "Please turn on Bluetooth\n";
+            string += "Please turn on the handheld\n";
+            string += "Reader may be in HID mode (Bluetooth LED fast blinking), please double click Bluetooth button to change back to Normal Mode (Bluetooth LED slow blinking), then you can see the reader here";
+            if (getActivity().getPackageName().contains("com.csl.cs710ademoapp")) string += "\n" + string710S;
+            textview.setText(string);
+        }
         final ListView readerListView = (ListView) getActivity().findViewById(R.id.readersList);
         TextView readerEmptyView = (TextView) getActivity().findViewById(R.id.empty);
         readerListView.setEmptyView(readerEmptyView);
@@ -77,6 +85,7 @@ public class ConnectionFragment extends CommonFragment {
                 boolean bSelectOld = readerDevice.getSelected();
 
                 if (MainActivity.csLibrary4A.isBleConnected() && readerDevice.isConnected() && (readerDevice.getSelected() || false)) {
+                    MainActivity.csLibrary4A.appendToLog("ConnectionFragment.onItemClick, Fragment: ");
                     MainActivity.csLibrary4A.disconnect(false); bleDisConnecting = true;
                     readersList.clear();
                 } else if (MainActivity.csLibrary4A.isBleConnected() == false && readerDevice.getSelected() == false) {
@@ -170,7 +179,7 @@ public class ConnectionFragment extends CommonFragment {
         }
     };
 
-    private class DeviceScanTask extends AsyncTask<Void, String, String> {
+    private class DeviceScanTask extends AsyncTaskA {
         private long timeMillisUpdate = System.currentTimeMillis();
         ArrayList<ReaderDevice> readersListOld = new ArrayList<ReaderDevice>();
         boolean wait4process = false; boolean scanning = false, DEBUG = false;
@@ -208,25 +217,41 @@ public class ConnectionFragment extends CommonFragment {
                 if (/*scanResultA.device.getType() == BluetoothDevice.DEVICE_TYPE_LE &&*/(true || scanResultA.rssi < 0)) {
                     boolean match = false;
                     for (int i = 0; i < readersList.size(); i++) {
-                        if (readersList.get(i).getAddress().matches(scanResultA.device.getAddress())) {
+                        String stringReaderAddress = readersList.get(i).getAddress();
+                        String stringDeviceAddress = (scanResultA.device == null ? scanResultA.getAddress() : scanResultA.device.getAddress());
+                        if (stringReaderAddress.matches(stringDeviceAddress)) {
                             ReaderDevice readerDevice1 = readersList.get(i);
                             int count = readerDevice1.getCount();
                             count++;
                             readerDevice1.setCount(count);
                             readerDevice1.setRssi(scanResultA.rssi);
+                            readerDevice1.setServiceUUID2p1(scanResultA.serviceUUID2p2);
                             readersList.set(i, readerDevice1); listUpdated = true;
                             match = true;
                             break;
                         }
                     }
                     if (match == false) {
-                        ReaderDevice readerDevice = new ReaderDevice(scanResultA.device.getName(), scanResultA.device.getAddress(), false, "", 1, scanResultA.rssi, scanResultA.serviceUUID2p2);
+                        String name = scanResultA.getName(); //(scanResultA.device == null ? scanResultA.getName() : scanResultA.device.getName());
+                        if (false) {
+                            if (scanResultA.device != null && scanResultA.rssi == 0) {
+                                BluetoothDevice bluetoothDevice = scanResultA.device;
+                                ParcelUuid[] parcelUuids = bluetoothDevice.getUuids();
+                                for (int k = 0; parcelUuids != null && k < parcelUuids.length; k++) {
+                                    name += (", " + parcelUuids[k].toString());
+                                }
+                            }
+                        }
+                        String address = (scanResultA.device == null ? scanResultA.getAddress() : scanResultA.device.getAddress());
+                        ReaderDevice readerDevice = new ReaderDevice(name, address, false, "", 1, scanResultA.rssi, scanResultA.serviceUUID2p2);
                         String strInfo = "";
-                        if (scanResultA.device.getBondState() == 12) {
+                        if (scanResultA.device != null && scanResultA.device.getBondState() == 12) {
                             strInfo += "BOND_BONDED\n";
                         }
                         readerDevice.setDetails(strInfo + "scanRecord=" + MainActivity.csLibrary4A.byteArrayToString(scanResultA.scanRecord));
                         readersList.add(readerDevice); listUpdated = true;
+                        if (!getActivity().getPackageName().contains("com.csl.cs710ademoapp")) textview.setVisibility(View.GONE);
+                        else textview.setText(string710S);
                     }
                 } else {
                     if (DEBUG) MainActivity.csLibrary4A.appendToLog("deviceScanTask: rssi=" + scanResultA.rssi + ", error type=" + scanResultA.device.getType());
@@ -298,8 +323,6 @@ public class ConnectionFragment extends CommonFragment {
 
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
-
             if (DEBUG) MainActivity.csLibrary4A.appendToLog("start of Connection with mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
             MainActivity.csLibrary4A.connect(connectingDevice);
             waitTime = 30;
@@ -336,7 +359,7 @@ public class ConnectionFragment extends CommonFragment {
 
         @Override
         protected void onCancelled(Integer result) {
-            if (DEBUG) MainActivity.csLibrary4A.appendToLog("onCancelled(): setting = " + setting + ", waitTime = " + waitTime);
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("ConnectionFragment.deviceConnectTask: onCancelled(): setting = " + setting + ", waitTime = " + waitTime);
             if (setting >= 0) {
                 Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.toast_ble_setup_problem), Toast.LENGTH_SHORT).show();
             } else {
@@ -350,7 +373,7 @@ public class ConnectionFragment extends CommonFragment {
         }
 
         protected void onPostExecute(Integer result) {
-            if (DEBUG) MainActivity.csLibrary4A.appendToLog("onPostExecute(): setting = " + setting + ", waitTime = " + waitTime);
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("ConnectionFragment.deviceConnectTask: onPostExecute(): setting = " + setting + ", waitTime = " + waitTime);
             ReaderDevice readerDevice = readersList.get(position);
             readerDevice.setConnected(true);
             readersList.set(position, readerDevice);

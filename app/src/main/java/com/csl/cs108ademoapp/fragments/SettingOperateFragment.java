@@ -16,6 +16,9 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SettingTask;
@@ -79,13 +82,13 @@ public class SettingOperateFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_settings_operate, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         if (MainActivity.csLibrary4A.get98XX() == 2) {
             TableRow tableRow = (TableRow) getActivity().findViewById(R.id.settingOperateCompactDelayRow);
@@ -615,7 +618,12 @@ public class SettingOperateFragment extends CommonFragment {
         }
         if (invalidRequest == false && (MainActivity.csLibrary4A.getPwrlevel() != powerLevel || sameCheck == false)) {
             sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 6");
-            if (powerLevel < powerLevelMin || powerLevel > 330) invalidRequest = true;
+            if (powerLevel < powerLevelMin) invalidRequest = true;
+            else if (powerLevel > MainActivity.powerLevelMax) {
+                CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                customPopupWindow.popupStart("Power can only be set to 320 or below", false);
+                invalidRequest = true;
+            }
             else if (MainActivity.csLibrary4A.setPowerLevel(powerLevel) == false) invalidRequest = true;
         }
         if ((invalidRequest == false && (MainActivity.csLibrary4A.getAntennaDwell() != dwellTime || sameCheck == false || changedChannel))) {

@@ -18,7 +18,10 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -26,6 +29,7 @@ import com.csl.cs108ademoapp.SaveList2ExternalTask;
 import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cslibrary4a.AesCmac;
 import com.csl.cslibrary4a.ReaderDevice;
+import com.csl.cslibrary4a.RfidReader;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
 import org.json.JSONArray;
@@ -67,14 +71,15 @@ public class AccessUcodeFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_access_ucode, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (MainActivity.mDid != null) if (MainActivity.mDid.contains("E28240")) iTagType = 5;
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (MainActivity.tagType != null) if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON) iTagType = 5;
+        //if (MainActivity.mDid != null) if (MainActivity.mDid.contains("E2824")) iTagType = 5;
 
         selectTag = new SelectTag((Activity)getActivity(), 1);
         if (MainActivity.mDid != null && MainActivity.mDid.indexOf("E2801") == 0) bImpinJTag = true;
@@ -269,13 +274,14 @@ public class AccessUcodeFragment extends CommonFragment {
         EditText editText = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId);
         TableRow tableRow1 = (TableRow) getActivity().findViewById(R.id.accessUCAuthProfileRow);
         LinearLayout layout1 = (LinearLayout) getActivity().findViewById(R.id.accessUCKeyLayout);
-        LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessUCButtons); layout.setVisibility(View.GONE);
+        LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessUCButtons);
         if (bImpinJTag) {
             textView.setVisibility(View.GONE);
             editText.setVisibility(View.GONE);
             editTextAuthMsg.setText("049CA53E55EA");
             tableRow1.setVisibility(View.GONE);
             layout1.setVisibility(View.GONE);
+            layout.setVisibility(View.GONE);
         }
 
         Button buttonImpinjCheck = (Button) getActivity().findViewById(R.id.accessUCImpinjCheck);
@@ -292,7 +298,7 @@ public class AccessUcodeFragment extends CommonFragment {
         editTextAccessUCserverImpinj = (EditText) getActivity().findViewById(R.id.accessUCserverImpinj);
         editTextAccessUCemail = (EditText) getActivity().findViewById(R.id.accessUCemail);
         editTextAccessUCpassword = (EditText) getActivity().findViewById(R.id.accessUCpassword);
-        if (false) {
+        if (true) {
             editTextAccessUCserverImpinj.setText(csLibrary4A.getServerImpinjLocation());
             editTextAccessUCemail.setText(csLibrary4A.getServerImpinjName());
             editTextAccessUCpassword.setText(csLibrary4A.getServerImpinjPassword());
@@ -404,7 +410,7 @@ public class AccessUcodeFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.csLibrary4A.setSameCheck(true);
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setSameCheck(true);
         //MainActivity.mCs108Library4a.appendToLog("onDestroy");
         super.onDestroy();
     }
@@ -654,7 +660,7 @@ public class AccessUcodeFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
+            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -736,7 +742,7 @@ public class AccessUcodeFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             if (readBufferChecked) readBufferChecked = false;

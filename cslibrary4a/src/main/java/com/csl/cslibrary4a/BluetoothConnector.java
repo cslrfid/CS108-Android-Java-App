@@ -133,11 +133,13 @@ public class BluetoothConnector {
         return validEvent;
     }
 
-    private byte[] writeBluetoothIc(BluetoothIcData data) {
+    private byte[] writeBluetoothIc(BluetoothIcData data, boolean usbConnection) {
+        boolean DEBUG = false;
         int datalength = 0;
         if (DEBUG) appendToLog("data.bluetoothIcPayloadEvent=" + data.bluetoothIcPayloadEvent.toString() + ", data.dataValues=" + byteArrayToString(data.dataValues));
         if (data.dataValues != null)    datalength = data.dataValues.length;
         byte[] dataOutRef = new byte[]{(byte) 0xA7, (byte) 0xB3, 2, (byte) 0x5F, (byte) 0x82, (byte) 0x37, 0, 0, (byte) 0xC0, 0};
+        if (usbConnection) dataOutRef[1] = (byte) 0xE6;
         byte[] dataOut = new byte[10 + datalength];
         if (datalength != 0)    {
             System.arraycopy(data.dataValues, 0, dataOut, 10, datalength);
@@ -203,7 +205,7 @@ public class BluetoothConnector {
 
     public int sendDataToWriteSent = 0;
     boolean bluetoothFailure = false;
-    public byte[] sendBluetoothIcToWrite() {
+    public byte[] sendBluetoothIcToWrite(boolean usbConnection) {
         if (bluetoothFailure) {
             bluetoothIcToWrite.remove(0); sendDataToWriteSent = 0;
         } else if (sendDataToWriteSent >= 5) {
@@ -218,7 +220,7 @@ public class BluetoothConnector {
         } else {
             if (DEBUG) appendToLog("size = " + bluetoothIcToWrite.size() + ", PayloadEvents = " + bluetoothIcToWrite.get(0).bluetoothIcPayloadEvent.toString());
             sendDataToWriteSent++;
-            return writeBluetoothIc(bluetoothIcToWrite.get(0));
+            return writeBluetoothIc(bluetoothIcToWrite.get(0), usbConnection);
         }
         return null;
     }

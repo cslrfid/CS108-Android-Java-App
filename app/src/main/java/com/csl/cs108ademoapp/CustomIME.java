@@ -3,7 +3,6 @@ package com.csl.cs108ademoapp;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
@@ -201,10 +200,10 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
     void startStopHandler() {
         boolean started = false;
         if (inventoryRfidTask != null) {
-            if (inventoryRfidTask.getStatus() == AsyncTask.Status.RUNNING) started = true;
+            if (inventoryRfidTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
         }
         if (inventoryBarcodeTask != null) {
-            if (inventoryBarcodeTask.getStatus() == AsyncTask.Status.RUNNING) started = true;
+            if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
         }
         appendToLog("CustomIME Debug 10");
         if ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false)) return;

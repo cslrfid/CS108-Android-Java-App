@@ -14,8 +14,10 @@ import static androidx.core.content.ContextCompat.getSystemService;
 import static com.csl.cs108ademoapp.MainActivity.isHomeFragment;
 import static com.csl.cs108ademoapp.MainActivity.mContext;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -30,6 +32,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -47,7 +50,7 @@ public class HomeFragment extends CommonFragment {
     final boolean DEBUG = false;
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         Log.i("Hello", "HomeFragment.onAttach");
         super.onAttach(context);
     }
@@ -62,14 +65,15 @@ public class HomeFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, true);
+        super.onCreateView(inflater, container, savedInstanceState);
         if (getActivity().getPackageName().contains("com.csl.cs710ademoapp")) return inflater.inflate(R.layout.home_layout710, container, false);
         else return inflater.inflate(R.layout.home_layout108, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        menuFragment = true;
+        super.onViewCreated(view, savedInstanceState);
 
         if (true && ((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -135,7 +139,10 @@ public class HomeFragment extends CommonFragment {
         boolean DEBUG = false;
         @Override
         public void run() {
-            if (true) MainActivity.csLibrary4A.appendToLog("runnableConfiguring(): mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+            if (true) {
+                MainActivity.csLibrary4A.appendToLog("runnableConfiguring(): isBleConnected = " + MainActivity.csLibrary4A.isBleConnected() + ", isRfidFailure = " + MainActivity.csLibrary4A.isRfidFailure());
+                MainActivity.csLibrary4A.appendToLog("runnableConfiguring(): mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+            }
             boolean progressShown = false;
             if (progressDialog != null) { if (progressDialog.isShowing()) progressShown = true; }
             if (MainActivity.csLibrary4A.isBleConnected() == false || MainActivity.csLibrary4A.isRfidFailure()) {
@@ -156,8 +163,8 @@ public class HomeFragment extends CommonFragment {
                 stopProgressDialog();
                 if (MainActivity.sharedObjects.versionWarningShown == false) {
                     String stringPopup = MainActivity.csLibrary4A.checkVersion();
-                    if (false && stringPopup != null && stringPopup.length() != 0) {
-                        stringPopup = "Firmware too old\nPlease upgrade firmware to at least:" + stringPopup;
+                    if (stringPopup != null && stringPopup.length() != 0) {
+                        if (stringPopup.indexOf("Unknown") != 0) stringPopup = "Firmware too old\nPlease upgrade firmware to at least:" + stringPopup;
                         CustomPopupWindow customPopupWindow = new CustomPopupWindow((Context)getActivity());
                         customPopupWindow.popupStart(stringPopup, false);
                     }
@@ -233,6 +240,26 @@ public class HomeFragment extends CommonFragment {
                     requestPermissions(new String[] { BLUETOOTH_SCAN, BLUETOOTH_CONNECT }, 123);
                 } else MainActivity.csLibrary4A.appendToLog("runnableStartService: handled BLUETOOTH_CONNECT and BLUETOOTH_SCAN");
             } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
+
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                MainActivity.csLibrary4A.appendToLog("runnableStartService: Need to enabled bluetoothConnect permission");
+            } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                MainActivity.csLibrary4A.appendToLog("runnableStartService: Enable bluetoothAdapter for low android");
+                bluetoothAdapter.enable();
+            } else if (!bluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, 1);
+                MainActivity.csLibrary4A.appendToLog("runnableStartService: Enable bluetoothAdapter for high android");
+                BluetoothAdapter.getDefaultAdapter().enable();
+            }
 
             MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, POST_NOTIFICATIONS) = " + ActivityCompat.checkSelfPermission(mContext, POST_NOTIFICATIONS));
             if (NotificationManagerCompat.from(getActivity()).areNotificationsEnabled()) MainActivity.csLibrary4A.appendToLog("Notification is enabled");

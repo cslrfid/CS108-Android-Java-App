@@ -2,11 +2,16 @@ package com.csl.cs108ademoapp.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuProvider;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +47,12 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
     private Button button, buttonShow;
 
     private ReaderListAdapter readerListAdapter;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        return inflater.inflate(R.layout.fragment_inventory_rfid_simple, container, false);
+    }
 
     void clearTagsList() {
         if (bRunningInventory) return;
@@ -86,7 +97,7 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemSelectedA(MenuItem item) {
         if (item.getItemId() == R.id.menuAction_clear) {
             clearTagsList();
             return true;
@@ -102,18 +113,24 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
         } else if (item.getItemId() == R.id.menuAction_share) {
             shareTagsList();
             return true;
-        } else return super.onOptionsItemSelected(item);
+        } else return super.onMenuItemSelectedA(item);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, true);
-        return inflater.inflate(R.layout.fragment_inventory_rfid_simple, container, false);
-    }
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidSimpleFragment.onViewCreated: going to addMenuProvider");
+        getActivity().addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@org.jspecify.annotations.NonNull Menu menu, @org.jspecify.annotations.NonNull MenuInflater menuInflater) {
+                onCreateMenuA(menu, menuInflater);
+            }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+            @Override
+            public boolean onMenuItemSelected(@org.jspecify.annotations.NonNull MenuItem item) {
+                return onMenuItemSelectedA(item);
+            }
+        }, getViewLifecycleOwner());
+        super.onViewCreated(view, savedInstanceState);
 
         MainActivity.selectFor = -1;
         if (true) {
@@ -254,7 +271,7 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
                 Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                 return;
             } else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
                 mHandler.post(runnableCheckReady);
                 return;
             }
@@ -398,8 +415,11 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
                         MainActivity.csLibrary4A.byteArrayToString(uplinkPacket.decodedPc),
                         null,
                         (uplinkPacket.decodedCrc != null ? MainActivity.csLibrary4A.byteArrayToString(uplinkPacket.decodedCrc) : null),
-                        null, null, 0, 0, null, 0, 0,null, null, null, null, 1,
-                        rssi, phase, chidx, port,
+                        null, null,
+                        null, 0, 0,
+                        null, 0, 0,
+                        null, null, null, null,
+                        1, rssi, phase, chidx, port,
                         0, 0, 0, 0, 0, 0, null, 0);
                 if (bAdd2End) MainActivity.sharedObjects.tagsList.add(deviceTag);
                 else MainActivity.sharedObjects.tagsList.add(0, deviceTag);

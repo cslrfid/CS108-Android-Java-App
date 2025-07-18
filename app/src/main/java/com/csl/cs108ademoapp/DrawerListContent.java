@@ -21,7 +21,7 @@ public class DrawerListContent {
         INVENTORY, SEARCH, MULTIBANK,
         SETTING, FILTER, READWRITE, SECURITY,
 
-        IMPINVENTORY, IMP775, IMPAUTOTUNE,
+        IMPINVENTORY, IMPAUTOTUNE,
         ALIEN,
         UCODE8, UCODEDNA,
         BAPCARD, COLDCHAIN, AURASENSE,
@@ -32,7 +32,7 @@ public class DrawerListContent {
         CTESIUS,
         ASYGNTAG,
 
-        REGISTER, READWRITEUSER, WEDGE, DIRECTWEDGE, SIMINVENTORY,
+        REGISTER, READWRITEUSER, WEDGE, DIRECTWEDGE, SIMINVENTORY, TAGBARINVENTORY,
         BLANK;
 
         public static DrawerPositions toDrawerPosition(int x) {
@@ -43,30 +43,31 @@ public class DrawerListContent {
                 case 3: return SEARCH;
                 case 4: return MULTIBANK;
                 case 5: return SIMINVENTORY;
-                case 6: return SETTING;
-                case 7: return FILTER;
-                case 8: return READWRITE;
-                case 9: return SECURITY;
+                case 6: return TAGBARINVENTORY;
+                case 7: return SETTING;
+                case 8: return FILTER;
+                case 9: return READWRITE;
+                case 10: return SECURITY;
 
-                case 10: return IMPINVENTORY;
-                case 11: return ALIEN;
-                case 12: return UCODE8;
-                case 13: return UCODEDNA;
-                case 14: return BAPCARD;
-                case 15: return COLDCHAIN;
-                case 16: return AURASENSE;
-                case 17: return KILOWAY;
-                case 18: return LONGJING;
-                case 19: return AXZON;
+                case 11: return IMPINVENTORY;
+                case 12: return ALIEN;
+                case 13: return UCODE8;
+                case 14: return UCODEDNA;
+                case 15: return BAPCARD;
+                case 16: return COLDCHAIN;
+                case 17: return AURASENSE;
+                case 18: return KILOWAY;
+                case 19: return LONGJING;
+                case 20: return AXZON;
                 //case 18: return RFMICRON;
-                case 20: return FDMICRO;
-                case 21: return CTESIUS;
-                case 22: return ASYGNTAG;
+                case 21: return FDMICRO;
+                case 22: return CTESIUS;
+                case 23: return ASYGNTAG;
 
-                case 23: return REGISTER;
-                case 24: return READWRITEUSER;
-                case 25: return WEDGE;
-                case 26: return DIRECTWEDGE;
+                case 24: return REGISTER;
+                case 25: return READWRITEUSER;
+                case 26: return WEDGE;
+                case 27: return DIRECTWEDGE;
             }
             return null;
         }
@@ -80,24 +81,25 @@ public class DrawerListContent {
         addItem(new DrawerItem("3", "Geiger Search", R.drawable.dl_loc));
         addItem(new DrawerItem("4", "Multi-bank Inventory", R.drawable.dl_inv));
         addItem(new DrawerItem("5", "Simple Inventory", R.drawable.dl_rr));
-        addItem(new DrawerItem("6", "Settings", R.drawable.dl_sett));
-        addItem(new DrawerItem("7", "Filters", R.drawable.dl_filters));
-        addItem(new DrawerItem("8", "Read/Write", R.drawable.dl_access));
-        addItem(new DrawerItem("9", "Security", R.drawable.dl_access));
+        addItem(new DrawerItem("6", "TagBar Inventory", R.drawable.dl_rr));
+        addItem(new DrawerItem("7", "Settings", R.drawable.dl_sett));
+        addItem(new DrawerItem("8", "Filters", R.drawable.dl_filters));
+        addItem(new DrawerItem("9", "Read/Write", R.drawable.dl_access));
+        addItem(new DrawerItem("10", "Security", R.drawable.dl_access));
 
-        addItem(new DrawerItem("10", "Impinj Special Features", R.drawable.dl_loc));
-        addItem(new DrawerItem("11", "Alien", R.drawable.dl_loc));
-        addItem(new DrawerItem("12", "NXP UCODE 8", R.drawable.dl_loc));
-        addItem(new DrawerItem("13", "NXP UCODE DNA", R.drawable.dl_loc));
-        addItem(new DrawerItem("14", "uEm CS9010 BAP ID Card", R.drawable.dl_loc));
-        addItem(new DrawerItem("15", "uEm Cold Chain CS8300", R.drawable.dl_loc));
-        addItem(new DrawerItem("16", "uEm Aura-sense", R.drawable.dl_loc));
-        addItem(new DrawerItem("17", "Kiloway KX2005X-BL", R.drawable.dl_rr));
-        addItem(new DrawerItem("18", "EL-N2ESL CS6861", R.drawable.dl_rr));
-        addItem(new DrawerItem("19", "Axzon", R.drawable.dl_loc));
-        addItem(new DrawerItem("20", "FM13DT160", R.drawable.dl_loc));
-        addItem(new DrawerItem("21", "Landa CTESIUS", R.drawable.dl_loc));
-        addItem(new DrawerItem("22", "Asygn AS321x", R.drawable.dl_loc));
+        addItem(new DrawerItem("11", "Impinj Special Features", R.drawable.dl_loc));
+        addItem(new DrawerItem("12", "Alien", R.drawable.dl_loc));
+        addItem(new DrawerItem("13", "NXP UCODE 8", R.drawable.dl_loc));
+        addItem(new DrawerItem("14", "NXP UCODE DNA", R.drawable.dl_loc));
+        addItem(new DrawerItem("15", "uEm CS9010 BAP ID Card", R.drawable.dl_loc));
+        addItem(new DrawerItem("16", "uEm Cold Chain CS8300", R.drawable.dl_loc));
+        addItem(new DrawerItem("17", "uEm Aura-sense", R.drawable.dl_loc));
+        addItem(new DrawerItem("18", "Kiloway KX2005X-BL", R.drawable.dl_rr));
+        addItem(new DrawerItem("19", "EL-N2ESL CS6861", R.drawable.dl_rr));
+        addItem(new DrawerItem("20", "Axzon", R.drawable.dl_loc));
+        addItem(new DrawerItem("21", "FM13DT160", R.drawable.dl_loc));
+        addItem(new DrawerItem("22", "Landa CTESIUS", R.drawable.dl_loc));
+        addItem(new DrawerItem("23", "Asygn AS321x", R.drawable.dl_loc));
 
         addItem(new DrawerItem("23", "Register Tag", R.drawable.dl_rr));
         addItem(new DrawerItem("24", "Large sized memory read/write", R.drawable.dl_rr));

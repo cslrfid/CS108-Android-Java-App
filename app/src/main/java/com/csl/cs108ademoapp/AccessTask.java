@@ -1,6 +1,5 @@
 package com.csl.cs108ademoapp;
 
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.widget.Button;
 import android.widget.TextView;
@@ -10,7 +9,7 @@ import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.util.ArrayList;
 
-public class AccessTask extends AsyncTask<Void, String, String> {
+public class AccessTask extends AsyncTaskA {
     final boolean DEBUG = true;
     final boolean skipSelect = false;
     public enum TaskCancelRReason {
@@ -162,7 +161,7 @@ public class AccessTask extends AsyncTask<Void, String, String> {
                 MainActivity.csLibrary4A.appendToLog("Going to setSelectCriteria disable");
                 MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
             }
-            if (powerLevel < 0 || powerLevel > 330) invalidRequest = true;
+            if (powerLevel < 0 || powerLevel > MainActivity.powerLevelMax) invalidRequest = true;
             else if (skipSelect == false) {
                 MainActivity.csLibrary4A.appendToLog("AccessTask.preExecute goes to setSelectTag");
                 if (MainActivity.csLibrary4A.setSelectedTag(selectOne, selectMask, selectBank, selectOffset, powerLevel, qValue, matchRep) == false) {
@@ -177,9 +176,6 @@ public class AccessTask extends AsyncTask<Void, String, String> {
             taskCancelReason = TaskCancelRReason.INVALD_REQUEST;
             MainActivity.csLibrary4A.appendToLog("invalidRequest A= " + invalidRequest);
         } else {
-            if (MainActivity.csLibrary4A.checkHostProcessorVersion(MainActivity.csLibrary4A.getMacVer(), 2, 6, 8)) {
-                MainActivity.csLibrary4A.setInvModeCompact(false);
-            }
             //MainActivity.csLibrary4A.setTagRead(0);
             MainActivity.csLibrary4A.sendHostRegRequestHST_CMD(hostCommand);
         }

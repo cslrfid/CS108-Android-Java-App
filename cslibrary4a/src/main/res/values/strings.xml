@@ -51,6 +51,32 @@
         <item>244: Miller 4 250kHz Tari 20us</item>
         <item>285: Miller 8 160kHz Tari 20us</item>
     </string-array>
+    <string-array name="profile4_options">
+        <item>103: FCC, FM0 640kHz 6.25us</item>
+        <item>302: ETSIUB, FM0 640kHz 7.5us</item>
+        <item>120: FCC, Miller 2 640kHz 6.25us</item>
+        <item>104: FCC, FM0 320kHz 6.25us</item>
+        <item>323: ETSIUB, Miller 2 640kHz 7.5us</item>
+        <item>4323: ETISUB, Miller 2 640kHz 7.5us Gen2X</item>
+        <item>203: Japan, FM0 426kHz 12.5us</item>
+        <item>202: ETSILB, FM0 426kHz 15us</item>
+        <item>226: Japan, Miller 2 426kHz 12.5us</item>
+        <item>344: ETSIUB, Miller 4 640kHz 7.5us</item>
+        <item>345: FCC ETSIUB, Miller 4 640kHz 7.5us</item>
+        <item>4345: FCC ETSIUB, Miller 4 640kHz 7.5us Gen2X</item>
+        <item>225: ETSILB, Miller 2 426kHz 15us</item>
+        <item>326: Japan, Miller 2 320kHz 12.5us</item>
+        <item>325: ETSILB, Miller 2 320kHz 15us</item>
+        <item>324: ETSILB, Miller 2 320kHz 20us</item>
+        <item>4324: ETSILB, Miller 2 320kHz 20us Gen2X</item>
+        <item>342: ETSILB, Miller 4 320kHz 20us</item>
+        <item>4342: ETSILB, Miller 4 320kHz 20us Gen2X</item>
+        <item>343: FCC, Miller 4 250kHz 20us</item>
+        <item>4343: FCC, Miller 4 250kHz 20us Gen2X</item>
+        <item>205: Japan, FM0 50kHz 20us</item>
+        <item>382: All, Miller 8 160kHz 20us</item>
+        <item>4382: All, Miller 8 160kHz 20us Gen2X</item>
+    </string-array>
 
     <string name="toast_permission_not_granted">"Permissions are not granted. Please allow them in system setting."</string>
 </resources>

@@ -3,9 +3,11 @@ package com.csl.cs108ademoapp.fragments;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S2;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S3;
-import static com.csl.cslibrary4a.RfidReader.TagType.TAG_XERXES;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON_XERXES;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -24,13 +26,14 @@ public class AxzonSelectorFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, true);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_select_axzon, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        menuFragment = true;
+        super.onViewCreated(view, savedInstanceState);
 
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -83,16 +86,16 @@ public class AxzonSelectorFragment extends CommonFragment {
     void gotoAxzonFragment(int tagType) {
         switch(tagType) {
             case 2:
-                MainActivity.tagType = TAG_MAGNUS_S2; MainActivity.mDid = "E282402";
+                MainActivity.tagType = TAG_MAGNUS_S2; MainActivity.mDid = ""; //""E282402";
                 break;
             case 3:
-                MainActivity.tagType = TAG_MAGNUS_S3; MainActivity.mDid = "E282403";
+                MainActivity.tagType = TAG_MAGNUS_S3; MainActivity.mDid = ""; //""E282403";
                 break;
             case 5:
-                MainActivity.tagType = TAG_XERXES; MainActivity.mDid = "E282405";
+                MainActivity.tagType = TAG_AXZON_XERXES; MainActivity.mDid = ""; //""E282405";
                 break;
             default:
-                MainActivity.tagType = TAG_AXZON; MainActivity.mDid = "E2824";
+                MainActivity.tagType = TAG_AXZON; MainActivity.mDid = ""; //""E2824";
                 break;
         }
         MainActivity.csLibrary4A.appendToLog("HelloABC: gotoAxzonFragment with tagType = " + tagType + ", MainActivity.mDid = " + MainActivity.mDid);

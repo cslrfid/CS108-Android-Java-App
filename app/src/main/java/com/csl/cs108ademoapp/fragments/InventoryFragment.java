@@ -3,12 +3,16 @@ package com.csl.cs108ademoapp.fragments;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import com.csl.cs108ademoapp.MainActivity;
@@ -26,28 +30,42 @@ public class InventoryFragment extends CommonFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         savedInstanceState = null;
-        super.onCreateView(inflater, container, savedInstanceState, true);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        MainActivity.csLibrary4A.appendToLog("InventoryFragment: onOptionsItemSelected with viewPager as " + viewPager.getCurrentItem());
+    public boolean onMenuItemSelectedA(@NonNull MenuItem item) {
+        MainActivity.csLibrary4A.appendToLog("InventoryFragment.onMenuItemSelectedA with viewPager as " + viewPager.getCurrentItem());
         InventoryRfidiMultiFragment fragment0 = (InventoryRfidiMultiFragment) adapter.getItem(0);
         InventoryBarcodeFragment fragment1 = (InventoryBarcodeFragment) adapter.getItem(1);
         switch (viewPager.getCurrentItem()) {
             case 0:
-                return fragment0.onOptionsItemSelected(item);
+                return fragment0.onMenuItemSelectedA(item);
             case 1:
-                return fragment1.onOptionsItemSelected(item);
+                return fragment1.onMenuItemSelectedA(item);
             default:
-                return super.onOptionsItemSelected(item);
+                return super.onMenuItemSelectedA(item);
         }
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        MainActivity.csLibrary4A.appendToLog("InventoryFragment.onViewCreated: going to addMenuProvider");
+        getActivity().addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@org.jspecify.annotations.NonNull Menu menu, @org.jspecify.annotations.NonNull MenuInflater menuInflater) {
+                MainActivity.csLibrary4A.appendToLog("InventoryFragment.onViewCreated.onCreateMenu");
+                onCreateMenuA(menu, menuInflater);
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@org.jspecify.annotations.NonNull MenuItem item) {
+                MainActivity.csLibrary4A.appendToLog("InventoryFragment.onViewCreated.onMenuItemSelected");
+                return onMenuItemSelectedA(item);
+            }
+        }, getViewLifecycleOwner());
+        super.onViewCreated(view, savedInstanceState);
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);

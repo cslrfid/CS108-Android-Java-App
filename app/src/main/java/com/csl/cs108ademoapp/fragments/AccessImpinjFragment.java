@@ -3,7 +3,6 @@ package com.csl.cs108ademoapp.fragments;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
@@ -19,8 +18,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.csl.cs108ademoapp.AccessTask;
 import com.csl.cs108ademoapp.AccessTask1;
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -51,13 +53,13 @@ public class AccessImpinjFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_access_impinj, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         checkBoxTagFocus = (CheckBox) getActivity().findViewById(R.id.accessImpinjTagFocus);
         if (MainActivity.csLibrary4A.get98XX() == 2) checkBoxTagFocus.setText(checkBoxTagFocus.getText().toString() + " (When enabled, tag select is disabled.)");
@@ -541,7 +543,7 @@ public class AccessImpinjFragment extends CommonFragment {
     boolean isRunningAccessTask() {
         boolean retValue = false;
         if (accessTask != null) {
-            if (accessTask.getStatus() != AsyncTask.Status.FINISHED) retValue = true;
+            if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) retValue = true;
         }
         return retValue;
     }
@@ -550,7 +552,7 @@ public class AccessImpinjFragment extends CommonFragment {
         public void run() {
             if (accessTask == null && accessTask1 == null) {
                 MainActivity.csLibrary4A.appendToLog("updateRunnable(): null AccessTask");
-            } else if (accessTask != null && accessTask.getStatus() == AsyncTask.Status.FINISHED) {
+            } else if (accessTask != null && accessTask.getStatus() == AsyncTaskA.Status.FINISHED) {
                 MainActivity.csLibrary4A.appendToLog("accessResult = " + accessTask.accessResult + " with iRunType = " + iRunType);
                 if (accessTask.accessResult == null) {
                      MainActivity.csLibrary4A.appendToLog("updateRunnable(): accessTask is finished without result but with error = " + accessTask.resultError);

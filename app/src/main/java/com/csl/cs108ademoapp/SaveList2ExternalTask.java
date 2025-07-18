@@ -396,6 +396,8 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
         } else if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) == false) errorDisplay = "Error in mouting external storage !!!";
         else {
             String strDir = "cs108Java";
+            if (MainActivity.stringPackageName.contains("cs710ademoapp")) strDir = "csReaderJava";
+            csLibrary4A.appendToLog("SaveList2ExternalTask.save2File: strDir = " + strDir);
             File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + Environment.DIRECTORY_DOWNLOADS + "/" + strDir);
             if (path.exists() == false) path.mkdirs();
             if (path.exists() == false) errorDisplay = "Error in making directory !!!";
@@ -540,7 +542,7 @@ public class SaveList2ExternalTask extends AsyncTask<Void,Void,String> {
             //csLibrary4A.appendToLog("inputStream = " + ir.readUTF());
             MainActivity.csLibrary4A.appendToLog("nnn 19: finished write2Server");
         } catch (Exception ex) {
-            MainActivity.csLibrary4A.appendToLog("nnn 20: errorDisplay = " + errorDisplay + ", execpetion = " + ex.getMessage());
+            MainActivity.csLibrary4A.appendToLog("nnn 20: errorDisplay = " + errorDisplay + ", exception = " + ex.getMessage());
         }
     }
 

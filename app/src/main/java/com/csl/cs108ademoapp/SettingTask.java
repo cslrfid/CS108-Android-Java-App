@@ -1,11 +1,10 @@
 package com.csl.cs108ademoapp;
 
-import android.os.AsyncTask;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class SettingTask extends AsyncTask<Void, String, String> {
+public class SettingTask extends AsyncTaskA {
     final boolean DEBUG = false;
     private enum TaskCancelRReason {
         SAME_SETTING, INVALD_REQUEST, TIMEOUT
@@ -51,9 +50,6 @@ public class SettingTask extends AsyncTask<Void, String, String> {
         }
         return "End of Asynctask()";
     }
-
-    @Override
-    protected void onProgressUpdate(String... output) { }
 
     @Override
     protected void onCancelled() {

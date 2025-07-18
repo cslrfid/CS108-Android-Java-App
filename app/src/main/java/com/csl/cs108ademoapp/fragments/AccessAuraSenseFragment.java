@@ -9,7 +9,6 @@ import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_BAP;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_COLDCHAIN;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -27,7 +26,10 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cs108ademoapp.AsyncTaskA;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SelectTag;
@@ -71,13 +73,13 @@ public class AccessAuraSenseFragment extends CommonFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState, false);
+        super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_access_aurasense, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         spinnerTagSelect = (Spinner) getActivity().findViewById(R.id.accessEmicroTagSelect);
         ArrayAdapter<CharSequence> targetAdapter1 = ArrayAdapter.createFromResource(getActivity(), R.array.emicro_options, R.layout.custom_spinner_layout);
@@ -93,25 +95,25 @@ public class AccessAuraSenseFragment extends CommonFragment {
                 if (MainActivity.csLibrary4A.get98XX() == 2) tableRow.setVisibility(View.GONE);
                 LinearLayout layout4 = (LinearLayout) getActivity().findViewById(R.id.accessCustomReadWrite);
                 if (position == eMicroTag.emAuraSense.ordinal()) {
-                    MainActivity.tagType = TAG_EM_AURASENSE; MainActivity.mDid = "E280B12";
+                    MainActivity.tagType = TAG_EM_AURASENSE; MainActivity.mDid = "" /*"E280B12"*/;
                     layout0.setVisibility(View.VISIBLE);
                     layout1.setVisibility(View.VISIBLE);
                     layout2.setVisibility(View.GONE);
                     layout4.setVisibility(View.VISIBLE);
                 } else if (position == eMicroTag.emColdChain.ordinal()) {
-                    MainActivity.tagType = TAG_EM_COLDCHAIN; MainActivity.mDid = "E280B0";
+                    MainActivity.tagType = TAG_EM_COLDCHAIN; MainActivity.mDid = "" /*"E280B0"*/;
                     layout0.setVisibility(View.VISIBLE);
                     layout1.setVisibility(View.GONE);
                     layout2.setVisibility(View.VISIBLE);
                     layout4.setVisibility(View.VISIBLE);
                 } else if (position == eMicroTag.emBap.ordinal()) {
-                    MainActivity.tagType = TAG_EM_BAP; MainActivity.mDid = "E200B0";
+                    MainActivity.tagType = TAG_EM_BAP; MainActivity.mDid = "" /*"E200B0"*/;
                     layout0.setVisibility(View.GONE);
                     layout1.setVisibility(View.GONE);
                     layout2.setVisibility(View.GONE);
                     layout4.setVisibility(View.GONE);
                 } else {
-                    MainActivity.tagType = TAG_EM; MainActivity.mDid = "E280B";
+                    MainActivity.tagType = TAG_EM; MainActivity.mDid = "" /*"E280B"*/;
                     layout0.setVisibility(View.GONE);
                     layout1.setVisibility(View.GONE);
                     layout2.setVisibility(View.GONE);
@@ -316,10 +318,10 @@ public class AccessAuraSenseFragment extends CommonFragment {
             if (spinnerTagSelect != null && spinnerTagSelect.getSelectedItemPosition() == eMicroTag.emAuraSense.ordinal()) {
                 if (radioButtonAuraSensAtBoot != null && radioButtonAuraSensAtSelect != null) {
                     if (radioButtonAuraSensAtBoot.isChecked()) {
-                        MainActivity.tagType = TAG_EM_AURASENSE_ATBOOT; MainActivity.mDid = "E280B12A";
+                        MainActivity.tagType = TAG_EM_AURASENSE_ATBOOT; MainActivity.mDid = "" /*"E280B12A"*/;
                     }
                     if (radioButtonAuraSensAtSelect.isChecked()) {
-                        MainActivity.tagType = TAG_EM_AURASENSE_ATSELECT; MainActivity.mDid = "E280B12B";
+                        MainActivity.tagType = TAG_EM_AURASENSE_ATSELECT; MainActivity.mDid = "" /*"E280B12B"*/;
                     }
                 }
             }
@@ -339,7 +341,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
             Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
             return true;
         } else if (accessTask != null) {
-            if (accessTask.getStatus() == AsyncTask.Status.RUNNING) {
+            if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) {
                 Toast.makeText(MainActivity.mContext, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -364,7 +366,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) {
+            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -416,7 +418,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTask.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             if (DEBUG || true) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessResult);

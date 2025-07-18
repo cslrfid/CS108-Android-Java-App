@@ -73,10 +73,12 @@ public class BarcodeConnector {
         }
         return validEvent;
     }
-    private byte[] writeBarcode(CsReaderBarcodeData data) {
+    private byte[] writeBarcode(CsReaderBarcodeData data, boolean usbConnection) {
+        boolean DEBUG = false;
         int datalength = 0;
         if (data.dataValues != null)    datalength = data.dataValues.length;
         byte[] dataOutRef = new byte[] { (byte) 0xA7, (byte) 0xB3, 2, (byte) 0x6A, (byte) 0x82, (byte) 0x37, 0, 0, (byte) 0x90, 0};
+        if (usbConnection) dataOutRef[1] = (byte) 0xE6;
 
         byte[] dataOut = new byte[10 + datalength];
         if (datalength != 0)    {
@@ -86,7 +88,7 @@ public class BarcodeConnector {
         System.arraycopy(dataOutRef, 0, dataOut, 0, dataOutRef.length);
 
         if (arrayTypeSet(dataOut, 9, data.barcodePayloadEvent)) {
-            if (false) {
+            if (DEBUG) {
                 appendToLog("BarStreamOut: " + byteArrayToString(dataOut));
                 appendToLogView("BOut: " + byteArrayToString(dataOut));
             }
@@ -164,7 +166,7 @@ public class BarcodeConnector {
 
     public int sendDataToWriteSent = 0; public boolean mDataToWriteRemoved = false;
     public boolean barcodeFailure = false;
-    public byte[] sendBarcodeToWrite() {
+    public byte[] sendBarcodeToWrite(boolean usbConnection) {
         boolean DEBUG = false;
         /*if (barcodePowerOnTimeOut != 0) {
             if (DEBUG) appendToLog("barcodePowerOnTimeOut = " + barcodePowerOnTimeOut + ", barcodeToWrite.size() = " + barcodeToWrite.size());
@@ -196,7 +198,7 @@ public class BarcodeConnector {
                 } else {
                     if (DEBUG) appendToLog("size = " + barcodeToWrite.size() + ", PayloadEvents = " + barcodeToWrite.get(0).barcodePayloadEvent.toString());
                     sendDataToWriteSent++;
-                    return writeBarcode(barcodeToWrite.get(0));
+                    return writeBarcode(barcodeToWrite.get(0), usbConnection);
                     /*if (retValue) {
                         sendDataToWriteSent++;
                         mDataToWriteRemoved = false;
