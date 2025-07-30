@@ -365,7 +365,8 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_SEARCHING);
         }
         MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest);
-        geigerSearchTask = new InventoryRfidTask(getContext(), -1,-1, 0, 0, 0, 0, invalidRequest, true,
+        geigerSearchTask = new InventoryRfidTask(getContext(), -1,-1, 0, 0, 0, 0,
+                invalidRequest, true, false,
                 null, null, RfidReader.TagType.TAG_NULL, null,
                 geigerTagRssiView, geigerTagGotView,
                 geigerRunTime, geigerVoltageLevelView, rfidYieldView, button, rfidRateView);

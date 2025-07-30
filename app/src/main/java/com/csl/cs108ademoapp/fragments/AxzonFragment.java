@@ -1,5 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON;
+
 import androidx.annotation.NonNull;
 import androidx.core.view.MenuProvider;
 import androidx.lifecycle.Lifecycle;
@@ -81,19 +83,19 @@ public class AxzonFragment extends CommonFragment {
         if (false) actionBar.setTitle(R.string.title_activity_axzon);
         else {
             String stringTitle = getResources().getString(R.string.title_activity_axzon);
-            if (MainActivity.tagType == RfidReader.TagType.TAG_MAGNUS_S2 /*MainActivity.mDid.matches("E282402")*/) stringTitle = "S2";
-            else if (MainActivity.tagType == RfidReader.TagType.TAG_MAGNUS_S3 /*MainActivity.mDid.matches("E282403")*/) stringTitle = "S3";
-            if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES /*MainActivity.mDid.matches("E282405")*/) stringTitle = "Xerxes";
+            if (MainActivity.tagType == RfidReader.TagType.TAG_MAGNUS_S2) stringTitle = "S2";
+            else if (MainActivity.tagType == RfidReader.TagType.TAG_MAGNUS_S3) stringTitle = "S3";
+            if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES) stringTitle = "Xerxes";
             actionBar.setTitle(stringTitle);
          }
 
         boolean bXervesTag = false;
-        if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES /*MainActivity.mDid != null) if (MainActivity.mDid.matches("E282405")*/) bXervesTag = true;
+        if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES) bXervesTag = true;
 
         TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
 
         adapter = new AdapterTab(getActivity().getSupportFragmentManager(), (bXervesTag ? 4 : 2));
-        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, null, ""));
+        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, TAG_AXZON, ""));
         adapter.setFragment(1, AccessMicronFragment.newInstance(true));
         adapter.setFragment(2, new AccessXerxesLoggerFragment());
         adapter.setFragment(3, new AccessUcodeFragment());

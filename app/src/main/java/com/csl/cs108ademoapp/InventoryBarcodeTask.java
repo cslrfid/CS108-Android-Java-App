@@ -1,6 +1,7 @@
 package com.csl.cs108ademoapp;
 
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ public class InventoryBarcodeTask extends AsyncTaskA {
     final boolean endingRequest = false;
 
     public TaskCancelRReason taskCancelReason;
+    public boolean pseudoStop = false;
     public String tagResult;
     int batteryCountInventory_old; long startTimeMillis, runTimeMillis;
 
@@ -45,6 +47,7 @@ public class InventoryBarcodeTask extends AsyncTaskA {
 //            tagsList.clear();
 //            readerListAdapter.notifyDataSetChanged();
         timeMillis = 0; startTimeMillis = System.currentTimeMillis(); runTimeMillis = startTimeMillis;
+        MainActivity.csLibrary4A.appendToLog("InventoryBarcodeTask.onPreExecute: taskCancelReason as NULL");
         taskCancelReason = TaskCancelRReason.NULL;
         if (barcodeYieldView != null) barcodeYieldView.setText("");
 
@@ -62,8 +65,10 @@ public class InventoryBarcodeTask extends AsyncTaskA {
                 publishProgress("VV");
             }
             if (System.currentTimeMillis() > runTimeMillis + 1000) {
+                MainActivity.csLibrary4A.appendToLog("InventoryBarcodeTask.doInBackground: pseudoStop = " + (pseudoStop ? "true" : "false"));
                 runTimeMillis = System.currentTimeMillis();
-                publishProgress("WW");
+                if (!pseudoStop) publishProgress("WW");
+                else startTimeMillis = runTimeMillis;
             }
             if (System.currentTimeMillis() - timeMillisSound > 1000) {
                 timeMillisSound = System.currentTimeMillis();
@@ -92,15 +97,23 @@ public class InventoryBarcodeTask extends AsyncTaskA {
                 MainActivity.csLibrary4A.appendToLog("InventoryBarcodeTask.doInBackground: BarStream: onBarcodeEvent, stringBar= " + stringBar);
                 if (stringBar != null) {
                     if (stringBar.length() != 0) {
-                        if (tagsList == null) {
+                        if (tagsList == null && registerBarValue == null) {
                             tagResult = stringBar.trim();
                             break;
                         } else publishProgress(null, stringBar.trim());
                     }
                 }
                 timeMillis = System.currentTimeMillis();
-            } else if (System.currentTimeMillis() - timeMillis > 300) { if (taskCancelReason != TaskCancelRReason.NULL) cancel(true); }
-            if (MainActivity.csLibrary4A.isBleConnected() == false) taskCancelReason = TaskCancelRReason.DESTORY;
+            } else if (System.currentTimeMillis() - timeMillis > 300) {
+                if (taskCancelReason != TaskCancelRReason.NULL) {
+                    Log.i("Hello", "InventoryBarcodeTask.doInBackground: going to cancel as taskCancelReason is found as " + taskCancelReason.toString());
+                    cancel(true);
+                }
+            }
+            if (MainActivity.csLibrary4A.isBleConnected() == false) {
+                Log.i("Hello", "InventoryBarcodeTask.doInBackground: taskCancelReason as DESTROY");
+                taskCancelReason = TaskCancelRReason.DESTORY;
+            }
         }
         return "End of Asynctask()";
     }
@@ -120,6 +133,7 @@ public class InventoryBarcodeTask extends AsyncTaskA {
                 }
                 return;
             }
+            MainActivity.csLibrary4A.appendToLog("InventoryBarcodeTask.onProgressUpdate: registerBarValue is " + (registerBarValue == null ? "null" : "valid") + ", barcode = " + output[1]);
             if (registerBarValue != null) registerBarValue.setText(output[1]);
             boolean match = false;
             if (false || tagsList != null) {

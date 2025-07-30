@@ -1,10 +1,15 @@
 package com.csl.cslibrary4a;
 
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M755;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M780;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODEDNA_AUTHMODE;
 import static java.lang.Math.log10;
 
 import android.content.Context;
+import android.nfc.Tag;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -63,9 +68,12 @@ public class RfidReader {
 
     public enum TagType {
         TAG_NULL,
-        TAG_IMPINJ, TAG_IMPINJ_M755, //E28011, E2C011
+        TAG_IMPINJ, //E28011
+        TAG_IMPINJ_M755, TAG_IMPINJ_M780, TAG_IMPINJ_M830, TAG_IMPINJ_M770, TAG_IMPINJ_M730, //E2C011(E2C011A2), E28011C, E28011B, E28011A, E280119
+        TAG_IMPINJ_MONZA_R6A, TAG_IMPINJ_MONZA_R6P, TAG_IMPINJ_MONZA_R6, TAG_IMPINJ_MONZA_X8K, //E2801171, E2801170, E2801160, E2801150
+        TAG_IMPINJ_noUSER, //E2001
         TAG_ALIEN, //E2003
-        TAG_NXP, TAG_NXP_UCODEDNA, //E2806, E2C06
+        TAG_NXP, TAG_NXP_UCODEDNA, TAG_NXP_UCODEDNA_AUTHMODE, //E2806, E2C06, E2C06
         TAG_NXP_UCODE8, TAG_NXP_UCODE8_EPC, TAG_NXP_UCODE8_EPCTID, TAG_NXP_UCODE8_EPCBRAND, TAG_NXP_UCODE8_EPCBRANDTID, //E2806894, E2806894A, E2806894B, E2806894C, E2806894d
         TAG_EM, TAG_EM_BAP, TAG_EM_COLDCHAIN, TAG_EM_AURASENSE, TAG_EM_AURASENSE_ATBOOT, TAG_EM_AURASENSE_ATSELECT, //E280B, E200B0, E280B0, E280B12, E280B12A, E280B12B
         TAG_KILOWAY, //E281D
@@ -102,12 +110,12 @@ public class RfidReader {
             extra2Count = 2;
             Log.i("Hello", "RfidReader.setExtraBankData: DebugABC, tagType = " + (tagType == null ? "null" : tagType.toString()) + ", mDid = " + mDid);
             if (mDid == null) mDid = "";
-            if (mDid.matches("E2801101") || mDid.matches("E2801102") || mDid.matches("E2801103") || mDid.matches("E2801104") || mDid.matches("E2801105")) {
+            if (tagType == TAG_IMPINJ_M755 || tagType == TAG_IMPINJ_M780) {
+            //if (mDid.matches("E2801101") || mDid.matches("E2801102") || mDid.matches("E2801103") || mDid.matches("E2801104") || mDid.matches("E2801105")) {
                 extra1Bank = 0;
                 extra1Offset = 4;
                 extra1Count = 1;
-                if (mDid.matches("E2801101")) extra2Count = 6;
-
+                if (tagType == TAG_IMPINJ_M755 /*mDid.matches("E2801101")*/) extra2Count = 6;
             } else if (tagType == TagType.TAG_EM_BAP /*mDid.matches("E200B0")*/) {
                 extra1Bank = 2;
                 extra1Offset = 0;
@@ -265,13 +273,14 @@ public class RfidReader {
                 //mDid = "E2806894";
             }
 
-            appendToLog("RfidReader.setSelectData4Inventory: ");
+            appendToLog("RfidReader.setSelectData4Inventory: bNeedSelectedTagByTID = " + bNeedSelectedTagByTID);
             if (bNeedSelectedTagByTID) {
+                appendToLog("RfidReader.setSelectData4Inventory: tagType = " + tagType.toString());
                 mDid = getsTid(tagType);
                 appendToLog("RfidReader.setSelectData4Inventory: mDid after getsTid = " + mDid);
 
                 String strMdid = mDid;
-                if (strMdid.indexOf("E28011") == 0) {
+                /*if (strMdid.indexOf("E28011") == 0) {
                     int iValue1 = Integer.valueOf(strMdid.substring(6, 8), 16);
                     iValue1 &= 0x0F;
                     appendToLog(String.format("iValue1 = 0x%X", iValue1));
@@ -285,7 +294,7 @@ public class RfidReader {
                     else if (iValue1 == 8) strMdid = "E2801150";
                     else
                         strMdid = "E2001"; //strMdid.substring(0, 5); even E2801 or E2C01 will return
-                }
+                }*/
                 if (stringProtectPassword != null) {
                     if (stringProtectPassword.trim().length() == 0)
                         stringProtectPassword = "00000000";
@@ -301,9 +310,21 @@ public class RfidReader {
 
     public String getsTid(TagType tagType) {
         String sTid = "";
-        if (tagType == TagType.TAG_ALIEN) sTid = "E2003";
+        if (tagType == TagType.TAG_IMPINJ_M755) sTid = "E2C011"; //"E2C011A2";
+        else if (tagType == TagType.TAG_IMPINJ_M780) sTid = "E28011C";
+        else if (tagType == TagType.TAG_IMPINJ_M830) sTid = "E28011B";
+        else if (tagType == TagType.TAG_IMPINJ_M770) sTid = "E28011A";
+        else if (tagType == TagType.TAG_IMPINJ_M730) sTid = "E280119";
+        else if (tagType == TagType.TAG_IMPINJ_MONZA_R6A) sTid = "E2801171";
+        else if (tagType == TagType.TAG_IMPINJ_MONZA_R6P) sTid = "E2801170";
+        else if (tagType == TagType.TAG_IMPINJ_MONZA_R6) sTid = "E2801160";
+        else if (tagType == TagType.TAG_IMPINJ_MONZA_X8K) sTid = "E2801150";
+        else if (tagType == TagType.TAG_IMPINJ_noUSER) sTid = "E2001";
+        else if (tagType == TAG_IMPINJ) sTid = "E28011";
+
+        else if (tagType == TagType.TAG_ALIEN) sTid = "E2003";
         else if (tagType == TagType.TAG_NXP) sTid = "E2806";
-        else if (tagType == TagType.TAG_NXP_UCODEDNA) sTid = "E2C06";
+        else if (tagType == TagType.TAG_NXP_UCODEDNA || tagType == TAG_NXP_UCODEDNA_AUTHMODE) sTid = "E2C06";
         else if (tagType == TagType.TAG_NXP_UCODE8 || tagType == TagType.TAG_NXP_UCODE8_EPC || tagType == TagType.TAG_NXP_UCODE8_EPCTID || tagType == TagType.TAG_NXP_UCODE8_EPCBRAND || tagType == TagType.TAG_NXP_UCODE8_EPCBRANDTID) sTid = "E2806894";
         else if (tagType == TAG_EM) sTid = "E280B";
         else if (tagType == TagType.TAG_EM_BAP) sTid = "E200B0";
@@ -324,10 +345,24 @@ public class RfidReader {
 
     public TagType getagType(String sTid) {
         TagType tagType = TagType.TAG_NULL;
-        if (sTid.indexOf("E2003") == 0) tagType = TagType.TAG_ALIEN;
+        if (sTid == null) return tagType;
+        if (sTid.indexOf("E2C011") == 0) tagType = TagType.TAG_IMPINJ_M755; //E2C011A2
+        else if (sTid.indexOf("E28011C") == 0) tagType = TagType.TAG_IMPINJ_M780;
+        else if (sTid.indexOf("E28011B") == 0) tagType = TagType.TAG_IMPINJ_M830;
+        else if (sTid.indexOf("E28011A") == 0) tagType = TagType.TAG_IMPINJ_M770;
+        else if (sTid.indexOf("E280119") == 0) tagType = TagType.TAG_IMPINJ_M730;
+        else if (sTid.indexOf("E2801171") == 0) tagType = TagType.TAG_IMPINJ_MONZA_R6A;
+        else if (sTid.indexOf("E2801170") == 0) tagType = TagType.TAG_IMPINJ_MONZA_R6P;
+        else if (sTid.indexOf("E2801160") == 0) tagType = TagType.TAG_IMPINJ_MONZA_R6;
+        else if (sTid.indexOf("E2801150") == 0) tagType = TagType.TAG_IMPINJ_MONZA_X8K;
+
+        else if (sTid.indexOf("E2001") == 0) tagType = TagType.TAG_IMPINJ_noUSER;
+        else if (sTid.indexOf("E28011") == 0) tagType = TagType.TAG_IMPINJ;
+
+        else if (sTid.indexOf("E2003") == 0) tagType = TagType.TAG_ALIEN;
         else if (sTid.indexOf("E2806894") == 0) tagType = TagType.TAG_NXP_UCODE8;
         else if (sTid.indexOf("E2806") == 0) tagType = TagType.TAG_NXP;
-        else if (sTid.indexOf("E2C06") == 0) tagType = TagType.TAG_NXP_UCODEDNA;
+        else if (sTid.indexOf("E2C06") == 0) tagType = TagType.TAG_NXP_UCODEDNA; //TAG_NXP_UCODEDNA_AUTHMODE
         else if (sTid.indexOf("E200B0") == 0) tagType = TagType.TAG_EM_BAP;
         else if (sTid.indexOf("E280B0") == 0) tagType = TagType.TAG_EM_COLDCHAIN;
         else if (sTid.indexOf("E280B12") == 0) tagType = TagType.TAG_EM_AURASENSE;
@@ -2021,7 +2056,7 @@ public class RfidReader {
         if (utility.DEBUG_SELECT) appendToLog("Debug_Select: RfidReader.setSelectedTag1[selectOne = " + selectOne + ", selectMask = "
                 + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", delay = "
                 + delay + ", pwrlevel = " + pwrlevel + ", qValue = " + qValue + ", matchRep = " + matchRep);
-        boolean setSuccess = true, DEBUG = false;
+        boolean setSuccess = true, DEBUG = true;
         if (selectMask == null)   selectMask = "";
 
         if (preMatchDataChanged == false) {
@@ -2063,7 +2098,7 @@ public class RfidReader {
         if (setSuccess) setSuccess = setMatchRep(matchRep);
         if (DEBUG) appendToLog("setSelectCriteria after setMatchRep, setSuccess = " + setSuccess);
         if (setSuccess) setSuccess = setTagDelay2RfidReader(tagDelayDefaultNormalSetting);
-        if (DEBUG) appendToLog("setSelectCriteria after setTagDelay, setSuccess = " + setSuccess);
+        if (DEBUG) appendToLog("setSelectCriteria after setTagDelay to " + tagDelayDefaultNormalSetting + ", setSuccess = " + setSuccess);
         if (setSuccess) setSuccess = (bis108 ? rfidReaderChipR2000.rx000Setting.setCycleDelay(cycleDelaySetting) : rfidReaderChipE710.rx000Setting.setCycleDelay(cycleDelaySetting));
         if (DEBUG) appendToLog("setSelectCriteria after setCycleDelay, setSuccess = " + setSuccess);
         if (utility.DEBUG_COMPACT) appendToLog("Debug_Compact 3: RfidReadder.setSelectedTag1 goes to setInvModeCompact");
@@ -4146,6 +4181,7 @@ public class RfidReader {
         }
     }
     public String getSerialNumber() {
+        if (rfidToWriteSize() != 0) return null;
         return (bis108 ? rfidReaderChipR2000.rx000OemSetting.getSerialNumber() : rfidReaderChipE710.rx000Setting.getBoardSerialNumber());
     }
     public boolean isInventoring() {

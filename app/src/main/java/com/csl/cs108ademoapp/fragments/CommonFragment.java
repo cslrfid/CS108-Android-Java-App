@@ -84,14 +84,10 @@ public abstract class CommonFragment extends Fragment {
             }
 
             mHandler.postDelayed(updateTriggerRunnable, reportCount * 1100);
-            MainActivity.csLibrary4A.appendToLog(fragmentName + ".CommonFragment: menuTriggerItem is " + (menuTriggerItem == null ? "null" : "valid"));
             if (menuTriggerItem == null) return;
-            MainActivity.csLibrary4A.appendToLog(fragmentName + ".CommonFragment: 1");
             if (MainActivity.csLibrary4A.isBleConnected() == false) { menuTriggerItem.setTitle("");  return; }
-            MainActivity.csLibrary4A.appendToLog(fragmentName + ".CommonFragment: 2");
 
             int triggerCount = MainActivity.csLibrary4A.getTriggerCount();
-            MainActivity.csLibrary4A.appendToLog(fragmentName + ".CommonFragment: triggerCount = " + triggerCount + ", triggerCount_old = " + triggerCount_old);
             if (triggerCount != triggerCount_old) {
                 triggerCount_old = triggerCount;
                 if (MainActivity.csLibrary4A.getTriggerButtonStatus()) menuTriggerItem.setTitle("Ton");

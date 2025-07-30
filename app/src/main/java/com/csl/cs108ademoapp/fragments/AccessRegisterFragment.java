@@ -226,7 +226,7 @@ public class AccessRegisterFragment extends CommonFragment {
                     long pwrlevel = Integer.parseInt(editTextAntennaPower.getText().toString());
                     MainActivity.csLibrary4A.setTagRead(0);
                     MainActivity.csLibrary4A.setSelectedTag(strTagId, selectBank, pwrlevel);
-                    MainActivity.csLibrary4A.appendToLog("Debug_Compact: AccessRegisterFragment.onActivityCreated.onClick");
+                    MainActivity.csLibrary4A.appendToLog("Debug_Compact: AccessRegisterFragment.onViewCreated.buttonSelect.onClick");
                     MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY);
                     inventoryRfidTask = new InventoryRfidTask();
                     inventoryRfidTask.execute();
@@ -319,6 +319,7 @@ public class AccessRegisterFragment extends CommonFragment {
         });
 
         MainActivity.csLibrary4A.setSameCheck(false);
+        MainActivity.csLibrary4A.getBarcodePreSuffix();
     }
 
     @Override
@@ -335,14 +336,16 @@ public class AccessRegisterFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.csLibrary4A.setNotificationListener(null);
         mHandler.removeCallbacks(runnableSelect);
         mHandler.removeCallbacks(runnableAuto123);
         if (inventoryBarcodeTask != null) inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.DESTORY;
         if (accessTask != null) accessTask.taskCancelReason = AccessTask.TaskCancelRReason.DESTORY;
         if (DEBUG) MainActivity.csLibrary4A.appendToLog("AcccessRegisterFragment().onDestory(): onDestory()");
-        MainActivity.csLibrary4A.setSameCheck(true);
-        MainActivity.csLibrary4A.restoreAfterTagSelect();
+        if (MainActivity.csLibrary4A != null) {
+            MainActivity.csLibrary4A.setNotificationListener(null);
+            MainActivity.csLibrary4A.setSameCheck(true);
+            MainActivity.csLibrary4A.restoreAfterTagSelect();
+        }
         super.onDestroy();
     }
 

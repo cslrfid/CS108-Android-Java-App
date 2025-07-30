@@ -270,7 +270,7 @@ public class InventoryRfidBarFragment extends CommonFragment {
                     //MainActivity.csLibrary4A.setPowerLevel(150);
                     MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY);
                     inventoryRfidTask = new InventoryRfidTask(getContext(), -1, -1, 0, 0, 0, 0,
-                            false, MainActivity.csLibrary4A.getInventoryBeep(),
+                            false, MainActivity.csLibrary4A.getInventoryBeep(), true,
                             null, null, RfidReader.TagType.TAG_NULL, null,
                             null, null,
                             null, barcodeVoltageLevel, null, button, null);

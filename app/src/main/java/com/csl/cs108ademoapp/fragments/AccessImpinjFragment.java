@@ -1,6 +1,15 @@
 package com.csl.cs108ademoapp.fragments;
 
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M730;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M755;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M770;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M780;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M830;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_MONZA_R6;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_MONZA_R6A;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_MONZA_R6P;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_MONZA_X8K;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -39,7 +48,7 @@ public class AccessImpinjFragment extends CommonFragment {
     Button buttonReadUserBank, buttonWriteUserBank;
     TextView textViewRunTime;
     enum impinjTag {
-        m775, m780, m830, m770, m730, monza_R6A, monza_R6P, monza_x8k, others
+        m775, m780, m830, m770, m730, monza_R6A, monza_R6P, monza_R6, monza_x8k, others
     }
 
     SelectTag selectTag;
@@ -127,12 +136,15 @@ public class AccessImpinjFragment extends CommonFragment {
 
                     textViewAutotuneValue.setText("");
 
-                    if (position == impinjTag.monza_R6A.ordinal() || position == impinjTag.monza_R6P.ordinal() || position == impinjTag.others.ordinal()) checkBoxProtect.setVisibility(View.GONE);
+                    if (position == impinjTag.monza_R6A.ordinal() || position == impinjTag.monza_R6P.ordinal() || position == impinjTag.monza_R6.ordinal() || position == impinjTag.others.ordinal()) checkBoxProtect.setVisibility(View.GONE);
                     else checkBoxProtect.setVisibility(View.VISIBLE);
                     if (position == impinjTag.m830.ordinal() || position == impinjTag.monza_R6P.ordinal()) checkBoxMemorySelect.setVisibility(View.VISIBLE);
                     else checkBoxMemorySelect.setVisibility(View.GONE);
                     if (position == impinjTag.m775.ordinal() || position == impinjTag.m780.ordinal() || position == impinjTag.m770.ordinal()) checkBoxUnkillable.setVisibility(View.VISIBLE);
                     else checkBoxUnkillable.setVisibility(View.GONE);
+                    if (position != impinjTag.monza_R6.ordinal()) checkBoxShortRange.setVisibility(View.VISIBLE);
+                    else checkBoxShortRange.setVisibility(View.GONE);
+
 
                     checkBoxAutoTuneDisable.setChecked(false); checkBoxAutoTuneDisable.setEnabled(false);
                     checkBoxProtect.setChecked(false); checkBoxProtect.setEnabled(false);
@@ -206,8 +218,9 @@ public class AccessImpinjFragment extends CommonFragment {
                     else if (itagSelect == impinjTag.m730.ordinal()) iAccOffset = 0x14;
                     else if (itagSelect == impinjTag.monza_R6A.ordinal()) iAccOffset = 0x14;
                     else if (itagSelect == impinjTag.monza_R6P.ordinal()) iAccOffset = 0x14;
+                    else if (itagSelect == impinjTag.monza_R6.ordinal()) iAccOffset = 0x0E;
                     MainActivity.csLibrary4A.appendToLog(String.format("AutoTune offset is 0x%X", iAccOffset));
-                    if (set_before_access(0, itagSelect, 1) == false) invalidRequest = true;
+                    if (set_before_access(0, iAccOffset, 1) == false) invalidRequest = true;
                     accessTask = new AccessTask(buttonAutoTuneValueRead, null, invalidRequest, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
@@ -255,14 +268,20 @@ public class AccessImpinjFragment extends CommonFragment {
                         if (accessTask != null) accessTask.taskCancelReason = AccessTask.TaskCancelRReason.DESTORY;
                     }
 
+                    MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment.onViewCreated.buttonProtectResumeRead.onClick: unprotecting = " + unprotecting);
                     if (unprotecting > 0) stopProtectResuming();
                     else {
                         unprotecting = 1;
-                        if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal()) selectTag.editTextTagID.setText("E2C011A2");
-                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m780.ordinal()) selectTag.editTextTagID.setText("E28011C");
-                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m770.ordinal()) selectTag.editTextTagID.setText("E28011A0");
-                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m830.ordinal()) selectTag.editTextTagID.setText("E28011B0");
-                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m730.ordinal()) selectTag.editTextTagID.setText("E280119");
+                        if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal())  selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M755)/*"E2C011"*/); //E2C011A2
+                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m780.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M780));
+                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m830.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M780));
+                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m770.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M770));
+                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m730.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M730));
+                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6A.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_MONZA_R6A));
+                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6P.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_MONZA_R6P));
+                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_MONZA_R6));
+                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_x8k.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_MONZA_X8K));
+                        else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.others.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ));
                         selectTag.spinnerSelectBank.setSelection(1);
                         checkBoxProtectSelect.setChecked(true);
                         buttonProtectResumeRead.setText("Stop resuming to normal");
@@ -417,7 +436,9 @@ public class AccessImpinjFragment extends CommonFragment {
     void startConfigRead() {
         textViewConfiguration.setText("");
         boolean invalidRequest = false;
-        if (set_before_access(0, 4, 1) == false) invalidRequest = true;
+        int iAccOffset = 4;
+        if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6.ordinal()) iAccOffset = 5;
+        if (set_before_access(0, iAccOffset, 1) == false) invalidRequest = true;
         int iSelectBank = selectTag.spinnerSelectBank.getSelectedItemPosition() + 1;
         int iSelectOffset = 32;
         if (iSelectBank != 1) iSelectOffset = 0;
@@ -432,7 +453,9 @@ public class AccessImpinjFragment extends CommonFragment {
     }
     void startConfigWrite() {
         boolean invalidRequest = false;
-        if (set_before_access(0, 4, 1) == false) invalidRequest = true;
+        int iAccOffset = 4;
+        if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6.ordinal()) iAccOffset = 5;
+        if (set_before_access(0, iAccOffset, 1) == false) invalidRequest = true;
         int iSelectBank = selectTag.spinnerSelectBank.getSelectedItemPosition() + 1;
         int iSelectOffset = 32;
         if (iSelectBank != 1) iSelectOffset = 0;
@@ -441,7 +464,10 @@ public class AccessImpinjFragment extends CommonFragment {
             int iValue = Integer.valueOf(string, 16);
             MainActivity.csLibrary4A.appendToLog(String.format("iValue = 0x%02X", iValue));
 
-            if (checkBoxAutoTuneDisable.isChecked()) iValue |= 0x01;
+            if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6.ordinal()) {
+                if (checkBoxAutoTuneDisable.isChecked()) iValue |= 0x8000;
+                else iValue &= ~0x8000;
+            } else if (checkBoxAutoTuneDisable.isChecked()) iValue |= 0x01;
             else iValue &= ~0x01;
 
             if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal() ||
@@ -566,7 +592,11 @@ public class AccessImpinjFragment extends CommonFragment {
                     int iValue = Integer.valueOf(accessTask.accessResult.substring(accessTask.accessResult.length()-2, accessTask.accessResult.length()), 16);
                     MainActivity.csLibrary4A.appendToLog("updateRunnable(): " + String.format("accessResult = %s, iValue = 0x%02X", accessTask.accessResult, iValue));
 
-                    if ((iValue & 0x01) != 0) checkBoxAutoTuneDisable.setChecked(true); else checkBoxAutoTuneDisable.setChecked(false);
+                    boolean bActive = false;
+                    if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6.ordinal()) {
+                        if ((iValue & 0x8000) != 0) bActive = true;
+                    } else if ((iValue & 0x01) != 0) bActive = true;
+                    if (bActive) checkBoxAutoTuneDisable.setChecked(true); else checkBoxAutoTuneDisable.setChecked(false);
                     checkBoxAutoTuneDisable.setEnabled(true);
 
                     if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal() ||
@@ -680,7 +710,18 @@ public class AccessImpinjFragment extends CommonFragment {
                 } else MainActivity.csLibrary4A.setTagGroup(MainActivity.csLibrary4A.getQuerySelect(), 0, 2);
                 if (checkBoxFastId.isChecked()) iValue |= 0x20;
                 if (spinnerTagSelect.getSelectedItemPosition() != impinjTag.others.ordinal()) iValue |= (spinnerTagSelect.getSelectedItemPosition() + 1);
-                MainActivity.tagType = TAG_IMPINJ; /* need more tagType */ MainActivity.mDid = "E28011" + String.format("%02X", iValue);
+                if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal())  { MainActivity.tagType = TAG_IMPINJ_M755; MainActivity.mDid = ""; }
+                else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m780.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M780; MainActivity.mDid = ""; }
+                else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m830.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M830; MainActivity.mDid = ""; }
+                else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m770.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M770; MainActivity.mDid = ""; }
+                else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m730.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M730; MainActivity.mDid = ""; }
+                else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6.ordinal()) { MainActivity.tagType = TAG_IMPINJ_MONZA_R6; MainActivity.mDid = ""; }
+                else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6A.ordinal()) { MainActivity.tagType = TAG_IMPINJ_MONZA_R6A; MainActivity.mDid = ""; }
+                else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_R6P.ordinal()) { MainActivity.tagType = TAG_IMPINJ_MONZA_R6P; MainActivity.mDid = ""; }
+                else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_x8k.ordinal()) { MainActivity.tagType = TAG_IMPINJ_MONZA_X8K; MainActivity.mDid = ""; }
+                else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.others.ordinal()) { MainActivity.tagType = TAG_IMPINJ; MainActivity.mDid = ""; }
+
+                MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment.setUserVisibleHint: DebugABC, MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + MainActivity.tagType.toString());
                 MainActivity.csLibrary4A.appendToLog(String.format("HelloK: iValue = 0x%02X, mDid = %s", iValue, MainActivity.mDid));
                 MainActivity.csLibrary4A.setImpinJExtension(checkBoxTagFocus.isChecked(), checkBoxFastId.isChecked());
             }

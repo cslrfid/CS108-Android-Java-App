@@ -158,6 +158,9 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
                     case 3:
                         strHeader = "USER";
                         break;
+                    case 4:
+                        strHeader = "AUTH";
+                        break;
                 }
                 if (strHeader != null)
                     strDetail += "\n" + strHeader + "=" + strExtra2;

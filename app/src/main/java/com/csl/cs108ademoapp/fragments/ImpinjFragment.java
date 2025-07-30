@@ -17,6 +17,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cslibrary4a.AdapterTab;
+import com.csl.cslibrary4a.RfidReader;
 import com.google.android.material.tabs.TabLayout;
 
 public class ImpinjFragment extends CommonFragment {
@@ -78,7 +79,7 @@ public class ImpinjFragment extends CommonFragment {
 
         adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
         adapter.setFragment(0, new AccessImpinjFragment(false));
-        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true, null, ""));
+        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true, RfidReader.TagType.TAG_IMPINJ, ""));
         adapter.setFragment(2, new AccessUcodeFragment());
 
         viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);

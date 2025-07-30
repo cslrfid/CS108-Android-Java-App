@@ -48,8 +48,8 @@ public class AccessConfigFragment extends CommonFragment {
         editText0 = (EditText) getActivity().findViewById(R.id.accessConfigData0);
 
         MainActivity.csLibrary4A.appendToLog("AccessConfigFragment.onViewCreated: DebugABC, MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + MainActivity.tagType.toString());
-        if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES /*MainActivity.mDid.indexOf("E282405") == 0*/) editText0.setText("9");
-        else if (MainActivity.tagType == RfidReader.TagType.TAG_MAGNUS_S3 /*MainActivity.mDid.indexOf("E282403") == 0*/) editText0.setText("3");
+        if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES) editText0.setText("9");
+        else if (MainActivity.tagType == RfidReader.TagType.TAG_MAGNUS_S3) editText0.setText("3");
         else editText0.setText("0");
 
         TextView textView1 = (TextView) getActivity().findViewById(R.id.accessConfigData1Label);
@@ -73,7 +73,7 @@ public class AccessConfigFragment extends CommonFragment {
                 MainActivity.config.config2 = editText2.getText().toString();
 
                 MainActivity.csLibrary4A.appendToLog("AccessConfigFragment.onViewCreated: DebugABC, MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + MainActivity.tagType.toString());
-                if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES /*MainActivity.mDid != null) if (MainActivity.mDid.indexOf("E282405") == 0*/) bXerxesEnable = true;
+                if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES) bXerxesEnable = true;
 
                 Fragment fragment;
                 if (bXerxesEnable) fragment = new AxzonFragment();

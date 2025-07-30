@@ -155,7 +155,7 @@ public class InventoryBarcodeFragment extends CommonFragment {
     public void onPause() {
         if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setNotificationListener(null);
         if (inventoryBarcodeTask != null) {
-            if (DEBUG && MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment().onDestory(): VALID inventoryBarcodeTask");
+            if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment.onPause: taskCancelReason as DESTORY");
             inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.DESTORY;
         }
         super.onPause();
@@ -181,6 +181,9 @@ public class InventoryBarcodeFragment extends CommonFragment {
         } else {
             MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment is now INVISIBLE");
             userVisibleHint = false;
+            if (inventoryBarcodeTask != null) {
+                inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.DESTORY;
+            }
             MainActivity.csLibrary4A.setAutoBarStartSTop(false); MainActivity.csLibrary4A.setNotificationListener(null);
         }
     }
@@ -206,10 +209,12 @@ public class InventoryBarcodeFragment extends CommonFragment {
         }
         boolean started = false;
         if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
+        /*
         if (buttonTrigger && ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) {
             MainActivity.csLibrary4A.appendToLog("BARTRIGGER: trigger ignore");
             return;
         }
+        */
         if (started == false) {
             if (MainActivity.csLibrary4A.isBleConnected() == false) {
                 Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
@@ -220,13 +225,23 @@ public class InventoryBarcodeFragment extends CommonFragment {
                 return;
             }
             MainActivity.csLibrary4A.appendToLog("BARTRIGGER: Start Barcode inventory");
-            started = true;
             inventoryBarcodeTask = new InventoryBarcodeTask(MainActivity.sharedObjects.barsList, readerListAdapter, null, barcodeRunTime, barcodeVoltageLevel, barcodeYieldView, button, null, barcodeTotal, false);
             inventoryBarcodeTask.execute();
         } else {
             MainActivity.csLibrary4A.appendToLog("BARTRIGGER: Stop Barcode inventory");
+            if (button.getText().toString().toUpperCase().matches("START")) {
+                if (!buttonTrigger) MainActivity.csLibrary4A.barcodeInventory(true);
+                inventoryBarcodeTask.pseudoStop = false;
+                button.setText("Stop");
+            } else if (!MainActivity.csLibrary4A.getTriggerButtonStatus()) {
+                if (!buttonTrigger) MainActivity.csLibrary4A.barcodeInventory(false);
+                inventoryBarcodeTask.pseudoStop = true;
+                button.setText("Start");
+            }
+            /*
             if (buttonTrigger) inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.BUTTON_RELEASE;
             else    inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.STOP;
+            */
         }
     }
 }

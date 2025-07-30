@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Cs108Library4A {
-    String stringVersion = "1";
+    String stringVersion = "0";
     final boolean DEBUG = false;
     final boolean DEBUG_FILE = false;
     private Handler mHandler = new Handler();
@@ -1862,7 +1862,13 @@ public class Cs108Library4A {
     public RfidReader.TagType getagType(String sTid) {
         return csReaderConnector.rfidReader.getagType(sTid);
     }
-    public int setOtherInventoryData(RfidReader.TagType tagType, String mDid) {
-        return -1;
+    public boolean setOtherInventoryData(RfidReader.TagType tagType, String mDid) {
+        appendToLog("Cs108Library4A.setOtherInventoryData: tagtype = " + (tagType == null ? "null" : tagType.toString()));
+        if (tagType == RfidReader.TagType.TAG_NXP_UCODEDNA) {
+            return setInvAuthenticate(false);
+        } else if (tagType == RfidReader.TagType.TAG_NXP_UCODEDNA_AUTHMODE) {
+            return setInvAuthenticate(true);
+        }
+        return false;
     }
 }

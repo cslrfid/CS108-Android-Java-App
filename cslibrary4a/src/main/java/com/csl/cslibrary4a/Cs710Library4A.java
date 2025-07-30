@@ -1886,13 +1886,14 @@ public class Cs710Library4A {
     public RfidReader.TagType getagType(String sTid) {
         return csReaderConnector.rfidReader.getagType(sTid);
     }
-    public int setOtherInventoryData(RfidReader.TagType tagType, String mDid) {
+    public boolean setOtherInventoryData(RfidReader.TagType tagType, String mDid) {
         if (tagType == RfidReader.TagType.TAG_ASYGN) { //mDid.matches("E283A")) {
             long iValue = csReaderConnector.rfidReader.getAntennaDwell();
             if (iValue == 0) {
                 csReaderConnector.rfidReader.setAntennaDwell(2000);
             }
+            return true;
         }
-        return -1;
+        return false;
     }
 }

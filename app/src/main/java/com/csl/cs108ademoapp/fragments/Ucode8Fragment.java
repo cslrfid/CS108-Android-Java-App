@@ -1,5 +1,8 @@
 package com.csl.cs108ademoapp.fragments;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODEDNA;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -79,7 +82,7 @@ public class Ucode8Fragment extends CommonFragment {
 
         adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
         adapter.setFragment(0, new AccessUcode8Fragment());
-        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true, null, ""));
+        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true, TAG_NXP_UCODE8, ""));
         adapter.setFragment(2, new AccessUcodeFragment());
         adapter.setFragment(3, new UtraceFragment());
 

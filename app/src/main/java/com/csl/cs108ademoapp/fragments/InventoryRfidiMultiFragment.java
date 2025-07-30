@@ -6,7 +6,10 @@ import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON_XERXES;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_CTESIUS;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_BAP;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_FDMICRO;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M755;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M780;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_KILOWAY;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NULL;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPC;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPCBRAND;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPCBRANDTID;
@@ -161,15 +164,16 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 tagType = RfidReader.TagType.values()[iValue];
                 MainActivity.csLibrary4A.appendToLog("onCreate: enumTagType = " + tagType.toString());
             } catch (Exception e) { }
-            if (bMultiBank && mDid == null) {
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.onCreate: bMultiBank = " + bMultiBank + ", mDid = " + mDid + ", tagType = " + tagType.toString());
+            if (bMultiBank && tagType == TAG_NULL /*mDid == null*/) {
                 bMultiBankInventory = true;
-            } else if (bMultiBank && mDid != null) {
-                if ((tagType == TAG_ALIEN /*mDid.matches("E2003"*/)
+                MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.onCreate: set bMultiBankInventory");
+            } else if (bMultiBank && ((tagType == TAG_ALIEN /*mDid.matches("E2003"*/)
                         || (tagType == TAG_EM_BAP /*mDid.matches("E200B0"*/)
                         || (tagType == TAG_CTESIUS /*mDid.matches("E203510"*/)
-                        || (tagType == TAG_ASYGN /*mDid.matches("E283A")*/)) {
-                    bctesiusInventory = true;
-                }
+                        || (tagType == TAG_ASYGN /*mDid.matches("E283A")*/))) {
+                bctesiusInventory = true;
+                MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.onCreate: set bctesiusInventory");
             }
         }
     }
@@ -221,7 +225,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
 
         checkBoxFilterByTid = (CheckBox) getActivity().findViewById(R.id.accessInventoryFilterByTid);
         MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.onViewCreated: mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid + ", tagType = " + tagType.toString() + ", bMultiBankInventory = " + bMultiBankInventory);
-        if (tagType != null && tagType != RfidReader.TagType.TAG_NULL) {
+        if (tagType != null && tagType != TAG_NULL) {
             if (tagType == TAG_FDMICRO) { //mDid.indexOf("E2827001") == 0) {
                 checkBoxFilterByTid.setVisibility(View.VISIBLE);
                 //checkBoxFilterByTid.setText("filter FM13DT160 only");
@@ -365,22 +369,25 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+        if (checkBoxFilterByProtect == null) return;
         if(getUserVisibleHint()) {
             userVisibleHint = true;
-            MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment is now VISIBLE");
-            MainActivity.csLibrary4A.appendToLog("11 mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid);
-            if (MainActivity.mDid != null && MainActivity.mDid.indexOf("E28011") == 0) {
-                int iValue = Integer.valueOf(MainActivity.mDid.substring(6, 8), 16);
-                iValue &= 0x0F;
-                MainActivity.csLibrary4A.appendToLog(String.format("iValue = 0x%X", iValue));
-                if (iValue > 0 && iValue < 6) {
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment is now VISIBLE with tagType = " + (tagType == null ? "null" : tagType.toString()) + ", MainActivity.tagType = " + (MainActivity.tagType == null ? "null" : MainActivity.tagType.toString()));
+            //MainActivity.csLibrary4A.appendToLog("11 mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid);
+            //if (MainActivity.mDid != null && MainActivity.mDid.indexOf("E28011") == 0) {
+            //    int iValue = Integer.valueOf(MainActivity.mDid.substring(6, 8), 16);
+            //    iValue &= 0x0F;
+            //    MainActivity.csLibrary4A.appendToLog(String.format("iValue = 0x%X", iValue));
+                 if (MainActivity.tagType == TAG_IMPINJ_M755 || MainActivity.tagType == TAG_IMPINJ_M780 ) {
+                //if (iValue > 0 && iValue < 6) {
+
                     checkBoxFilterByProtect.setVisibility(View.VISIBLE);
                     editTextProtectPassword.setVisibility(View.VISIBLE);
                 } else {
                     checkBoxFilterByProtect.setVisibility(View.GONE); checkBoxFilterByProtect.setChecked(false);
                     editTextProtectPassword.setVisibility(View.GONE);
                 }
-            }
+            //}
             MainActivity.csLibrary4A.appendToLog("setNotificationListener in multibank inventory");
             setNotificationListener();
         } else {
@@ -423,7 +430,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
 
     boolean needResetData = false;
     void resetSelectData() {
-        if (MainActivity.tagType == TAG_AXZON_XERXES /*MainActivity.mDid != null && MainActivity.mDid.indexOf("E282405") == 0*/) { }
+        if (MainActivity.tagType == TAG_AXZON_XERXES) { }
         else MainActivity.csLibrary4A.restoreAfterTagSelect();
         if (needResetData) {
             MainActivity.csLibrary4A.setTagRead(0);
@@ -473,6 +480,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         //RfidReader.ExtraBankData extraBankData = new RfidReader.ExtraBankData();
         String mDid = this.mDid;
 
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask: tagType = " + (tagType == null ? "null" : tagType.toString()) + ", MainActivity.tagType = " + (MainActivity.tagType == null ? "null" : MainActivity.tagType.toString()));
         RfidReader.TagType tagType1 = this.tagType;
         if (MainActivity.tagType != null) tagType1 = MainActivity.tagType;
 
@@ -565,7 +573,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             }
             MainActivity.csLibrary4A.restoreAfterTagSelect();
             inventoryRfidTask = new InventoryRfidTask(getContext(), -1, -1, 0, 0, 0, 0,
-                    false, MainActivity.csLibrary4A.getInventoryBeep(),
+                    false, MainActivity.csLibrary4A.getInventoryBeep(), false,
                     MainActivity.sharedObjects.tagsList, readerListAdapter, RfidReader.TagType.TAG_NULL, null,
                     null, null,
                     rfidRunTime, rfidVoltageLevel, rfidYieldView, button, rfidRateView);
@@ -575,7 +583,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         } else {
             Log.i("Hello", "InventoryRfidMultiFragment.startInventoryTask: DebugABC, extra1Bank = " + extraBankData.extra1Bank + ", extra2Bank = " + extraBankData.extra2Bank);
             boolean inventoryUcode8_bc = /*mDid != null && mDid.matches("E2806894") && MainActivity.mDid != null
-                    && */(MainActivity.tagType == TAG_NXP_UCODE8_EPCTID /*MainActivity.mDid.matches("E2806894B")*/ || MainActivity.tagType == TAG_NXP_UCODE8_EPCBRAND /*MainActivity.mDid.matches("E2806894C")*/);
+                    && */(MainActivity.tagType == TAG_NXP_UCODE8_EPCTID || MainActivity.tagType == TAG_NXP_UCODE8_EPCBRAND);
             if ((extraBankData.extra1Bank != -1 && extraBankData.extra1Count != 0) || (extraBankData.extra2Bank != -1 && extraBankData.extra2Count != 0)) {
                 extraBankData.adjustExtraBank1();
                 MainActivity.csLibrary4A.appendToLog("HelloK: mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid + " with extra1Bank = " + extraBankData.extra1Bank + "," + extraBankData.extra1Offset + "," + extraBankData.extra1Count + ", extra2Bank = " + extraBankData.extra2Bank + "," + extraBankData.extra2Offset + "," + extraBankData.extra2Count);
@@ -597,7 +605,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             } else resetSelectData();
             MainActivity.csLibrary4A.appendToLog("startInventoryTask: going to startOperation with extra1Bank = " + extraBankData.extra1Bank + "," + extraBankData.extra1Offset + "," + extraBankData.extra1Count + ", extra2Bank = " + extraBankData.extra2Bank + "," + extraBankData.extra2Offset + "," + extraBankData.extra2Count);
             inventoryRfidTask = new InventoryRfidTask(getContext(), extraBankData.extra1Bank, extraBankData.extra2Bank, extraBankData.extra1Count, extraBankData.extra2Count, extraBankData.extra1Offset, extraBankData.extra2Offset,
-                    false, MainActivity.csLibrary4A.getInventoryBeep(),
+                    false, MainActivity.csLibrary4A.getInventoryBeep(), false,
                     MainActivity.sharedObjects.tagsList, readerListAdapter, tagType1, mDid,
                     null, null,
                     rfidRunTime, rfidVoltageLevel, rfidYieldView, button, rfidRateView);

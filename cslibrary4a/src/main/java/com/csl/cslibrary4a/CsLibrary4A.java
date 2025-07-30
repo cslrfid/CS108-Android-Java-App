@@ -2386,12 +2386,12 @@ public class CsLibrary4A {
         else Log.i("Hello2", "getagType" + stringNOTCONNECT);
         return null;
     }
-    public int setOtherInventoryData(RfidReader.TagType tagType, String mDid) {
+    public boolean setOtherInventoryData(RfidReader.TagType tagType, String mDid) {
         if (DEBUG2) Log.i("Hello2", "setOtherInventoryData");
         //appendToLog("BtDataOut: tagType = " + (tagType == null ? "null" : tagType.toString()) + ", mDid = " + mDid);
         if (isCs108Connected()) return cs108Library4A.setOtherInventoryData(tagType, mDid);
         else if (isCs710Connected()) return cs710Library4A.setOtherInventoryData(tagType, mDid);
         else Log.i("Hello2", "setOtherInventoryData" + stringNOTCONNECT);
-        return -1;
+        return false;
     }
 }

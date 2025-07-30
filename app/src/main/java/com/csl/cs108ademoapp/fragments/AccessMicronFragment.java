@@ -79,7 +79,7 @@ public class AccessMicronFragment extends CommonFragment {
         editText.setText(MainActivity.config.config3);
         TableRow tableRow = (TableRow) getActivity().findViewById(R.id.accessMNHumidityThresholdRow);
         MainActivity.csLibrary4A.appendToLog("AccessMicronFragment.onViewCreated: DebugABC, MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + MainActivity.tagType.toString());
-        if (MainActivity.tagType == TAG_AXZON /*MainActivity.mDid.matches("E2824")*/) tableRow.setVisibility(View.GONE);
+        if (MainActivity.tagType == TAG_AXZON) tableRow.setVisibility(View.GONE);
 
         textViewConfigOk = (TextView) getActivity().findViewById(R.id.accessMNModelCodeOK);
         textViewCalibrationOk = (TextView) getActivity().findViewById(R.id.accessMNCalibrationOK);
@@ -114,10 +114,10 @@ public class AccessMicronFragment extends CommonFragment {
         spinnerTagType.setAdapter(arrayAdapterTagType);
         spinnerTagType.setEnabled(false);
         if (MainActivity.mDid != null) {
-            if (MainActivity.tagType == TAG_AXZON /*MainActivity.mDid.matches("E2824")*/) spinnerTagType.setSelection(0);
-            else if (MainActivity.tagType == TAG_MAGNUS_S2 /*MainActivity.mDid.matches("E282402")*/) spinnerTagType.setSelection(1);
-            else if (MainActivity.tagType == TAG_MAGNUS_S3 /*MainActivity.mDid.matches("E282403")*/) spinnerTagType.setSelection(2);
-            else if (MainActivity.tagType == TAG_AXZON_XERXES /*MainActivity.mDid.matches("E282405")*/) spinnerTagType.setSelection(3);
+            if (MainActivity.tagType == TAG_AXZON) spinnerTagType.setSelection(0);
+            else if (MainActivity.tagType == TAG_MAGNUS_S2) spinnerTagType.setSelection(1);
+            else if (MainActivity.tagType == TAG_MAGNUS_S3) spinnerTagType.setSelection(2);
+            else if (MainActivity.tagType == TAG_AXZON_XERXES) spinnerTagType.setSelection(3);
         }
         spinnerTagType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -206,7 +206,7 @@ public class AccessMicronFragment extends CommonFragment {
 
             }
         });
-        if (MainActivity.tagType == TAG_AXZON /*MainActivity.mDid.matches("E2824")*/) spinnerSensorUnit.setEnabled(false);
+        if (MainActivity.tagType == TAG_AXZON) spinnerSensorUnit.setEnabled(false);
 
         ArrayAdapter<CharSequence> arrayAdapterTemperatureUnit = ArrayAdapter.createFromResource(getActivity(), R.array.temperature_unit_options, R.layout.custom_spinner_layout);
         arrayAdapterTemperatureUnit.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

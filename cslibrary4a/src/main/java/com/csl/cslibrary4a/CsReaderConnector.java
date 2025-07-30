@@ -538,7 +538,10 @@ public class CsReaderConnector {
             if (DEBUG_SCAN) appendToLog("mScanResultList.size() = " + mScanResultList.size());
             BluetoothGatt.CsScanData csScanData = mScanResultList.get(0); mScanResultList.remove(0);
             if (csScanData != null) {
-                appendToLog("found981 with name = " + csScanData.name + ", device.name = " + csScanData.device.getName());
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                    return null;
+                }
+                appendToLog("found981 with name = " + csScanData.name + (csScanData.device == null ? ", device = null" : (", device.name = " + csScanData.device.getName())));
                 //appendToLog("DeviceFinder, CsReaderConnector.getNewDeviceScanned: csScanData.getAddress is " + csScanData.getAddress());
             }
             return csScanData;
