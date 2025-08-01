@@ -152,6 +152,9 @@ public class InventoryBarcodeTask extends AsyncTaskA {
                     } else MainActivity.csLibrary4A.appendToLog("InventoryBarcodeTask.onProgressUpdate: BarMatch: NOT Matched stored bdata" + i + "= " + tagsList.get(i).getAddress());
                 }
             }
+            if (tagsList == null || tagsList.isEmpty()) {
+                yield = 0; total = 0; allTotal = 0;
+            }
             if (match == false) {
                 if (ALLOW_WEDGE) MainActivity.sharedObjects.serviceArrayList.add(output[1]);
                 MainActivity.csLibrary4A.appendToLog("InventoryBarcodeTask.onProgressUpdate: " + output[1] + " is added to MainActivity.shareObjects.serviceArrayList with size = " +  MainActivity.sharedObjects.serviceArrayList.size());

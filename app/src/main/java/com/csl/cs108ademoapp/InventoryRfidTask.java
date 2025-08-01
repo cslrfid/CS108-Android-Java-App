@@ -1,5 +1,8 @@
 package com.csl.cs108ademoapp;
 
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_MONZA_R6A;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_MONZA_R6P;
+
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
@@ -352,8 +355,8 @@ public class InventoryRfidTask extends AsyncTaskA {
                     }
 
                     boolean bFastId = false; boolean bTempId = false;
-                    MainActivity.csLibrary4A.appendToLog("bFastId is false with MainActivity.mDid = " + MainActivity.mDid + ", getFastId = " + MainActivity.csLibrary4A.getFastId());
-                    if (MainActivity.mDid != null) {
+                    MainActivity.csLibrary4A.appendToLog("bFastId is false with MainActivity.mDid = " + MainActivity.mDid + ", getFastId = " + MainActivity.csLibrary4A.getFastId() + ", MainActivity.tagType = " + (MainActivity.tagType == null ? "null" : MainActivity.tagType.toString()));
+                    /*if (false && MainActivity.mDid != null) {
                         if (MainActivity.mDid.indexOf("E28011") == 0) {
                             int iValue = Integer.valueOf(MainActivity.mDid.substring("E28011".length()), 16);
                             MainActivity.csLibrary4A.appendToLog(String.format("iValue = 0x%02X", iValue));
@@ -362,7 +365,8 @@ public class InventoryRfidTask extends AsyncTaskA {
                             }
                             if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloK: iValue = " + String.format("%02X", iValue));
                         }
-                    } else if (MainActivity.csLibrary4A.getFastId() > 0) {
+                    } else*/
+                    if (MainActivity.csLibrary4A.getFastId() > 0) {
                         bFastId = true; MainActivity.csLibrary4A.appendToLog("bFastId is true");
                     }
                     if (DEBUG) MainActivity.csLibrary4A.appendToLog("HelloK: strMdid = " + strMdid + ", MainMdid = " + MainActivity.mDid + ", bFastId = " + bFastId);
@@ -402,8 +406,8 @@ public class InventoryRfidTask extends AsyncTaskA {
                             strEpc1 = strEpc.substring(0, strEpc.length() - 24);
                             strTid = strEpc.substring(strEpc.length() - 24, strEpc.length());
                             RfidReader.TagType tagType1 = MainActivity.csLibrary4A.getagType(strTid);
+                            MainActivity.csLibrary4A.appendToLog("InventoryRfidTask.tagHandler: tagType1 = " + (tagType1 == null ? "null" : tagType1.toString()));
                             if (tagType1 != RfidReader.TagType.TAG_IMPINJ_noUSER) {
-                            //if (strTid.indexOf("E28011") == 0 || strTid.indexOf("E2C011") == 0 ) {
                                 strEpc = strEpc1; strAddresss = strEpc;
                                 strExtra2 = strTid;
                                 extra2Bank = 2;
@@ -465,20 +469,8 @@ public class InventoryRfidTask extends AsyncTaskA {
                     if (DEBUG || true) MainActivity.csLibrary4A.appendToLog("strMdid = " + strMdid + ", tagType = " + (tagType == null ? "null" : tagType.toString()) + ", strTidCompared = " + strMdid + ", MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + (MainActivity.tagType == null ? "null" : MainActivity.tagType.toString()) + ", strExtra1 = " + strExtra1 + ", strExtra2 = " + strExtra2);
                     if (strMdid != null) {
                         String strTidCompared = MainActivity.csLibrary4A.getsTid(tagType);
-                        /*if (strTidCompared.indexOf("E28011") == 0) {
-                            int iValue = Integer.valueOf(MainActivity.mDid.substring("E28011".length()), 16);
-                            MainActivity.csLibrary4A.appendToLog(String.format("iValue = 0x%02X", iValue));
-                            if ((iValue & 0x40) != 0) strTidCompared = "E2C011";
-                            else if ((iValue & 0x80) != 0) strTidCompared = "E280117";
-                            else strTidCompared = "E28011";
-                        }*/
                         MainActivity.csLibrary4A.appendToLog("InventoryRfidTask.tagHandler: strTidCompared = " + strTidCompared + ", tagType = " + tagType.toString() + ", strExtra1 = " + (strExtra1 == null ? "null" : strExtra1) + ", strExtra2 = " + (strExtra2 == null ? "null" : strExtra2));
-                        if (tagType == RfidReader.TagType.TAG_IMPINJ_M755) { }
-                        else if (tagType == RfidReader.TagType.TAG_IMPINJ_M780) { }
-                        else if (tagType == RfidReader.TagType.TAG_IMPINJ_M830) { }
-                        //else if (strTidCompared.matches("E28011")) { }
-
-
+                        if (tagType.toString().indexOf("TAG_IMPINJ") == 0) { }
                         else if (tagType == RfidReader.TagType.TAG_NXP_UCODE8_EPCBRAND) { }
                         else if (tagType == RfidReader.TagType.TAG_KILOWAY) { }
                         else if (tagType == RfidReader.TagType.TAG_MAGNUS_S2) { }

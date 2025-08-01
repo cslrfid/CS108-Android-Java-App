@@ -170,11 +170,13 @@ public class AxzonFragment extends CommonFragment {
         if (adapter.fragment1 != null) if (adapter.fragment1.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment1.onDestroy();
         if (adapter.fragment2 != null) if (adapter.fragment2.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment2.onDestroy();
         if (adapter.fragment3 != null) if (adapter.fragment3.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) adapter.fragment3.onDestroy();
-        if (MainActivity.selectFor != -1) {
-            MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
-            MainActivity.selectFor = -1;
+        if (MainActivity.csLibrary4A != null) {
+            if (MainActivity.selectFor != -1) {
+                MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
+                MainActivity.selectFor = -1;
+            }
+            MainActivity.csLibrary4A.restoreAfterTagSelect();
         }
-        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 

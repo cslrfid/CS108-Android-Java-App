@@ -390,7 +390,7 @@ public class SettingAdminFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         if (settingTask != null) settingTask.cancel(true);
-        MainActivity.csLibrary4A.setSameCheck(true);
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setSameCheck(true);
         mHandler.removeCallbacks(updateRunnable);
         super.onDestroy();
     }

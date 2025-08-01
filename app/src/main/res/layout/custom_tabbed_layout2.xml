@@ -1,5 +1,4 @@
 <RelativeLayout
-    android:id="@+id/main_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,7 +7,7 @@
     tools:context=".MainActivity">
 
     <com.google.android.material.tabs.TabLayout
-        android:id="@+id/specialOperationsTabLayout"
+        android:id="@+id/OperationsTabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -16,10 +15,9 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/specialOperationsPager"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/OperationsPager2"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@id/specialOperationsTabLayout"/>
-
+        android:layout_below="@id/OperationsTabLayout"/>
 </RelativeLayout>

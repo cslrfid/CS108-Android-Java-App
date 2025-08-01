@@ -1,7 +1,5 @@
 package com.csl.cs108ademoapp.fragments;
 
-import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M755;
-
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -416,7 +414,6 @@ public class AccessUcodeFragment extends CommonFragment {
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
         if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setSameCheck(true);
-        //MainActivity.mCs108Library4a.appendToLog("onDestroy");
         super.onDestroy();
     }
 

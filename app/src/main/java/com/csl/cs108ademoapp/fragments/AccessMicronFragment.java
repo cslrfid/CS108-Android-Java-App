@@ -259,7 +259,7 @@ public class AccessMicronFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.csLibrary4A.setSameCheck(true);
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setSameCheck(true);
         super.onDestroy();
     }
 

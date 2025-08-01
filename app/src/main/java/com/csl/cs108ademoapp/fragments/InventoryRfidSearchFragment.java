@@ -207,11 +207,11 @@ public class InventoryRfidSearchFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.csLibrary4A.setNotificationListener(null);
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setNotificationListener(null);
         if (geigerSearchTask != null) {
             geigerSearchTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.DESTORY;
         }
-        MainActivity.csLibrary4A.restoreAfterTagSelect();
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 

@@ -138,7 +138,7 @@ public class LongjingFragment extends CommonFragment {
     public void onDestroy() {
         adapter.fragment0.onDestroy();
         adapter.fragment1.onDestroy();
-        MainActivity.csLibrary4A.setTagGroup(MainActivity.csLibrary4A.getQuerySelect(), iSessionOld, iTargetOld);
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setTagGroup(MainActivity.csLibrary4A.getQuerySelect(), iSessionOld, iTargetOld);
         //MainActivity.mCs108Library4a.macWrite(0x203, 0);
         super.onDestroy();
     }

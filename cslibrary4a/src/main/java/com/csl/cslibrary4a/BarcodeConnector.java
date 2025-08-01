@@ -15,6 +15,7 @@ public class BarcodeConnector {
     public BarcodeConnector(Context context, Utility utility) {
         this.context = context;
         this.utility = utility;
+        this.DEBUG_PKDATA = utility.DEBUG_PKDATA;
     }
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
@@ -37,7 +38,7 @@ public class BarcodeConnector {
     private boolean vibrateStatus = false; boolean getVibrateStatus() { return vibrateStatus; }
 
     public interface BarcodeConnectorCallback {
-        boolean callbackMethod(byte[] dataValues, CsReaderBarcodeData csReaderBarcodeData);
+        int callbackMethod(byte[] dataValues, CsReaderBarcodeData csReaderBarcodeData);
     }
     public BarcodeConnectorCallback barcodeConnectorCallback = null;
 
@@ -229,8 +230,17 @@ public class BarcodeConnector {
                     //commandType = null;
                     if (barcodeToWrite.size() > 0) {
                         if (barcodeToWrite.get(0).downlinkResponsed) {
-                            if (barcodeConnectorCallback != null) found = barcodeConnectorCallback.callbackMethod(dataValues, csReaderBarcodeData);
-                            break;
+                            appendToLog("BarcodeConnector.isBarcodeToRead: barcodeToWrite.get(0).dataValues = " + byteArrayToString(barcodeToWrite.get(0).dataValues) + ", ");
+                            int iFound = 0;
+                            if (barcodeConnectorCallback != null) {
+                                iFound = barcodeConnectorCallback.callbackMethod(dataValues, csReaderBarcodeData);
+                                appendToLog("BarcodeConnector.isBarcodeToRead: callbackMethod is " + (barcodeConnectorCallback == null ? "null" : ("valid with iFound = " + iFound)) + ", dataValues = " + byteArrayToString(dataValues));
+                            }
+                            if (iFound > 0) {
+                                byte[] dataValuesNew = new byte[iFound];
+                                System.arraycopy(dataValues, dataValues.length - iFound, dataValuesNew, 0, dataValuesNew.length);
+                                dataValues = dataValuesNew;
+                            } else break;
                         }
                     }
                     /*for (int i=0; false && commandType == null && i < dataValues.length; i++) {
@@ -255,6 +265,7 @@ public class BarcodeConnector {
             }
         }
         if (found && DEBUG)  appendToLog("found Barcode.read data = " + byteArrayToString(connectorData.dataValues));
+        appendToLog("BarcodeConnector.isBarcodeToRead: found = " + found);
         return found;
     }
 }

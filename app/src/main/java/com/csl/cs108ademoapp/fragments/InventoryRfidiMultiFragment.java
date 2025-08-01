@@ -6,8 +6,11 @@ import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON_XERXES;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_CTESIUS;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_BAP;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_FDMICRO;
-import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M755;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M730;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M775;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M770;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M780;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M830;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_KILOWAY;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NULL;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8_EPC;
@@ -373,21 +376,13 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         if(getUserVisibleHint()) {
             userVisibleHint = true;
             MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment is now VISIBLE with tagType = " + (tagType == null ? "null" : tagType.toString()) + ", MainActivity.tagType = " + (MainActivity.tagType == null ? "null" : MainActivity.tagType.toString()));
-            //MainActivity.csLibrary4A.appendToLog("11 mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid);
-            //if (MainActivity.mDid != null && MainActivity.mDid.indexOf("E28011") == 0) {
-            //    int iValue = Integer.valueOf(MainActivity.mDid.substring(6, 8), 16);
-            //    iValue &= 0x0F;
-            //    MainActivity.csLibrary4A.appendToLog(String.format("iValue = 0x%X", iValue));
-                 if (MainActivity.tagType == TAG_IMPINJ_M755 || MainActivity.tagType == TAG_IMPINJ_M780 ) {
-                //if (iValue > 0 && iValue < 6) {
-
+                 if (MainActivity.tagType == TAG_IMPINJ_M775 || MainActivity.tagType == TAG_IMPINJ_M780 || MainActivity.tagType == TAG_IMPINJ_M830 || MainActivity.tagType == TAG_IMPINJ_M770 || MainActivity.tagType == TAG_IMPINJ_M730 ) {
                     checkBoxFilterByProtect.setVisibility(View.VISIBLE);
                     editTextProtectPassword.setVisibility(View.VISIBLE);
                 } else {
                     checkBoxFilterByProtect.setVisibility(View.GONE); checkBoxFilterByProtect.setChecked(false);
                     editTextProtectPassword.setVisibility(View.GONE);
                 }
-            //}
             MainActivity.csLibrary4A.appendToLog("setNotificationListener in multibank inventory");
             setNotificationListener();
         } else {

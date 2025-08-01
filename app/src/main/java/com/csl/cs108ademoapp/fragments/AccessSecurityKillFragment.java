@@ -84,7 +84,7 @@ public class AccessSecurityKillFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.csLibrary4A.setNotificationListener(null);
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setNotificationListener(null);
         if (accessTask != null) accessTask.cancel(true);
         super.onDestroy();
     }

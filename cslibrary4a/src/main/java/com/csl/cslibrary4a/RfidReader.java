@@ -2,14 +2,16 @@ package com.csl.cslibrary4a;
 
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ;
-import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M755;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M730;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M775;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M770;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M780;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M830;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODE8;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_NXP_UCODEDNA_AUTHMODE;
 import static java.lang.Math.log10;
 
 import android.content.Context;
-import android.nfc.Tag;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -69,7 +71,7 @@ public class RfidReader {
     public enum TagType {
         TAG_NULL,
         TAG_IMPINJ, //E28011
-        TAG_IMPINJ_M755, TAG_IMPINJ_M780, TAG_IMPINJ_M830, TAG_IMPINJ_M770, TAG_IMPINJ_M730, //E2C011(E2C011A2), E28011C, E28011B, E28011A, E280119
+        TAG_IMPINJ_M775, TAG_IMPINJ_M780, TAG_IMPINJ_M830, TAG_IMPINJ_M770, TAG_IMPINJ_M730, //E2C011(E2C011A2), E28011C, E28011B, E28011A, E280119
         TAG_IMPINJ_MONZA_R6A, TAG_IMPINJ_MONZA_R6P, TAG_IMPINJ_MONZA_R6, TAG_IMPINJ_MONZA_X8K, //E2801171, E2801170, E2801160, E2801150
         TAG_IMPINJ_noUSER, //E2001
         TAG_ALIEN, //E2003
@@ -110,12 +112,11 @@ public class RfidReader {
             extra2Count = 2;
             Log.i("Hello", "RfidReader.setExtraBankData: DebugABC, tagType = " + (tagType == null ? "null" : tagType.toString()) + ", mDid = " + mDid);
             if (mDid == null) mDid = "";
-            if (tagType == TAG_IMPINJ_M755 || tagType == TAG_IMPINJ_M780) {
-            //if (mDid.matches("E2801101") || mDid.matches("E2801102") || mDid.matches("E2801103") || mDid.matches("E2801104") || mDid.matches("E2801105")) {
+            if (true && (tagType == TAG_IMPINJ_M775 || tagType == TAG_IMPINJ_M780 || tagType == TAG_IMPINJ_M830 || tagType == TAG_IMPINJ_M770 || tagType == TAG_IMPINJ_M730)) {
                 extra1Bank = 0;
                 extra1Offset = 4;
                 extra1Count = 1;
-                if (tagType == TAG_IMPINJ_M755 /*mDid.matches("E2801101")*/) extra2Count = 6;
+                if (tagType == TAG_IMPINJ_M775) extra2Count = 6;
             } else if (tagType == TagType.TAG_EM_BAP /*mDid.matches("E200B0")*/) {
                 extra1Bank = 2;
                 extra1Offset = 0;
@@ -280,21 +281,6 @@ public class RfidReader {
                 appendToLog("RfidReader.setSelectData4Inventory: mDid after getsTid = " + mDid);
 
                 String strMdid = mDid;
-                /*if (strMdid.indexOf("E28011") == 0) {
-                    int iValue1 = Integer.valueOf(strMdid.substring(6, 8), 16);
-                    iValue1 &= 0x0F;
-                    appendToLog(String.format("iValue1 = 0x%X", iValue1));
-                    if (iValue1 == 1) strMdid = "E2C011A2";
-                    else if (iValue1 == 2) strMdid = "E28011C";
-                    else if (iValue1 == 3) strMdid = "E28011B";
-                    else if (iValue1 == 4) strMdid = "E28011A";
-                    else if (iValue1 == 5) strMdid = "E280119";
-                    else if (iValue1 == 6) strMdid = "E2801171";
-                    else if (iValue1 == 7) strMdid = "E2801170";
-                    else if (iValue1 == 8) strMdid = "E2801150";
-                    else
-                        strMdid = "E2001"; //strMdid.substring(0, 5); even E2801 or E2C01 will return
-                }*/
                 if (stringProtectPassword != null) {
                     if (stringProtectPassword.trim().length() == 0)
                         stringProtectPassword = "00000000";
@@ -310,11 +296,11 @@ public class RfidReader {
 
     public String getsTid(TagType tagType) {
         String sTid = "";
-        if (tagType == TagType.TAG_IMPINJ_M755) sTid = "E2C011"; //"E2C011A2";
+        if (tagType == TagType.TAG_IMPINJ_M775) sTid = "E2C011"; //"E2C011A2";
         else if (tagType == TagType.TAG_IMPINJ_M780) sTid = "E28011C";
-        else if (tagType == TagType.TAG_IMPINJ_M830) sTid = "E28011B";
-        else if (tagType == TagType.TAG_IMPINJ_M770) sTid = "E28011A";
-        else if (tagType == TagType.TAG_IMPINJ_M730) sTid = "E280119";
+        else if (tagType == TAG_IMPINJ_M830) sTid = "E28011B";
+        else if (tagType == TAG_IMPINJ_M770) sTid = "E28011A";
+        else if (tagType == TAG_IMPINJ_M730) sTid = "E280119";
         else if (tagType == TagType.TAG_IMPINJ_MONZA_R6A) sTid = "E2801171";
         else if (tagType == TagType.TAG_IMPINJ_MONZA_R6P) sTid = "E2801170";
         else if (tagType == TagType.TAG_IMPINJ_MONZA_R6) sTid = "E2801160";
@@ -346,11 +332,11 @@ public class RfidReader {
     public TagType getagType(String sTid) {
         TagType tagType = TagType.TAG_NULL;
         if (sTid == null) return tagType;
-        if (sTid.indexOf("E2C011") == 0) tagType = TagType.TAG_IMPINJ_M755; //E2C011A2
+        if (sTid.indexOf("E2C011") == 0) tagType = TagType.TAG_IMPINJ_M775; //E2C011A2
         else if (sTid.indexOf("E28011C") == 0) tagType = TagType.TAG_IMPINJ_M780;
-        else if (sTid.indexOf("E28011B") == 0) tagType = TagType.TAG_IMPINJ_M830;
-        else if (sTid.indexOf("E28011A") == 0) tagType = TagType.TAG_IMPINJ_M770;
-        else if (sTid.indexOf("E280119") == 0) tagType = TagType.TAG_IMPINJ_M730;
+        else if (sTid.indexOf("E28011B") == 0) tagType = TAG_IMPINJ_M830;
+        else if (sTid.indexOf("E28011A") == 0) tagType = TAG_IMPINJ_M770;
+        else if (sTid.indexOf("E280119") == 0) tagType = TAG_IMPINJ_M730;
         else if (sTid.indexOf("E2801171") == 0) tagType = TagType.TAG_IMPINJ_MONZA_R6A;
         else if (sTid.indexOf("E2801170") == 0) tagType = TagType.TAG_IMPINJ_MONZA_R6P;
         else if (sTid.indexOf("E2801160") == 0) tagType = TagType.TAG_IMPINJ_MONZA_R6;

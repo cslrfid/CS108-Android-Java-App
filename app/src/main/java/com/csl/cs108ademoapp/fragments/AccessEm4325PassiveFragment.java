@@ -72,8 +72,10 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
-        MainActivity.csLibrary4A.setSameCheck(true);
-        MainActivity.csLibrary4A.restoreAfterTagSelect();
+        if (MainActivity.csLibrary4A != null) {
+            MainActivity.csLibrary4A.setSameCheck(true);
+            MainActivity.csLibrary4A.restoreAfterTagSelect();
+        }
         super.onDestroy();
     }
 

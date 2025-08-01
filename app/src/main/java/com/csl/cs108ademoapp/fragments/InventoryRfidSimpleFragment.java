@@ -221,11 +221,12 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
     @Override
     public void onDestroy() {
         mHandler.removeCallbacks(runnableCheckReady);
-        MainActivity.csLibrary4A.setNotificationListener(null);
-        MainActivity.csLibrary4A.setSameCheck(true);
-        MainActivity.csLibrary4A.setInvBrandId(false);
-        MainActivity.csLibrary4A.setVibrateTime(vibrateTimeBackup);
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryRfidSimpleFragment().onDestory(): onDestory()");
+        if (MainActivity.csLibrary4A != null) {
+            MainActivity.csLibrary4A.setNotificationListener(null);
+            MainActivity.csLibrary4A.setSameCheck(true);
+            MainActivity.csLibrary4A.setInvBrandId(false);
+            MainActivity.csLibrary4A.setVibrateTime(vibrateTimeBackup);
+        }
         super.onDestroy();
     }
 

@@ -91,7 +91,7 @@ public class AccessUcode8Fragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.csLibrary4A.setSameCheck(true);
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setSameCheck(true);
         super.onDestroy();
     }
 

@@ -131,11 +131,13 @@ public class MicronFragment extends CommonFragment {
     public void onDestroy() {
         if (adapter.fragment0 != null) adapter.fragment0.onDestroy();
         if (adapter.fragment1 != null) adapter.fragment1.onDestroy();
-        if (MainActivity.selectFor != -1) {
-            MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
-            MainActivity.selectFor = -1;
+        if (MainActivity.csLibrary4A != null) {
+            if (MainActivity.selectFor != -1) {
+                MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
+                MainActivity.selectFor = -1;
+            }
+            MainActivity.csLibrary4A.restoreAfterTagSelect();
         }
-        MainActivity.csLibrary4A.restoreAfterTagSelect();
         super.onDestroy();
     }
 

@@ -2,7 +2,7 @@ package com.csl.cs108ademoapp.fragments;
 
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M730;
-import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M755;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M775;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M770;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M780;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M830;
@@ -272,7 +272,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     if (unprotecting > 0) stopProtectResuming();
                     else {
                         unprotecting = 1;
-                        if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal())  selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M755)/*"E2C011"*/); //E2C011A2
+                        if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal())  selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M775)/*"E2C011"*/); //E2C011A2
                         else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m780.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M780));
                         else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m830.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M780));
                         else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m770.ordinal()) selectTag.editTextTagID.setText(MainActivity.csLibrary4A.getsTid(TAG_IMPINJ_M770));
@@ -681,13 +681,15 @@ public class AccessImpinjFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
-        MainActivity.csLibrary4A.abortOperation();
-        MainActivity.csLibrary4A.setSameCheck(true);
-        MainActivity.csLibrary4A.setTagGroup(MainActivity.csLibrary4A.getQuerySelect(), data2Restore.iQuerySession, data2Restore.iQueryTarget);
-        MainActivity.csLibrary4A.setTagDelay((byte)data2Restore.tagDelay);
-        MainActivity.csLibrary4A.setAntennaDwell(data2Restore.dwellTime);
-        MainActivity.csLibrary4A.setTagFocus(data2Restore.tagFocus > 0 ? true : false);
-        MainActivity.csLibrary4A.restoreAfterTagSelect();
+        if (MainActivity.csLibrary4A != null) {
+            MainActivity.csLibrary4A.abortOperation();
+            MainActivity.csLibrary4A.setSameCheck(true);
+            MainActivity.csLibrary4A.setTagGroup(MainActivity.csLibrary4A.getQuerySelect(), data2Restore.iQuerySession, data2Restore.iQueryTarget);
+            MainActivity.csLibrary4A.setTagDelay((byte) data2Restore.tagDelay);
+            MainActivity.csLibrary4A.setAntennaDwell(data2Restore.dwellTime);
+            MainActivity.csLibrary4A.setTagFocus(data2Restore.tagFocus > 0 ? true : false);
+            MainActivity.csLibrary4A.restoreAfterTagSelect();
+        }
         super.onDestroy();
     }
 
@@ -708,9 +710,14 @@ public class AccessImpinjFragment extends CommonFragment {
                     MainActivity.csLibrary4A.setAntennaDwell(2000);
                     iValue |= 0x10;
                 } else MainActivity.csLibrary4A.setTagGroup(MainActivity.csLibrary4A.getQuerySelect(), 0, 2);
-                if (checkBoxFastId.isChecked()) iValue |= 0x20;
+                if (checkBoxFastId.isChecked()) {
+                    iValue |= 0x20;
+                    MainActivity.csLibrary4A.setFastId(true);
+                } else {
+                    MainActivity.csLibrary4A.setFastId(false);
+                }
                 if (spinnerTagSelect.getSelectedItemPosition() != impinjTag.others.ordinal()) iValue |= (spinnerTagSelect.getSelectedItemPosition() + 1);
-                if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal())  { MainActivity.tagType = TAG_IMPINJ_M755; MainActivity.mDid = ""; }
+                if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal())  { MainActivity.tagType = TAG_IMPINJ_M775; MainActivity.mDid = ""; }
                 else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m780.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M780; MainActivity.mDid = ""; }
                 else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m830.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M830; MainActivity.mDid = ""; }
                 else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m770.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M770; MainActivity.mDid = ""; }
@@ -721,10 +728,12 @@ public class AccessImpinjFragment extends CommonFragment {
                 else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.monza_x8k.ordinal()) { MainActivity.tagType = TAG_IMPINJ_MONZA_X8K; MainActivity.mDid = ""; }
                 else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.others.ordinal()) { MainActivity.tagType = TAG_IMPINJ; MainActivity.mDid = ""; }
 
+                MainActivity.mDid = "E28011" + String.format("%02X", iValue);
                 MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment.setUserVisibleHint: DebugABC, MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + MainActivity.tagType.toString());
                 MainActivity.csLibrary4A.appendToLog(String.format("HelloK: iValue = 0x%02X, mDid = %s", iValue, MainActivity.mDid));
                 MainActivity.csLibrary4A.setImpinJExtension(checkBoxTagFocus.isChecked(), checkBoxFastId.isChecked());
             }
+            MainActivity.csLibrary4A.setRx000AccessPassword("000000000");
             userVisibleHint = false;
             MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment is now INVISIBLE" + (checkBoxFastId != null ? (" with Value = " + iValue) : ""));
         }

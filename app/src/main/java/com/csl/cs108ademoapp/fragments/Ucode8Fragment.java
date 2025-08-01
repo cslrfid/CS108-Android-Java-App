@@ -135,8 +135,10 @@ public class Ucode8Fragment extends CommonFragment {
     public void onDestroy() {
         adapter.fragment0.onDestroy();
         adapter.fragment1.onDestroy();
-        MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
-        MainActivity.csLibrary4A.restoreAfterTagSelect();
+        if (MainActivity.csLibrary4A != null) {
+            MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
+            MainActivity.csLibrary4A.restoreAfterTagSelect();
+        }
         super.onDestroy();
     }
 

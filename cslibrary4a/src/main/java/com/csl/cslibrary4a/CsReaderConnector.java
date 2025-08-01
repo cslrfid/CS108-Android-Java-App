@@ -410,9 +410,8 @@ public class CsReaderConnector {
         barcodeNewland = new BarcodeNewland(context, utility, barcodeConnector, settingData.barcode2TriggerMode);
         barcodeConnector.barcodeConnectorCallback = new BarcodeConnector.BarcodeConnectorCallback(){
             @Override
-            public boolean callbackMethod(byte[] dataValues, BarcodeConnector.CsReaderBarcodeData csReaderBarcodeData) {
-                barcodeNewland.decodeBarcodeUplinkData(dataValues, csReaderBarcodeData);
-                return false;
+            public int callbackMethod(byte[] dataValues, BarcodeConnector.CsReaderBarcodeData csReaderBarcodeData) {
+                return barcodeNewland.decodeBarcodeUplinkData(dataValues, csReaderBarcodeData);
             }
         };
         settingData.setConnectedConnectors(notificationConnector, rfidReader);

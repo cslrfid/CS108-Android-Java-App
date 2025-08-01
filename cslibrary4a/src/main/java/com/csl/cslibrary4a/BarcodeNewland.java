@@ -27,6 +27,7 @@ public class BarcodeNewland {
     public boolean barcodeSendCommand(byte[] barcodeCommandData) {
         BarcodeConnector.CsReaderBarcodeData csReaderBarcodeData = new BarcodeConnector.CsReaderBarcodeData();
         csReaderBarcodeData.barcodePayloadEvent = BarcodeConnector.BarcodePayloadEvents.BARCODE_COMMAND;
+        appendToLog("BarcodeNewland.barcodeSendCommand: barcodeCommandData is " + byteArrayToString(barcodeCommandData));
         csReaderBarcodeData.waitUplinkResponse = true;
         csReaderBarcodeData.dataValues = barcodeCommandData;
         barcodeConnector.barcodeToWrite.add(csReaderBarcodeData); appendToLog("barcodeToWrite added with size = " + barcodeConnector.barcodeToWrite.size());
@@ -256,8 +257,8 @@ public class BarcodeNewland {
         }
         return result;
     }
-    public boolean decodeBarcodeUplinkData(byte[] dataValues, BarcodeConnector.CsReaderBarcodeData csReaderBarcodeData) {
-        appendToLog("decodeBarcodeUplinkData starts");
+    public int decodeBarcodeUplinkData(byte[] dataValues, BarcodeConnector.CsReaderBarcodeData csReaderBarcodeData) {
+        appendToLog("decodeBarcodeUplinkData starts with dataValue = " + byteArrayToString(dataValues) + ", csReaderBarcodeData.dataValues = " + byteArrayToString(csReaderBarcodeData.dataValues));
         boolean found = false, DEBUG = false;
         int count = 0; boolean matched = true;
         if (barcodeConnector.barcodeToWrite.get(0).dataValues[0] == 0x1b) {
@@ -385,16 +386,22 @@ public class BarcodeNewland {
             }
             if (DEBUG) appendToLog("Setting strData = " + strData + ", count = " + count);
         }
+        int iDataValueRemained = 0;
         if (count != 0) {
-            if (false) appendToLog("dataValues.length = " + dataValues.length + ", okCount = " + barcodeConnector.iOkCount + ", count = " + count + " for barcodeToWrite data = " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues));
+            if (true) appendToLog("dataValues.length = " + dataValues.length + ", okCount = " + barcodeConnector.iOkCount + ", count = " + count + " for barcodeToWrite data = " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues));
             matched = false; boolean foundOk = false;
             for (int k = 0; k < dataValues.length; k++) {
                 boolean match06 = false;
                 if (dataValues[k] == 0x06 || dataValues[k] == 0x15) { match06 = true; if (++barcodeConnector.iOkCount == count) matched = true; }
                 if (match06 == false) break;
                 foundOk = true; found = true;
+                if (matched) {
+                    appendToLog("BarcodeNewland.decodeBarcodeUplinkData: matched at k = " + k + ", dataValuees.length = " + dataValues.length);
+                    iDataValueRemained = dataValues.length - k - 1;
+                    break;
+                }
             }
-            if (false) appendToLog("00 matcched = " + matched);
+            if (false) appendToLog("00 matched = " + matched);
             if (matched) { if (utility.DEBUG_PKDATA) appendToLog("PkData: Barcode.Uplink.DataRead." + byteArrayToString(dataValues) + " is processed with matched = " + matched + ", OkCount = " + barcodeConnector.iOkCount + ", expected count = " + count + " for " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues)); }
             else if (foundOk) { if (utility.DEBUG_PKDATA) appendToLog("PkData: Barcode.Uplink.DataRead." + byteArrayToString(dataValues) + " is processed with matched = " + matched + ", but OkCount = " + barcodeConnector.iOkCount + ", expected count = " + count + " for " + byteArrayToString(barcodeConnector.barcodeToWrite.get(0).dataValues)); }
             else {
@@ -407,7 +414,8 @@ public class BarcodeNewland {
             barcodeConnector.barcodeToWrite.remove(0); barcodeConnector.sendDataToWriteSent = 0; barcodeConnector.mDataToWriteRemoved = true; appendToLog("barcodeToWrite remove0 with length = " + barcodeConnector.barcodeToWrite.size());
             if (utility.DEBUG_PKDATA) appendToLog("PkData: new barcodeToWrite size = " + barcodeConnector.barcodeToWrite.size());
         }
-        appendToLog("decodeBarcodeUplinkData found = " + found);
-        return found;
+        appendToLog("decodeBarcodeUplinkData found = " + found + ", iDataValueRemained = " + iDataValueRemained + ", new dataValues = " + byteArrayToString(dataValues));
+        if (found) return iDataValueRemained;
+        else return -1;
     }
 }
