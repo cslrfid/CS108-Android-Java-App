@@ -16,8 +16,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SelectTag;
@@ -34,7 +34,7 @@ public class UtraceFragment extends CommonFragment {
 
     EditText editTextEpcSize;
     private Button buttonUntrace; String strUntraceButtonBackup;
-    private AccessTask accessTask;
+    private AccessTaskCustom accessTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,7 +46,7 @@ public class UtraceFragment extends CommonFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        selectTag = new SelectTag((Activity)getActivity(), 2);
+        selectTag = new SelectTag((Activity)getActivity(), view,2);
 
         checkBoxHideXpc = (CheckBox) getActivity().findViewById(R.id.utraceAssertUXPC);
         checkBoxHideEpc = (CheckBox) getActivity().findViewById(R.id.utraceHideEpc);
@@ -109,10 +109,10 @@ public class UtraceFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 startAccessTask();
@@ -126,20 +126,23 @@ public class UtraceFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
+        setUserVisibleHint2(true);
         MainActivity.csLibrary4A.appendToLog("going to setupTagID"); setupTagID();
     }
 
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
+        setUserVisibleHint2(false);
         super.onDestroy();
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("UtraceFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if(isVisibleToUser) { //getUserVisibleHint()) {
             MainActivity.csLibrary4A.appendToLog("going to setupTagID"); setupTagID();
             userVisibleHint = true;
             MainActivity.csLibrary4A.appendToLog("UtraceFragment is now VISIBLE");
@@ -201,7 +204,7 @@ public class UtraceFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
+            } else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -230,11 +233,12 @@ public class UtraceFragment extends CommonFragment {
 
                 Button button = buttonUntrace; int selectBank = selectTag.spinnerSelectBank.getSelectedItemPosition() + 1; MainActivity.csLibrary4A.appendToLog("selectBank = " + selectBank);
                 //if (strUntraceButtonBackup == null) strUntraceButtonBackup = buttonUntrace.getText().toString(); buttonUntrace.setText("Show"); button = buttonUntrace;
-                accessTask = new AccessTask(button, null, invalid, true,
+                accessTask = MainActivity.csLibrary4A.getAccessTaskCustom(button, null, invalid, true,
                         selectTag.editTextTagID.getText().toString(), selectBank, (selectBank == 1 ? 32 : 0),
                         selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_UNTRACEABLE,
                         0, 0, true, false,
-                        null, null, null, null, null);
+                        null, null, null, null, null,
+                        MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                 accessTask.execute();
                 rerunRequest = true;
             }
@@ -250,7 +254,7 @@ public class UtraceFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             //if (strUntraceButtonBackup != null) buttonUntrace.setText(strUntraceButtonBackup); strUntraceButtonBackup = null;

@@ -266,12 +266,12 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
         MainActivity.csLibrary4A.appendToLog("started = " + started);
         if (started == false) {
             if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                 return;
             } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                 return;
-            } else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
+            } else if (MainActivity.csLibrary4A.rfidToWriteSize() != 0) {
                 //Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
                 mHandler.post(runnableCheckReady);
                 return;
@@ -326,7 +326,7 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
         public void run() {
             RfidReaderChipData.Rx000pkgData uplinkPacket;
             if (MainActivity.csLibrary4A.isBleConnected() && bRunningInventory) {
-                while (MainActivity.csLibrary4A.mrfidToWriteSize() == 0 && (iTagTarget == 0 || iTagGot < iTagTarget)) {
+                while (MainActivity.csLibrary4A.rfidToWriteSize() == 0 && (iTagTarget == 0 || iTagGot < iTagTarget)) {
                     if (System.currentTimeMillis() > runTimeMillis + 1000) {
                         runTimeMillis = System.currentTimeMillis();
                         long timePeriod = (System.currentTimeMillis() - startTimeMillis) / 1000;
@@ -452,7 +452,7 @@ public class InventoryRfidSimpleFragment extends CommonFragment {
     private final Runnable runnableCheckReady = new Runnable() {
         @Override
         public void run() {
-            if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
+            if (MainActivity.csLibrary4A.rfidToWriteSize() != 0) {
                 button.setEnabled(false);
                 button.setText("Please wait");
                 MainActivity.csLibrary4A.setNotificationListener(null);

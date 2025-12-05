@@ -1,8 +1,13 @@
 package com.csl.cs108ademoapp;
 
+import android.content.Context;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CsLibrary4A;
+import com.csl.cslibrary4a.CustomAsyncTask;
+import com.csl.cslibrary4a.CustomMediaPlayer;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessTask1 {
@@ -16,11 +21,13 @@ public class AccessTask1 {
     RfidReaderChipData.HostCommands hostCommand;
     Runnable updateRunnable = null;
 
-    AccessTask accessTask;
+    AccessTaskCustom accessTask;
+    Context context;
+    CustomMediaPlayer playerN, playerO;
     public AccessTask1(Button button, boolean invalidRequest,
                        int accBank, int accOffset, int accSize, int accBlockCount, String accWriteData,
                        String selectMask, int selectBank, int selectOffset,
-                       String strPassword, int powerLevel, RfidReaderChipData.HostCommands hostCommand, Runnable updateRunnable) {
+                       String strPassword, int powerLevel, RfidReaderChipData.HostCommands hostCommand, Runnable updateRunnable, Context context, CustomMediaPlayer playerN, CustomMediaPlayer playerO) {
         this.button = button;
         this.invalidRequest = invalidRequest;
         MainActivity.csLibrary4A.appendToLog("HelloK: invalidRequest=" + invalidRequest);
@@ -51,9 +58,10 @@ public class AccessTask1 {
         this.powerLevel = powerLevel;
         this.hostCommand = hostCommand;
         this.updateRunnable = updateRunnable;
+        this.context = context;
+        this.playerN = playerN;
+        this.playerO = playerO;
         MainActivity.csLibrary4A.appendToLog("HelloA, AccessTask1");
-        CustomMediaPlayer playerN = MainActivity.sharedObjects.playerN;
-        playerN.start();
         setup();
     }
 
@@ -66,8 +74,8 @@ public class AccessTask1 {
         return accessTask.cancel(bCancel);
     }
 
-    public AsyncTaskA.Status getStatus() {
-        if (accessTask == null) return AsyncTaskA.Status.FINISHED;
+    public CustomAsyncTask.Status getStatus() {
+        if (accessTask == null) return CustomAsyncTask.Status.FINISHED;
         return accessTask.getStatus();
     }
 
@@ -91,7 +99,7 @@ public class AccessTask1 {
     public boolean isResultReady() {
         boolean bValue = false;
         if (accessTask == null) { }
-        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) { }
+        else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) { }
         else if (button.getText().toString().indexOf("ING") > 0) { }
         else if (isResultReady == false) {
             String strAccessResult = "";
@@ -120,7 +128,7 @@ public class AccessTask1 {
             MainActivity.csLibrary4A.appendToLog("HelloA: accessResult=" + accessTask.accessResult);
             if (accessTask.accessResult != null && accSizeNow >= accSize) {
                 bValue = true;
-                Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.toast_abort_by_SUCCESS, Toast.LENGTH_SHORT).show();
             }
             else {
                 if (accessTask.accessResult != null) {
@@ -148,7 +156,7 @@ public class AccessTask1 {
             MainActivity.csLibrary4A.appendToLog("accessTask is null");
             return null;
         }
-        if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
+        if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) {
             MainActivity.csLibrary4A.appendToLog("accessTask.getStatus is not finished");
             return null;
         }
@@ -195,8 +203,8 @@ public class AccessTask1 {
         }
         MainActivity.csLibrary4A.appendToLog("HelloA: accOffset=" + accOffset + ", accSizeNow=" + accSizeNow + ", accSize=" + accSize);
         MainActivity.csLibrary4A.appendToLog("HelloK: invalidRequest=" + invalidRequest);
-        accessTask = new AccessTask(button, invalidRequest, true,
+        accessTask = MainActivity.csLibrary4A.getAccessTaskCustom(button, invalidRequest, true,
                 selectMask, selectBank, selectOffset,
-                strPassword, powerLevel, hostCommand, tryCount==tryCountMax, updateRunnable);
+                strPassword, powerLevel, hostCommand, tryCount==tryCountMax, updateRunnable, playerN, playerO);
     }
 }

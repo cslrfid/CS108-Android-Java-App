@@ -28,13 +28,14 @@ import java.util.Locale;
 public class Utility {
     public final boolean DEBUG_SCAN = false;
     public final boolean DEBUG_CONNECT = false;
-    public final boolean DEBUG_SELECT = false;
+    public final boolean DEBUG_SELECT = true;
     public final boolean DEBUG_INVCFG = false;
-    public final boolean DEBUG_BTDATA = false;
+    public final boolean DEBUG_BTDATA = true;
     public final boolean DEBUG_FMDATA = false;
     public final boolean DEBUG_PKDATA = false;
     public final boolean DEBUG_APDATA = false;
     public final boolean DEBUG_COMPACT = false;
+    public final boolean DEBUG_INVENTORING = false;
     public final boolean ENABLE_USBDATA = false;
     private Context mContext; private TextView mLogView;
     public Utility(Context context, TextView mLogView) {
@@ -179,10 +180,6 @@ public class Utility {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 writeExtPermission = false;
-                //appendToLog("requestPermissions WRITE_EXTERNAL_STORAGE 1");
-                //requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                //if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
-                //return;
             }
         }
         String errorDisplay = null;
@@ -241,7 +238,7 @@ public class Utility {
         return null;
     }
 
-    public String StringVersionHeader = "20.";
+    public String StringVersionHeader = "21.";
     public String getCombinedVersion(String string0) {
         String string1 = BuildConfig.VERSION_NAME;
         int iValue1 = Integer.parseInt(string1);

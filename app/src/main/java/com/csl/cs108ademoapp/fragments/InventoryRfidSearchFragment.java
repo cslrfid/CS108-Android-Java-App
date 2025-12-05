@@ -24,8 +24,8 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.csl.cs108ademoapp.AsyncTaskA;
-import com.csl.cs108ademoapp.CustomMediaPlayer;
+import com.csl.cslibrary4a.CustomAsyncTask;
+import com.csl.cslibrary4a.CustomMediaPlayer;
 import com.csl.cs108ademoapp.InventoryRfidTask;
 import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cs108ademoapp.MainActivity;
@@ -77,19 +77,19 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             actionBar.setTitle(R.string.title_activity_geiger);
         }
 
-        selectTag = new SelectTag((Activity)getActivity(), 0);
+        selectTag = new SelectTag((Activity)getActivity(), view,0);
         TableRow tableRowProgressLabel;
-        TextView textViewProgressLabelMin = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMin);
-        TextView textViewProgressLabelMid = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMid);
-        TextView textViewProgressLabelMax = (TextView) getActivity().findViewById(R.id.geigerProgressLabelMax);
+        TextView textViewProgressLabelMin = (TextView) view.findViewById(R.id.geigerProgressLabelMin);
+        TextView textViewProgressLabelMid = (TextView) view.findViewById(R.id.geigerProgressLabelMid);
+        TextView textViewProgressLabelMax = (TextView) view.findViewById(R.id.geigerProgressLabelMax);
         textViewProgressLabelMin.setText(String.format("%.0f", MainActivity.csLibrary4A.getRssiDisplaySetting() != 0 ? labelMin : labelMin + dBuV_dBm_constant));
         textViewProgressLabelMid.setText(String.format("%.0f", MainActivity.csLibrary4A.getRssiDisplaySetting() != 0 ? labelMin + (labelMax - labelMin) / 2 : labelMin + (labelMax - labelMin) / 2 + dBuV_dBm_constant));
         textViewProgressLabelMax.setText(String.format("%.0f", MainActivity.csLibrary4A.getRssiDisplaySetting() != 0 ? labelMax : labelMax + dBuV_dBm_constant));
 
-        geigerProgress = (ProgressBar) getActivity().findViewById(R.id.geigerProgress);
-        checkBoxGeigerTone = (CheckBox) getActivity().findViewById(R.id.geigerToneCheck);
+        geigerProgress = (ProgressBar) view.findViewById(R.id.geigerProgress);
+        checkBoxGeigerTone = (CheckBox) view.findViewById(R.id.geigerToneCheck);
 
-        seekGeiger = (SeekBar) getActivity().findViewById(R.id.geigerSeek);
+        seekGeiger = (SeekBar) view.findViewById(R.id.geigerSeek);
         seekGeiger.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -105,7 +105,7 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             public void onStopTrackingTouch(SeekBar seekBar) { }
         });
 
-        memoryBankSpinner = (Spinner) getActivity().findViewById(R.id.selectMemoryBank);
+        memoryBankSpinner = (Spinner) view.findViewById(R.id.selectMemoryBank);
         ArrayAdapter<CharSequence> memoryBankAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
         memoryBankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         memoryBankSpinner.setAdapter(memoryBankAdapter);
@@ -136,16 +136,16 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             }
         });
 
-        editTextRWSelectOffset = (EditText) getActivity().findViewById(R.id.selectMemoryOffset);
+        editTextRWSelectOffset = (EditText) view.findViewById(R.id.selectMemoryOffset);
 
-        TableRow tableRowSelectPassword = (TableRow) getActivity().findViewById(R.id.selectPasswordRow);
+        TableRow tableRowSelectPassword = (TableRow) view.findViewById(R.id.selectPasswordRow);
         tableRowSelectPassword.setVisibility(View.GONE);
 
-        editTextGeigerAntennaPower = (EditText) getActivity().findViewById(R.id.selectAntennaPower);
+        editTextGeigerAntennaPower = (EditText) view.findViewById(R.id.selectAntennaPower);
         editTextGeigerAntennaPower.setText(String.valueOf(300));
 
-        geigerThresholdView = (TextView) getActivity().findViewById(R.id.geigerThreshold);
-        geigerTagRssiView = (TextView) getActivity().findViewById(R.id.geigerTagRssi);
+        geigerThresholdView = (TextView) view.findViewById(R.id.geigerThreshold);
+        geigerTagRssiView = (TextView) view.findViewById(R.id.geigerTagRssi);
         geigerTagRssiView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
@@ -176,12 +176,12 @@ public class InventoryRfidSearchFragment extends CommonFragment {
                 }
             }
         });
-        geigerRunTime = (TextView) getActivity().findViewById(R.id.geigerRunTime);
-        geigerTagGotView = (TextView) getActivity().findViewById(R.id.geigerTagGot);
-        geigerVoltageLevelView = (TextView) getActivity().findViewById(R.id.geigerVoltageLevel);
-        rfidYieldView = (TextView) getActivity().findViewById(R.id.geigerYield);
-        rfidRateView = (TextView) getActivity().findViewById(R.id.geigerRate);
-        button = (Button) getActivity().findViewById(R.id.geigerStart);
+        geigerRunTime = (TextView) view.findViewById(R.id.geigerRunTime);
+        geigerTagGotView = (TextView) view.findViewById(R.id.geigerTagGot);
+        geigerVoltageLevelView = (TextView) view.findViewById(R.id.geigerVoltageLevel);
+        rfidYieldView = (TextView) view.findViewById(R.id.geigerYield);
+        rfidRateView = (TextView) view.findViewById(R.id.geigerRate);
+        button = (Button) view.findViewById(R.id.geigerStart);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -196,12 +196,12 @@ public class InventoryRfidSearchFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (userVisibleHint) setNotificationListener();
+        setUserVisibleHint2(true);
     }
 
     @Override
     public void onPause() {
-        MainActivity.csLibrary4A.setNotificationListener(null);
+        setUserVisibleHint2(false);
         super.onPause();
     }
 
@@ -216,20 +216,32 @@ public class InventoryRfidSearchFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = true;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidSearchFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if(isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
             MainActivity.csLibrary4A.appendToLog("InventoryRfidSearchFragment is now VISIBLE");
             setupTagID();
             MainActivity.csLibrary4A.appendToLog("setNotificationListener in search inventory");
             setNotificationListener();
+            if (true) {
+                geigerSearchTask = new InventoryRfidTask(getContext(),
+                        false, true, false,
+                        null, null,
+                        geigerTagRssiView, geigerTagGotView,
+                        geigerRunTime, geigerVoltageLevelView, rfidYieldView, button, rfidRateView);
+                geigerSearchTask.execute();
+            }
         } else {
             userVisibleHint = false;
             MainActivity.csLibrary4A.appendToLog("InventoryRfidSearchFragment is now INVISIBLE");
             MainActivity.csLibrary4A.appendToLog("setNotificationListener NULL in search inventory");
             MainActivity.csLibrary4A.setNotificationListener(null);
+            if (geigerSearchTask != null) {
+                geigerSearchTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.DESTORY;
+            }
         }
     }
 
@@ -308,34 +320,49 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             }
         });
     }
-
+    boolean bStartStopping = false, bButtonTriggering = false, bStartStopHandling = false;
     void startStopHandler(boolean buttonTrigger) {
-        boolean started = false;
-        if (geigerSearchTask != null) {
-            if (geigerSearchTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
-        }
-        if (buttonTrigger == true &&
-                ((started && MainActivity.csLibrary4A.getTriggerButtonStatus())
-                        || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false)))   return;
-        if (started == false) {
-            if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
-                return;
-            } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
-                return;
-            } else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            startInventoryTask();
-            alertRssiUpdateTime = 0;
-        } else {
-            if (buttonTrigger) geigerSearchTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.BUTTON_RELEASE;
-            else geigerSearchTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.STOP;
-            alertRssiUpdateTime = -1;
+        if (buttonTrigger) bButtonTriggering = true;
+        else bStartStopping = true;
+        if (!bStartStopHandling) {
+            bStartStopHandling = true;
+            mHandler.post(runnableStartStopHandler);
         }
     }
+    Runnable runnableStartStopHandler = new Runnable() {
+        @Override
+        public void run() {
+            MainActivity.csLibrary4A.appendToLog("runnableStartStopHandler: isInventoring=" + MainActivity.csLibrary4A.isInventoring() + ", bStartStopping = " + bStartStopping + ", bButtonTriggering=" + bButtonTriggering + ", triggerButtonStatus=" + MainActivity.csLibrary4A.getTriggerButtonStatus());
+            if (MainActivity.csLibrary4A.isInventoring()) {
+                if (bStartStopping || (bButtonTriggering && !MainActivity.csLibrary4A.getTriggerButtonStatus())) {
+                    if (bButtonTriggering) geigerSearchTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.BUTTON_RELEASE;
+                    else geigerSearchTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.STOP;
+                    alertRssiUpdateTime = -1;
+                } else {
+                    MainActivity.csLibrary4A.appendToLog("InventoryRfidSearchFragment.runnableStartStopHandler.run: BtDataOut: Triggger is pressed when inventoring. please wait");
+                    mHandler.postDelayed(runnableStartStopHandler, 100);
+                    return;
+                }
+            } else {
+                if (!MainActivity.csLibrary4A.isBleConnected()) {
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                } else if (MainActivity.csLibrary4A.rfidToWriteSize() != 0) {
+                    MainActivity.csLibrary4A.appendToLog("InventoryRfidSearchFragment.runnableStartStopHandler.run: BtDataOut: sending data. please wait");
+                    mHandler.postDelayed(runnableStartStopHandler, 100);
+                    return;
+                } else if (bStartStopping || (bButtonTriggering && MainActivity.csLibrary4A.getTriggerButtonStatus())) {
+                    startInventoryTask();
+                    alertRssiUpdateTime = 0;
+                }
+            }
+            bStartStopping = false;
+            bButtonTriggering = false;
+            bStartStopHandling = false;
+            MainActivity.csLibrary4A.appendToLogView("InventoryRfidSearchFragment.runnableStartStopHandler.run: ending");
+        }
+    };
 
     void startInventoryTask() {
         started = true; boolean invalidRequest = false;
@@ -355,7 +382,7 @@ public class InventoryRfidSearchFragment extends CommonFragment {
         }
         int memorybank = memoryBankSpinner.getSelectedItemPosition();
         int powerLevel = Integer.valueOf(editTextGeigerAntennaPower.getText().toString());
-        if (powerLevel < 0 || powerLevel > MainActivity.powerLevelMax) {
+        if (powerLevel < 0 || powerLevel > MainActivity.csLibrary4A.getPowerLevelMax()) {
             MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest + ", with powerLevel = " + powerLevel);
             invalidRequest = true;
         } else if (MainActivity.csLibrary4A.setSelectedTag(selectTag.editTextTagID.getText().toString(), memorybank+1, powerLevel) == false) {
@@ -365,11 +392,13 @@ public class InventoryRfidSearchFragment extends CommonFragment {
             MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_SEARCHING);
         }
         MainActivity.csLibrary4A.appendToLog("invalidRequest = " + invalidRequest);
-        geigerSearchTask = new InventoryRfidTask(getContext(), -1,-1, 0, 0, 0, 0,
-                invalidRequest, true, false,
-                null, null, RfidReader.TagType.TAG_NULL, null,
-                geigerTagRssiView, geigerTagGotView,
-                geigerRunTime, geigerVoltageLevelView, rfidYieldView, button, rfidRateView);
-        geigerSearchTask.execute();
+        if (false) {
+            geigerSearchTask = new InventoryRfidTask(getContext(),
+                    invalidRequest, true, false,
+                    null, null,
+                    geigerTagRssiView, geigerTagGotView,
+                    geigerRunTime, geigerVoltageLevelView, rfidYieldView, button, rfidRateView);
+            geigerSearchTask.execute();
+        }
     }
 }

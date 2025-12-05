@@ -12,7 +12,7 @@ import static androidx.core.app.ServiceCompat.STOP_FOREGROUND_REMOVE;
 import static androidx.core.app.ServiceCompat.stopForeground;
 import static androidx.core.content.ContextCompat.getSystemService;
 import static com.csl.cs108ademoapp.MainActivity.isHomeFragment;
-import static com.csl.cs108ademoapp.MainActivity.mContext;
+import static com.csl.cs108ademoapp.MainActivity.context;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -40,7 +40,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.csl.cs108ademoapp.CustomAlertDialog;
-import com.csl.cs108ademoapp.CustomPopupWindow;
+import com.csl.cslibrary4a.CustomPopupWindow;
 import com.csl.cs108ademoapp.CustomProgressDialog;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.MyForegroundService;
@@ -141,7 +141,7 @@ public class HomeFragment extends CommonFragment {
         public void run() {
             if (true) {
                 MainActivity.csLibrary4A.appendToLog("runnableConfiguring(): isBleConnected = " + MainActivity.csLibrary4A.isBleConnected() + ", isRfidFailure = " + MainActivity.csLibrary4A.isRfidFailure());
-                MainActivity.csLibrary4A.appendToLog("runnableConfiguring(): mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+                MainActivity.csLibrary4A.appendToLog("runnableConfiguring(): mrfidToWriteSize = " + MainActivity.csLibrary4A.rfidToWriteSize());
             }
             boolean progressShown = false;
             if (progressDialog != null) { if (progressDialog.isShowing()) progressShown = true; }
@@ -152,8 +152,8 @@ public class HomeFragment extends CommonFragment {
                     CustomPopupWindow customPopupWindow = new CustomPopupWindow((Context) getActivity());
                     customPopupWindow.popupStart(stringPopup, false); */
                 }
-            } else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
-                if (DEBUG) MainActivity.csLibrary4A.appendToLog("mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+            } else if (MainActivity.csLibrary4A.rfidToWriteSize() != 0) {
+                if (DEBUG) MainActivity.csLibrary4A.appendToLog("mrfidToWriteSize = " + MainActivity.csLibrary4A.rfidToWriteSize());
                 mHandler.postDelayed(runnableConfiguring, 250);
                 if (progressShown == false) {
                     progressDialog = new CustomProgressDialog(getActivity(), "Initializing reader. Please wait.");
@@ -180,69 +180,56 @@ public class HomeFragment extends CommonFragment {
 
         @Override
         public void run() {
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE) = " + ActivityCompat.checkSelfPermission(mContext, WRITE_EXTERNAL_STORAGE));
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, READ_EXTERNAL_STORAGE)  = " + ActivityCompat.checkSelfPermission(mContext, READ_EXTERNAL_STORAGE));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE) = " + ActivityCompat.checkSelfPermission(context, WRITE_EXTERNAL_STORAGE));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, READ_EXTERNAL_STORAGE)  = " + ActivityCompat.checkSelfPermission(context, READ_EXTERNAL_STORAGE));
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (mContext.checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions WRITE_EXTERNAL_STORAGE"); //
+                if (context.checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    MainActivity.csLibrary4A.appendToLog("HomeFragment.runnableStartService.run: requestPermissions WRITE_EXTERNAL_STORAGE and READ_EXTERNAL_STORAGE"); //
                     requestPermissions(new String[] { WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE }, 1);
                     //Toast.makeText(mContext, com.csl.cslibrary4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
                 } else MainActivity.csLibrary4A.appendToLog("runnableStartService: WRITE_EXTERNAL_STORAGE is permitted"); ///
             } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle WRITE_EXTERNAL_STORAGE");
 
-            LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
+            LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
             MainActivity.csLibrary4A.appendToLog("runnableStartService: locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
             MainActivity.csLibrary4A.appendToLog("runnableStartService: locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) = " + ActivityCompat.checkSelfPermission(mContext, ACCESS_FINE_LOCATION));
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_COARSE_LOCATION)  = " + ActivityCompat.checkSelfPermission(mContext, ACCESS_COARSE_LOCATION));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if ((ActivityCompat.checkSelfPermission(mContext, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(mContext, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-                    CustomAlertDialog appdialog = new CustomAlertDialog();
-                    appdialog.Confirm(getActivity(), "Use your location",
-                            "This app collects location data in the background.  In terms of the features using this location data in the background, this App collects location data when it is reading RFID tag in all inventory pages.  The purpose of this is to correlate the RFID tag with the actual GNSS(GPS) location of the tag.  In other words, this is to track the physical location of the logistics item tagged with the RFID tag.",
-                            "No thanks", "Turn on",
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    MainActivity.csLibrary4A.appendToLog("runnableStartService: allow permission in ACCESS_FINE_LOCATION handler");
-                                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions ACCESS_FINE_LOCATION");
-                                    requestPermissions(new String[] { ACCESS_FINE_LOCATION }, 123); //ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION
-                                    //if (false) Toast.makeText(mContext, com.csl.cslibrary4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
-                                    /*{
-                                        LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
-                                        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) {
-                                            MainActivity.csLibrary4A.appendToLog("popupAlert: StreamOut: start activity ACTION_LOCATION_SOURCE_SETTINGS");
-                                            Intent intent1 = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                            mContext.startActivity(intent1);
-                                        }
-                                    }*/
-                                    //bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
-                                    //bAlerting = false;
-                                }
-                            },
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    MainActivity.csLibrary4A.appendToLog("runnableStartService: reject permission in ACCESS_FINE_LOCATION handler");
-                                    //bAlerting = false;
-                                    //bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
-                                }
-                            });
-                    MainActivity.csLibrary4A.appendToLog("runnableStartService: started ACCESS_FINE_LOCATION handler");
-                } else MainActivity.csLibrary4A.appendToLog("runnableStartService: handled ACCESS_FINE_LOCATION");
-            } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle ACCESS_FINE_LOCATION");
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) = " + ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_COARSE_LOCATION)  = " + ActivityCompat.checkSelfPermission(context, ACCESS_COARSE_LOCATION));
+            if ((ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                CustomAlertDialog appdialog = new CustomAlertDialog();
+                appdialog.Confirm(getActivity(), "Use your location",
+                        "This app collects location data in the background.  In terms of the features using this location data in the background, this App collects location data when it is reading RFID tag in all inventory pages.  The purpose of this is to correlate the RFID tag with the actual GNSS(GPS) location of the tag.  In other words, this is to track the physical location of the logistics item tagged with the RFID tag.",
+                        "No thanks", "Turn on",
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                MainActivity.csLibrary4A.appendToLog("HomeFragment.runnableStartService.run: requestPermissions ACCESS_FINE_LOCATION and ACCESS_COARSE_LOCATION");
+                                requestPermissions(new String[]{ ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION }, 123); //ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION
+                            }
+                        },
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                MainActivity.csLibrary4A.appendToLog("runnableStartService: reject permission in ACCESS_FINE_LOCATION handler");
+                                //bAlerting = false;
+                                //bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
+                            }
+                        });
+                MainActivity.csLibrary4A.appendToLog("runnableStartService: started ACCESS_FINE_LOCATION handler");
+            } else
+                MainActivity.csLibrary4A.appendToLog("runnableStartService: handled ACCESS_FINE_LOCATION");
 
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_CONNECT) = " + ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_CONNECT));
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_SCAN)  = " + ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_SCAN));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_CONNECT) = " + ActivityCompat.checkSelfPermission(context, BLUETOOTH_CONNECT));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_SCAN)  = " + ActivityCompat.checkSelfPermission(context, BLUETOOTH_SCAN));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
+                if (ActivityCompat.checkSelfPermission(context, BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    MainActivity.csLibrary4A.appendToLog("HomeFragmentrunnableStartService.run: requestPermissions BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
                     requestPermissions(new String[] { BLUETOOTH_SCAN, BLUETOOTH_CONNECT }, 123);
                 } else MainActivity.csLibrary4A.appendToLog("runnableStartService: handled BLUETOOTH_CONNECT and BLUETOOTH_SCAN");
             } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
 
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -258,16 +245,16 @@ public class HomeFragment extends CommonFragment {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, 1);
                 MainActivity.csLibrary4A.appendToLog("runnableStartService: Enable bluetoothAdapter for high android");
-                BluetoothAdapter.getDefaultAdapter().enable();
+                bluetoothAdapter.enable();
             }
 
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, POST_NOTIFICATIONS) = " + ActivityCompat.checkSelfPermission(mContext, POST_NOTIFICATIONS));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, POST_NOTIFICATIONS) = " + ActivityCompat.checkSelfPermission(context, POST_NOTIFICATIONS));
             if (NotificationManagerCompat.from(getActivity()).areNotificationsEnabled()) MainActivity.csLibrary4A.appendToLog("Notification is enabled");
             else MainActivity.csLibrary4A.appendToLog("Notification is disabled");
             if (!MainActivity.foregroundServiceEnable) { }
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (ActivityCompat.checkSelfPermission(mContext, POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions POST_NOTIFICATIONS");
+                if (ActivityCompat.checkSelfPermission(context, POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    MainActivity.csLibrary4A.appendToLog("HomeFragment.runnableStartService.run: requestPermissions POST_NOTIFICATIONS");
                     requestPermissions(new String[] { POST_NOTIFICATIONS }, 10); //POST_NOTIFICATIONS, FOREGROUND_SERVICE_LOCATION
                 } else {
                     MainActivity.csLibrary4A.appendToLog("runnableStartService: handled POST_NOTIFICATIONS");

@@ -1,13 +1,14 @@
 package com.csl.cs108ademoapp.fragments;
 
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON_OPUS;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S1;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S2;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S3;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON_XERXES;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.Lifecycle;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,16 +19,18 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
+import com.csl.cslibrary4a.CustomTabLayout;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReader;
 import com.csl.cslibrary4a.RfidReaderChipData;
@@ -35,22 +38,26 @@ import com.csl.cslibrary4a.RfidReaderChipData;
 public class AccessMicronFragment extends CommonFragment {
     final boolean DEBUG = true;
     boolean bXerxesEnable = false;
+    View viewFragment;
     EditText editTextaccessRWSelectHoldTime, editTextRWTagID, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
-    TextView textViewSelectHoldTimeLabel, textViewConfigOk, textViewCalibrationOk, textViewAnalogPort2CodeOk, textViewAnalogPort1CodeOk, textViewSensorCodeOk, textViewRssiCodeOk, textViewTemperatureCodeOk;
-    CheckBox checkBoxConfig, checkBoxCalibration, checkBoxAnalogPort1Code, checkBoxAnalogPort2Code, checkBoxSensorCode, checkBoxRssiCode, checkBoxTemperatureCode;
+    TextView textViewSelectHoldTimeLabel, textViewConfigOk, textViewCalibrationOk, textViewAnalogPort2CodeOk, textViewAnalogPort1CodeOk, textViewSensorCodeOk,
+            textViewRssiCodeOk, textViewTemperatureCodeOk;
+    CheckBox checkBoxConfig, checkBoxCalibration, checkBoxAnalogPort1Code, checkBoxAnalogPort2Code, checkBoxSensorCode,
+            checkBoxRssiCode, checkBoxTemperatureCode;
     Spinner spinnerTagType, spinnerSensorUnit, spinnerTemperatureUnit;
     boolean btagTypeSelected = false;
 
-    TextView textViewModelCode, textViewCalibrationVersion, textViewAnalogPort1Code, textViewAnalogPort2Code, textViewSensorCode, textViewRssiCode, textViewTemperatureCode;
+    TextView textViewModelCode, textViewCalibrationVersion, textViewAnalogPort1Code, textViewAnalogPort2Code, textViewSensorCode,
+            textViewRssiCode, textViewTemperatureCode;
 	private Button buttonRead;
 
     enum ReadWriteTypes {
-        NULL, MODELCODE, CALIBRATION, SENSORCODE, RSSICODE, TEMPERATURECODE
+        NULL, MODELCODE, CALIBRATION, SENSORCODE, RSSICODE, RSSISELECT, TEMPERATURECODE
     }
     ReadWriteTypes readWriteTypes;
     boolean operationRead = false;
 
-    private AccessTask accessTask;
+    private AccessTaskCustom accessTask;
     private int modelCode = 0, selectHold = 15;
     private int calCode1, calTemp1, calCode2, calTemp2, calVer = -1;
     private boolean changedSelectIndex = false;
@@ -58,74 +65,78 @@ public class AccessMicronFragment extends CommonFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_access_micron, container, false);
+        viewFragment = inflater.inflate(R.layout.fragment_access_micron, container, false);
+        return viewFragment;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessMNTagID);
-        editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessMNAccPasswordValue);
+        editTextRWTagID = (EditText) view.findViewById(R.id.accessMNTagID);
+        editTextAccessRWAccPassword = (EditText) view.findViewById(R.id.accessMNAccPasswordValue);
         editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
         editTextAccessRWAccPassword.setText(MainActivity.config.configPassword);
 
         if (MainActivity.config != null) { if (MainActivity.config.config0 != null) selectHold = Integer.parseInt(MainActivity.config.config0); }
-        EditText editText = (EditText) getActivity().findViewById(R.id.accessMNRssiUpperLimit);
-        editText.setText(MainActivity.config.config1);
-        editText = (EditText) getActivity().findViewById(R.id.accessMNRssiLowerLimit);
-        editText.setText(MainActivity.config.config2);
-        editText = (EditText) getActivity().findViewById(R.id.accessMNHumidityThreshold);
-        editText.setText(MainActivity.config.config3);
-        TableRow tableRow = (TableRow) getActivity().findViewById(R.id.accessMNHumidityThresholdRow);
-        MainActivity.csLibrary4A.appendToLog("AccessMicronFragment.onViewCreated: DebugABC, MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + MainActivity.tagType.toString());
+        EditText editText = (EditText) view.findViewById(R.id.accessMNRssiUpperLimit);
+        editText.setText(MainActivity.config.configRssiUpperLimit);
+        editText = (EditText) view.findViewById(R.id.accessMNRssiLowerLimit);
+        editText.setText(MainActivity.config.configRssiLowerLimit);
+        editText = (EditText) view.findViewById(R.id.accessMNHumidityThreshold);
+        editText.setText(MainActivity.config.configHumidityThreshold);
+        TableRow tableRow = (TableRow) view.findViewById(R.id.accessMNHumidityThresholdRow);
+        MainActivity.csLibrary4A.appendToLog("AccessMicronFragment.onViewCreated: DebugABC, MainActivity.tagType = " + MainActivity.tagType.toString());
         if (MainActivity.tagType == TAG_AXZON) tableRow.setVisibility(View.GONE);
 
-        textViewConfigOk = (TextView) getActivity().findViewById(R.id.accessMNModelCodeOK);
-        textViewCalibrationOk = (TextView) getActivity().findViewById(R.id.accessMNCalibrationOK);
-        textViewAnalogPort1CodeOk = (TextView) getActivity().findViewById(R.id.accessMNAnalogPort1CodeOK);
-        textViewAnalogPort2CodeOk = (TextView) getActivity().findViewById(R.id.accessMNAnalogPort2CodeOK);
-        textViewSensorCodeOk = (TextView) getActivity().findViewById(R.id.accessMNSensorCodeOK);
-        textViewRssiCodeOk = (TextView) getActivity().findViewById(R.id.accessMNRssiCodeOK);
-        textViewTemperatureCodeOk = (TextView) getActivity().findViewById(R.id.accessMNTemperatureCodeOK);
+        textViewConfigOk = (TextView) view.findViewById(R.id.accessMNModelCodeOK);
+        textViewCalibrationOk = (TextView) view.findViewById(R.id.accessMNCalibrationOK);
+        textViewAnalogPort1CodeOk = (TextView) view.findViewById(R.id.accessMNAnalogPort1CodeOK);
+        textViewAnalogPort2CodeOk = (TextView) view.findViewById(R.id.accessMNAnalogPort2CodeOK);
+        textViewSensorCodeOk = (TextView) view.findViewById(R.id.accessMNSensorCodeOK);
+        textViewRssiCodeOk = (TextView) view.findViewById(R.id.accessMNRssiCodeOK);
+        textViewTemperatureCodeOk = (TextView) view.findViewById(R.id.accessMNTemperatureCodeOK);
 
-        checkBoxConfig = (CheckBox) getActivity().findViewById(R.id.accessMNModelCodeTitle);
-        checkBoxCalibration = (CheckBox) getActivity().findViewById(R.id.accessMNCalibrationTitle);
-        checkBoxAnalogPort1Code = (CheckBox) getActivity().findViewById(R.id.accessMNAnalogPort1CodeTitle); checkBoxAnalogPort1Code.setEnabled(false);
-        checkBoxAnalogPort2Code = (CheckBox) getActivity().findViewById(R.id.accessMNAnalogPort2CodeTitle); checkBoxAnalogPort2Code.setEnabled(false);
-        checkBoxSensorCode = (CheckBox) getActivity().findViewById(R.id.accessMNSensorCodeTitle);
-        checkBoxRssiCode = (CheckBox) getActivity().findViewById(R.id.accessMNRssiCodeTitle);
-        checkBoxTemperatureCode = (CheckBox) getActivity().findViewById(R.id.accessMNTemperatureCodeTitle);
+        checkBoxConfig = (CheckBox) view.findViewById(R.id.accessMNModelCodeTitle);
+        checkBoxCalibration = (CheckBox) view.findViewById(R.id.accessMNCalibrationTitle);
+        checkBoxAnalogPort1Code = (CheckBox) view.findViewById(R.id.accessMNAnalogPort1CodeTitle); checkBoxAnalogPort1Code.setEnabled(false);
+        checkBoxAnalogPort2Code = (CheckBox) view.findViewById(R.id.accessMNAnalogPort2CodeTitle); checkBoxAnalogPort2Code.setEnabled(false);
+        checkBoxSensorCode = (CheckBox) view.findViewById(R.id.accessMNSensorCodeTitle);
+        checkBoxRssiCode = (CheckBox) view.findViewById(R.id.accessMNRssiCodeTitle);
+        checkBoxTemperatureCode = (CheckBox) view.findViewById(R.id.accessMNTemperatureCodeTitle);
 
-        textViewModelCode = (TextView) getActivity().findViewById(R.id.accessMNModelCode);
+        textViewModelCode = (TextView) view.findViewById(R.id.accessMNModelCode);
 
-        textViewAnalogPort1Code = (TextView) getActivity().findViewById(R.id.accessMNAnalogPort1Code);
-        textViewAnalogPort2Code = (TextView) getActivity().findViewById(R.id.accessMNAnalogPort2Code);
-        textViewSensorCode = (TextView) getActivity().findViewById(R.id.accessMNSensorCode);
-        textViewRssiCode = (TextView) getActivity().findViewById(R.id.accessMNRssiCode);
-        textViewCalibrationVersion = (TextView) getActivity().findViewById(R.id.accessMNCalibrationVersion);
-        textViewTemperatureCode = (TextView) getActivity().findViewById(R.id.accessMNTemperatureCode);
+        textViewAnalogPort1Code = (TextView) view.findViewById(R.id.accessMNAnalogPort1Code);
+        textViewAnalogPort2Code = (TextView) view.findViewById(R.id.accessMNAnalogPort2Code);
+        textViewSensorCode = (TextView) view.findViewById(R.id.accessMNSensorCode);
+        textViewRssiCode = (TextView) view.findViewById(R.id.accessMNRssiCode);
+        textViewCalibrationVersion = (TextView) view.findViewById(R.id.accessMNCalibrationVersion);
+        textViewTemperatureCode = (TextView) view.findViewById(R.id.accessMNTemperatureCode);
 
         ArrayAdapter<CharSequence> arrayAdapterTagType;
         if (bXerxesEnable) arrayAdapterTagType = ArrayAdapter.createFromResource(getActivity(), R.array.xerxesTag_options, R.layout.custom_spinner_layout);
         else arrayAdapterTagType = ArrayAdapter.createFromResource(getActivity(), R.array.rfMicronTag_options, R.layout.custom_spinner_layout);
         arrayAdapterTagType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerTagType = (Spinner) getActivity().findViewById(R.id.accessMNTagType);
+        spinnerTagType = (Spinner) view.findViewById(R.id.accessMNTagType);
         spinnerTagType.setAdapter(arrayAdapterTagType);
-        spinnerTagType.setEnabled(false);
-        if (MainActivity.mDid != null) {
+        spinnerTagType.setEnabled(true );
+        if (true) {
             if (MainActivity.tagType == TAG_AXZON) spinnerTagType.setSelection(0);
             else if (MainActivity.tagType == TAG_MAGNUS_S2) spinnerTagType.setSelection(1);
             else if (MainActivity.tagType == TAG_MAGNUS_S3) spinnerTagType.setSelection(2);
             else if (MainActivity.tagType == TAG_AXZON_XERXES) spinnerTagType.setSelection(3);
+            else if (MainActivity.tagType == TAG_AXZON_OPUS) spinnerTagType.setSelection(4);
         }
         spinnerTagType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                TableRow tableRowCalibration = (TableRow) getActivity().findViewById(R.id.accessMNCalibrationRow);
-                TableRow tableRowTemperatureCode = (TableRow) getActivity().findViewById(R.id.accessMNTemperatureCodeRow);
-                TableRow tableRowAnalogPort1 = (TableRow) getActivity().findViewById(R.id.accessMNAnalogPort1CodeRow);
-                TableRow tableRowAnalogPort2 = (TableRow) getActivity().findViewById(R.id.accessMNAnalogPort2CodeRow);
+                MainActivity.csLibrary4A.appendToLog("AccessMicroFragment.onItemSelected: 0 MainActivity.tagType = " + MainActivity.tagType.toString());
+                LinearLayout layoutMagnus = (LinearLayout) viewFragment.findViewById(R.id.accessMNMagnusLayout);
+                LinearLayout layoutTemperature = (LinearLayout) viewFragment.findViewById(R.id.accessMNTemperatureLayout);
+                LinearLayout layoutBackport = (LinearLayout) viewFragment.findViewById(R.id.accessMNBackportLayout) ;
+                CustomTabLayout tabLayout = (CustomTabLayout) getActivity().findViewById(R.id.OperationsTabLayout2);
+                MainActivity.csLibrary4A.appendToLog("AccessMicronFragment.onViewCreated.onItemSelected: tabLayout is " + (tabLayout == null ? "null" : "valid"));
 
                 switch (spinnerTagType.getSelectedItemPosition()) {
                     case 0:
@@ -138,9 +149,15 @@ public class AccessMicronFragment extends CommonFragment {
                         MainActivity.tagType = TAG_MAGNUS_S3; MainActivity.mDid = ""; //""E282403";
                         break;
                     case 3:
+                        //tabLayout.getTabAt(2).setCustomView(View.VISIBLE);
                         MainActivity.tagType = TAG_AXZON_XERXES; MainActivity.mDid = ""; //""E282405";
                         break;
+                    case 4:
+                        MainActivity.tagType = TAG_AXZON_OPUS; MainActivity.mDid = ""; //""E2C24500";
+                        break;
                 }
+                MainActivity.csLibrary4A.appendToLog("AccessMicroFragment.onItemSelected: MainActivity.tagType = " + MainActivity.tagType.toString());
+
                 if (btagTypeSelected) {
                     switch (spinnerTagType.getSelectedItemPosition()) {
                         case 0:
@@ -155,32 +172,61 @@ public class AccessMicronFragment extends CommonFragment {
                             break;
                     }
                 } else btagTypeSelected = true;
+
                 switch (spinnerTagType.getSelectedItemPosition()) {
                     case 0:
                     case 1:
                     case 2:
-                        textViewSelectHoldTimeLabel.setVisibility(View.GONE);
-                        editTextaccessRWSelectHoldTime.setVisibility(View.GONE);
-                        tableRowAnalogPort1.setVisibility(View.GONE);
-                        tableRowAnalogPort2.setVisibility(View.GONE);
+                        tabLayout.getTabAt(2).view.setVisibility(View.GONE);
+                        tabLayout.getTabAt(3).view.setVisibility(View.GONE);
+                        //textViewSelectHoldTimeLabel.setVisibility(View.GONE);
+                        //editTextaccessRWSelectHoldTime.setVisibility(View.GONE);
                         break;
                     case 3:
-                        textViewSelectHoldTimeLabel.setVisibility(View.VISIBLE);
-                        editTextaccessRWSelectHoldTime.setVisibility(View.VISIBLE);
-                        tableRowAnalogPort1.setVisibility(View.VISIBLE);
-                        tableRowAnalogPort2.setVisibility(View.VISIBLE);
+                    case 4:
+                        tabLayout.getTabAt(2).view.setVisibility(View.VISIBLE);
+                        if (spinnerTagType.getSelectedItemPosition() == 3 && (MainActivity.csLibrary4A.get98XX() == 0 || MainActivity.csLibrary4A.getMacVer().indexOf("1.2") == 0)) {
+                            tabLayout.getTabAt(3).view.setVisibility(View.VISIBLE);
+                        } else tabLayout.getTabAt(3).view.setVisibility(View.GONE);
+                        //textViewSelectHoldTimeLabel.setVisibility(View.VISIBLE);
+                        //editTextaccessRWSelectHoldTime.setVisibility(View.VISIBLE);
+                        break;
+                }
+                switch (spinnerTagType.getSelectedItemPosition()) {
+                    case 1:
+                    case 2:
+                    case 3:
+                        layoutMagnus.setVisibility(View.VISIBLE);
+                        break;
+                    case 0:
+                    case 4:
+                        layoutMagnus.setVisibility(View.GONE);
                         break;
                 }
                 switch (spinnerTagType.getSelectedItemPosition()) {
                     case 0:
                     case 1:
-                        tableRowCalibration.setVisibility(View.GONE);
-                        tableRowTemperatureCode.setVisibility(View.GONE);
+                    case 4:
+                        layoutTemperature.setVisibility(View.GONE);
                         break;
                     case 2:
                     case 3:
-                        tableRowCalibration.setVisibility(View.VISIBLE);
-                        tableRowTemperatureCode.setVisibility(View.VISIBLE);
+                        layoutTemperature.setVisibility(View.VISIBLE);
+                        break;
+                }
+
+                TableRow rowSelectHoldTime = (TableRow) viewFragment.findViewById(R.id.accessMNSelectHoldTimeRow);
+                switch (spinnerTagType.getSelectedItemPosition()) {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 4:
+                        rowSelectHoldTime.setVisibility(View.GONE);
+                        layoutBackport.setVisibility(View.GONE);
+                        break;
+                    case 3:
+                        rowSelectHoldTime.setVisibility(View.GONE);
+                        layoutBackport.setVisibility(View.VISIBLE);
                         break;
                 }
             }
@@ -193,7 +239,7 @@ public class AccessMicronFragment extends CommonFragment {
 
         ArrayAdapter<CharSequence> arrayAdapterSensorUnit = ArrayAdapter.createFromResource(getActivity(), R.array.sensor_unit_options, R.layout.custom_spinner_layout);
         arrayAdapterSensorUnit.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerSensorUnit = (Spinner) getActivity().findViewById(R.id.accessMNSensorUnit);
+        spinnerSensorUnit = (Spinner) view.findViewById(R.id.accessMNSensorUnit);
         spinnerSensorUnit.setAdapter(arrayAdapterSensorUnit);
         spinnerSensorUnit.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -210,7 +256,7 @@ public class AccessMicronFragment extends CommonFragment {
 
         ArrayAdapter<CharSequence> arrayAdapterTemperatureUnit = ArrayAdapter.createFromResource(getActivity(), R.array.temperature_unit_options, R.layout.custom_spinner_layout);
         arrayAdapterTemperatureUnit.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerTemperatureUnit = (Spinner) getActivity().findViewById(R.id.accessMNTemperatureUnit);
+        spinnerTemperatureUnit = (Spinner) view.findViewById(R.id.accessMNTemperatureUnit);
         spinnerTemperatureUnit.setAdapter(arrayAdapterTemperatureUnit);
         spinnerTemperatureUnit.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -224,22 +270,22 @@ public class AccessMicronFragment extends CommonFragment {
             }
         });
 
-        textViewSelectHoldTimeLabel = (TextView) getActivity().findViewById(R.id.accessMNSelectHoldTimeLabel);
-        editTextaccessRWSelectHoldTime = (EditText) getActivity().findViewById(R.id.accessMNSelectHoldTime);
+        textViewSelectHoldTimeLabel = (TextView) view.findViewById(R.id.accessMNSelectHoldTimeLabel);
+        editTextaccessRWSelectHoldTime = (EditText) view.findViewById(R.id.accessMNSelectHoldTime);
         editTextaccessRWSelectHoldTime.setText(String.valueOf(selectHold));
 
-        editTextaccessRWAntennaPower = (EditText) getActivity().findViewById(R.id.accessMNAntennaPower);
+        editTextaccessRWAntennaPower = (EditText) view.findViewById(R.id.accessMNAntennaPower);
         editTextaccessRWAntennaPower.setText(String.valueOf(MainActivity.config.configPower));
 
-        buttonRead = (Button) getActivity().findViewById(R.id.accessMNReadButton);
+        buttonRead = (Button) view.findViewById(R.id.accessMNReadButton);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 selectHold = Integer.parseInt(editTextaccessRWSelectHoldTime.getText().toString());
@@ -253,22 +299,24 @@ public class AccessMicronFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
-        setupTagID();
+        setUserVisibleHint2(true);
     }
 
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
         if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setSameCheck(true);
+        setUserVisibleHint2(false);
         super.onDestroy();
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED) == false) return;
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessMicronFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser + ", MainActivity.tagSelected = " + (MainActivity.tagSelected == null ? "null" : "valid"));
+        //if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED) == false) { MainActivity.csLibrary4A.appendToLog("AccessMicronFragment.setUserVisibleHint: return"); return; }
+        if (isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
             setupTagID();
         } else {
@@ -281,12 +329,12 @@ public class AccessMicronFragment extends CommonFragment {
             iValue = Integer.parseInt(editTextaccessRWSelectHoldTime.getText().toString());
             MainActivity.selectHold = iValue;
 
-            EditText editText = (EditText) getActivity().findViewById(R.id.accessMNRssiUpperLimit);
-            MainActivity.config.config1 = editText.getText().toString();
-            editText = (EditText) getActivity().findViewById(R.id.accessMNRssiLowerLimit);
-            MainActivity.config.config2 = editText.getText().toString();
-            editText = (EditText) getActivity().findViewById(R.id.accessMNHumidityThreshold);
-            MainActivity.config.config3 = editText.getText().toString();
+            EditText editText = (EditText) viewFragment.findViewById(R.id.accessMNRssiUpperLimit);
+            MainActivity.config.configRssiUpperLimit = editText.getText().toString();
+            editText = (EditText) viewFragment.findViewById(R.id.accessMNRssiLowerLimit);
+            MainActivity.config.configRssiLowerLimit = editText.getText().toString();
+            editText = (EditText) viewFragment.findViewById(R.id.accessMNHumidityThreshold);
+            MainActivity.config.configHumidityThreshold = editText.getText().toString();
         }
     }
 
@@ -302,6 +350,7 @@ public class AccessMicronFragment extends CommonFragment {
     void setupTagID() {
         ReaderDevice tagSelected = MainActivity.tagSelected;
         boolean bSelected = false;
+        MainActivity.csLibrary4A.appendToLog("AccessMicroFragment.setupTagID: tagSelected = " + (tagSelected == null ? "null" : "valid"));
         if (tagSelected != null) {
             if (tagSelected.getSelected() == true) {
                 String stringDetail = tagSelected.getDetails();
@@ -315,16 +364,16 @@ public class AccessMicronFragment extends CommonFragment {
                     textViewModelCode.setText(tagSelected.getTid().substring(5));
 
                 } else if (tagSelected.getTagTypeExpected() == null) {
-//                } else if (tagSelected.getMdid() == null) {
+                } else if (tagSelected.getTagTypeExpected() == TAG_MAGNUS_S1) {
+                    textViewModelCode.setText("01"); modelCode = 1;
                 } else if (tagSelected.getTagTypeExpected() == TAG_MAGNUS_S2) {
-//              } else if (tagSelected.getMdid().contains(MainActivity.csLibrary4A.getmDid(TAG_MAGNUS_S2) /*"E282402"*/)) {
                     textViewModelCode.setText("02"); modelCode = 2;
                 } else if (tagSelected.getTagTypeExpected() == TAG_MAGNUS_S3) {
-//              } else if (tagSelected.getMdid().contains(MainActivity.csLibrary4A.getmDid(TAG_MAGNUS_S3) /*"E282403"*/)) {
                     textViewModelCode.setText("03"); modelCode = 3;
                 } else if (tagSelected.getTagTypeExpected() == TAG_AXZON_XERXES) {
-//              } else if (tagSelected.getMdid().contains(MainActivity.csLibrary4A.getmDid(TAG_AXZON_XERXES) /*"E282405"*/)) {
                     textViewModelCode.setText("05"); modelCode = 5;
+                } else if (tagSelected.getTagTypeExpected() == TAG_AXZON_OPUS) {
+                    textViewModelCode.setText("50"); modelCode = 50;
                 }
 
                 String strRes = tagSelected.getRes();
@@ -390,7 +439,7 @@ public class AccessMicronFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessMicronFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
+            } else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessMicronFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -406,13 +455,14 @@ public class AccessMicronFragment extends CommonFragment {
                     int selectBank = 1;
                     int selectOffset = 32;
                     String selectMask = editTextRWTagID.getText().toString();
-                    accessTask = new AccessTask(buttonRead, null, invalid, true,
+                    accessTask = MainActivity.csLibrary4A.getAccessTaskCustom(buttonRead, null, invalid, true,
                             selectMask, selectBank, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             (operationRead ? RfidReaderChipData.HostCommands.CMD_18K6CREAD: RfidReaderChipData.HostCommands.CMD_18K6CWRITE),
                             0, 0, true, bSkipClearPrefilter,
-                            null, null, null, null, null);
+                            null, null, null, null, null,
+                            MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     accessTask.execute();
                     rerunRequest = true;
                     MainActivity.csLibrary4A.appendToLog("accessTask is created with selectBank = " + selectBank);
@@ -433,18 +483,15 @@ public class AccessMicronFragment extends CommonFragment {
         if (strTid.length() <= 7) return false;
         RfidReader.TagType tagType = MainActivity.csLibrary4A.getagType(strTid);
         if (tagType == TAG_MAGNUS_S1) {
-        //if (strTid.substring(0, 7).matches("E282401")) {
-            modelCode = 1;
-            return true;
+            modelCode = 1; return true;
         } else if (tagType == TAG_MAGNUS_S2) {
-        //} else if (strTid.substring(0, 7).matches(MainActivity.csLibrary4A.getsTid(TAG_MAGNUS_S2) /*"E282402"*/)) {
             modelCode = 2; return true;
         } else if (tagType == TAG_MAGNUS_S3) {
-        //} else if (strTid.substring(0, 7).matches(MainActivity.csLibrary4A.getsTid(TAG_MAGNUS_S3) /*"E282403"*/)) {
             modelCode = 3; return true;
         } else if (tagType == TAG_AXZON_XERXES) {
-        //} else if (strTid.substring(0, 7).matches(MainActivity.csLibrary4A.getsTid(TAG_AXZON_XERXES) /*"E282405"*/)) {
             modelCode = 5; return true;
+        } else if (tagType == TAG_AXZON_OPUS) {
+            modelCode = 50; return true;
         }
         return false;
     }
@@ -485,9 +532,9 @@ public class AccessMicronFragment extends CommonFragment {
 
         int iTemp = Integer.parseInt(strData.substring(0,4), 16); iTemp &= 0x1F;
         textViewRssiCode.setText(String.format("%d", iTemp));   //"%02X"
-        EditText editText = (EditText) getActivity().findViewById(R.id.accessMNRssiLowerLimit);
+        EditText editText = (EditText) viewFragment.findViewById(R.id.accessMNRssiLowerLimit);
         int iTempLower = Integer.parseInt(editText.getText().toString());
-        editText = (EditText) getActivity().findViewById(R.id.accessMNRssiUpperLimit);
+        editText = (EditText) viewFragment.findViewById(R.id.accessMNRssiUpperLimit);
         int iTempUpper = Integer.parseInt(editText.getText().toString());
         if (iTemp >= iTempLower && iTemp <= iTempUpper) textViewRssiCode.setTextColor(Color.BLACK);
         else textViewRssiCode.setTextColor(Color.RED);
@@ -506,7 +553,7 @@ public class AccessMicronFragment extends CommonFragment {
         if (spinnerSensorUnit.getSelectedItemPosition() > 0) {
             float fValue = (float) Integer.parseInt(strData);
             if (spinnerSensorUnit.getSelectedItemPosition() == 2) {
-                EditText editText = (EditText) getActivity().findViewById(R.id.accessMNHumidityThreshold);
+                EditText editText = (EditText) viewFragment.findViewById(R.id.accessMNHumidityThreshold);
                 int iValue = Integer.parseInt(editText.getText().toString());
                 MainActivity.csLibrary4A.appendToLog("iValue for Dry/Wet comparision = " + iValue);
                 if (fValue >=  iValue) strData = "dry";
@@ -559,7 +606,7 @@ public class AccessMicronFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) return false;
         else {
             if (changedSelectIndex) {
                 changedSelectIndex = false; MainActivity.selectFor = 0;
@@ -591,7 +638,7 @@ public class AccessMicronFragment extends CommonFragment {
                     readWriteTypes = ReadWriteTypes.NULL;
                     boolean valid = setModelCode(accessResult);
                     if (valid) textViewModelCode.setText(accessResult.substring(5));
-                    else Toast.makeText(MainActivity.mContext, "This is not Micron 0X tag !!!", Toast.LENGTH_SHORT).show();
+                    else Toast.makeText(MainActivity.context, "This is not Micron 0X tag !!!", Toast.LENGTH_SHORT).show();
                 } else if (readWriteTypes == ReadWriteTypes.CALIBRATION) {
                     textViewCalibrationOk.setText("O");
                     //checkBoxCalibration.setChecked(false);
@@ -638,7 +685,7 @@ public class AccessMicronFragment extends CommonFragment {
             textViewCalibrationOk.setText(""); textViewCalibrationVersion.setText(""); calVer = -1;
         } else if (checkBoxSensorCode.isChecked() == true && modelCode != -1 && checkProcessing < 3 && operationRead) {
             accBank = 0; if (modelCode == 1) accBank = 3;
-            accOffset = 11; if (modelCode == 3 || modelCode == 5) accOffset = 12;
+            accOffset = 12; if (modelCode == 1 || modelCode == 2) accOffset = 11;
             accSize = 1; readWriteTypes = ReadWriteTypes.SENSORCODE; checkProcessing = 3;
             textViewSensorCodeOk.setText(""); textViewSensorCode.setText("");
         } else if (checkBoxRssiCode.isChecked() == true && modelCode != -1 && checkProcessing < 4 && operationRead) {

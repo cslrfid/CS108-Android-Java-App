@@ -2,7 +2,6 @@ package com.csl.cslibrary4a;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanCallback;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -13,7 +12,6 @@ import android.widget.TextView;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -63,6 +61,7 @@ public class CsReaderConnector {
 
     int writeDataCount; int btSendTimeOut = 0; long btSendTime = 0; int BTSENDDELAY = 20;
     boolean writeData(byte[] buffer, int timeout) {
+        appendToLog("CsReaderConnector.writeData: BtDataOut, start with buffer = " + byteArrayToString(buffer));
         if (rfidReader.isInventoring()) {
             utility.appendToLogView("BtData: isInventoring is true when writeData " + byteArrayToString(buffer));
         }
@@ -401,7 +400,7 @@ public class CsReaderConnector {
         csConnectorData = new CsConnectorData();
         notificationConnector = new NotificationConnector(context, utility, settingData.triggerReporting, settingData.triggerReportingCountSetting);
         controllerConnector = new ControllerConnector(context, utility);
-        bluetoothConnector = new BluetoothConnector(context, utility, settingData.userDebugEnable);
+        bluetoothConnector = new BluetoothConnector(context, utility, settingData.userDebugEnable, bis108);
         //settingData = new SettingData(context, utility);
 
         rfidReader = new RfidReader(context, utility, this, bis108, bluetoothGatt, settingData, notificationConnector);
@@ -440,7 +439,7 @@ public class CsReaderConnector {
         this.iScanType = iScanType;
         appendToLog("CsReaderConnector.CsReaderConnector with bis108 = " + (bis108 ? "true" : "false"));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (true) {
             mScanCallback = new ScanCallback() {
                 @Override
                 public void onBatchScanResults(List<ScanResult> results) {
@@ -455,45 +454,24 @@ public class CsReaderConnector {
                 @Override
                 public void onScanResult(int callbackType, ScanResult result) {
                     boolean DEBUG = true;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (true) {
                         BluetoothGatt.CsScanData scanResultA = new BluetoothGatt.CsScanData(result.getDevice(), result.getRssi(), result.getScanRecord().getBytes());
                         boolean found98 = true;
                         if (true) {
                             CheckResult resultc = check9800(scanResultA);
                             if (resultc != null) {
-                                found98 = resultc.is9802;
+                                found98 = resultc.is980;
+                                scanResultA.serviceUUID = resultc.serviceUUID;
+                                scanResultA.hasServicePower = resultc.hasPowerLevel;
                                 scanResultA.name = resultc.stringName;
                             }
                         }
                         if (DEBUG) appendToLog("CsReaderConnector " + bis108 + ", found98 = " + found98 + ", mScanResultList 0 = " + (mScanResultList != null ? "VALID" : "NULL"));
                         if (mScanResultList != null && found98) {
-                            scanResultA.serviceUUID2p2 = check9800_serviceUUID2p1;
                             appendToLog("found980 with name = " + scanResultA.name + ", device.name = " + scanResultA.device.getName());
                             mScanResultList.add(scanResultA);
-                            if (DEBUG) appendToLog("CsReaderConnector, bis108 = " + bis108 + ", mScanResultList 0 = " + mScanResultList.size() + ", serviceUUID2p2 = " + scanResultA.serviceUUID2p2);
+                            if (DEBUG) appendToLog("CsReaderConnector, bis108 = " + bis108 + ", mScanResultList 0 = " + mScanResultList.size() + ", serviceUUID2p2 = " + scanResultA.serviceUUID);
                         }
-                    }
-                }
-            };
-        } else {
-            mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
-                @Override
-                public void onLeScan(final BluetoothDevice device, final int rssi, final byte[] scanRecord) {
-                    if (true) appendToLog("onLeScan()");
-                    BluetoothGatt.CsScanData scanResultA = new BluetoothGatt.CsScanData(device, rssi, scanRecord);
-                    boolean found98 = true;
-                    if (true) {
-                        CheckResult resultc = check9800(scanResultA);
-                        if (resultc != null) {
-                            found98 = resultc.is9802;
-                            scanResultA.name = resultc.stringName;
-                        }
-                    }
-                    appendToLog("found98 = " + found98 + ", mScanResultList 1 = " + (mScanResultList != null ? "VALID" : "NULL"));
-                    if (mScanResultList != null && found98) {
-                        scanResultA.serviceUUID2p2 = check9800_serviceUUID2p1;
-                        mScanResultList.add(scanResultA);
-                        appendToLog("mScanResultList 1 = " + mScanResultList.size());
                     }
                 }
             };
@@ -537,7 +515,7 @@ public class CsReaderConnector {
             if (DEBUG_SCAN) appendToLog("mScanResultList.size() = " + mScanResultList.size());
             BluetoothGatt.CsScanData csScanData = mScanResultList.get(0); mScanResultList.remove(0);
             if (csScanData != null) {
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                     return null;
                 }
                 appendToLog("found981 with name = " + csScanData.name + (csScanData.device == null ? ", device = null" : (", device.name = " + csScanData.device.getName())));
@@ -547,9 +525,10 @@ public class CsReaderConnector {
         } else return null;
     }
     ArrayList<BluetoothGatt.CsScanData> mScanResultList = new ArrayList<>();
-    int check9800_serviceUUID2p1 = 0;
     class CheckResult {
-        boolean is9802;
+        boolean is980;
+        int serviceUUID;
+        boolean hasPowerLevel;
         String stringName;
     }
     CheckResult check9800(BluetoothGatt.CsScanData scanResultA) {
@@ -558,15 +537,15 @@ public class CsReaderConnector {
         int iNewADLength = 0;
         byte[] newAD = new byte[0];
         int iNewADIndex = 0;
-        check9800_serviceUUID2p1 = -1;
         if (bluetoothGatt.isBLUETOOTH_CONNECTinvalid()) return null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)
             return null;
-        CheckResult checkResult = new CheckResult(); checkResult.is9802 = false;
-        String strTemp = scanResultA.getDevice().getName();
+        CheckResult checkResult = new CheckResult(); checkResult.is980 = false; checkResult.serviceUUID = -1; checkResult.hasPowerLevel = false;
+        String strTemp = scanResultA.device.getName();
         if (strTemp != null && DEBUG)
             appendToLog("Found name = " + strTemp + ", length = " + String.valueOf(strTemp.length()));
-        for (byte bdata : scanResultA.getScanRecord()) {
+        boolean hasPowerLevel = false;
+        for (byte bdata : scanResultA.scanRecord) {
             if (iNewADIndex >= iNewADLength && iNewADLength != 0) {
                 scanResultA.decoded_scanRecord.add(newAD);
                 iNewADIndex = 0;
@@ -582,8 +561,10 @@ public class CsReaderConnector {
                         checkResult.stringName = new String(byteString, StandardCharsets.UTF_8);
                         stringADType = "Complete local name, " + checkResult.stringName;
                     }
-                    else if (newAD[0] == 0x0A) stringADType = "Tx power level";
-                    else if (newAD[0] == 0x12) stringADType = "Peripheral connection interval range";
+                    else if (newAD[0] == 0x0A) {
+                        stringADType = "Tx power level";
+                        checkResult.hasPowerLevel = true;
+                    } else if (newAD[0] == 0x12) stringADType = "Peripheral connection interval range";
                     else if (newAD[0] == 0x16) stringADType = "Service data - 16-bit UUID";
                     else if (newAD[0] == 0x19) stringADType = "Appearance";
                     else if (newAD[0] == (byte)0xFF) {
@@ -611,17 +592,16 @@ public class CsReaderConnector {
                 if (((currentAD[1] == 0 && ((iScanType & 0x01) != 0)) || (currentAD[1] == 2 && ((iScanType & 0x02) != 0))) && currentAD[2] == (byte) 0x98) {
                     if (DEBUG) appendToLog("Found 980" + (bis108 ? "0" : "2"));
                     found98 = true;
-                    check9800_serviceUUID2p1 = currentAD[1];
-                    if (DEBUG) appendToLog("serviceUD1D2p1 = " + check9800_serviceUUID2p1);
+                    checkResult.serviceUUID = currentAD[1];
                     break;
                 }
             }
         }
         if (found98 == false && DEBUG)
-            appendToLog("No 9800: with scanData = " + byteArrayToString(scanResultA.getScanRecord()));
+            appendToLog("No 9800: with scanData = " + byteArrayToString(scanResultA.scanRecord));
         else if (DEBUG_SCAN)
-            appendToLog("CsReaderConnector " + bis108 + ", Found 9800: with scanData = " + byteArrayToString(scanResultA.getScanRecord()));
-        checkResult.is9802 = found98;
+            appendToLog("CsReaderConnector " + bis108 + ", Found 9800: with scanData = " + byteArrayToString(scanResultA.scanRecord));
+        checkResult.is980 = found98;
         return checkResult;
     }
 
@@ -792,7 +772,9 @@ public class CsReaderConnector {
                 }
                 if (barcodeConnector.barcodeToWrite.size() != 0 && true)
                     appendToLog("AAA 1 barcodeToWrite.size = " + barcodeConnector.barcodeToWrite.size() + ", bisRfidCommandStop = " + bisRfidCommandStop + ", barcodePowerOnTimeOut = " + barcodeConnector.barcodePowerOnTimeOut);
-                if (DEBUG) appendToLog("BtData: bisRfidCommandStop is " + bisRfidCommandStop);
+                if (false) appendToLog("CsReaderConnector.mReadWriteRunnable.run: BtDataOut, bisRfidCommandStop is " + bisRfidCommandStop
+                        + ", bis108 = " + bis108 + ", isInventoring = " + rfidReader.isInventoring()
+                        + ", rfidFailure = " + rfidConnector.rfidFailure + ", mRfidToWrite.size = " + rfidConnector.mRfidToWrite.size() + ", rfidPowerOnTimeOut = " + rfidConnector.rfidPowerOnTimeOut);
                 if (bisRfidCommandStop) {
                     if (rfidConnector.rfidPowerOnTimeOut != 0) {
                         if (DEBUG) appendToLog("rfidPowerOnTimeOut = " + rfidConnector.rfidPowerOnTimeOut + ", mRfidToWrite.size() = " + rfidConnector.mRfidToWrite.size());
@@ -806,7 +788,7 @@ public class CsReaderConnector {
                                 appendToLog("aabb 5A");
                                 byte[] dataOut = rfidConnector.sendRfidToWrite(usbConnector != null && usbConnector.isConnected());
                                 if (dataOut != null) {
-                                    appendToLog("CsReaderConnector.mReadWriteRunnable: UsbConnector: going to writeData 1");
+                                    appendToLog("CsReaderConnector.mReadWriteRunnable.run: BtDataOut, 1 going to writeData with dataOut = " + byteArrayToString(dataOut));
                                     retValue = writeData(dataOut, (rfidConnector.mRfidToWrite.get(0).waitUplinkResponse ? 500 : 0));
                                     if (false) appendToLog("BtData: done writeData with waitUplinkResponse = " + rfidConnector.mRfidToWrite.get(0).waitUplinkResponse);
                                 }
@@ -837,7 +819,7 @@ public class CsReaderConnector {
                                 appendToLog("aabb 5b");
                                 byte[] dataOut = rfidConnector.sendRfidToWrite(usbConnector != null && usbConnector.isConnected());
                                 if (dataOut != null) {
-                                    appendToLog("CsReaderConnector.mReadWriteRunnable: UsbConnector: going to writeData 2");
+                                    appendToLog("CsReaderConnector.mReadWriteRunnable.run: BtDataOut, 2 going to writeData with dataOut = " + byteArrayToString(dataOut));
                                     retValue = writeData(dataOut, (rfidConnector.mRfidToWrite.get(0).waitUplinkResponse ? 500 : 0));
                                     if (false) appendToLog("done writeData with waitUplinkResponse = " + rfidConnector.mRfidToWrite.get(0).waitUplinkResponse);
                                 }
@@ -878,7 +860,7 @@ public class CsReaderConnector {
 
                         if (dataOut != null) {
                             appendToLog("aabb 3n2");
-                            appendToLog("CsReaderConnector.mReadWriteRunnable: UsbConnector: going to writeData 3 " + byteArrayToString(dataOut));
+                            appendToLog("CsReaderConnector.mReadWriteRunnable.run: BtDataOut, 3 going to writeData with dataOut = " + byteArrayToString(dataOut));
                             retValue = writeData(dataOut, 0);
                         }
                         if (retValue) {
@@ -907,7 +889,7 @@ public class CsReaderConnector {
                             appendToLog("!!! mSiliconLabIcDevice.sendDataToWriteSent = " + controllerConnector.sendDataToWriteSent);
 
                         if (dataOut != null) {
-                            appendToLog("CsReaderConnector.mReadWriteRunnable: UsbConnector: going to writeData 4");
+                            appendToLog("CsReaderConnector.mReadWriteRunnable.run: BtDataOut, 4 going to writeData with dataOut = " + byteArrayToString(dataOut));
                             retValue = writeData(dataOut, 0);
                         }
                         if (retValue) {
@@ -919,7 +901,7 @@ public class CsReaderConnector {
                     }
                     ready2Write = false;    //
                     if (false) appendToLog("ready2Write is set false after true sendSiliconLabIcToWrite");
-                } else if (bluetoothConnector.bluetoothIcToWrite.size() != 0) {   //Bluetooth version affects Barcode operation
+                } else if (bluetoothConnector.bluetoothIcToWrite.size() != 0) {
                     appendToLog("AAA 6");
                     if (isConnected() == false) bluetoothConnector.bluetoothIcToWrite.clear();
                     else if (System.currentTimeMillis() - btSendTime > btSendTimeOut) {
@@ -937,7 +919,7 @@ public class CsReaderConnector {
                             appendToLog("!!! mBluetoothIcDevice.sendDataToWriteSent = " + bluetoothConnector.sendDataToWriteSent);
 
                         if (dataOut != null) {
-                            appendToLog("CsReaderConnector.mReadWriteRunnable: UsbConnector: going to writeData 5");
+                            appendToLog("CsReaderConnector.mReadWriteRunnable.run: BtDataOut, 5 going to writeData with dataOut = " + byteArrayToString(dataOut));
                             retValue = writeData(dataOut, 0);
                         }
                         if (retValue) {
@@ -956,15 +938,13 @@ public class CsReaderConnector {
                         appendToLog("2 UsbConnector is " + (usbConnector == null ? "null" : "valid"));
                         byte[] dataOut = barcodeConnector.sendBarcodeToWrite( usbConnector != null && usbConnector.isConnected());
                         if (dataOut != null) {
-                            appendToLog("CsReaderConnector.mReadWriteRunnable: UsbConnector: going to writeData 6");
+                            appendToLog("CsReaderConnector.mReadWriteRunnable.run: BtDataOut, 6 going to writeData with dataOut = " + byteArrayToString(dataOut));
                             writeData(dataOut, (barcodeConnector.barcodeToWrite.get(0).waitUplinkResponse ? 500 : 0));
                         }
                     }
                     ready2Write = false;
                     appendToLog("ready2Write is set false after true sendBarcodeToWrite");
-                } else if (rfidConnector.rfidPowerOnTimeOut != 0) {
-                    if (DEBUG || true) appendToLog("rfidPowerOnTimeOut = " + rfidConnector.rfidPowerOnTimeOut + ", mRfidToWrite.size() = " + rfidConnector.mRfidToWrite.size());
-                } else if (rfidConnector.rfidFailure == false && rfidConnector.mRfidToWrite.size() != 0) {
+                } else if (rfidConnector.rfidFailure == false && rfidConnector.mRfidToWrite.size() != 0 && rfidConnector.rfidPowerOnTimeOut == 0) {
                     appendToLog("aabb 3");
                     if (utility.DEBUG_BTDATA) appendToLog("BtData: CsReaderConnector.mReadWriteRunnable rfidFailure is false and mRfidToWrite.size is " + rfidConnector.mRfidToWrite.size());
                     if (isConnected() == false) {
@@ -978,7 +958,7 @@ public class CsReaderConnector {
                             appendToLog("aabb 5c");
                             byte[] dataOut = rfidConnector.sendRfidToWrite(usbConnector != null && usbConnector.isConnected());
                             if (dataOut != null) {
-                                appendToLog("CsReaderConnector.mReadWriteRunnable: UsbConnector: going to writeData 7");
+                                appendToLog("CsReaderConnector.mReadWriteRunnable.run: BtDataOut, 7 going to writeData with dataOut = " + byteArrayToString(dataOut));
                                 retValue = writeData(dataOut, (rfidConnector.mRfidToWrite.get(0).waitUplinkResponse ? 500 : 0));
                                 if (false) appendToLog("done writeData with waitUplinkResponse = " + rfidConnector.mRfidToWrite.get(0).waitUplinkResponse);
 
@@ -987,8 +967,6 @@ public class CsReaderConnector {
                                 String stringCompare = "800280B310A";
                                 if (bis108) stringCompare = "8002700100F00F000000";
                                 if (false) appendToLog("AAA sending rifd data portion = " + string + ", " + string.indexOf(stringCompare));
-                                if (string.indexOf(stringCompare) == 0)
-                                    rfidReader.setInventoring(true);
                             }
                             if (DEBUG && !rfidConnector.mRfidToWrite.isEmpty())
                                 appendToLog("BtDataOut: done writeRfid with size = " + rfidConnector.mRfidToWrite.size() + ", PayloadEvents = " + rfidConnector.mRfidToWrite.get(0).rfidPayloadEvent.toString() + ", data=" + byteArrayToString(rfidConnector.mRfidToWrite.get(0).dataValues));
@@ -1038,7 +1016,7 @@ public class CsReaderConnector {
         if (true) {
             String strModelName1 = rfidReader.rfidReaderChipE710.rx000Setting.getModelCode();
             if (DEBUG) appendToLog("Cs710Library4A.getModelName strModelName1 = " + strModelName1);
-            if (strModelName == null || strModelName.length() == 0) {
+            if (true || strModelName == null || strModelName.length() == 0) {
                 if (DEBUG) appendToLog("Cs710Library4A.getModelName strModeName is updated as modeCode");
                 strModelName = strModelName1;
             }
@@ -1118,7 +1096,7 @@ public class CsReaderConnector {
                             !utility.checkHostProcessorVersion(hostVersion, Integer.parseInt(strHostVersions[0].trim()), Integer.parseInt(strHostVersions[1].trim()), Integer.parseInt(strHostVersions[2].trim())))
                         stringPopup += "\nAtmel firmware: V" + strVersionHost;
 
-                    if (icsModel != 463) {
+                    if (icsModel != 203) {
                         appendToLog("CsReaderConnector.checkVersion, x: strVersionBT is " + strVersionBT + ", bluetoothVersion = " + bluetoothVersion);
                         if (false && !utility.checkHostProcessorVersion(bluetoothVersion, Integer.parseInt(strBTVersions[0].trim()), Integer.parseInt(strBTVersions[1].trim()), Integer.parseInt(strBTVersions[2].trim())))
                             stringPopup += "\nBluetooth firmware: V" + strVersionBT;

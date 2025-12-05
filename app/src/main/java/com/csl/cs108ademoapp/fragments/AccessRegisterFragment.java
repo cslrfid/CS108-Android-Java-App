@@ -1,6 +1,6 @@
 package com.csl.cs108ademoapp.fragments;
 
-import static com.csl.cs108ademoapp.MainActivity.mContext;
+import static com.csl.cs108ademoapp.MainActivity.context;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -24,9 +24,9 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
-import com.csl.cs108ademoapp.CustomPopupWindow;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
+import com.csl.cslibrary4a.CustomPopupWindow;
 import com.csl.cs108ademoapp.InventoryBarcodeTask;
 import com.csl.cs108ademoapp.InventoryRfidTask;
 import com.csl.cs108ademoapp.MainActivity;
@@ -51,7 +51,7 @@ public class AccessRegisterFragment extends CommonFragment {
 
     InventoryRfidTask inventoryRfidTask;
     InventoryBarcodeTask inventoryBarcodeTask;
-    AccessTask accessTask;
+    AccessTaskCustom accessTask;
 
     ReaderDevice tagSelected = MainActivity.tagSelected;
     boolean newWriteData;
@@ -73,7 +73,7 @@ public class AccessRegisterFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_access);
         actionBar.setTitle(R.string.title_activity_registertag);
 
-        customPopupWindow = new CustomPopupWindow(mContext);
+        customPopupWindow = new CustomPopupWindow(context);
 
         tableRowSelectMask = (TableRow) getActivity().findViewById(R.id.registerSelectMaskRow);
         tableRowSelectBank = (TableRow) getActivity().findViewById(R.id.registerSelectBankRow);
@@ -126,7 +126,7 @@ public class AccessRegisterFragment extends CommonFragment {
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.mContext, "Step 2 data is confirmed.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, "Step 2 data is confirmed.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -159,7 +159,7 @@ public class AccessRegisterFragment extends CommonFragment {
                 }
 
                 if (inventoryBarcodeTask != null) {
-                    if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) {
+                    if (inventoryBarcodeTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
                         barcodeReadDone = true; MainActivity.csLibrary4A.appendToLog("barcodeReadDone = true in textChanged");
                         MainActivity.csLibrary4A.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(false);
                     }
@@ -203,7 +203,7 @@ public class AccessRegisterFragment extends CommonFragment {
                     textViewSelectedTags.setText("");
                     buttonSelect.setText("Read");
                 } else if (buttonSelect.getText().toString().contains("Stop")) {
-                    inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.BUTTON_RELEASE;
+                    inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.STOP;
                     mHandler.removeCallbacks(runnableSelect);
                     textViewSelectedTags.setText("");
                     for (int i = 0; i < epcArrayList.size(); i++) {
@@ -282,7 +282,7 @@ public class AccessRegisterFragment extends CommonFragment {
         buttonWrite3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (accessTask != null) if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) return;
+                if (accessTask != null) if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) return;
                 runningAuto123 = 0; startStopAccessHandler(false);
             }
         });
@@ -291,7 +291,7 @@ public class AccessRegisterFragment extends CommonFragment {
         buttonAuto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (accessTask != null) if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) return;
+                if (accessTask != null) if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) return;
                 runningAuto123 = 1; startStopAccessHandler(false);
             }
         });
@@ -300,7 +300,7 @@ public class AccessRegisterFragment extends CommonFragment {
         buttonAuto123.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (accessTask != null) if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) return;
+                if (accessTask != null) if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) return;
                 runningAuto123 = 2; mHandler.post(runnableAuto123);
             }
         });
@@ -318,6 +318,7 @@ public class AccessRegisterFragment extends CommonFragment {
             }
         });
 
+        MainActivity.csLibrary4A.restoreAfterTagSelect();
         MainActivity.csLibrary4A.setSameCheck(false);
         MainActivity.csLibrary4A.getBarcodePreSuffix();
     }
@@ -336,13 +337,13 @@ public class AccessRegisterFragment extends CommonFragment {
 
     @Override
     public void onDestroy() {
+        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setNotificationListener(null);
         mHandler.removeCallbacks(runnableSelect);
         mHandler.removeCallbacks(runnableAuto123);
         if (inventoryBarcodeTask != null) inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.DESTORY;
-        if (accessTask != null) accessTask.taskCancelReason = AccessTask.TaskCancelRReason.DESTORY;
+        if (accessTask != null) accessTask.taskCancelReason = AccessTaskCustom.TaskCancelRReason.DESTORY;
         if (DEBUG) MainActivity.csLibrary4A.appendToLog("AcccessRegisterFragment().onDestory(): onDestory()");
         if (MainActivity.csLibrary4A != null) {
-            MainActivity.csLibrary4A.setNotificationListener(null);
             MainActivity.csLibrary4A.setSameCheck(true);
             MainActivity.csLibrary4A.restoreAfterTagSelect();
         }
@@ -407,9 +408,9 @@ public class AccessRegisterFragment extends CommonFragment {
                 }
             }
             MainActivity.csLibrary4A.appendToLog("runnableAuto123: runningAuto123 = " + runningAuto123 + ", inventoryBarcodeTask = " + (inventoryBarcodeTask != null ? "valid" : "null"));
-            if (runningAuto123 == 2 && inventoryBarcodeTask != null) { if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) running = true; }
+            if (runningAuto123 == 2 && inventoryBarcodeTask != null) { if (inventoryBarcodeTask.getStatus() == CustomAsyncTask.Status.RUNNING) running = true; }
             MainActivity.csLibrary4A.appendToLog("runnableAuto123: accessTask = " + (accessTask != null ? "valid" : "null"));
-            if (accessTask != null) { if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) running = true; }
+            if (accessTask != null) { if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) running = true; }
             MainActivity.csLibrary4A.appendToLog("runnableAuto123: running = " + running);
             if (running == false) {
                 int totalTagNew = getTotalTag();
@@ -488,21 +489,21 @@ public class AccessRegisterFragment extends CommonFragment {
 
     void startStopBarcodeHandler(boolean buttonTrigger) {
         if (MainActivity.sharedObjects.runningInventoryRfidTask) {
-            Toast.makeText(MainActivity.mContext, "Running RFID access", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Running RFID access", Toast.LENGTH_SHORT).show();
             return;
         }
 
         boolean started = false;
-        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
+        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == CustomAsyncTask.Status.RUNNING) started = true;
         if (buttonTrigger && ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) return;
         if (started == false) {
             if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                 return;
             }
             if (MainActivity.csLibrary4A.isBarcodeFailure()) {
                 MainActivity.csLibrary4A.appendToLog("Toasted 'Barcode is disable'");
-                Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                 return;
             }
             boolean noToast = true; //runningAuto123;
@@ -514,14 +515,14 @@ public class AccessRegisterFragment extends CommonFragment {
     boolean startStopAccessHandler(boolean buttonTrigger) {
         boolean runningBarcode = false;
         if (inventoryBarcodeTask != null) {
-            if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) {
+            if (inventoryBarcodeTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
                 MainActivity.csLibrary4A.appendToLog("going to startStopBarcodeHandler 1"); startStopBarcodeHandler(buttonTrigger);
                 runningBarcode = true;
             }
         }
 
         boolean runningAccessTask = false;
-        if (accessTask != null) { if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) runningAccessTask = true; }
+        if (accessTask != null) { if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) runningAccessTask = true; }
         if (buttonTrigger && ((runningAccessTask && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (runningAccessTask == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) {
             return true;
         }
@@ -529,17 +530,17 @@ public class AccessRegisterFragment extends CommonFragment {
         boolean validResult = true;
         if (runningBarcode) { }
         else if (runningAccessTask) {
-            if (buttonTrigger) accessTask.taskCancelReason = AccessTask.TaskCancelRReason.BUTTON_RELEASE;
-            else accessTask.taskCancelReason = AccessTask.TaskCancelRReason.STOP;
+            if (buttonTrigger) accessTask.taskCancelReason = AccessTaskCustom.TaskCancelRReason.BUTTON_RELEASE;
+            else accessTask.taskCancelReason = AccessTaskCustom.TaskCancelRReason.STOP;
         } else {
             if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                 validResult = false;
             } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                 validResult = false;
-            } else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
+            } else if (MainActivity.csLibrary4A.rfidToWriteSize() != 0) {
+                Toast.makeText(MainActivity.context, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
                 validResult = false;
             }
 
@@ -668,11 +669,12 @@ public class AccessRegisterFragment extends CommonFragment {
         MainActivity.csLibrary4A.appendToLog("invalidRequest1 = " + invalidRequest1
                 + ", selectMask = " + selectMask + ", selectBank1 = " + selectBank1 + ", selectOffset1 = " + selectOffset1
                 + ", password = " + password + ", power = " + antennaPower + ", repeatCount = " + repeatCount + ", resetCount = " + resetCount);
-        accessTask = new AccessTask(buttonWrite, textViewWriteCount, invalidRequest1, true,
+        accessTask = MainActivity.csLibrary4A.getAccessTaskCustom(buttonWrite, textViewWriteCount, invalidRequest1, true,
                 selectMask, selectBank1, selectOffset1,
                 password, antennaPower, RfidReaderChipData.HostCommands.CMD_18K6CWRITE,
                 selectQValue, repeatCount, resetCount, false,
-                textViewRunTime, textViewTagGot, textViewVoltageLevel, textViewYield, textViewTotal);
+                textViewRunTime, textViewTagGot, textViewVoltageLevel, textViewYield, textViewTotal,
+                MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
         accessTask.execute();
         resetCount = false;
         return invalidRequest1;

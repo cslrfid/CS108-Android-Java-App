@@ -34,6 +34,7 @@ public class HomeSpecialFragment extends CommonFragment {
         Button buttonAuraSense = (Button) getActivity().findViewById(R.id.SpecialButtonAurasense);
         Button buttonFdmicro = (Button) getActivity().findViewById(R.id.SpecialButtonFdmicro);
         Button buttonLanda = (Button) getActivity().findViewById(R.id.SpecialButtonLanda);
+        MainActivity.csLibrary4A.appendToLog("HomeSpecialFragment.onViewCreated: get98XX() = " + MainActivity.csLibrary4A.get98XX());
         if (MainActivity.csLibrary4A.get98XX() == 2) {
             buttonAuraSense.setVisibility(View.GONE);
             buttonFdmicro.setVisibility(View.GONE); buttonLanda.setVisibility(View.GONE);

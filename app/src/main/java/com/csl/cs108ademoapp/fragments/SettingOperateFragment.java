@@ -18,14 +18,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.CustomPopupWindow;
+import com.csl.cslibrary4a.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.SettingTask;
+import com.csl.cs108ademoapp.SettingTaskCustom;
 
 public class SettingOperateFragment extends CommonFragment {
     final String strOVERRIDE = "Override"; final String strRESET = "Reset";
-    private CheckBox checkBoxPortEnable, checkBoxTagFocus, checkBoxFastId, checkBoxHighCompression;
+    private CheckBox checkBoxPortEnable, checkBoxPowerBoost, checkBoxTagFocus, checkBoxFastId, checkBoxHighCompression;
     private Spinner spinnerRegulatoryRegion, spinnerFrequencyOrder, spinnerChannel, spinnerQueryTarget, spinnerQuerySession, spinnerInvAlgo, spinnerProfile, spinnerRflnaGain, spinnerIflnaGain, spinnerAgcGain;
     private EditText editTextPopulation, editTextStartQValue, editTextOperatePower, editTextPortDwell, editTextTagDelay, editTextIntraPkDelay, editTextDupDelay, editTextRetry;
     private TextView textViewPortChannel;
@@ -62,7 +62,7 @@ public class SettingOperateFragment extends CommonFragment {
     int countrySelect = -1;
     int channelOrder = -1; int channelSelect = -1;
     int channel = -1; final int channelMin = 1; int channelMax = 1; int iPortNumber = 1;
-    boolean portEnable = false;
+    boolean portEnable = false, powerBoost;
     long powerLevel = -1; final long powerLevelMin = 0; final long powerLevelMax = 300;
     long dwellTime = -1; final long dwellTimeMin = 0; final long dwellTimeMax = 10000;
     byte byteTagDelay = -1; byte byteTagDelayMin = 0; byte byteTagDelayMax = 63;
@@ -73,12 +73,12 @@ public class SettingOperateFragment extends CommonFragment {
     int queryTarget;
     int querySession = -1;
     int tagFocus = -1, fastId = -1;
-    boolean invAlgoDynamic = false;
+    int invAlgoDynamic = -1;
     int retry = -1;
     int profile = -1;
     int highCompression = -1, rflnagain = -1, iflnagain = -1, agcgain = -1;
 
-    private SettingTask settingTask;
+    private SettingTaskCustom settingTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -91,101 +91,117 @@ public class SettingOperateFragment extends CommonFragment {
         super.onViewCreated(view, savedInstanceState);
 
         if (MainActivity.csLibrary4A.get98XX() == 2) {
-            TableRow tableRow = (TableRow) getActivity().findViewById(R.id.settingOperateCompactDelayRow);
+            TableRow tableRow = (TableRow) view.findViewById(R.id.settingOperateCompactDelayRow);
             tableRow.setVisibility(View.GONE);
-            LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.settingOperateGainControl);
+            LinearLayout linearLayout0 = (LinearLayout) view.findViewById(R.id.settingOperateOtherConfigurationLayout0);
+            linearLayout0.setVisibility(View.GONE);
+            LinearLayout linearLayout1 = (LinearLayout) view.findViewById(R.id.settingOperateOtherConfigurationLayout1);
+            linearLayout1.setVisibility(View.GONE);
+            LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.settingOperateTestConfigurationLayout);
             linearLayout.setVisibility(View.GONE);
         } else {
-            TableRow tableRow = (TableRow) getActivity().findViewById(R.id.settingOperateDupDelayRow);
+            TableRow tableRow = (TableRow) view.findViewById(R.id.settingOperateDupDelayRow);
             tableRow.setVisibility(View.GONE);
-            TableRow tableRow1 = (TableRow) getActivity().findViewById(R.id.settingOperateIntraPkDelayRow);
+            TableRow tableRow1 = (TableRow) view.findViewById(R.id.settingOperateIntraPkDelayRow);
             tableRow1.setVisibility(View.GONE);
-            //TableRow tableRow2 = (TableRow) getActivity().findViewById(R.id.settingOperatePortWarningRow);
-            //tableRow2.setVisibility(View.GONE);
+            LinearLayout linearLayout1 = (LinearLayout) view.findViewById(R.id.settingOperateOtherConfigurationLayout1);
+            linearLayout1.setVisibility(View.GONE);
+            LinearLayout linearLayout2 = (LinearLayout) view.findViewById(R.id.settingOperateOtherConfigurationLayout2);
+            linearLayout2.setVisibility(View.GONE);
         }
 
-        spinnerRegulatoryRegion = (Spinner) getActivity().findViewById(R.id.settingOperateRegulatoryRegion);
-        spinnerFrequencyOrder = (Spinner) getActivity().findViewById(R.id.settingOperateFrequencyOrder); spinnerFrequencyOrder.setEnabled(false);
-        spinnerChannel = (Spinner) getActivity().findViewById(R.id.settingOperateChannel);
+        spinnerRegulatoryRegion = (Spinner) view.findViewById(R.id.settingOperateRegulatoryRegion);
+        spinnerFrequencyOrder = (Spinner) view.findViewById(R.id.settingOperateFrequencyOrder); spinnerFrequencyOrder.setEnabled(false);
+        spinnerChannel = (Spinner) view.findViewById(R.id.settingOperateChannel);
+        {
+            TableRow tableRow = (TableRow) view.findViewById(R.id.settingOperateChannelRow);
+            if (MainActivity.csLibrary4A.getChannelHoppingStatus()) tableRow.setVisibility(View.GONE);
+        }
 
         iPortNumber = MainActivity.csLibrary4A.getPortNumber();
         if (iPortNumber == 1 && false) {
-            TableRow tableRow = (TableRow) getActivity().findViewById(R.id.settingOperatePortChannelRow);
+            TableRow tableRow = (TableRow) view.findViewById(R.id.settingOperatePortChannelRow);
             tableRow.setVisibility(View.GONE);
-            tableRow = (TableRow) getActivity().findViewById(R.id.settingOperatePortEnableRow);
+            tableRow = (TableRow) view.findViewById(R.id.settingOperatePortEnableRow);
             tableRow.setVisibility(View.GONE);
-            tableRow = (TableRow) getActivity().findViewById(R.id.settingOperatePortDwellRow);
+            tableRow = (TableRow) view.findViewById(R.id.settingOperatePortDwellRow);
             tableRow.setVisibility(View.GONE);
         } else {
             int iTemp = iPortNumber;
-            if (iTemp > 1) channelMax = iTemp;
+            if (true || iTemp > 1) channelMax = iTemp;
             else channelMax = 16;
+            TextView textViewPortChannelLabel = (TextView) view.findViewById(R.id.settingOperatePortChannelLabel);
+            if (iPortNumber != 1) textViewPortChannelLabel.setText("Ant port #");
+            else textViewPortChannelLabel.setText("Antenna port");
             if (channelMax != 1) {
-                TextView textViewPortChannelLabel = (TextView) getActivity().findViewById(R.id.settingOperatePortChannelLabel);
-                if (iPortNumber != 1) textViewPortChannelLabel.setText("Ant port #");
-                else textViewPortChannelLabel.setText("Power level");
                 String stringPortChannelLabel = textViewPortChannelLabel.getText().toString();
                 stringPortChannelLabel += "(" + String.valueOf(channelMin) + "-" + String.valueOf(channelMax) + ")";
                 textViewPortChannelLabel.setText(stringPortChannelLabel);
             }
-            textViewPortChannel = (TextView) getActivity().findViewById(R.id.settingOperatePortChannel); textViewPortChannel.setText("1");
-            buttonPortSelect = (Button) getActivity().findViewById(R.id.settingOperatePortChannelSelect);
+            textViewPortChannel = (TextView) view.findViewById(R.id.settingOperatePortChannel); setTextViewChannel(1);
+            buttonPortSelect = (Button) view.findViewById(R.id.settingOperatePortChannelSelect);
+            if (iPortNumber == 1) buttonPortSelect.setVisibility(View.GONE);
             if (false && MainActivity.csLibrary4A.get98XX() == 2) buttonPortSelect.setEnabled(false);
             buttonPortSelect.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    int channel = Integer.parseInt(textViewPortChannel.getText().toString());
+                    int channel = getTextViewChannel();
                     if (channel < 1) channel = channelMin;
                     if (++channel > channelMax) channel = channelMin;
-                    textViewPortChannel.setText(""); if (MainActivity.csLibrary4A.setAntennaSelect(channel-1))    textViewPortChannel.setText(String.valueOf(channel));
+                    setTextViewChannel(channel);
                     editTextOperatePower.setText("");
                     editTextPortDwell.setText("");
                     mHandler.post(updateRunnable);
                 }
             });
 
-            checkBoxPortEnable = (CheckBox) getActivity().findViewById(R.id.settingOperatePortEnable);
+            checkBoxPortEnable = (CheckBox) view.findViewById(R.id.settingOperatePortEnable);
+            if (iPortNumber == 1) checkBoxPortEnable.setEnabled(false);
 
-            TextView textViewPortDwellLabel = (TextView) getActivity().findViewById(R.id.settingOperatePortDwellLabel);
+            TextView textViewPortDwellLabel = (TextView) view.findViewById(R.id.settingOperatePortDwellLabel);
             String stringPortDwellLabel = textViewPortDwellLabel.getText().toString();
             stringPortDwellLabel += "(" + String.valueOf(dwellTimeMin) + "-" + String.valueOf(dwellTimeMax) + ")";
             textViewPortDwellLabel.setText(stringPortDwellLabel);
-            editTextPortDwell = (EditText) getActivity().findViewById(R.id.settingOperatePortDwell);
+            editTextPortDwell = (EditText) view.findViewById(R.id.settingOperatePortDwell);
         }
 
-        TextView textViewAdminTagDelayLabel = (TextView) getActivity().findViewById(R.id.settingAdminTagDelayLabel);
+        TextView textViewAdminTagDelayLabel = (TextView) view.findViewById(R.id.settingAdminTagDelayLabel);
         String stringAdminTagDelayLabel = textViewAdminTagDelayLabel.getText().toString();
         stringAdminTagDelayLabel += "(" + String.valueOf(byteTagDelayMin) + "-" + String.valueOf(byteTagDelayMax) + "ms)";
         textViewAdminTagDelayLabel.setText(stringAdminTagDelayLabel);
-        editTextTagDelay = (EditText) getActivity().findViewById(R.id.settingOperateTagDelay);
-        editTextIntraPkDelay = (EditText) getActivity().findViewById(R.id.settingOperateIntraPkDelay);
-        editTextDupDelay = (EditText) getActivity().findViewById(R.id.settingOperateDupDelay);
+        editTextTagDelay = (EditText) view.findViewById(R.id.settingOperateTagDelay);
+        editTextIntraPkDelay = (EditText) view.findViewById(R.id.settingOperateIntraPkDelay);
+        editTextDupDelay = (EditText) view.findViewById(R.id.settingOperateDupDelay);
 
-        TextView textViewOperatePowerLabel = (TextView) getActivity().findViewById(R.id.settingOperatePowerLabel);
+        TextView textViewOperatePowerLabel = (TextView) view.findViewById(R.id.settingOperatePowerLabel);
         String stringOperationPowerLabel = textViewOperatePowerLabel.getText().toString();
         stringOperationPowerLabel += "(" + String.valueOf(powerLevelMin) + "-" + String.valueOf(powerLevelMax) + ")";
         textViewOperatePowerLabel.setText(stringOperationPowerLabel);
-        editTextOperatePower = (EditText) getActivity().findViewById(R.id.settingOperatePower);
+        editTextOperatePower = (EditText) view.findViewById(R.id.settingOperatePower);
 
-        TextView textViewOperatePopulationLabel = (TextView) getActivity().findViewById(R.id.settingOperatePopulationLabel);
+        checkBoxPowerBoost = (CheckBox) view.findViewById(R.id.settingOperatePowerBoost);
+        if (MainActivity.csLibrary4A.get98XX() == 0) {
+            checkBoxPowerBoost.setVisibility(View.GONE);
+        }
+
+        TextView textViewOperatePopulationLabel = (TextView) view.findViewById(R.id.settingOperatePopulationLabel);
         String stringOperationPopulationLabel = textViewOperatePopulationLabel.getText().toString();
         stringOperationPopulationLabel += "(" + String.valueOf(iPopulationMin) + "-" + String.valueOf(iPopulationMax) + ")";
         textViewOperatePopulationLabel.setText(stringOperationPopulationLabel);
-        editTextPopulation = (EditText) getActivity().findViewById(R.id.settingOperatePopulation);
+        editTextPopulation = (EditText) view.findViewById(R.id.settingOperatePopulation);
+        editTextStartQValue = (EditText) view.findViewById(R.id.settingOperateQValue);
 
-        editTextStartQValue = (EditText) getActivity().findViewById(R.id.settingOperateQValue);
-
-        spinnerQueryTarget = (Spinner) getActivity().findViewById(R.id.settingOperateTarget);
+        spinnerQueryTarget = (Spinner) view.findViewById(R.id.settingOperateTarget);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.query_target_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerQueryTarget.setAdapter(targetAdapter);
 
-        spinnerQuerySession = (Spinner) getActivity().findViewById(R.id.settingOperateSession);
+        spinnerQuerySession = (Spinner) view.findViewById(R.id.settingOperateSession);
         targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.query_session_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerQuerySession.setAdapter(targetAdapter);
 
-        checkBoxTagFocus = (CheckBox) getActivity().findViewById(R.id.settingOperateTagFocus);
+        checkBoxTagFocus = (CheckBox) view.findViewById(R.id.settingOperateTagFocus);
         String string = checkBoxTagFocus.getText().toString();
         if (MainActivity.csLibrary4A.get98XX() ==  2) checkBoxTagFocus.setText(string.substring(0, string.length()-1) + ". When enabled, tag select is disabled.)");
         checkBoxTagFocus.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -196,18 +212,18 @@ public class SettingOperateFragment extends CommonFragment {
             }
         });
 
-        checkBoxFastId = (CheckBox) getActivity().findViewById(R.id.settingOperateFastId);
+        checkBoxFastId = (CheckBox) view.findViewById(R.id.settingOperateFastId);
 
-        spinnerInvAlgo = (Spinner) getActivity().findViewById(R.id.settingOperateAlgorithmToUse);
+        spinnerInvAlgo = (Spinner) view.findViewById(R.id.settingOperateAlgorithmToUse);
         targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.inventory_algorithm_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerInvAlgo.setAdapter(targetAdapter);
 
-        TextView textViewRetry = (TextView) getActivity().findViewById(R.id.settingOperateRetryLabel);
-        if (MainActivity.csLibrary4A.get98XX() == 2) textViewRetry.setText("Minimum minQ cycles");
-        editTextRetry = (EditText) getActivity().findViewById(R.id.settingOperateRetry);
+        TextView textViewRetry = (TextView) view.findViewById(R.id.settingOperateRetryLabel);
+        if (MainActivity.csLibrary4A.get98XX() == 2) textViewRetry.setText("Minimum Q cycles");
+        editTextRetry = (EditText) view.findViewById(R.id.settingOperateRetry);
 
-        spinnerProfile = (Spinner) getActivity().findViewById(R.id.settingOperateProfile);
+        spinnerProfile = (Spinner) view.findViewById(R.id.settingOperateProfile);
         if (true) {
             ArrayAdapter<String> targetAdapter1 = new ArrayAdapter<String>(getContext(),  android.R.layout.simple_spinner_dropdown_item, MainActivity.csLibrary4A.getProfileList());
             targetAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -215,53 +231,51 @@ public class SettingOperateFragment extends CommonFragment {
         }
 
         MainActivity.csLibrary4A.resetEnvironmentalRSSI();
-        textViewEnvironmentalRSSI = (TextView) getActivity().findViewById(R.id.settingOperateEnvironmentalRSSI);
-        checkBoxHighCompression = (CheckBox) getActivity().findViewById(R.id.settingOperateHighCompression);
+        textViewEnvironmentalRSSI = (TextView) view.findViewById(R.id.settingOperateEnvironmentalRSSI);
+        checkBoxHighCompression = (CheckBox) view.findViewById(R.id.settingOperateHighCompression);
 
-        spinnerRflnaGain = (Spinner) getActivity().findViewById(R.id.settingOperateRflnaGain);
+        spinnerRflnaGain = (Spinner) view.findViewById(R.id.settingOperateRflnaGain);
         targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.rflnagain_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerRflnaGain.setAdapter(targetAdapter);
 
-        spinnerIflnaGain = (Spinner) getActivity().findViewById(R.id.settingOperateIflnaGain);
+        spinnerIflnaGain = (Spinner) view.findViewById(R.id.settingOperateIflnaGain);
         targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.iflnagain_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerIflnaGain.setAdapter(targetAdapter);
 
-        spinnerAgcGain = (Spinner) getActivity().findViewById(R.id.settingOperateAgcGAin);
+        spinnerAgcGain = (Spinner) view.findViewById(R.id.settingOperateAgcGAin);
         targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.agcgain_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerAgcGain.setAdapter(targetAdapter);
 
-        buttonOverride = (Button) getActivity().findViewById(R.id.settingOperateOverrideButton);
-        String strText = buttonOverride.getText().toString();
-        if (strText.contains(strOVERRIDE)) {
-            editTextPopulation.setEnabled(true);
-            editTextStartQValue.setEnabled(false);
-        } else {
-            editTextPopulation.setEnabled(false);
-            editTextStartQValue.setEnabled(true);
-        }
+        buttonOverride = (Button) view.findViewById(R.id.settingOperateOverrideButton);
         buttonOverride.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String strText = buttonOverride.getText().toString();
-                if (strText.contains(strOVERRIDE)) {
+                int iPopulation2 = -1;
+                try {
+                    iPopulation2 = Integer.parseInt(editTextPopulation.getText().toString());
+                } catch (Exception ex) { }
+                if (iPopulation2 <= 0) { }
+                else if (strText.contains(strOVERRIDE)) {
                     editTextPopulation.setEnabled(false);
                     editTextStartQValue.setEnabled(true);
                     buttonOverride.setText(strRESET); overriding = true;
+
+                    editTextStartQValue.setText(String.valueOf(MainActivity.csLibrary4A.getPopulation2Q(iPopulation2)));
                 } else {
                     editTextPopulation.setEnabled(true);
                     editTextStartQValue.setEnabled(false);;
                     buttonOverride.setText(strOVERRIDE); overriding = false;
 
-                    iPopulation = Integer.parseInt(editTextPopulation.getText().toString());
-                    editTextStartQValue.setText(String.valueOf(MainActivity.csLibrary4A.getPopulation2Q(iPopulation)));
+                    updatePopulation4Q();
                 }
             }
         });
 
-        button = (Button) getActivity().findViewById(R.id.settingSaveButtonOperate);
+        button = (Button) view.findViewById(R.id.settingSaveButtonOperate);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -269,7 +283,7 @@ public class SettingOperateFragment extends CommonFragment {
             }
         });
 
-        button1 = (Button) getActivity().findViewById(R.id.settingSaveButtonOperate1);
+        button1 = (Button) view.findViewById(R.id.settingSaveButtonOperate1);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -279,16 +293,39 @@ public class SettingOperateFragment extends CommonFragment {
 
         mHandler.post(updateRunnable);
     }
-
+    void updatePopulation4Q() {
+        int iPopulation2 = -1;
+        try {
+            iPopulation2 = Integer.parseInt(editTextPopulation.getText().toString());
+        } catch (Exception ex) { }
+        if (iPopulation2 <= 0) { }
+        else {
+            int iQValue4Population = (int) MainActivity.csLibrary4A.getPopulation2Q(iPopulation);
+            int iQValueNew = -1;
+            try {
+                iQValueNew = Integer.valueOf(editTextStartQValue.getText().toString());
+            } catch (Exception ex) {
+            }
+            MainActivity.csLibrary4A.appendToLog("SettingOperateFragment.updatePopulation4Q: iPopulation = " + iPopulation + ", iQValue4Population = " + iQValue4Population + ", iQValueNew = " + iQValueNew);
+            if (iQValueNew < 0 || iQValueNew > 15)
+                editTextStartQValue.setText(String.valueOf(iQValue4Population));
+            else if (iQValueNew != iQValue4Population) {
+                iPopulation2 = MainActivity.csLibrary4A.getQ2Population(iQValueNew);
+                editTextPopulation.setText(String.valueOf(iPopulation2));
+                iPopulation = iPopulation2;
+            }
+            MainActivity.csLibrary4A.appendToLog("SettingOperateFragment.updatePopulation4Q: editTextPopulation.getText = " + editTextPopulation.getText().toString());
+        }
+    }
     void settingUpdate1() {
         if (MainActivity.csLibrary4A.isBleConnected() == false) {
-            Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
             return;
         } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-            Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
             return;
         } else if (updateRunning) {
-            Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
             return;
         } else {
             MainActivity.csLibrary4A.setSameCheck(sameCheck);
@@ -296,10 +333,10 @@ public class SettingOperateFragment extends CommonFragment {
                 countrySelect = spinnerRegulatoryRegion.getSelectedItemPosition();
                 channelOrder = spinnerFrequencyOrder.getSelectedItemPosition();
                 channelSelect = spinnerChannel.getSelectedItemPosition();
-                if (textViewPortChannel != null)
-                    channel = Integer.parseInt(textViewPortChannel.getText().toString());
+                if (textViewPortChannel != null) channel = getTextViewChannel();
                 if (checkBoxPortEnable != null) portEnable = checkBoxPortEnable.isChecked();
                 powerLevel = Long.parseLong(editTextOperatePower.getText().toString());
+                powerBoost = checkBoxPowerBoost.isChecked();
                 if (editTextPortDwell != null)
                     dwellTime = Long.parseLong(editTextPortDwell.getText().toString());
                 if (editTextTagDelay != null)
@@ -309,12 +346,13 @@ public class SettingOperateFragment extends CommonFragment {
                 if (editTextDupDelay != null)
                     byteDupDelay = Byte.parseByte(editTextDupDelay.getText().toString());
                 iPopulation = Integer.parseInt(editTextPopulation.getText().toString());
+                MainActivity.csLibrary4A.appendToLog("SettingOperateFragment.settingUpdate1: iPopulation = " + iPopulation);
                 byteFixedQValue = Byte.parseByte(editTextStartQValue.getText().toString());
                 queryTarget = spinnerQueryTarget.getSelectedItemPosition();
                 querySession = spinnerQuerySession.getSelectedItemPosition();
                 tagFocus = (checkBoxTagFocus.isChecked() ? 1 : 0);
                 fastId = (checkBoxFastId.isChecked() ? 1 : 0);
-                invAlgoDynamic = (spinnerInvAlgo.getSelectedItemPosition() == 0 ? true : false);
+                invAlgoDynamic = (spinnerInvAlgo.getSelectedItemPosition() == 0 ? 3 : 0);
                 retry = Integer.parseInt(editTextRetry.getText().toString());
                 profile = spinnerProfile.getSelectedItemPosition();
                 highCompression = (checkBoxHighCompression.isChecked() ? 1 : 0);
@@ -323,9 +361,21 @@ public class SettingOperateFragment extends CommonFragment {
                 agcgain = spinnerAgcGain.getSelectedItemPosition();
                 settingUpdate();
             } catch (Exception ex) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setUserVisibleHint2(true);
+    }
+
+    @Override
+    public void onPause() {
+        setUserVisibleHint2(false);
+        super.onPause();
     }
 
     @Override
@@ -337,11 +387,11 @@ public class SettingOperateFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = true;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        MainActivity.csLibrary4A.appendToLog("isVisibleToUser = " + isVisibleToUser);
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("SettingOperateFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if (isVisibleToUser) { //getUserVisibleHint()) {
             if (userVisibleHint == false) {
                 userVisibleHint = true;
                 mHandler.post(updateRunnable);
@@ -355,6 +405,24 @@ public class SettingOperateFragment extends CommonFragment {
         super("SettingOperateFragment");
     }
 
+    int getTextViewChannel() {
+        String string = textViewPortChannel.getText().toString();
+        String[] strings = string.split(" ");
+        return Integer.parseInt(strings[0]);
+    }
+    void setTextViewChannel(int channel) {
+        textViewPortChannel.setText("");
+        if (MainActivity.csLibrary4A.setAntennaSelect(channel-1)) {
+            String string = String.valueOf(channel);
+            if (MainActivity.csLibrary4A.getcsModel() == 203) {
+                String string1 = "";
+                if (channel == 1) string1 = " [external]";
+                else if (channel == 2) string1 = " [internal]";
+                string = string + string1;
+            }
+            textViewPortChannel.setText(string);
+        }
+    }
     boolean updateRunning = false;
     private final Runnable updateRunnable = new Runnable() {
         @Override
@@ -364,34 +432,29 @@ public class SettingOperateFragment extends CommonFragment {
             boolean updating = false;
 
             updateRunning = true;
-            if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0)   {
+            if (MainActivity.csLibrary4A.rfidToWriteSize() != 0)   {
                 updating = true; MainActivity.csLibrary4A.appendToLog("updating 1");
             }
             else {
                 iPopulation = MainActivity.csLibrary4A.getPopulation();
                 if (iPopulation < 0) {
                     updating = true; MainActivity.csLibrary4A.appendToLog("updating 2");
-                }
-                else {
+                } else {
                     editTextPopulation.setText(String.valueOf(iPopulation));
-
-                    byteFixedQValue = MainActivity.csLibrary4A.getQValue();
-                    editTextStartQValue.setText(String.valueOf(byteFixedQValue));
-                    if (MainActivity.csLibrary4A.getPopulation2Q(iPopulation) != byteFixedQValue) {
-                        buttonOverride.setText(strRESET); overriding = true;
-                    } else {
-                        buttonOverride.setText(strOVERRIDE); overriding = false;
-                    }
+                    //byteFixedQValue = MainActivity.csLibrary4A.getQValue();
+                    //editTextStartQValue.setText(String.valueOf(byteFixedQValue));
+                    editTextStartQValue.setText(String.valueOf(MainActivity.csLibrary4A.getPopulation2Q(iPopulation)));
                 }
                 if (updating == false && textViewPortChannel != null) {
-                    lValue = MainActivity.csLibrary4A.getAntennaSelect();
-                    if (lValue < 0) {
+                    int iValue1 = MainActivity.csLibrary4A.getAntennaSelect();
+                    if (iValue1 < 0) {
                         updating = true; MainActivity.csLibrary4A.appendToLog("updating 4");
                     } else {
-                        textViewPortChannel.setText(String.valueOf(lValue+1));
+                        setTextViewChannel(iValue1+1);
                     }
                 }
-                if (checkBoxPortEnable != null) checkBoxPortEnable.setChecked(MainActivity.csLibrary4A.getAntennaEnable());
+                if (checkBoxPortEnable != null) checkBoxPortEnable.setChecked(MainActivity.csLibrary4A.getAntennaEnable() > 0);
+                if (checkBoxPowerBoost != null) checkBoxPowerBoost.setChecked(MainActivity.csLibrary4A.getPowerBoost() > 0);
                 if (updating == false) {
                     lValue = MainActivity.csLibrary4A.getPwrlevel();
                     if (lValue < 0) {
@@ -440,7 +503,7 @@ public class SettingOperateFragment extends CommonFragment {
                     else checkBoxFastId.setChecked(iValue > 0 ? true : false);
                 }
                 if (updating == false) {
-                    spinnerInvAlgo.setSelection(MainActivity.csLibrary4A.getInvAlgo() ? 0 : 1);
+                    spinnerInvAlgo.setSelection(MainActivity.csLibrary4A.getInvAlgo() == 3 ? 0 : 1);
                 }
                 if (updating == false) {
                     int iRetry = MainActivity.csLibrary4A.getRetryCount();
@@ -451,6 +514,7 @@ public class SettingOperateFragment extends CommonFragment {
                 }
                 if (updating == false) {
                     String[] strCountryList = MainActivity.csLibrary4A.getCountryList();
+                    MainActivity.csLibrary4A.appendToLog("SettingOperateFragment.updateRunnable.run: strCountryList is " + (strCountryList == null ? "null" : "valid"));
                     for (int i = 0; i < strCountryList.length; i++) MainActivity.csLibrary4A.appendToLog("updating: String " + i + " = " + strCountryList[i]);
                     String[] strChannelFrequencyList = MainActivity.csLibrary4A.getChannelFrequencyList();
                     //for (int i = 0; i < strChannelFrequencyList.length; i++) MainActivity.csLibrary4A.appendToLog("updating: String " + i + " = " + strChannelFrequencyList[i]);
@@ -597,8 +661,9 @@ public class SettingOperateFragment extends CommonFragment {
             else spinnerChannel.setEnabled(false);
             spinnerChannel.setSelection(MainActivity.csLibrary4A.getChannel()); MainActivity.csLibrary4A.appendToLog("1 channel = ");
         }
+        MainActivity.csLibrary4A.appendToLog("SettingOperateFragment.settingUpdate: invalidRequest = " + invalidRequest + ", getChannel = " + MainActivity.csLibrary4A.getChannel() + ", channelSelect = " + channelSelect + ", sameCheck = " + sameCheck);
         if (invalidRequest == false && (MainActivity.csLibrary4A.getChannel() != channelSelect || sameCheck == false)) {
-            sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 3");
+            sameSetting = false; MainActivity.csLibrary4A.appendToLog("SettingOperateFragment.settingUpdate: point 3, channelSelect = " + channelSelect + ", FreqChnCnt = " + MainActivity.csLibrary4A.FreqChnCnt());
             if (channelSelect < MainActivity.csLibrary4A.FreqChnCnt()) {
                 if (MainActivity.csLibrary4A.setChannel(channelSelect) == false)    invalidRequest = true;
             } else {
@@ -611,20 +676,26 @@ public class SettingOperateFragment extends CommonFragment {
             else if (MainActivity.csLibrary4A.setAntennaSelect(channel - 1) == false) invalidRequest = true;
             else changedChannel = true;
         }
-        if (invalidRequest == false && (MainActivity.csLibrary4A.getAntennaEnable() != portEnable || sameCheck == false || changedChannel)) {
+        if (invalidRequest == false && ((MainActivity.csLibrary4A.getAntennaEnable() > 0) != portEnable || sameCheck == false || changedChannel)) {
             sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 5");
-            if (MainActivity.csLibrary4A.setAntennaEnable(portEnable) == false)
+            if (MainActivity.csLibrary4A.setAntennaEnable(portEnable) == false) {
+                MainActivity.csLibrary4A.appendToLog("point 5A");
                 invalidRequest = true;
+            }
         }
         if (invalidRequest == false && (MainActivity.csLibrary4A.getPwrlevel() != powerLevel || sameCheck == false)) {
             sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 6");
             if (powerLevel < powerLevelMin) invalidRequest = true;
-            else if (powerLevel > MainActivity.powerLevelMax) {
-                CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+            else if (powerLevel > MainActivity.csLibrary4A.getPowerLevelMax()) {
+                CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.context);
                 customPopupWindow.popupStart("Power can only be set to 320 or below", false);
                 invalidRequest = true;
             }
             else if (MainActivity.csLibrary4A.setPowerLevel(powerLevel) == false) invalidRequest = true;
+        }
+        if (invalidRequest == false && ((MainActivity.csLibrary4A.getPowerBoost() > 0) != powerBoost || sameCheck == false)) {
+            sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 6A");
+            if (MainActivity.csLibrary4A.setPowerBoost(powerBoost) == false) invalidRequest = true;
         }
         if ((invalidRequest == false && (MainActivity.csLibrary4A.getAntennaDwell() != dwellTime || sameCheck == false || changedChannel))) {
             sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 7");
@@ -656,22 +727,18 @@ public class SettingOperateFragment extends CommonFragment {
             }
         }
 
-        if (overriding) {
-            if (MainActivity.csLibrary4A.getQValue() != byteFixedQValue || sameCheck == false) {
-                sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 9");
-                if (byteFixedQValue < byteFixedQValueMin || byteFixedQValue > byteFixedQValueMax) invalidRequest = true;
-                if (MainActivity.csLibrary4A.setQValue(byteFixedQValue) == false)
-                    invalidRequest = true;
-            }
-        } else {
-            if (invalidRequest == false && (MainActivity.csLibrary4A.getPopulation() != iPopulation || MainActivity.csLibrary4A.getQValue() != byteFixedQValue || sameCheck == false)) {
-                sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 10");
-                if (iPopulation < iPopulationMin || iPopulation > iPopulationMax) invalidRequest = true;
-                else if (MainActivity.csLibrary4A.setPopulation(iPopulation) == false) {
-                    invalidRequest = true;
-                } else {
-                    editTextStartQValue.setText(String.valueOf(MainActivity.csLibrary4A.getPopulation2Q(iPopulation)));
-                }
+        MainActivity.csLibrary4A.appendToLog("SettingOperateFragment.settingUpdate: overriding = " + overriding + ", invalidRequest = " + invalidRequest + ", getPopulation = " + MainActivity.csLibrary4A.getPopulation()
+                + ", iPopulation = " + iPopulation + ", getQValue = " + MainActivity.csLibrary4A.getQValue() + ", byteFixedQValue = " + byteFixedQValue + ", sameCheck = " + sameCheck);
+        if (overriding) updatePopulation4Q();
+        MainActivity.csLibrary4A.appendToLog("SettingOperateFragment.settingUpdate: 2 overriding = " + overriding + ", invalidRequest = " + invalidRequest + ", getPopulation = " + MainActivity.csLibrary4A.getPopulation()
+                + ", iPopulation = " + iPopulation + ", getQValue = " + MainActivity.csLibrary4A.getQValue() + ", byteFixedQValue = " + byteFixedQValue + ", sameCheck = " + sameCheck);
+        if (invalidRequest == false && (MainActivity.csLibrary4A.getPopulation() != iPopulation || MainActivity.csLibrary4A.getQValue() != byteFixedQValue  || sameCheck == false)) {
+            sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 10");
+            if (iPopulation < iPopulationMin || iPopulation > iPopulationMax) invalidRequest = true;
+            else if (MainActivity.csLibrary4A.setPopulation(iPopulation) == false) {
+                invalidRequest = true;
+            } else {
+                editTextStartQValue.setText(String.valueOf(MainActivity.csLibrary4A.getPopulation2Q(iPopulation)));
             }
         }
         if ((MainActivity.csLibrary4A.getQueryTarget() != queryTarget
@@ -693,7 +760,7 @@ public class SettingOperateFragment extends CommonFragment {
         if (invalidRequest == false) {
             if (MainActivity.csLibrary4A.getInvAlgo() != invAlgoDynamic || sameCheck == false) {
                 sameSetting = false; MainActivity.csLibrary4A.appendToLog("point 13");
-                if (MainActivity.csLibrary4A.setInvAlgo(invAlgoDynamic) == false)
+                if (MainActivity.csLibrary4A.setInvAlgo(invAlgoDynamic == 3) == false)
                     invalidRequest = true;
                 spinnerQueryTarget.setSelection(MainActivity.csLibrary4A.getQueryTarget());
             }
@@ -712,6 +779,7 @@ public class SettingOperateFragment extends CommonFragment {
                     invalidRequest = true;
             }
         }
+        MainActivity.csLibrary4A.appendToLog("point end 0 with invalidRequest = " + invalidRequest);
         if (invalidRequest == false) {
             switch(rflnagain) {
                 case 1:
@@ -761,11 +829,14 @@ public class SettingOperateFragment extends CommonFragment {
                     || (MainActivity.csLibrary4A.getAgcGain() != agcgain)
                     || sameCheck == false) {
                 sameSetting = false;
-                if (MainActivity.csLibrary4A.setRxGain(highCompression, rflnagain, iflnagain, agcgain) == false)
+                if (MainActivity.csLibrary4A.setRxGain(highCompression, rflnagain, iflnagain, agcgain) == false) {
+                    MainActivity.csLibrary4A.appendToLog("point end 1");
                     invalidRequest = true;
+                }
             }
         }
-        settingTask = new SettingTask((sameCheck ? button: button1), sameSetting, invalidRequest);
+        MainActivity.csLibrary4A.appendToLog("point end 2 with invalidRequest = " + invalidRequest);
+        settingTask = new SettingTaskCustom((sameCheck ? button: button1), sameSetting, invalidRequest);
         settingTask.execute();
         MainActivity.csLibrary4A.saveSetting2File();
         mHandler.post(updateRunnable);

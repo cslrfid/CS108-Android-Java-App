@@ -7,12 +7,13 @@ import androidx.core.view.MenuProvider;
 import androidx.lifecycle.Lifecycle;
 import android.os.Bundle;
 
-import com.csl.cslibrary4a.AdapterTab;
+import com.csl.cslibrary4a.CustomTabAdapter;
+import com.csl.cslibrary4a.CustomTabLayout;
 import com.csl.cslibrary4a.RfidReader;
-import com.google.android.material.tabs.TabLayout;
-import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,22 +26,19 @@ import com.csl.cs108ademoapp.R;
 
 public class AxzonFragment extends CommonFragment {
     private ActionBar actionBar;
-    private ViewPager viewPager;
-    AdapterTab adapter;
-
-    private String[] tabs = { "Scan/Select", "Read" };
-    private String[] tabsXerxes0 = { "Logger" };
-    private String[] tabsXerxes = { "Logger", "Security" };
+    private ViewPager2 viewPager;
+    CustomTabAdapter adapter;
+    private String[] tabs = { "Read", "Scan/Select", "Logger", "Security" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
+        return inflater.inflate(R.layout.custom_tabbed_layout2, container, false);
     }
 
     @Override
     public boolean onMenuItemSelectedA(MenuItem item) {
-        InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) adapter.fragment0;
+        InventoryRfidiMultiFragment fragment = (InventoryRfidiMultiFragment) adapter.fragment1;
         if (item.getItemId() == R.id.menuAction_clear) {
             fragment.clearTagsList();
             return true;
@@ -79,8 +77,7 @@ public class AxzonFragment extends CommonFragment {
 
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setIcon(R.drawable.dl_inv);
-        MainActivity.csLibrary4A.appendToLog("MainActivity.mDid = " + MainActivity.mDid);
-        if (false) actionBar.setTitle(R.string.title_activity_axzon);
+        if (true) actionBar.setTitle(R.string.title_activity_axzon);
         else {
             String stringTitle = getResources().getString(R.string.title_activity_axzon);
             if (MainActivity.tagType == RfidReader.TagType.TAG_MAGNUS_S2) stringTitle = "S2";
@@ -89,50 +86,18 @@ public class AxzonFragment extends CommonFragment {
             actionBar.setTitle(stringTitle);
          }
 
-        boolean bXervesTag = false;
-        if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON_XERXES) bXervesTag = true;
-
-        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
-
-        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), (bXervesTag ? 4 : 2));
-        adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, TAG_AXZON, ""));
-        adapter.setFragment(1, AccessMicronFragment.newInstance(true));
-        adapter.setFragment(2, new AccessXerxesLoggerFragment());
+        adapter = new CustomTabAdapter(this, tabs.length);
+        adapter.setFragment(0, AccessMicronFragment.newInstance(true));
+        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true, TAG_AXZON, ""));
+        adapter.setFragment(2, new AccessOpusLoggerFragment());
         adapter.setFragment(3, new AccessUcodeFragment());
 
-        viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
+        viewPager = (ViewPager2) getActivity().findViewById(R.id.OperationsPager2);
         viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        //viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
-        for (String tab_name : tabs) {
-            tabLayout.addTab(tabLayout.newTab().setText(tab_name));
-        }
-        if (bXervesTag) {
-            if (MainActivity.csLibrary4A.get98XX() == 2 && MainActivity.csLibrary4A.getMacVer().indexOf("1.2") != 0) {
-                for (String tab_name : tabsXerxes0) {
-                    tabLayout.addTab(tabLayout.newTab().setText(tab_name));
-                }
-            } else {
-                for (String tab_name : tabsXerxes) {
-                    tabLayout.addTab(tabLayout.newTab().setText(tab_name));
-                }
-            }
-        }
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
-        });
+        CustomTabLayout tabLayout = (CustomTabLayout) getActivity().findViewById(R.id.OperationsTabLayout2);
+        tabLayout.addTab(tabs, viewPager);
 
         MainActivity.csLibrary4A.setBasicCurrentLinkProfile();
     }

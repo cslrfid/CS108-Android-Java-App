@@ -308,6 +308,76 @@
         <item>S2</item>
         <item>S3</item>
         <item>Xerxes</item>
+        <item>Opus AZN5200-AFR</item>
+    </string-array>
+
+    <string-array name="tagAxzon_Opus_logging_interval_options">
+        <item></item>
+        <item>1 second</item>
+        <item>5 seconds</item>
+        <item>10 seconds</item>
+        <item>15 seconds</item>
+        <item>20 seconds</item>
+        <item>25 seconds</item>
+        <item>30 seconds</item>
+        <item>1 minute</item>
+        <item>2 minutes</item>
+        <item>3 minutes</item>
+        <item>4 minutes</item>
+        <item>5 minutes</item>
+        <item>6 minutes</item>
+        <item>7 minutes</item>
+        <item>10 minutes</item>
+        <item>15 minutes</item>
+        <item>20 minutes</item>
+        <item>25 minutes</item>
+        <item>30 minutes</item>
+        <item>35 minutes</item>
+        <item>40 minutes</item>
+        <item>1 hour</item>
+        <item>2 hours</item>
+        <item>3 hours</item>
+        <item>4 hours</item>
+        <item>5 hours</item>
+        <item>6 hours</item>
+        <item>7 hours</item>
+        <item>8 hours</item>
+    </string-array>
+
+    <string-array name="tagAxzon_Opus_SampleNumber_ToLog_options">
+        <item></item>
+        <item>512</item>
+        <item>1024</item>
+        <item>1536</item>
+        <item>2048</item>
+        <item>2560</item>
+        <item>3072</item>
+        <item>3584</item>
+        <item>4096</item>
+    </string-array>
+
+    <string-array name="tagAxzon_Opus_disable_enable_options">
+        <item></item>
+        <item>Disable</item>
+        <item>Enable</item>
+    </string-array>
+
+    <string-array name="tagAxzon_Opus_inactive_active_options">
+        <item></item>
+        <item>Inactive</item>
+        <item>Active</item>
+    </string-array>
+
+    <string-array name="tagAxzon_Opus_logger_state_options">
+        <item></item>
+        <item>Sleep</item>
+        <item>Standby after enabling BAP</item>
+        <item>State 2</item>
+        <item>Ready to start logging</item>
+        <item>State 4</item>
+        <item>BAP after first request</item>
+        <item>Logging</item>
+        <item>Finished logging</item>
     </string-array>
 
     <string-array name="sensor_unit_options">
@@ -397,8 +467,6 @@
     <string name="toast_abort_by_TIMEOUT">Finish as TIMEOUT</string>
     <string name="toast_abort_by_RFIDRESET">Finish as RFID RESET</string>
     <string name="toast_abort_by_END">Finish as COMMAND END is received</string>
-    <string name="toast_abort_by_SUCCESS">SUCCESS</string>
-    <string name="toast_abort_by_FAILURE">FAILURE</string>
     <string name="toast_ble_connected">BLE is connected</string>
     <string name="toast_ble_setup_problem">Setup problem after connection. Disconnect</string>
     <string name="toast_invalid_range">Invalid Range. Operation is cancelled.</string>
@@ -489,7 +557,14 @@
 
     <string name="error_bluetooth_connection_failed">Unable to connect device</string>
     <string name="colon">:</string>
+    <string name="other_common_configurations">Other Common Configurations</string>
+    <string name="common_configurations">Common Configurations</string>
+    <string name="regulatory_region">Regulatory region</string>
+    <string name="frequency_order">Frequency order</string>
+    <string name="fixed_channel">Fixed channel</string>
+    <string name="antenna_specific_configurations">Antenna Specific Configurations</string>
+    <string name="tag_population">Tag population</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-
+    <string name="toast_abort_by_SUCCESS">SUCCESS</string>
 </resources>

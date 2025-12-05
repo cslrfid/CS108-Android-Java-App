@@ -77,11 +77,8 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
             }
         }
         if (MainActivity.csLibrary4A.isBleScanning()) {
-            if (reader.getServiceUUID2p1() == 0 || reader.getServiceUUID2p1() == 1) text1 += "\nCS108 Reader";
-            else if (reader.getServiceUUID2p1() == 2 || reader.getServiceUUID2p1() == 3) text1 += "\nCS710S Reader";
-            else if (reader.getServiceUUID2p1() == 4) text1 += "\nCS463 Reader";
-            else if (reader.getServiceUUID2p1() == 5) text1 += "\nCS203XL Reader";
-            else if (reader.getServiceUUID2p1() == 6) text1 += "\nConnected paired devices";
+            String string = reader.getDeviceType();
+            if (string != null) text1 += ("\n" + string);
         }
         checkedTextView.setText(text1);
         if (reader.getSelected()) {
@@ -128,7 +125,7 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
                 }
             } else if (codeSensor > reader.INVALID_CODESENSOR && codeRssi > reader.INVALID_CODERSSI) { //for Axzon/Magnus tags
                 strExtra = "SC=" + String.format("%d", codeSensor);
-                int iHumidityThreshold = Integer.parseInt(MainActivity.config.config3);
+                int iHumidityThreshold = Integer.parseInt(MainActivity.config.configHumidityThreshold);
                 if (false && reader.getCodeSensorMax() > 0) {
                     float fValue = (float) codeSensor;
                     fValue /= (float) reader.getCodeSensorMax();
@@ -138,8 +135,8 @@ public class ReaderListAdapter extends ArrayAdapter<ReaderDevice> {
                     strExtra += "\nSC=" + (codeSensor >= iHumidityThreshold ? "Dry" : "Wet");
                 }
                 int ocrssiMin = -1; int ocrssiMax = -1; boolean bValidOcrssi = false;
-                ocrssiMax = Integer.parseInt(MainActivity.config.config1);
-                ocrssiMin = Integer.parseInt(MainActivity.config.config2);
+                ocrssiMax = Integer.parseInt(MainActivity.config.configRssiUpperLimit);
+                ocrssiMin = Integer.parseInt(MainActivity.config.configRssiLowerLimit);
                 if (ocrssiMax > 0 && ocrssiMin > 0 && (codeRssi > ocrssiMax || codeRssi < ocrssiMin)) strExtra += ("\n<font color=red>OCRSSI=" + String.format("%d", codeRssi) + "</font>");
                 else {
                     bValidOcrssi = true; strExtra += ("\nOCRSSI=" + String.format("%d", codeRssi));

@@ -68,14 +68,18 @@ public class SensorConnector {
 
         public void turnOn(boolean onStatus) {
             if (locationManager != null) {
-                if (true) MainActivity.csLibrary4A.appendToLog("permission.ACCESS_FINE_LOCATION = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION));
-                if (true) MainActivity.csLibrary4A.appendToLog("permission.ACCESS_COARSE_LOCATION = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION));
+                if (true && MainActivity.csLibrary4A != null) {
+                    MainActivity.csLibrary4A.appendToLog("permission.ACCESS_FINE_LOCATION = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION));
+                    MainActivity.csLibrary4A.appendToLog("permission.ACCESS_COARSE_LOCATION = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION));
+                }
                 if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(mContext.getApplicationContext(), "LOCATION_FEATURE permission is NOT GRANTED in this phone !!! Please go to Phone Setup and enable Location Services and Relaunch.", Toast.LENGTH_SHORT).show();
                 } else if (onStatus && this.onStatus == false) {
                     this.onStatus = onStatus;
-                    if (true) MainActivity.csLibrary4A.appendToLog("LocationDevice.setRfidOn(): ON with LocationManager: ON");
-                    if (true) MainActivity.csLibrary4A.appendToLog("LocationManager.PASSIVE_PROVIDER = " + LocationManager.PASSIVE_PROVIDER);
+                    if (true && MainActivity.csLibrary4A != null) {
+                        MainActivity.csLibrary4A.appendToLog("LocationDevice.setRfidOn(): ON with LocationManager: ON");
+                        MainActivity.csLibrary4A.appendToLog("LocationManager.PASSIVE_PROVIDER = " + LocationManager.PASSIVE_PROVIDER);
+                    }
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 //                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
                       if (true) locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListener); //not working in iData2S phone

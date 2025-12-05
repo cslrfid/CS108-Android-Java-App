@@ -14,6 +14,7 @@ import static java.lang.Math.log10;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 
 import java.math.BigInteger;
@@ -66,6 +67,11 @@ public class RfidReader {
         for (int i = 0; i < 50; i++) {
             if (false) appendToLog("fccFreqTableIdx[" + i + "] = " + countryChannelData.fccFreqTableIdx[i]);
         }
+
+        antennas = new Antenna[2];
+        for (int i = 0; i < 2; i++) {
+            antennas[i] = new Antenna(i);
+        }
     }
 
     public enum TagType {
@@ -80,7 +86,7 @@ public class RfidReader {
         TAG_EM, TAG_EM_BAP, TAG_EM_COLDCHAIN, TAG_EM_AURASENSE, TAG_EM_AURASENSE_ATBOOT, TAG_EM_AURASENSE_ATSELECT, //E280B, E200B0, E280B0, E280B12, E280B12A, E280B12B
         TAG_KILOWAY, //E281D
         TAG_LONGJING, //E201E
-        TAG_AXZON, TAG_MAGNUS_S1, TAG_MAGNUS_S2, TAG_MAGNUS_S3, TAG_AXZON_XERXES,    //E2824, E282401, E282402, E282403, E282405
+        TAG_AXZON, TAG_MAGNUS_S1, TAG_MAGNUS_S2, TAG_MAGNUS_S3, TAG_AXZON_XERXES, TAG_AXZON_OPUS,    //E2824, E282401, E282402, E282403, E282405, E2C24500
 
         TAG_FDMICRO, //E2827001
         TAG_CTESIUS, //E203510 -- not tested
@@ -323,6 +329,7 @@ public class RfidReader {
         else if (tagType == TagType.TAG_MAGNUS_S2) sTid = "E282402";
         else if (tagType == TagType.TAG_MAGNUS_S3) sTid = "E282403";
         else if (tagType == TagType.TAG_AXZON_XERXES) sTid = "E282405";
+        else if (tagType == TagType.TAG_AXZON_OPUS) sTid = "E2C24500";
         else if (tagType == TagType.TAG_FDMICRO) sTid = "E2827001";
         else if (tagType == TagType.TAG_CTESIUS) sTid = "E203510";
         else if (tagType == TagType.TAG_ASYGN) sTid = "E283A";
@@ -359,6 +366,7 @@ public class RfidReader {
         else if (sTid.indexOf("E282402") == 0) tagType = TagType.TAG_MAGNUS_S2;
         else if (sTid.indexOf("E282403") == 0) tagType = TagType.TAG_MAGNUS_S3;
         else if (sTid.indexOf("E282405") == 0) tagType = TagType.TAG_AXZON_XERXES;
+        else if (sTid.indexOf("E2C24500") == 0) tagType = TagType.TAG_AXZON_OPUS;
         else if (sTid.indexOf("E2824") == 0) tagType = TagType.TAG_AXZON;
         else if (sTid.indexOf("E2827001") == 0) tagType = TagType.TAG_FDMICRO;
         else if (sTid.indexOf("E203510") == 0) tagType = TagType.TAG_CTESIUS;
@@ -386,8 +394,9 @@ public class RfidReader {
         int iRetry = getRetryCount();
         int iAbFlip = (bis108 ? rfidReaderChipR2000.rx000Setting.getAlgoAbFlip() : rfidReaderChipE710.rx000Setting.getAlgoAbFlip());
         if (DEBUG) appendToLog("2 setInvAlgo1: going to setInvAlgo with dynamicAlgo = " + dynamicAlgo + ", iAlgo = " + iAlgo + ", iRetry = " + iRetry + ", iabFlip = " + iAbFlip);
-        if ( (dynamicAlgo && iAlgo == 0) || (dynamicAlgo == false && iAlgo == 3)) {
-            bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setInvAlgo(dynamicAlgo ? 3 : 0) : rfidReaderChipE710.rx000Setting.setInvAlgo(dynamicAlgo ? 3 : 0));
+        if ( (dynamicAlgo && iAlgo == 0) || (!dynamicAlgo && iAlgo == 3)) {
+            int iDynamicAlgo = (dynamicAlgo ? 3 : 0);
+            bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setInvAlgo(iDynamicAlgo) : rfidReaderChipE710.rx000Setting.setInvAlgo(iDynamicAlgo));
             if (DEBUG) appendToLog("After setInvAlgo, bValue = " + bValue);
             if (DEBUG) appendToLog("Before setPopulation, population = " + getPopulation());
             if (bValue) bValue = setPopulation(getPopulation());
@@ -1327,7 +1336,7 @@ public class RfidReader {
                 "56", "Germany", "-1", "4", "Fixed", "600", "865.7",
                 "57", "Ghana", "-1", "4", "Fixed", "600", "865.7",
                 "58", "Greece", "-1", "4", "Fixed",  "600", "865.7",
-                "59", " Guatemala", "-2 RW", "50", "Hop", "500", "902.75",
+                "59", "Guatemala", "-2 RW", "50", "Hop", "500", "902.75",
                 "60", "HongKong1", "-1", "4", "Fixed", "600", "865.7",
                 "61", "HongKong2", "-2 OFCA", "50", "Hop", "50", "921.25",
                 "62", "Hungary1", "-1", "4", "Fixed", "600", "865.7",
@@ -1397,8 +1406,8 @@ public class RfidReader {
                 "126", "Slovak2", "-9", "3", "Fixed", "1200", "916.3",
                 "127", "Slovenia1", "-1", "4", "Fixed", "600", "865.7",
                 "128", "Solvenia2", "-9", "3", "Fixed", "1200", "916.3",
-                "129", "SAfrica1", "-1", "4", "Fixed", "600", "865.7",
-                "130", "SAfrica2", "-9", "7", "Fixed", "500", "915.7",
+                "129", "SouthAfrica1", "-1", "4", "Fixed", "600", "865.7",
+                "130", "SouthAfrica2", "-9", "7", "Fixed", "500", "915.7",
                 "131", "Spain", "-1", "4", "Fixed", "600", "865.7",
                 "132", "SriLanka", "-1", "4", "Fixed", "600", "865.7",
                 "133", "Sudan", "-1", "4", "Fixed", "600", "865.7",
@@ -1411,7 +1420,7 @@ public class RfidReader {
                 "140", "Taiwan2", "-4", "12", "Hop", "375", "922.875",
                 "141", "Tajikistan", "-1", "4", "Fixed", "600", "865.7",
                 "142", "Tanzania", "-1", "4", "Fixed", "600", "865.7",
-                "143", "Thailand", "-2 RW", "8", "Hop", "500", "920.75",
+                "143", "Thailand", "-2 TH", "8", "Hop", "500", "920.75",
                 "144", "Trinidad", "-2 RW", "50", "Hop", "500", "902.75",
                 "145", "Tunisia", "-1", "4", "Fixed", "600", "865.7",
                 "146", "Turkey", "-1", "4", "Fixed", "600", "865.7",
@@ -1961,26 +1970,6 @@ public class RfidReader {
         }
         return result;
     }
-
-    public static class PreMatchData {
-        public boolean enable; public int target;
-        public int action; public int bank;
-        public int offset; public String mask; public int maskblen; public int querySelect; public long pwrlevel; public boolean invAlgo; public int qValue;
-        public PreMatchData(boolean enable, int target, int action, int bank, int offset, String mask, int maskblen, int querySelect, long pwrlevel, boolean invAlgo, int qValue) {
-            this.enable = enable;
-            this.target = target;
-            this.action = action;
-            this.bank = bank;
-            this.offset = offset;
-            this.mask = mask;
-            this.maskblen = maskblen;
-            this.querySelect = querySelect;
-            this.pwrlevel = pwrlevel;
-            this.invAlgo = invAlgo;
-            this.qValue = qValue;
-        }
-    }
-    public PreMatchData preMatchData;
     public boolean setOnlyPowerLevel(long pwrlevel) {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setAntennaPower(pwrlevel) : rfidReaderChipE710.rx000Setting.setAntennaPower(pwrlevel));
     }
@@ -1997,8 +1986,6 @@ public class RfidReader {
         int maskbytelen = maskblen / 4; if ((maskblen % 4) != 0) maskbytelen++; if (maskbytelen > 64) maskbytelen = 64;
         if (mask == null) mask = "";
         if (mask.length() > maskbytelen ) mask = mask.substring(0, maskbytelen);
-        if (index == 0) preMatchData = new RfidReader.PreMatchData(enable, target, action, bank, offset, mask, maskblen,
-                (bis108 ? rfidReaderChipR2000.rx000Setting.getQuerySelect() : rfidReaderChipE710.rx000Setting.getQuerySelect()), getPwrlevel(), getInvAlgo(), getQValue());
         boolean result = true;
         if (index != (bis108 ? rfidReaderChipR2000.rx000Setting.getInvSelectIndex() : rfidReaderChipE710.rx000Setting.getInvSelectIndex())) {
             if (utility.DEBUG_SELECT) appendToLog("Debug_Select: RfidReader.setSelectCriteria3 goes to setInvSelectIndex");
@@ -2037,23 +2024,12 @@ public class RfidReader {
         return result;
     }
     public PostMatchData postMatchDataOld; public boolean postMatchDataChanged = false;
-    public RfidReader.PreMatchData preMatchDataOld; public boolean preMatchDataChanged = false;
     public boolean setSelectedTag1(boolean selectOne, String selectMask, int selectBank, int selectOffset, int delay, long pwrlevel, int qValue, int matchRep) {
         if (utility.DEBUG_SELECT) appendToLog("Debug_Select: RfidReader.setSelectedTag1[selectOne = " + selectOne + ", selectMask = "
                 + selectMask + ", selectBank = " + selectBank + ", selectOffset = " + selectOffset + ", delay = "
                 + delay + ", pwrlevel = " + pwrlevel + ", qValue = " + qValue + ", matchRep = " + matchRep);
         boolean setSuccess = true, DEBUG = true;
         if (selectMask == null)   selectMask = "";
-
-        if (preMatchDataChanged == false) {
-            preMatchDataChanged = true; if (DEBUG) appendToLog("setSelectCriteria preMatchDataChanged is SET with preMatchData = " + (preMatchData != null ? "valid" : "null"));
-            if (preMatchData == null) {
-                preMatchData = new RfidReader.PreMatchData(false,
-                        (bis108 ? rfidReaderChipR2000.rx000Setting.getQueryTarget() : rfidReaderChipE710.rx000Setting.getQueryTarget()), 0, 0, 0, "", 0,
-                        (bis108 ? rfidReaderChipR2000.rx000Setting.getQuerySelect() : rfidReaderChipE710.rx000Setting.getQuerySelect()), getPwrlevel(), getInvAlgo(), getQValue());
-            }
-            preMatchDataOld = preMatchData;
-        }
         int indexCurrent = (bis108 ? rfidReaderChipR2000.rx000Setting.invSelectIndex : rfidReaderChipE710.rx000Setting.invSelectIndex);
         for (int i = 0; i < 7; i++) {
             if (utility.DEBUG_SELECT) appendToLog("Debug_Select: RfidReader.setSelectedTag1 1 goes to setInvSelectIndex with i = " + i);
@@ -2107,7 +2083,7 @@ public class RfidReader {
         return isValid;
     }
     public boolean setSelectedTagByTID(String selectMask, long pwrlevel) {
-        if (pwrlevel < 0) pwrlevel = pwrlevelSetting;
+        if (pwrlevel < 0) pwrlevel = getPwrlevel();
         if (utility.DEBUG_SELECT) appendToLog("Debug_Select: RfidReader.setSelectedTagByTID goes to setSelectedTag1");
         return setSelectedTag1(false, selectMask, 2, 0, 0, pwrlevel, 0, 0);
     }
@@ -2239,7 +2215,7 @@ public class RfidReader {
     }
     public RegionCodes regionCode = null;
     RegionCodes[] getRegionList1() {
-        boolean DEBUG = false;
+        boolean DEBUG = true;
         RegionCodes[] regionList = null;
         regionCode = null;
         if (DEBUG) appendToLog("3 getCountryList: getCountryCode is " + getCountryCode());
@@ -2289,6 +2265,10 @@ public class RfidReader {
                 } else if (strSpecialCountryVersion.contains("SG")) {
                     regionList = new RegionCodes[]{
                             RfidReader.RegionCodes.Singapore2
+                    };
+                } else if (strSpecialCountryVersion.contains("TH")) {
+                    regionList = new RegionCodes[]{
+                            RfidReader.RegionCodes.Thailand
                     };
                 } else if (strSpecialCountryVersion.contains("RW")) {
                     regionList = new RegionCodes[]{
@@ -2457,7 +2437,7 @@ public class RfidReader {
         appendToLog("countryInListDefault = " + countryInListDefault);
         return regionList;
         } else {
-        boolean DEBUG = false;
+        boolean DEBUG = true;
         RegionCodes[] regionList;
         regionCode = null;
         if (DEBUG) appendToLog("2 getCountryList");
@@ -2545,6 +2525,7 @@ public class RfidReader {
     }
     public void setReaderDefault() {
         setPowerLevel(300);
+        setAntennaDwell(2000);
         setTagGroup(0, 0, 2);
         setPopulation(60);
         setInvAlgoNoSave(true);
@@ -2581,6 +2562,7 @@ public class RfidReader {
             rfidReaderChipE710.rx000Setting.getIntraPacketDelay();
             rfidReaderChipE710.rx000Setting.getFrequencyChannelIndex();
             rfidReaderChipE710.rx000Setting.getCurrentPort();
+            rfidReaderChipE710.rx000Setting.getPowerBoost();
         }
     }
     public String getMacVer() {
@@ -2623,11 +2605,305 @@ public class RfidReader {
         }
         return str;
     }
+    class Antenna {
+        int port = -1;
+        Antenna(int port) {
+            this.port = port;
+        }
+        private int enable = -1;
+        public int getAntennaEnable() {
+            int iValue; boolean DEBUG = false;
+            if (enable >= 0) {
+                appendToLog("RfidReader.antenna.getAntennaEnable: 0, port = " + port + ", enable = " + enable);
+                return enable;
+            }
+            if (DEBUG) appendToLog("1 getAntennaEnable");
+            iValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAntennaEnable() : rfidReaderChipE710.rx000Setting.getAntennaEnable());
+            if (DEBUG) appendToLog("1A getAntennaEnable: AntennaEnable = " + iValue);
+            appendToLog("RfidReader.antenna.getAntennaEnable: 1, port = " + port + ", enable = " + enable);
+            enable = iValue;
+            return enable;
+        }
+        public boolean setAntennaEnable(boolean enable) {
+            int iEnable = 0;
+            if (enable) iEnable = 1;
+            boolean bValue = false;
+            appendToLog("1A setAntennaEnable: iEnable = " + iEnable);
+            bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setAntennaEnable(iEnable) : rfidReaderChipE710.rx000Setting.setAntennaEnable(iEnable));
+            appendToLog("AntennaEnable = " + iEnable + " returning " + bValue);
+            if (bValue && bis108 == false) rfidReaderChipE710.rx000Setting.updateCurrentPort();
+            if (bValue) {
+                if (enable) this.enable = 1;
+                else this.enable = 0;
+            }
+            appendToLog("RfidReader.antenna.setAntennaEnable: port = " + port + ", enable = " + this.enable);
+            return bValue;
+        }
+        private long power = -1;
+        public long getPwrlevel() {
+            long lValue = 0;
+            if (power > 0) return power;
+            lValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAntennaPower(-1) : rfidReaderChipE710.rx000Setting.getAntennaPower(-1));
+            power = lValue;
+            return power;
+        }
+        public boolean setPowerLevel(long pwrlevel) {
+            boolean bValue = false;
+            bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setAntennaPower(pwrlevel) : rfidReaderChipE710.rx000Setting.setAntennaPower(pwrlevel));
+            if (false) appendToLog("PowerLevel = " + pwrlevel + " returning " + bValue);
+            if (bValue) {
+                power = pwrlevel;
+            }
+            return bValue;
+        }
+        private long dwell = -1;
+        public long getAntennaDwell() {
+            long lValue = 0; boolean DEBUG = false;
+            if (dwell > 0) return dwell;
+            if (DEBUG) appendToLog("1 getAntennaDwell");
+            lValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAntennaDwell() : rfidReaderChipE710.rx000Setting.getAntennaDwell());
+            dwell = lValue;
+            if (DEBUG) appendToLog("1A getAntennaDwell: lValue = " + lValue);
+            //appendToLog("BtDataOut: getAntennaDwell as " + lValue);
+            return dwell;
+        }
+        public boolean setAntennaDwell(long antennaDwell) {
+            boolean bValue = false, DEBUG = false;
+            //appendToLog("BtDataOut: setAntennaDwell as " + antennaDwell);
+            if (DEBUG) appendToLog("1 AntennaDwell = " + antennaDwell + " returning " + bValue);
+            if (getAntennaDwell() == antennaDwell) return true;
+            bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setAntennaDwell(antennaDwell) : rfidReaderChipE710.rx000Setting.setAntennaDwell(antennaDwell));
+            if (DEBUG) appendToLog("1A AntennaDwell = " + antennaDwell + " returning " + bValue);
+            if (bValue) {
+                this.dwell = antennaDwell;
+            }
+            return bValue;
+        }
+        private int population = -1;
+        public int getPopulation() {
+            appendToLog("RfidReader.Antenna.getPopulation: port = " + port + ", population = " + population);
+            if (population < 0) {
+                int iValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAlgoStartQ() : rfidReaderChipE710.rx000Setting.getAntennaStartQ(port));
+                population = getQ2Population(iValue);
+                appendToLog("RfidReader.Antenna.getPopulation: port = " + port + ", population = " + population + ", startQ = " + iValue);
+            }
+            return population;
+        }
+        public boolean setPopulation(int population) {
+            if (true) appendToLog("RfidReader.Antenna.setPopulation: port = " + port + ", population = " + population);
+            byte iValue = getPopulation2Q(population);
+            if (true) appendToLog("RfidReader.Antenna.setPopulation: setPopulation2Q = " + iValue);
+            this.population = population;
+            appendToLog("RfidReader.Antenna.setPopulation: port = " + port + ", this.population = " + this.population);
+            return setQValue(iValue);
+        }
+        private int dynamicAlgo = -1;
+        public int getInvAlgo() {
+            if (dynamicAlgo < 0) {
+                dynamicAlgo = (bis108 ? rfidReaderChipR2000.rx000Setting.getInvAlgo() : rfidReaderChipE710.rx000Setting.getInvAlgo(port));
+            }
+            appendToLog("RfidReader.getInvAlgo: dynamicAlgo = " + dynamicAlgo);
+            return dynamicAlgo;
+        }
+        public boolean setInvAlgo(boolean dynamicAlgo) {
+            int iDynamicAlgo = (dynamicAlgo ? 3 : 0);
+            boolean bValue = setInvAlgo1(dynamicAlgo);
+            if (bValue) this.dynamicAlgo = iDynamicAlgo;
+            appendToLog("RfidReader.setInvAlgo: dynamicAlgo = " + dynamicAlgo + ", bValue = " + bValue);
+            return bValue;
+        }
+        private int target = -1;
+        public int getQueryTarget() {
+            int iValue; boolean DEBUG = false;
+            if (target < 0) {
+                iValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAlgoAbFlip() : rfidReaderChipE710.rx000Setting.getQueryTarget());
+                if (DEBUG)
+                    appendToLog("getQueryTarget with bis108 = " + bis108 + ", iValue = " + iValue);
+                if (bis108) {
+                    if (iValue > 0) {
+                        target = 2;
+                    } else {
+                        if (DEBUG) appendToLog("getQueryTarget");
+                        target = rfidReaderChipR2000.rx000Setting.getQueryTarget();
+                    }
+                } else {
+                    target = iValue;
+                }
+            }
+            return target;
+        }
+        private int session = -1;
+        public int getQuerySession() {
+            if (session < 0) {
+                session = (bis108 ? rfidReaderChipR2000.rx000Setting.getQuerySession() : rfidReaderChipE710.rx000Setting.getQuerySession());
+            }
+            return session;
+        }
+        private int select = -1;
+        public int getQuerySelect() {
+            if (select < 0) {
+                select = (bis108 ? rfidReaderChipR2000.rx000Setting.getQuerySelect() : rfidReaderChipE710.rx000Setting.getQuerySelect());
+            }
+            return select;
+        }
+        public boolean setTagGroup(int sL, int session, int target1) {
+            boolean bValue = false;
+            if (bis108) {
+                rfidReaderChipR2000.rx000Setting.setAlgoSelect(getInvAlgoInChip()); //Must not delete this line
+                if (false) appendToLog("RfidReader.setTagGroup[" + target1 + ", " + session + ", " + sL);
+                bValue = rfidReaderChipR2000.rx000Setting.setQueryTarget(target1, session, sL);
+            } else {
+                int iAlgoAbFlip = rfidReaderChipE710.rx000Setting.getAlgoAbFlip();
+                appendToLog("RfidReader.setTagGroup: port = " + port + ", sL = " + sL + ", session = " + session + ", target = " + target1 + ", getAlgoAbFlip = " + iAlgoAbFlip);
+
+                bValue = rfidReaderChipE710.rx000Setting.setQueryTarget(target1, session, sL);
+                if (bValue) {
+                    if (iAlgoAbFlip != 0 && target1 < 2)
+                        bValue = rfidReaderChipE710.rx000Setting.setAlgoAbFlip(0);
+                    else if (iAlgoAbFlip == 0 && target1 >= 2)
+                        bValue = rfidReaderChipE710.rx000Setting.setAlgoAbFlip(1);
+                }
+            }
+            if (bValue) {
+                target = target1;
+                this.session = session;
+                select = sL;
+            }
+            return bValue;
+        }
+        private int tagFocus = -1;
+        public int getTagFocus() {
+            if (tagFocus < 0) {
+                if (bis108) {
+                    tagFocus = rfidReaderChipR2000.rx000Setting.getImpinjExtension();
+                    if (tagFocus > 0) tagFocus = ((tagFocus & 0x10) >> 4);
+                } else {
+                    tagFocus = rfidReaderChipE710.rx000Setting.getImpinjExtension() & 0x04;
+                }
+                appendToLog("RfidReader.Antenna.getTagFocus: port = " + port + ", tagFocus = " + tagFocus);
+            }
+            return tagFocus;
+        }
+        public boolean setTagFocus(boolean tagFocusNew) {
+            boolean bRetValue;
+            if (bis108) {
+                bRetValue = rfidReaderChipR2000.rx000Setting.setImpinjExtension(tagFocusNew, (fastId > 0 ? true : false));
+            } else {
+                bRetValue = rfidReaderChipE710.rx000Setting.setImpinjExtension(tagFocusNew, (fastId > 0 ? true : false));
+            }
+            if (bRetValue) tagFocus = (tagFocusNew ? 1 : 0);
+            appendToLog("RfidReader.Antenna.setTagFocus: port = " + port + ", tagFocus = " + tagFocus);
+            return bRetValue;
+        }
+        private int fastId = -1;
+        public int getFastId() {
+            if (fastId < 0) {
+                if (rfidReaderChipR2000 != null) {
+                    fastId = rfidReaderChipR2000.rx000Setting.getImpinjExtension();
+                    if (fastId > 0) fastId = ((fastId & 0x20) >> 5);
+                } else {
+                    fastId = rfidReaderChipE710.rx000Setting.getImpinjExtension() & 0x02;
+                }
+            }
+            return fastId;
+        }
+        public boolean setFastId(boolean fastIdNew) {
+            boolean bRetValue;
+            if (bis108) {
+                bRetValue = rfidReaderChipR2000.rx000Setting.setImpinjExtension((tagFocus > 0 ? true : false), fastIdNew);
+            } else {
+                bRetValue = rfidReaderChipE710.rx000Setting.setImpinjExtension((tagFocus > 0 ? true : false), fastIdNew);
+            }
+            if (bRetValue) fastId = (fastIdNew ? 1 : 0);
+            return bRetValue;
+        }
+        private int profile = -1;
+        public int getCurrentProfile() {
+            if (profile < 0) {
+                if (bis108) profile = rfidReaderChipR2000.rx000Setting.getCurrentProfile();
+                else {
+                    boolean DEBUG = true;
+                    if (DEBUG) appendToLog("1 getCurrentProfile");
+                    int iValue = rfidReaderChipE710.rx000Setting.getCurrentProfile();
+                    if (DEBUG) appendToLog("1A getCurrentProfile: getCurrentProfile = " + iValue);
+                    if (iValue > 0) {
+                        List<String> profileList = getProfileList();
+                        if (DEBUG) appendToLog("1b getCurrentProfile: getProfileList = " + (profileList != null ? "valid" : ""));
+                        int index = 0;
+                        for (; index < profileList.size(); index++) {
+                            if (Integer.valueOf(profileList.get(index).substring(0, profileList.get(index).indexOf(":"))) == iValue)
+                                break;
+                        }
+                        if (index >= profileList.size()) {
+                            index = profileList.size() - 1;
+                            setCurrentLinkProfile(index);
+                        }
+                        if (DEBUG) appendToLog("1C getCurrentProfile: index in the profileList = " + index);
+                        iValue = index;
+                    }
+                    profile = iValue;
+                }
+            }
+            return profile;
+        }
+        public boolean setBasicCurrentLinkProfile() {
+            if (bis108) return setCurrentLinkProfile(1);
+            boolean b211 = bluetoothGatt.isVersionGreaterEqual(rfidReaderChipE710.rx000Setting.getMacVer(), 2, 1, 1);
+            int profile = (b211 ? 343 : 244);
+            if (getCountryCode() == 1) profile = (b211 ? 342 : 241);
+            appendToLog("profile is " + profile);
+            return rfidReaderChipE710.rx000Setting.setCurrentProfile(profile);
+        }
+        public boolean setCurrentLinkProfile(int profile) {
+            boolean bValue = false;
+            if (bis108) {
+                if (profile == getCurrentProfile()) return true;
+                boolean result;
+                result = rfidReaderChipR2000.rx000Setting.setCurrentProfile(profile);
+                if (result) {
+                    rfidReaderChipR2000.setPwrManagementMode(false);
+                    result = rfidReaderChipR2000.sendHostRegRequestHST_CMD(RfidReaderChipData.HostCommands.CMD_UPDATELINKPROFILE);
+                }
+                if (result && profile == 3) {
+                    appendToLog("It is profile3");
+                    if (getTagDelay() < 2) result = setTagDelay((byte) 2);
+                }
+                bValue = result;
+            } else {
+                boolean DEBUG = true;
+                if (DEBUG) appendToLog("1 setCurrentLinkProfile: input profile = " + profile);
+                if (true && profile < 50) {
+                    List<String> profileList = getProfileList();
+                    if (profile < 0 || profile >= profileList.size()) return false;
+                    int profile1 = Integer.valueOf(profileList.get(profile).substring(0, profileList.get(profile).indexOf(":")));
+                    if (DEBUG)
+                        appendToLog("1A setCurrentLinkProfile: adjusted profile = " + profile1);
+                    bValue = rfidReaderChipE710.rx000Setting.setCurrentProfile(profile1);
+                }
+                if (DEBUG)
+                    appendToLog("1b setCurrentLinkProfile: after setCurrentProfile, result = " + bValue);
+                if (bValue) {
+                    setPwrManagementMode(false);
+                }
+                if (DEBUG)
+                    appendToLog("1C setCurrentLinkProfile: after setPwrManagementMode, result = " + bValue + ", profile = " + profile);
+                if (bValue && profile == 3) {
+                    if (getTagDelay() < 2) bValue = setTagDelay((byte) 2);
+                }
+                if (DEBUG)
+                    appendToLog("1d setCurrentLinkProfile: after setTagDelay, result = " + bValue);
+                getCurrentProfile();
+            }
+            if (bValue) this.profile = profile;
+            return bValue;
+        }
+    }
+    Antenna[] antennas;
     public int getAntennaSelect() {
         int iValue = 0;
         iValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAntennaSelect() : rfidReaderChipE710.rx000Setting.getAntennaPort());
         appendToLog("AntennaSelect = " + iValue);
-        return iValue;
+        return iValue ;
     }
     public boolean setAntennaSelect(int number) {
         boolean bValue = false;
@@ -2635,161 +2911,57 @@ public class RfidReader {
         appendToLog("AntennaSelect = " + number + " returning " + bValue);
         return bValue;
     }
-    public boolean getAntennaEnable() {
-        int iValue; boolean DEBUG = false;
-        if (DEBUG) appendToLog("1 getAntennaEnable");
-        iValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAntennaEnable() : rfidReaderChipE710.rx000Setting.getAntennaEnable());
-        if (DEBUG) appendToLog("1A getAntennaEnable: AntennaEnable = " + iValue);
-        if (iValue > 0) return true;
-        else return false;
+    public int getAntennaEnable() {
+        int iValue = getAntennaSelect();
+        appendToLog("RfidReader.getAntennaEnable: antennaSelect = " + iValue);
+        iValue = antennas[getAntennaSelect()].getAntennaEnable();
+        appendToLog("RfidReader.getAntennaEnable: antennaEnable = " + iValue);
+        return iValue;
     }
     public boolean setAntennaEnable(boolean enable) {
-        int iEnable = 0;
-        if (enable) iEnable = 1;
-        boolean bValue = false;
-        appendToLog("1A setAntennaEnable: iEnable = " + iEnable);
-        bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setAntennaEnable(iEnable) : rfidReaderChipE710.rx000Setting.setAntennaEnable(iEnable));
-        appendToLog("AntennaEnable = " + iEnable + " returning " + bValue);
-        if (bValue && bis108 == false) bValue = rfidReaderChipE710.rx000Setting.updateCurrentPort();
-        return bValue;
+        int iValue = getAntennaSelect();
+        appendToLog("RfidReader.setAntennaEnable: enable = " + enable + ", antennaSelect = " + iValue);
+        return antennas[getAntennaSelect()].setAntennaEnable(enable);
     }
-    public long getAntennaDwell() {
-        long lValue = 0; boolean DEBUG = false;
-        if (DEBUG) appendToLog("1 getAntennaDwell");
-        lValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAntennaDwell() : rfidReaderChipE710.rx000Setting.getAntennaDwell());
-        if (DEBUG) appendToLog("1A getAntennaDwell: lValue = " + lValue);
-        //appendToLog("BtDataOut: getAntennaDwell as " + lValue);
-        return lValue;
+    public long getPowerLevelMax() { return (bis108 ? rfidReaderChipR2000.powerLevelMax : rfidReaderChipE710.powerLevelMax); }
+    public long getPwrlevel() { return antennas[getAntennaSelect()].getPwrlevel(); }
+    public boolean setPowerLevel(long pwrlevel) { return antennas[getAntennaSelect()].setPowerLevel(pwrlevel); }
+    public long getAntennaDwell() { return antennas[getAntennaSelect()].getAntennaDwell(); }
+    public boolean setAntennaDwell(long antennaDwell) { return antennas[getAntennaSelect()].setAntennaDwell(antennaDwell); }
+    public int getQ2Population(int iQValue) {
+        int iValue = (int) Math.pow(2, iQValue);
+        appendToLog("RfidReader.getQ2Population: iQValue = " + iQValue + ", iValue = " + iValue);
+        return iValue;
     }
-    public boolean setAntennaDwell(long antennaDwell) {
-        boolean bValue = false, DEBUG = false;
-        //appendToLog("BtDataOut: setAntennaDwell as " + antennaDwell);
-        if (DEBUG) appendToLog("1 AntennaDwell = " + antennaDwell + " returning " + bValue);
-        if (getAntennaDwell() == antennaDwell) return true;
-        bValue =  (bis108 ? rfidReaderChipR2000.rx000Setting.setAntennaDwell(antennaDwell) : rfidReaderChipE710.rx000Setting.setAntennaDwell(antennaDwell));
-        if (DEBUG) appendToLog("1A AntennaDwell = " + antennaDwell + " returning " + bValue);
-        return bValue;
+    public byte getPopulation2Q(int population) {
+        double dValue = log10(population) / log10(2);
+        byte byteValue = (byte) dValue;
+        if ((double)byteValue != dValue) byteValue++;
+        if (byteValue < 0) byteValue = 0;
+        if(byteValue > 15) byteValue = 15;
+        if (DEBUG || true) appendToLog("getPopulation2Q(" + population + "): log dValue = " + dValue + ", byteValue = " + byteValue);
+        return byteValue;
     }
-    public long getPwrlevel() {
-        long lValue = 0;
-        lValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAntennaPower(-1) : rfidReaderChipE710.rx000Setting.getAntennaPower(-1));
-        return lValue;
-    }
-    public long pwrlevelSetting;
-    public boolean setPowerLevel(long pwrlevel) {
-        pwrlevelSetting = pwrlevel;
-        boolean bValue = false;
-        bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setAntennaPower(pwrlevel) : rfidReaderChipE710.rx000Setting.setAntennaPower(pwrlevel));
-        if (false) appendToLog("PowerLevel = " + pwrlevel + " returning " + bValue);
-        return bValue;
-    }
-    public int getQueryTarget() {
-        int iValue; boolean DEBUG = false;
-        iValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getAlgoAbFlip() : rfidReaderChipE710.rx000Setting.getQueryTarget());
-        if (DEBUG) appendToLog("getQueryTarget with bis108 = " + bis108 + ", iValue = " + iValue);
-        if (bis108) {
-            if (iValue > 0) {
-                rfidReaderChipR2000.rx000Setting.getQueryTarget();
-                return 2;
-            }
-            else {
-                if (DEBUG) appendToLog("getQueryTarget");
-                iValue = rfidReaderChipR2000.rx000Setting.getQueryTarget();
-                if (iValue > 0) return 1;
-                return 0;
-            }
-        } else {
-            if (DEBUG) appendToLog("1A getQueryTarget: iValue = " + iValue);
-            if (iValue < 0) iValue = 0;
-            return iValue;
-        }
-    }
-    public int getQuerySession() {
-        return (bis108 ? rfidReaderChipR2000.rx000Setting.getQuerySession() : rfidReaderChipE710.rx000Setting.getQuerySession());
-    }
-    public int getQuerySelect() {
-        return (bis108 ? rfidReaderChipR2000.rx000Setting.getQuerySelect() : rfidReaderChipE710.rx000Setting.getQuerySelect());
-    }
-    public boolean setTagGroup(int sL, int session, int target1) {
-        if (bis108) {
-            rfidReaderChipR2000.rx000Setting.setAlgoSelect(getInvAlgoInChip()); //Must not delete this line
-            if (false) appendToLog("RfidReader.setTagGroup[" + target1 + ", " + session + ", " + sL);
-            return rfidReaderChipR2000.rx000Setting.setQueryTarget(target1, session, sL);
-        } else {
-            //appendToLog("1d");
-            int iAlgoAbFlip = rfidReaderChipE710.rx000Setting.getAlgoAbFlip();
-            appendToLog("sL = " + sL + ", session = " + session + ", target = " + target1 + ", getAlgoAbFlip = " + iAlgoAbFlip);
-            boolean bValue = false;
-            bValue = rfidReaderChipE710.rx000Setting.setQueryTarget(target1, session, sL);
-            if (bValue) {
-                if (iAlgoAbFlip != 0 && target1 < 2)
-                    bValue = rfidReaderChipE710.rx000Setting.setAlgoAbFlip(0);
-                else if (iAlgoAbFlip == 0 && target1 >= 2)
-                    bValue = rfidReaderChipE710.rx000Setting.setAlgoAbFlip(1);
-            }
-            return bValue;
-        }
-    }
-    public int tagFocus = -1;
-    public int getTagFocus() {
-        if (bis108) {
-            tagFocus = rfidReaderChipR2000.rx000Setting.getImpinjExtension();
-            if (tagFocus > 0) tagFocus = ((tagFocus & 0x10) >> 4);
-        } else {
-            tagFocus = rfidReaderChipE710.rx000Setting.getImpinjExtension() & 0x04;
-        }
-        return tagFocus;
-    }
-    public boolean setTagFocus(boolean tagFocusNew) {
-        boolean bRetValue;
-        if (bis108) {
-            bRetValue = rfidReaderChipR2000.rx000Setting.setImpinjExtension(tagFocusNew, (fastId > 0 ? true : false));
-        } else {
-            bRetValue = rfidReaderChipE710.rx000Setting.setImpinjExtension(tagFocusNew, (fastId > 0 ? true : false));
-        }
-        if (bRetValue) tagFocus = (tagFocusNew ? 1 : 0);
-        return bRetValue;
-    }
-    public int fastId = -1;
-    public int getFastId() {
-        if (rfidReaderChipR2000 != null) {
-            fastId = rfidReaderChipR2000.rx000Setting.getImpinjExtension();
-            if (fastId > 0) fastId = ((fastId & 0x20) >> 5);
-        } else {
-            fastId = rfidReaderChipE710.rx000Setting.getImpinjExtension() & 0x02;
-        }
-        return fastId;
-    }
-    public boolean setFastId(boolean fastIdNew) {
-        boolean bRetValue;
-        if (bis108) {
-            bRetValue = rfidReaderChipR2000.rx000Setting.setImpinjExtension((tagFocus > 0 ? true : false), fastIdNew);
-        } else {
-            bRetValue = rfidReaderChipE710.rx000Setting.setImpinjExtension((tagFocus > 0 ? true : false), fastIdNew);
-        }
-        if (bRetValue) fastId = (fastIdNew ? 1 : 0);
-        return bRetValue;
-    }
-    public boolean invAlgoSetting = true;
-    public boolean getInvAlgo() {
-        return invAlgoSetting;
-    }
+    public int getPopulation() { return antennas[getAntennaSelect()].getPopulation(); }
+    public boolean setPopulation(int population) { return antennas[getAntennaSelect()].setPopulation(population); }
     public int getInvAlgoInChip() {
-        return (bis108 ? rfidReaderChipR2000.rx000Setting.getInvAlgo() : rfidReaderChipE710.rx000Setting.getInvAlgo());
+        return (bis108 ? rfidReaderChipR2000.rx000Setting.getInvAlgo() : rfidReaderChipE710.rx000Setting.getInvAlgo(getAntennaSelect()));
     }
-    public boolean setInvAlgo(boolean dynamicAlgo) {
-        boolean DEBUG = false;
-        if (DEBUG) appendToLog("1 setInvAlgo with dynamicAlgo = " + dynamicAlgo);
-        boolean bValue = setInvAlgo1(dynamicAlgo);
-        if (bValue) invAlgoSetting = dynamicAlgo;
-        if (DEBUG) appendToLog("1A setInvAlgo with bValue = " + bValue);
-        return bValue;
-    }
+    public int getInvAlgo() { return antennas[getAntennaSelect()].getInvAlgo(); }
+    public boolean setInvAlgo(boolean dynamicAlgo) { return antennas[getAntennaSelect()].setInvAlgo(dynamicAlgo); }
+    public int getQueryTarget() { return antennas[getAntennaSelect()].getQueryTarget(); }
+    public int getQuerySession() { return antennas[getAntennaSelect()].getQuerySession(); }
+    public int getQuerySelect() { return antennas[getAntennaSelect()].getQuerySelect(); }
+    public boolean setTagGroup(int sL, int session, int target1) { return antennas[getAntennaSelect()].setTagGroup(sL, session, target1); }
+    public int getTagFocus() { return antennas[getAntennaSelect()].getTagFocus(); }
+    public boolean setTagFocus(boolean tagFocusNew) { return antennas[getAntennaSelect()].setTagFocus(tagFocusNew); }
+    public int getFastId() { return antennas[getAntennaSelect()].getFastId(); }
+    public boolean setFastId(boolean fastIdNew) { return antennas[getAntennaSelect()].setFastId(fastIdNew); }
     public List<String> getProfileList() {
         if (bis108) return Arrays.asList(context.getResources().getStringArray(R.array.profile1_options));
         appendToLog("getMacVer = " + rfidReaderChipE710.rx000Setting.getMacVer());
-        if (bluetoothGatt.isVersionGreaterEqual(rfidReaderChipE710.rx000Setting.getMacVer(), 2, 1, 1)) {
-            appendToLog("equal or greater than 2.1.1");
+        if (bluetoothGatt.isVersionGreaterEqual(rfidReaderChipE710.rx000Setting.getMacVer(), 2, 1, 2)) {
+            appendToLog("equal or greater than 2.1.2");
             return Arrays.asList(context.getResources().getStringArray(R.array.profile4_options));
         } else if (bluetoothGatt.isVersionGreaterEqual(rfidReaderChipE710.rx000Setting.getMacVer(), 1, 0, 250)) {
             appendToLog("equal or greater than 1.0.250");
@@ -2800,76 +2972,67 @@ public class RfidReader {
         }
     }
     public int getCurrentProfile() {
-        if (bis108) return rfidReaderChipR2000.rx000Setting.getCurrentProfile();
-        boolean DEBUG = false;
-        if (DEBUG) appendToLog("1 getCurrentProfile");
-        int iValue;
-        if (true) {
-            iValue = rfidReaderChipE710.rx000Setting.getCurrentProfile();
-            if (DEBUG) appendToLog("1A getCurrentProfile: getCurrentProfile = " + iValue);
-            if (iValue > 0) {
-                List<String> profileList = getProfileList();
-                if (DEBUG) appendToLog("1b getCurrentProfile: getProfileList = " + (profileList != null ? "valid" : ""));
-                int index = 0;
-                for (; index < profileList.size(); index++) {
-                    if (Integer.valueOf(profileList.get(index).substring(0, profileList.get(index).indexOf(":"))) == iValue)
-                        break;
-                }
-                if (index >= profileList.size()) {
-                    index = profileList.size()-1;
-                    setCurrentLinkProfile(index);
-                }
-                if (DEBUG) appendToLog("1C getCurrentProfile: index in the profileList = " + index);
-                iValue = index;
-            }
-        }
+        int iValue = antennas[getAntennaSelect()].getCurrentProfile();
+        appendToLog("RfidReader.getCurrentProfile: iValue = " + iValue);
         return iValue;
     }
     public boolean setBasicCurrentLinkProfile() {
-        if (bis108) return setCurrentLinkProfile(1);
-        boolean b211 = bluetoothGatt.isVersionGreaterEqual(rfidReaderChipE710.rx000Setting.getMacVer(), 2, 1, 1);
-        int profile = (b211 ? 343 : 244);
-        if (getCountryCode() == 1) profile = (b211 ? 342 : 241);
-        appendToLog("profile is " + profile);
-        return rfidReaderChipE710.rx000Setting.setCurrentProfile(profile);
+        boolean bValue = antennas[getAntennaSelect()].setBasicCurrentLinkProfile();
+        appendToLog("RfidReader.setBasicCurrentLinkProfile: bValue = " + bValue);
+        return bValue;
     }
     public boolean setCurrentLinkProfile(int profile) {
-        if (bis108) {
-            if (profile == getCurrentProfile()) return true;
-            boolean result;
-            result = rfidReaderChipR2000.rx000Setting.setCurrentProfile(profile);
-            if (result) {
-                rfidReaderChipR2000.setPwrManagementMode(false);
-                result = rfidReaderChipR2000.sendHostRegRequestHST_CMD(RfidReaderChipData.HostCommands.CMD_UPDATELINKPROFILE);
-            }
-            if (result && profile == 3) {
-                appendToLog("It is profile3");
-                if (getTagDelay() < 2) result = setTagDelay((byte) 2);
-            }
-            return result;
-        }
-        boolean DEBUG = true;
-        if (DEBUG) appendToLog("1 setCurrentLinkProfile: input profile = " + profile);
-        if (true && profile < 50) {
-            List<String> profileList = getProfileList();
-            if (profile < 0 || profile >= profileList.size()) return false;
-            int profile1 = Integer.valueOf(profileList.get(profile).substring(0, profileList.get(profile).indexOf(":")));
-            profile = profile1;
-        }
-        if (DEBUG) appendToLog("1A setCurrentLinkProfile: adjusted profile = " + profile);
-        boolean result = rfidReaderChipE710.rx000Setting.setCurrentProfile(profile);
-        if (DEBUG) appendToLog("1b setCurrentLinkProfile: after setCurrentProfile, result = " + result);
-        if (result) {
-            setPwrManagementMode(false);
-        }
-        if (DEBUG) appendToLog("1C setCurrentLinkProfile: after setPwrManagementMode, result = " + result + ", profile = " + profile);
-        if (result && profile == 3) {
-            if (getTagDelay() < 2) result = setTagDelay((byte)2);
-        }
-        if (DEBUG) appendToLog("1d setCurrentLinkProfile: after setTagDelay, result = " + result);
-        getCurrentProfile();
-        return result;
+        appendToLog("RfidReader.setCurrentLinkProfile: before setting with profile[0] = " + antennas[0].getCurrentProfile() + ", profile[1] = " + antennas[1].getCurrentProfile() + ", new profile = " + profile);
+        boolean bValue = antennas[getAntennaSelect()].setCurrentLinkProfile(profile);
+        appendToLog("RfidReader.setCurrentLinkProfile: after setting with profile[0] = " + antennas[0].getCurrentProfile() + ", profile[1] = " + antennas[1].getCurrentProfile() + ", bValue = " + bValue);
+        return bValue;
     }
+
+    private int powerBoost = -1;
+    public int getPowerBoost() {
+        if (powerBoost < 0 && !bis108) {
+            powerBoost = rfidReaderChipE710.rx000Setting.getPowerBoost();
+        }
+        return powerBoost;
+    }
+    public boolean setPowerBoost(boolean powerBoost) {
+        if (false) appendToLog("RfidReader.setPowerBoost: old powerBoost = " + getPowerBoost() + ", new powerBoost = " + powerBoost);
+        if (getPowerBoost() >= 0) {
+            if ((getPowerBoost() > 0) == powerBoost) return true;
+        }
+        boolean bValue = !bis108 && rfidReaderChipE710.rx000Setting.setPowerBoost(powerBoost);
+        if (bValue) this.powerBoost = (powerBoost ? 1 : 0);
+        return bValue;
+    }
+    private int dupDelay = -1;
+    public int getDupDelay() {
+        if (dupDelay < 0) {
+            byte byteValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getDupElimRollWindow() : rfidReaderChipE710.rx000Setting.getDupElimRollWindow());
+            dupDelay = (int) byteValue;
+        }
+        return dupDelay;
+    }
+    public boolean setDupDelay(byte dupElim) {
+        boolean bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setDupElimRollWindow(dupElim) : rfidReaderChipE710.rx000Setting.setDupElimRollWindow(dupElim));
+        if (bValue) dupDelay = (int)dupElim;
+        return bValue;
+    }
+    private int intraDelay = -1;
+    public int getIntraPkDelay() {
+        if (intraDelay < 0) {
+            byte byteValue = (bis108 ? rfidReaderChipR2000.rx000Setting.getIntraPacketDelay() : rfidReaderChipE710.rx000Setting.getIntraPacketDelay());
+            intraDelay = (int) byteValue;
+        }
+        return intraDelay;
+    }
+    public boolean setIntraPkDelay(byte intraPkDelay) {
+        boolean bValue = (bis108 ? rfidReaderChipR2000.rx000Setting.setIntraPacketDelay(intraPkDelay) : rfidReaderChipE710.rx000Setting.setIntraPacketDelay(intraPkDelay));
+        if (bValue) this.intraDelay = intraPkDelay;
+        return bValue;
+    }
+
+
+
     public void resetEnvironmentalRSSI() {
         if (bis108) rfidReaderChipR2000.rx000EngSetting.resetRSSI();
         else rfidReaderChipE710.rx000EngSetting.resetRSSI();
@@ -3056,18 +3219,7 @@ public class RfidReader {
     boolean setTagDelay2RfidReader(int tagDelay) {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.setTagDelay2RfidReader(tagDelay) : rfidReaderChipE710.rx000Setting.setTagDelay(tagDelay));
     }
-    public byte getIntraPkDelay() {
-        return (bis108 ? rfidReaderChipR2000.rx000Setting.getIntraPacketDelay() : rfidReaderChipE710.rx000Setting.getIntraPacketDelay());
-    }
-    public boolean setIntraPkDelay(byte intraPkDelay) {
-        return (bis108 ? rfidReaderChipR2000.rx000Setting.setIntraPacketDelay(intraPkDelay) : rfidReaderChipE710.rx000Setting.setIntraPacketDelay(intraPkDelay));
-    }
-    public byte getDupDelay() {
-        return (bis108 ? rfidReaderChipR2000.rx000Setting.getDupElimRollWindow() : rfidReaderChipE710.rx000Setting.getDupElimRollWindow());
-    }
-    public boolean setDupDelay(byte dupElim) {
-        return (bis108 ? rfidReaderChipR2000.rx000Setting.setDupElimRollWindow(dupElim) : rfidReaderChipE710.rx000Setting.setDupElimRollWindow(dupElim));
-    }
+
     public long getCycleDelay() {
         cycleDelaySetting = (bis108 ? rfidReaderChipR2000.rx000Setting.getCycleDelay() : rfidReaderChipE710.rx000Setting.getCycleDelay());
         return cycleDelaySetting;
@@ -3366,8 +3518,6 @@ public class RfidReader {
                 settingData.preFilterData = new SettingData.PreFilterData(enable, target, action, bank, offset, mask, false);
             if (mask == null) mask = "";
             if (mask.length() > 64) mask = mask.substring(0, 64);
-            if (index == 0)
-                preMatchData = new RfidReader.PreMatchData(enable, target, action, bank, offset, mask, mask.length() * 4, rfidReaderChipR2000.rx000Setting.getQuerySelect(), getPwrlevel(), getInvAlgo(), getQValue());
             boolean result = true;
             if (index != rfidReaderChipR2000.rx000Setting.getInvSelectIndex()) {
                 if (false) appendToLog("RfidReader.setSelectCriteria goes to setInvSelectIndex");
@@ -3536,8 +3686,8 @@ public class RfidReader {
         return strSpecialCountryCode;
     }
     public static class PostMatchData {
-        public boolean enable; public boolean target; public int offset; public String mask; public long pwrlevel; public boolean invAlgo; public int qValue;
-        public PostMatchData(boolean enable, boolean target, int offset, String mask, int antennaCycle, long pwrlevel, boolean invAlgo, int qValue) {
+        public boolean enable; public boolean target; public int offset; public String mask; public long pwrlevel; public int invAlgo; public int qValue;
+        public PostMatchData(boolean enable, boolean target, int offset, String mask, int antennaCycle, long pwrlevel, int invAlgo, int qValue) {
             this.enable = enable;
             this.target = target;
             this.offset = offset;
@@ -3581,7 +3731,7 @@ public class RfidReader {
                 if (utility.DEBUG_COMPACT) appendToLog("Debug_Compact 0: RfidReadder.startOperation operationTypes is " + operationTypes.toString());
                 if (operationTypes == RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT) {
                     setTagDelay2RfidReader(0); setMatchRep(0);
-                    if (false && tagFocus >= 1) {
+                    if (false && getTagFocus() >= 1) {
                         setTagGroup(-1, 1, 0);  //Set Session S1, Target A
                         setTagDelay2RfidReader(0);
                         setAntennaDwell(2000);
@@ -3600,9 +3750,9 @@ public class RfidReader {
                     if (operationTypes == RfidReaderChipData.OperationTypes.TAG_SEARCHING && bis108 == false) rfidReaderChipE710.rx000Setting.setDupElimRollWindow((byte)0);
                 }
                 if (bis108) {
-                    notificationConnector.getAutoRFIDAbort();
-                    notificationConnector.setAutoRFIDAbort(true);
-                    notificationConnector.getAutoRFIDAbort();
+                    //notificationConnector.getAutoRFIDAbort();
+                    //notificationConnector.setAutoRFIDAbort(true);
+                    //notificationConnector.getAutoRFIDAbort();
                     rfidReaderChipR2000.setPwrManagementMode(false);
                     appendToLog("going to sendHostRegRequestHST_CMD(Cs108Library4A.HostCommands.CMD_18K6CINV)");
 
@@ -3620,12 +3770,13 @@ public class RfidReader {
                     if (operationTypes == RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT) hostCommands = RfidReaderChipData.HostCommands.CMD_18K6CINV_COMPACT;
                     else if (rfidReaderChipE710.rx000Setting.getTagRead() != 0 && bTagFocus == false) hostCommands = RfidReaderChipData.HostCommands.CMD_18K6CINV_MB;
                     appendToLog("1 OperationTypes = " + operationTypes.toString() + ", hostCommands = " + hostCommands.toString());
-                    if (true) {
-                        appendToLog("BtDataOut: 3030: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.antennaPortConfig[0]));
-                        appendToLog("BtDataOut: 3140: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.selectConfiguration[0]));
-                        appendToLog("BtDataOut: 3270: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.multibankReadConfig[0]));
-                        appendToLog("BtDataOut: 3277: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.multibankReadConfig[1]));
-                        appendToLog("BtDataOut: 3908: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.intraPacketDelay));
+                    if (false) {
+                        appendToLog("RfidReader.startOperation: BtDataOut, 3030: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.antennaPortConfig[0]));
+                        appendToLog("RfidReader.startOperation: BtDataOut, 3140: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.selectConfiguration[0]));
+                        appendToLog("RfidReader.startOperation: BtDataOut, 3270: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.multibankReadConfig[0]));
+                        appendToLog("RfidReader.startOperation: BtDataOut, 3277: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.multibankReadConfig[1]));
+                        appendToLog("RfidReader.startOperation: BtDataOut, 3908: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.intraPacketDelay));
+                        appendToLog("RfidReader.startOperation: BtDataOut, 3950: " + utility.byteArrayToString(rfidReaderChipE710.rx000Setting.powerBoost));
                     }
                     retValue = rfidReaderChipE710.sendHostRegRequestHST_CMD(hostCommands);
                     break;
@@ -3634,8 +3785,9 @@ public class RfidReader {
         return retValue;
     }
     public boolean abortOperation() {
+        appendToLog("RfidReader.abortOperation: BtDataOut");
         boolean bRetValue = (bis108 ? rfidReaderChipR2000.sendControlCommand(RfidReaderChipR2000.ControlCommands.ABORT) : rfidReaderChipE710.sendHostRegRequestHST_CMD(RfidReaderChipData.HostCommands.NULL));
-        setInventoring(false);
+        //setInventoring(false);
         return bRetValue;
     }
     public boolean setMatchRep(int matchRep) {
@@ -3895,25 +4047,6 @@ public class RfidReader {
             return result;
         }
     }
-    public byte getPopulation2Q(int population) {
-        double dValue = 1 + log10(population * 2) / log10(2);
-        if (dValue < 0) dValue = 0;
-        if(dValue > 15) dValue = 15;
-        byte iValue = (byte) dValue;
-        if (DEBUG || true) appendToLog("getPopulation2Q(" + population + "): log dValue = " + dValue + ", iValue = " + iValue);
-        return iValue;
-    }
-    public int population = 30;
-    public int getPopulation() {
-        return population;
-    }
-    public boolean setPopulation(int population) {
-        if (true) appendToLog("setPopulation " + population);
-        byte iValue = getPopulation2Q(population);
-        if (true) appendToLog("getPopulation2Q = " + iValue);
-        this.population = population;
-        return setQValue(iValue);
-    }
     public byte qValueSetting = -1;
     public byte getQValue() {
         return qValueSetting;
@@ -3944,7 +4077,7 @@ public class RfidReader {
         } else {
             boolean result = true;
             if (false) appendToLog("3 setAlgoStartQ with iValue = " + iValue);
-            result = rfidReaderChipE710.rx000Setting.setAlgoStartQ(iValue);
+            result = rfidReaderChipE710.rx000Setting.setAntennaStartQ(iValue);
             return result;
         }
     }
@@ -3953,7 +4086,8 @@ public class RfidReader {
         if (bis108) {
             RfidReaderChipData.Rx000pkgData rx000pkgData = null;
             //if (mrfidToWriteSize() != 0) mRfidReaderChip.mRx000ToRead.clear();
-            if (rfidReaderChipR2000.bRx000ToReading == false && rfidReaderChipR2000.mRx000ToRead.size() != 0) {
+            if (rfidReaderChipR2000.bRx000ToReading == false && rfidReaderChipR2000.mRx000ToRead.size() != 0 && updating_mRx000ToRead == false) {
+                updating_mRx000ToRead = true;
                 rfidReaderChipR2000.bRx000ToReading = true;
                 int index = 0;
                 try {
@@ -3965,6 +4099,7 @@ public class RfidReader {
                     rx000pkgData = null;
                 }
                 rfidReaderChipR2000.bRx000ToReading = false;
+                updating_mRx000ToRead = false;
             }
             return rx000pkgData;
         } else {
@@ -3976,6 +4111,7 @@ public class RfidReader {
                 int index = 0;
                 try {
                     rx000pkgData = rfidReaderChipE710.mRx000ToRead.get(index);
+                    appendToLog("RfidReader.onRFIDEvent: responseType = " + rx000pkgData.responseType.toString());
                     if (false && rx000pkgData.responseType == RfidReaderChipData.HostCmdResponseTypes.TYPE_COMMAND_END)
                         if (DEBUG) appendToLog("get mRx000ToRead with COMMAND_END");
                     rfidReaderChipE710.mRx000ToRead.remove(index);
@@ -4045,18 +4181,18 @@ public class RfidReader {
             }
             return strCountryCode;
         } else {
-            boolean DEBUG = false;
-            if (DEBUG) appendToLog("getModelName = " + strModelName);
+            boolean DEBUG = true;
+            if (DEBUG) appendToLog("RfidReader.getModelNumber: strModelName = " + strModelName);
             int iCountryCode = getCountryCode();
-            if (DEBUG) appendToLog("getCountryCode = " + iCountryCode);
+            if (DEBUG) appendToLog("RfidReader.getModelNumber: iCountryCode = " + iCountryCode);
             String strSpecialCountryVersion = getSpecialCountryVersion();
-            if (DEBUG) appendToLog("getSpecialCountryVersion = " + strSpecialCountryVersion);
+            if (DEBUG) appendToLog("RfidReader.getModelNumber: strSpecialCountryVersion = " + strSpecialCountryVersion);
             int iFreqModifyCode = getFreqModifyCode();
-            if (DEBUG) appendToLog("getFreqModifyCode = " + iFreqModifyCode);
+            if (DEBUG) appendToLog("RfidReader.getModelNumber: iFreqModifyCode = " + iFreqModifyCode);
 
             String strModelNumber = (strModelName == null ? "" : strModelName);
             if (iCountryCode > 0) strModelNumber += ("-" + String.valueOf(iCountryCode) + (strSpecialCountryVersion == null ? "" : (" " + strSpecialCountryVersion)));
-            if (DEBUG) appendToLog("strModelNumber = " + strModelNumber);
+            if (DEBUG) appendToLog("RfidReader.getModelNumber: strModelNumber = " + strModelNumber);
             return strModelNumber;
         }
     }
@@ -4163,7 +4299,7 @@ public class RfidReader {
         } else {
             boolean bRetValue;
             bRetValue = rfidReaderChipE710.rx000Setting.setImpinjExtension(tagFocus, fastId);
-            if (bRetValue) this.tagFocus = (tagFocus ? 1 : 0);
+            if (bRetValue) setTagFocus(tagFocus);
         }
     }
     public String getSerialNumber() {
@@ -4177,18 +4313,18 @@ public class RfidReader {
         //appendToLog("isInventoring " + bValue + " with bis108 " + bis108);
         return bValue;
     }
-    public void setInventoring(boolean enable) {
-        appendToLog("setInventoring " + enable + " with bis108 " + bis108);
-        if (bis108) rfidReaderChipR2000.setInventoring(enable);
-        else rfidReaderChipE710.setInventoring(enable);
-    }
     void addRfidToWrite(RfidConnector.CsReaderRfidData csReaderRfidData) {
         if (bis108) rfidReaderChipR2000.addRfidToWrite(csReaderRfidData);
         else rfidReaderChipE710.addRfidToWrite(csReaderRfidData);
     }
+    boolean updating_mRx000ToRead = false;
     void uplinkHandler() {
-        if (bis108) rfidReaderChipR2000.uplinkHandler();
-        else rfidReaderChipE710.uplinkHandler();
+        if (updating_mRx000ToRead == false) {
+            updating_mRx000ToRead = true;
+            if (bis108) rfidReaderChipR2000.uplinkHandler();
+            else rfidReaderChipE710.uplinkHandler();
+            updating_mRx000ToRead = false;
+        }
     }
     public int getAntennaCycle() {
         return (bis108 ? rfidReaderChipR2000.rx000Setting.getAntennaCycle() : rfidReaderChipE710.rx000Setting.getAntennaCycle());

@@ -587,79 +587,16 @@ public class BluetoothGatt extends BluetoothGattCallback {
                 isLocationAccepted = false;
         }
         if (DEBUG || utility.DEBUG_SCAN) appendToLog("BluetoothGatt.scanLeDevice: isLocationAccepted = " + isLocationAccepted + ", bAlerting = " + bAlerting + ", bleEnableRequestShown = " + bleEnableRequestShown);
-        /*if (false && isLocationAccepted == false) {
-            if (bAlerting == false && bleEnableRequestShown0 == false) {
-                bAlerting = true;
-                if (DEBUG) appendToLog("StreamOut: new AlertDialog");
-                popupAlert();
-            }
-            return false;
-        }*/
-/*
-        if (DEBUG) appendToLog("StreamOut: Passed AlertDialog");
-        if (enable && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (DEBUG) appendToLog("Checking permission and grant !!!");
-            LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
-            if (DEBUG_SCAN) appendToLog("locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
-            if (DEBUG_SCAN) appendToLog("locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-            if (DEBUG_SCAN) appendToLog("ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION));
-            if (DEBUG_SCAN) appendToLog("ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)  = " + ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION));
-            if (false && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) {
-                boolean isShowing = false;
-                if (popupWindow != null) isShowing = popupWindow.isShowing();
-                if (isShowing == false) {
-                    LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
-                    View popupView = layoutInflater.inflate(R.layout.popup, null);
-                    popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
-                    TextView textViewDismiss = (TextView) popupView.findViewById(R.id.dismissMessage);
-                    textViewDismiss.setText("Android OS 6.0+ requires to enable location service to find the nearby BLE devices");
-                    Button btnDismiss = (Button) popupView.findViewById(R.id.dismiss);
-                    if (DEBUG) appendToLog("Setting grant");
-                    btnDismiss.setOnClickListener(new Button.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            popupWindow.dismiss();
-                            if (DEBUG) appendToLog("Set GRANT");
-                            Intent intent1 = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            mContext.startActivity(intent1);
-                        }
-                    });
-                }
-                return false;
-            } else if (
-                    (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false
-                            && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false)
-                            || (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                            && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-                if (true) {
-                    if (bAlerting || bleEnableRequestShown0) return false;
-                    bAlerting = true;
-                    popupAlert();
-                    return false;
-                }
-            }
-        }
-*/
+
         if (isBLUETOOTH_CONNECTinvalid()) return false;
 
         if (locationReady == false) {
             if (DEBUG) appendToLog("BluetoothGatt.scanLeDevice: AccessCoarseLocatin is NOT granted");
         } else if (bluetoothAdapter == null) {
             if (DEBUG) appendToLog("BluetoothGatt.scanLeDevice: scanLeDevice(" + enable + ") with NULL mBluetoothAdapter");
-/*        } else if (!bluetoothAdapter.isEnabled()) {
-            if (DEBUG) appendToLog("StreamOut: bleEnableRequestShown = " + bleEnableRequestShown);
-            if (bleEnableRequestShown == false) {
-                if (true) appendToLog("scanLeDevice(" + enable + ") with DISABLED mBluetoothAdapter");
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                activity.startActivityForResult(enableBtIntent, 1);
-                if (DEBUG) appendToLog("StreamOut: bleEnableRequestShown is set");
-                bleEnableRequestShown = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
-            }
-*/
         } else {
             bleEnableRequestShown = false;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (true) {
                 bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
                 if (bluetoothLeScanner == null) {
                     if (DEBUG) appendToLog("BluetoothGatt.scanLeDevice: scanLeDevice(" + enable + ") with NULL BluetoothLeScanner");
@@ -668,20 +605,15 @@ public class BluetoothGatt extends BluetoothGattCallback {
             }
             if (enable == false) {
                 if (true) appendToLog("BluetoothGatt.scanLeDevice: scanLeDevice(" + enable + ") with mScanCallBack is " + (mScanCallBack != null ? "VALID" : "INVALID"));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (true) {
                     if (mScanCallBack != null) bluetoothLeScanner.stopScan(mScanCallBack);
-                } else {
-                    if (mLeScanCallback != null) bluetoothAdapter.stopLeScan(mLeScanCallback);
                 }
                 scanning = false; result = true;
             } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (true) {
                     if (true) appendToLog("BluetoothGatt.scanLeDevice: scanLeDevice(" + enable + "): START with mleScanner. ActivityCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_SCAN) = " + ActivityCompat.checkSelfPermission(context, BLUETOOTH_SCAN));
                     if (isBLUETOOTH_CONNECTinvalid()) return false;
                     else bluetoothLeScanner.startScan(mScanCallBack);
-                } else {
-                    if (true) appendToLog("BluetoothGatt.scanLeDevice: scanLeDevice(" + enable + "): START with mBluetoothAdapter");
-                    bluetoothAdapter.startLeScan(mLeScanCallback);
                 }
                 scanning = true; result = true;
             }
@@ -696,63 +628,7 @@ public class BluetoothGatt extends BluetoothGattCallback {
             bleEnableRequestShown = false;
         }
     };
-/*
-    void popupAlert() {
-        appdialog = new CustomAlertDialog();
-        appdialog.Confirm(activity, "Use your location",
-                "This app collects location data in the background.  In terms of the features using this location data in the background, this App collects location data when it is reading RFID tag in all inventory pages.  The purpose of this is to correlate the RFID tag with the actual GNSS(GPS) location of the tag.  In other words, this is to track the physical location of the logistics item tagged with the RFID tag.",
-                "No thanks", "Turn on",
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        isLocationAccepted = true;
-                        appendToLog("StreamOut: This from FALSE proc");
-                        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-//                                && ActivityCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-                                && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            appendToLog("requestPermissions ACCESS_FINE_LOCATION 123");
-                            requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
-                            if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
-                        }
-                        {
-                            LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
-                            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) {
-                                appendToLog("StreamOut: start activity ACTION_LOCATION_SOURCE_SETTINGS");
-                                Intent intent1 = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                mContext.startActivity(intent1);
-                            }
-                        }
-                        bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
-                        bAlerting = false;
-                    }
-                },
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        appendToLog("StreamOut: This from FALSE proc");
-                        bAlerting = false;
-                        bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
-                    }
-                });
-    }
 
-    BroadcastReceiver myReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            appendToLog("action = " + action);
-            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
-                    // CONNECT
-                }
-            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // Discover new device
-            }
-        }
-    };
-*/
     public boolean connect(ReaderDevice readerDevice) {
         boolean DEBUG = false;
         if (DEBUG) appendToLog("abcc: start connecting " + readerDevice.getName());
@@ -772,7 +648,7 @@ public class BluetoothGatt extends BluetoothGattCallback {
                 if (checkSelfPermissionBLUETOOTH() == false) return false;
                 bluetoothGatt = bluetoothAdapter.getRemoteDevice(address).connectGatt(context, false, this);
                 if (bluetoothGatt != null) mBluetoothGattActive = true;
-                if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (false) {
                     if (true) {
                         bluetoothGatt.requestConnectionPriority(android.bluetooth.BluetoothGatt.CONNECTION_PRIORITY_HIGH);
                         if (DEBUG) appendToLog("Stream Set to HIGH");
@@ -975,20 +851,6 @@ public class BluetoothGatt extends BluetoothGattCallback {
                 bValue = true;
             }
         }
-/*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (
-                ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
-        )) {
-            appendToLog("requestPermissions BLUETOOTH_CONNECT & BLUETOOTH_CONNECT 123");
-            requestPermissions(activity, new String[] {
-                    Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.BLUETOOTH_CONNECT
-            }, 123);
-            if (false) Toast.makeText(mContext, R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
-            bValue = true;
-        }
-        //appendToLog("isBLUETOOTH_CONNECTinvalid returns " + bValue);
-*/
         return bValue;
     }
 
@@ -1025,10 +887,11 @@ public class BluetoothGatt extends BluetoothGattCallback {
 
     public static class CsScanData {
         public BluetoothDevice device; public String name, address;
-        public int rssi;
         public byte[] scanRecord;
+        public int rssi;
         public ArrayList<byte[]> decoded_scanRecord;
-        public int serviceUUID2p2;
+        public int serviceUUID;
+        public boolean hasServicePower;
 
         public CsScanData(BluetoothDevice device, int rssi, byte[] scanRecord) {
             this.device = device;
@@ -1041,14 +904,6 @@ public class BluetoothGatt extends BluetoothGattCallback {
             this.rssi = rssi;
             this.scanRecord = scanRecord;
         }
-        public BluetoothDevice getDevice() { return device; }
-        public String getName() {
-            return name;
-        }
-        public String getAddress() {
-            return address;
-        }
-        public byte[] getScanRecord() { return scanRecord; }
     }
 
     public void removeBond(ReaderDevice readerDevice) {

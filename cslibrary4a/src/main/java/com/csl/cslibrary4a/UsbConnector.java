@@ -150,18 +150,18 @@ class UsbConnector {
                     switch (device.getVendorId()) {
                         case 1003: //Atmel
                             scanResultA.name = "CS701 USB HID";
-                            scanResultA.serviceUUID2p2 = 3;
+                            scanResultA.serviceUUID = 3;
                             break;
                         case 4292: //Silicon Laboratory
                             scanResultA.name = "CS108 USB HID";
-                            scanResultA.serviceUUID2p2 = 1;
+                            scanResultA.serviceUUID = 1;
                             break;
                     }
                     appendToLog("UsbConnector.runnable: scanResultA.name is " + scanResultA.name);
 
                     if (csReaderConnector.mScanResultList != null) {
                         csReaderConnector.mScanResultList.add(scanResultA);
-                        appendToLog("UsbConnector.runnable: scanResultA.getAddress is " + csReaderConnector.mScanResultList.get(0).getAddress());
+                        appendToLog("UsbConnector.runnable: scanResultA.getAddress is " + csReaderConnector.mScanResultList.get(0).address);
                     }
                 }
             }

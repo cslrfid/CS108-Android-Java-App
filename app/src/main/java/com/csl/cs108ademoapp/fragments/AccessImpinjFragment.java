@@ -29,18 +29,19 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.AccessTask;
+import com.csl.cslibrary4a.AccessTaskCustom;
 import com.csl.cs108ademoapp.AccessTask1;
-import com.csl.cs108ademoapp.AsyncTaskA;
-import com.csl.cs108ademoapp.CustomPopupWindow;
+import com.csl.cslibrary4a.CustomAsyncTask;
+import com.csl.cslibrary4a.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SelectTag;
+import com.csl.cslibrary4a.CustomTabLayout;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
-import com.google.android.material.tabs.TabLayout;
 
 public class AccessImpinjFragment extends CommonFragment {
+    View viewFragment;
     CheckBox checkBoxTagFocus, checkBoxFastId, checkBoxProtectSelect, checkBoxAutoTuneDisable, checkBoxProtect, checkBoxShortRange, checkBoxMemorySelect, checkBoxUnkillable;
     Spinner spinnerTagSelect;
 
@@ -55,7 +56,7 @@ public class AccessImpinjFragment extends CommonFragment {
     TextView textViewAuthenticatedResult, textViewAutotuneValue, textViewProtectValue, textViewProtectNormalValue, textViewEpc128Value, textViewConfiguration;
     Button button, buttonAutoTuneValueRead, buttonProtectValueRead, buttonProtectResumeRead, buttonEpc128ValueRead, buttonRead, buttonWrite;
     boolean operationRead = false;
-    AccessTask accessTask;
+    AccessTaskCustom accessTask;
     AccessTask1 accessTask1;
     int iRunType = -1; String stringNewAutoTuneConfig = null;
     int unprotecting = 0;
@@ -63,34 +64,36 @@ public class AccessImpinjFragment extends CommonFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_access_impinj, container, false);
+        viewFragment = inflater.inflate(R.layout.fragment_access_impinj, container, false);
+        return viewFragment;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        checkBoxTagFocus = (CheckBox) getActivity().findViewById(R.id.accessImpinjTagFocus);
+        checkBoxTagFocus = (CheckBox) view.findViewById(R.id.accessImpinjTagFocus);
         if (MainActivity.csLibrary4A.get98XX() == 2) checkBoxTagFocus.setText(checkBoxTagFocus.getText().toString() + " (When enabled, tag select is disabled.)");
         MainActivity.csLibrary4A.appendToLog("CheckBoxTagFocus is set");
-        checkBoxFastId = (CheckBox) getActivity().findViewById(R.id.accessImpinjFastId);
+        checkBoxFastId = (CheckBox) view.findViewById(R.id.accessImpinjFastId);
 
-        checkBoxAutoTuneDisable = (CheckBox) getActivity().findViewById(R.id.accessImpinjAutoTune);
-        checkBoxProtect = (CheckBox) getActivity().findViewById(R.id.accessImpinjProtect);
-        checkBoxShortRange = (CheckBox) getActivity().findViewById(R.id.accessImpinjShortRange);
-        checkBoxMemorySelect = (CheckBox) getActivity().findViewById(R.id.accessImpinjMemorySelect);
-        checkBoxUnkillable = (CheckBox) getActivity().findViewById(R.id.accessImpinjUnkillable);
+        checkBoxAutoTuneDisable = (CheckBox) view.findViewById(R.id.accessImpinjAutoTune);
+        checkBoxProtect = (CheckBox) view.findViewById(R.id.accessImpinjProtect);
+        checkBoxShortRange = (CheckBox) view.findViewById(R.id.accessImpinjShortRange);
+        checkBoxMemorySelect = (CheckBox) view.findViewById(R.id.accessImpinjMemorySelect);
+        checkBoxUnkillable = (CheckBox) view.findViewById(R.id.accessImpinjUnkillable);
 
-        spinnerTagSelect = (Spinner) getActivity().findViewById(R.id.accessImpinjTagSelect);
+        spinnerTagSelect = (Spinner) view.findViewById(R.id.accessImpinjTagSelect);
         ArrayAdapter<CharSequence> targetAdapter1 = ArrayAdapter.createFromResource(getActivity(), R.array.impinj_options, R.layout.custom_spinner_layout);
         targetAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTagSelect.setAdapter(targetAdapter1); spinnerTagSelect.setSelection(0);
         spinnerTagSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
-                TabLayout.TabView tabView = tabLayout.getTabAt(2).view;
-                //LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessImpinjAuthenticateLayout);
+                CustomTabLayout tabLayout = (CustomTabLayout) getActivity().findViewById(R.id.OperationsTabLayout2);
+                MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment.onViewCreated.onItemSelected: tabLayout is " + (tabLayout == null ? "null" : "valid"));
+                CustomTabLayout.TabView tabView = tabLayout.getTabAt(2).view;
+                //LinearLayout layout = (LinearLayout) viewFragment.findViewById(R.id.accessImpinjAuthenticateLayout);
                 if (position == impinjTag.m775.ordinal()) {
                     //layout.setVisibility(View.VISIBLE);
                     textViewAuthenticatedResult.setText("");
@@ -100,8 +103,8 @@ public class AccessImpinjFragment extends CommonFragment {
                     tabView.setVisibility(View.GONE);
                 }
 
-                LinearLayout layoutA = (LinearLayout) getActivity().findViewById(R.id.accessImpinjProtectLayout);
-                LinearLayout layoutA1 = (LinearLayout) getActivity().findViewById(R.id.accessImpinjProtectLayout1);
+                LinearLayout layoutA = (LinearLayout) viewFragment.findViewById(R.id.accessImpinjProtectLayout);
+                LinearLayout layoutA1 = (LinearLayout) viewFragment.findViewById(R.id.accessImpinjProtectLayout1);
                 if (position == impinjTag.m775.ordinal() ||
                         position == impinjTag.m780.ordinal() ||
                         position == impinjTag.m830.ordinal() ||
@@ -115,18 +118,18 @@ public class AccessImpinjFragment extends CommonFragment {
                     layoutA1.setVisibility(View.GONE);
                 }
 
-                LinearLayout layout0 = (LinearLayout) getActivity().findViewById(R.id.accessImpinjMemorySelectLayout);
+                LinearLayout layout0 = (LinearLayout) viewFragment.findViewById(R.id.accessImpinjMemorySelectLayout);
                 if (position == impinjTag.m830.ordinal() || position == impinjTag.monza_R6P.ordinal()) {
                     layout0.setVisibility(View.VISIBLE);
                     textViewEpc128Value.setText("");
                 } else layout0.setVisibility(View.GONE);
 
-                LinearLayout layout1 = (LinearLayout) getActivity().findViewById(R.id.accessImpinjSelectLayout);
+                LinearLayout layout1 = (LinearLayout) viewFragment.findViewById(R.id.accessImpinjSelectLayout);
                 if (position == impinjTag.others.ordinal()) layout1.setVisibility(View.GONE);
                 else layout1.setVisibility(View.VISIBLE);
 
-                LinearLayout layout2 = (LinearLayout) getActivity().findViewById(R.id.accessImpinjAutotuneLayout);
-                LinearLayout layout3 = (LinearLayout) getActivity().findViewById(R.id.accessImpinjConfigLayout);
+                LinearLayout layout2 = (LinearLayout) viewFragment.findViewById(R.id.accessImpinjAutotuneLayout);
+                LinearLayout layout3 = (LinearLayout) viewFragment.findViewById(R.id.accessImpinjConfigLayout);
                 if (position == impinjTag.monza_x8k.ordinal() || position == impinjTag.others.ordinal()) {
                     layout2.setVisibility(View.GONE);
                     layout3.setVisibility(View.GONE);
@@ -154,7 +157,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     textViewConfiguration.setText("");
                 }
 
-                LinearLayout layout4 = (LinearLayout) getActivity().findViewById(R.id.accessImpinjReadUserLayout);
+                LinearLayout layout4 = (LinearLayout) viewFragment.findViewById(R.id.accessImpinjReadUserLayout);
                 if (position == impinjTag.monza_x8k.ordinal()) layout4.setVisibility(View.VISIBLE);
                 else layout4.setVisibility(View.GONE);
             }
@@ -173,11 +176,11 @@ public class AccessImpinjFragment extends CommonFragment {
         data2Restore.dwellTime = MainActivity.csLibrary4A.getAntennaDwell();
         data2Restore.tagFocus = MainActivity.csLibrary4A.getTagFocus();
 
-        selectTag = new SelectTag((Activity)getActivity(), 0);
+        selectTag = new SelectTag((Activity)getActivity(), view, 0);
 
         if (true) {
-            textViewAuthenticatedResult = (TextView) getActivity().findViewById(R.id.accessImpinjAuthenticatedResult);
-            button = (Button) getActivity().findViewById(R.id.accessImpinjAuthenticateButton);
+            textViewAuthenticatedResult = (TextView) view.findViewById(R.id.accessImpinjAuthenticatedResult);
+            button = (Button) view.findViewById(R.id.accessImpinjAuthenticateButton);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -186,11 +189,12 @@ public class AccessImpinjFragment extends CommonFragment {
 
                     textViewAuthenticatedResult.setText("");
                     boolean invalidRequest = MainActivity.csLibrary4A.setAuthenticateConfiguration();
-                    accessTask = new AccessTask(button, null, false, true,
+                    accessTask = new AccessTaskCustom(button, null, false, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CAUTHENTICATE,
                             -1, -1, false, false,
-                            null, null, null, null, null);
+                            null, null, null, null, null,
+                            MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     accessTask.execute();
 
                     mHandler.removeCallbacks(updateRunnable);
@@ -200,8 +204,8 @@ public class AccessImpinjFragment extends CommonFragment {
         }
 
         if (true) {
-            textViewAutotuneValue = (TextView) getActivity().findViewById(R.id.accessImpinjAutoTuneValue);
-            buttonAutoTuneValueRead = (Button) getActivity().findViewById(R.id.accessImpinjAutotuneValueButton);
+            textViewAutotuneValue = (TextView) view.findViewById(R.id.accessImpinjAutoTuneValue);
+            buttonAutoTuneValueRead = (Button) view.findViewById(R.id.accessImpinjAutotuneValueButton);
             buttonAutoTuneValueRead.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -221,21 +225,22 @@ public class AccessImpinjFragment extends CommonFragment {
                     else if (itagSelect == impinjTag.monza_R6.ordinal()) iAccOffset = 0x0E;
                     MainActivity.csLibrary4A.appendToLog(String.format("AutoTune offset is 0x%X", iAccOffset));
                     if (set_before_access(0, iAccOffset, 1) == false) invalidRequest = true;
-                    accessTask = new AccessTask(buttonAutoTuneValueRead, null, invalidRequest, true,
+                    accessTask = new AccessTaskCustom(buttonAutoTuneValueRead, null, invalidRequest, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                             -1, -1, false, checkProtectedBoxBeforeAccess(),
-                            null, null, null, null, null);
+                            null, null, null, null, null,
+                            MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     accessTask.execute();
                     mHandler.removeCallbacks(updateRunnable);
                     iRunType = 2; mHandler.post(updateRunnable);
                 }
             });
 
-            textViewProtectValue = (TextView) getActivity().findViewById(R.id.accessImpinjProtectValue);
-            checkBoxProtectSelect = (CheckBox) getActivity().findViewById(R.id.accessImpinjProtectSelect);
-            textViewProtectNormalValue = (TextView) getActivity().findViewById(R.id.accessImpinjProtectNormalValue);
-            buttonProtectValueRead = (Button) getActivity().findViewById(R.id.accessImpinjProtectValueButton);
+            textViewProtectValue = (TextView) view.findViewById(R.id.accessImpinjProtectValue);
+            checkBoxProtectSelect = (CheckBox) view.findViewById(R.id.accessImpinjProtectSelect);
+            textViewProtectNormalValue = (TextView) view.findViewById(R.id.accessImpinjProtectNormalValue);
+            buttonProtectValueRead = (Button) view.findViewById(R.id.accessImpinjProtectValueButton);
             buttonProtectValueRead.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -245,11 +250,12 @@ public class AccessImpinjFragment extends CommonFragment {
                     textViewProtectValue.setText("");
                     boolean invalidRequest = false;
                     if (set_before_access(1, 2, 6) == false) invalidRequest = true;
-                    accessTask = new AccessTask(buttonProtectValueRead, null, invalidRequest, true,
+                    accessTask = new AccessTaskCustom(buttonProtectValueRead, null, invalidRequest, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                             -1, -1, false, checkProtectedBoxBeforeAccess(),
-                            null, null, null, null, null);
+                            null, null, null, null, null,
+                            MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     MainActivity.csLibrary4A.appendToLog("setSelectCriteria: before execute");
                     accessTask.execute();
                     MainActivity.csLibrary4A.appendToLog("setSelectCriteria: after execute");
@@ -258,14 +264,14 @@ public class AccessImpinjFragment extends CommonFragment {
                 }
             });
 
-            buttonProtectResumeRead = (Button) getActivity().findViewById(R.id.accessImpinjProtectResumeButton);
+            buttonProtectResumeRead = (Button) view.findViewById(R.id.accessImpinjProtectResumeButton);
             buttonProtectResumeRead.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (isZeroPassword()) return;
                     if (isRfidConnectionValid() == false) return;
                     if (isRunningAccessTask()) {
-                        if (accessTask != null) accessTask.taskCancelReason = AccessTask.TaskCancelRReason.DESTORY;
+                        if (accessTask != null) accessTask.taskCancelReason = AccessTaskCustom.TaskCancelRReason.DESTORY;
                     }
 
                     MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment.onViewCreated.buttonProtectResumeRead.onClick: unprotecting = " + unprotecting);
@@ -291,8 +297,8 @@ public class AccessImpinjFragment extends CommonFragment {
                 }
             });
 
-            textViewEpc128Value = (TextView) getActivity().findViewById(R.id.accessImpinjEpc128Value);
-            buttonEpc128ValueRead = (Button) getActivity().findViewById(R.id.accessImpinjEpc128ValueButton);
+            textViewEpc128Value = (TextView) view.findViewById(R.id.accessImpinjEpc128Value);
+            buttonEpc128ValueRead = (Button) view.findViewById(R.id.accessImpinjEpc128ValueButton);
             buttonEpc128ValueRead.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -302,50 +308,51 @@ public class AccessImpinjFragment extends CommonFragment {
                     textViewEpc128Value.setText("");
                     boolean invalidRequest = false;
                     if (set_before_access(1, 2, 8) == false) invalidRequest = true;
-                    accessTask = new AccessTask(buttonEpc128ValueRead, null, invalidRequest, true,
+                    accessTask = new AccessTaskCustom(buttonEpc128ValueRead, null, invalidRequest, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                             -1, -1, false, checkProtectedBoxBeforeAccess(),
-                            null, null, null, null, null);
+                            null, null, null, null, null,
+                            MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     accessTask.execute();
                     mHandler.removeCallbacks(updateRunnable);
                     iRunType = 4; mHandler.post(updateRunnable);
                 }
             });
 
-            textViewRunTime = (TextView) getActivity().findViewById(R.id.accessImpinjRunTime);
-            buttonReadUserBank = (Button) getActivity().findViewById(R.id.accessRWReadButton);
+            textViewRunTime = (TextView) view.findViewById(R.id.accessImpinjRunTime);
+            buttonReadUserBank = (Button) view.findViewById(R.id.accessRWReadButton);
             buttonReadUserBank.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                        Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                         return;
                     } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                        Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     operationRead = true; startAccessUserTask();
                 }
             });
 
-            buttonWriteUserBank = (Button) getActivity().findViewById(R.id.accessRWWriteButton);
+            buttonWriteUserBank = (Button) view.findViewById(R.id.accessRWWriteButton);
             buttonWriteUserBank.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                        Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                         return;
                     } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                        Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     operationRead = false; startAccessUserTask();
                 }
             });
 
-            textViewConfiguration = (TextView) getActivity().findViewById(R.id.accessImpinjConfiguration);
-            buttonRead = (Button) getActivity().findViewById(R.id.accessImpinjReadButton);
+            textViewConfiguration = (TextView) view.findViewById(R.id.accessImpinjConfiguration);
+            buttonRead = (Button) view.findViewById(R.id.accessImpinjReadButton);
             buttonRead.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -356,7 +363,7 @@ public class AccessImpinjFragment extends CommonFragment {
                 }
             });
 
-            buttonWrite = (Button) getActivity().findViewById(R.id.accessImpinjWriteButton);
+            buttonWrite = (Button) view.findViewById(R.id.accessImpinjWriteButton);
             buttonWrite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -365,7 +372,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     if (isRunningAccessTask()) return;
 
                     if (textViewConfiguration.getText().toString().length() < 4) {
-                        Toast.makeText(MainActivity.mContext, "Please read configuration first", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.context, "Please read configuration first", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     startConfigWrite();
@@ -383,7 +390,7 @@ public class AccessImpinjFragment extends CommonFragment {
         }
         MainActivity.csLibrary4A.appendToLog("Password = " + iValue);
         if (iValue == 0) {
-            CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+            CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.context);
             customPopupWindow.popupStart("Before operation, please enter non-zero access password !!!", false);
             bValue = true;
         }
@@ -404,9 +411,9 @@ public class AccessImpinjFragment extends CommonFragment {
         int iSelectOffset = 32;
         if (iSelectBank != 1) iSelectOffset = 0;
 
-        EditText editTextBlockCount = (EditText) getActivity().findViewById(R.id.accessImpinjBlockCount);
-        EditText editTextUserOffset = (EditText) getActivity().findViewById(R.id.accessImpinjUserOffset);
-        EditText editTextUserLength = (EditText) getActivity().findViewById(R.id.accessImpinjUserLength);
+        EditText editTextBlockCount = (EditText) viewFragment.findViewById(R.id.accessImpinjBlockCount);
+        EditText editTextUserOffset = (EditText) viewFragment.findViewById(R.id.accessImpinjUserOffset);
+        EditText editTextUserLength = (EditText) viewFragment.findViewById(R.id.accessImpinjUserLength);
         int accBlockCount = 32, accOffset = 1, accSize = 1;
         try {
             accBlockCount = Integer.parseInt(editTextBlockCount.getText().toString());
@@ -418,7 +425,7 @@ public class AccessImpinjFragment extends CommonFragment {
             accSize = Integer.valueOf(editTextUserLength.getText().toString(), 10);
         } catch (Exception ex) { }
 
-        textViewUserValue = (TextView) getActivity().findViewById(R.id.accessImpinjUserValue);
+        textViewUserValue = (TextView) viewFragment.findViewById(R.id.accessImpinjUserValue);
         if (operationRead) textViewUserValue.setText("");
         boolean invalidRequest = false;
 
@@ -429,7 +436,7 @@ public class AccessImpinjFragment extends CommonFragment {
                 selectTag.editTextTagID.getText().toString(), iSelectBank, iSelectOffset,
                 selectTag.editTextAccessPassword.getText().toString(),
                 Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()),
-                (operationRead ? RfidReaderChipData.HostCommands.CMD_18K6CREAD: RfidReaderChipData.HostCommands.CMD_18K6CWRITE), updateRunnable);
+                (operationRead ? RfidReaderChipData.HostCommands.CMD_18K6CREAD: RfidReaderChipData.HostCommands.CMD_18K6CWRITE), updateRunnable, MainActivity.context, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
         accessTask1.execute();
         iRunType = 7;
     }
@@ -442,11 +449,12 @@ public class AccessImpinjFragment extends CommonFragment {
         int iSelectBank = selectTag.spinnerSelectBank.getSelectedItemPosition() + 1;
         int iSelectOffset = 32;
         if (iSelectBank != 1) iSelectOffset = 0;
-        accessTask = new AccessTask(buttonRead, null, invalidRequest, true,
+        accessTask = new AccessTaskCustom(buttonRead, null, invalidRequest, true,
                 selectTag.editTextTagID.getText().toString(), iSelectBank, iSelectOffset,
                 selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
                 -1, -1, false, checkProtectedBoxBeforeAccess(),
-                null, null, null, null, null);
+                null, null, null, null, null,
+                MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
         accessTask.execute();
         mHandler.removeCallbacks(updateRunnable);
         iRunType = 5; mHandler.post(updateRunnable);
@@ -513,11 +521,12 @@ public class AccessImpinjFragment extends CommonFragment {
             }
         }
 
-        accessTask = new AccessTask(buttonWrite, null, invalidRequest, true,
+        accessTask = new AccessTaskCustom(buttonWrite, null, invalidRequest, true,
                 selectTag.editTextTagID.getText().toString(), 1, 32,
                 selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CWRITE,
                 -1, -1, false, checkProtectedBoxBeforeAccess(),
-                null, null, null, null, null);
+                null, null, null, null, null,
+                MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
         accessTask.execute();
         mHandler.removeCallbacks(updateRunnable);
         iRunType = 6; mHandler.post(updateRunnable);
@@ -537,9 +546,9 @@ public class AccessImpinjFragment extends CommonFragment {
     boolean isRfidConnectionValid() {
         boolean bValue = false;
         if (MainActivity.csLibrary4A.isBleConnected() == false) {
-            Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
         } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-            Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
         } else bValue = true;
         return bValue;
     }
@@ -569,7 +578,7 @@ public class AccessImpinjFragment extends CommonFragment {
     boolean isRunningAccessTask() {
         boolean retValue = false;
         if (accessTask != null) {
-            if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) retValue = true;
+            if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) retValue = true;
         }
         return retValue;
     }
@@ -578,7 +587,7 @@ public class AccessImpinjFragment extends CommonFragment {
         public void run() {
             if (accessTask == null && accessTask1 == null) {
                 MainActivity.csLibrary4A.appendToLog("updateRunnable(): null AccessTask");
-            } else if (accessTask != null && accessTask.getStatus() == AsyncTaskA.Status.FINISHED) {
+            } else if (accessTask != null && accessTask.getStatus() == CustomAsyncTask.Status.FINISHED) {
                 MainActivity.csLibrary4A.appendToLog("accessResult = " + accessTask.accessResult + " with iRunType = " + iRunType);
                 if (accessTask.accessResult == null) {
                      MainActivity.csLibrary4A.appendToLog("updateRunnable(): accessTask is finished without result but with error = " + accessTask.resultError);
@@ -651,7 +660,7 @@ public class AccessImpinjFragment extends CommonFragment {
                 }
                 else if (iRunType == 6) {
                     MainActivity.csLibrary4A.appendToLog("updateRunnable(): accessResult = " + accessTask.accessResult + ", accessError = " + accessTask.resultError);
-                    if (accessTask.resultError.trim().length() != 0) Toast.makeText(MainActivity.mContext, accessTask.resultError, Toast.LENGTH_SHORT).show();
+                    if (accessTask.resultError.trim().length() != 0) Toast.makeText(MainActivity.context, accessTask.resultError, Toast.LENGTH_SHORT).show();
                     else if (accessTask.accessResult.length() == 0) textViewConfiguration.setText(stringNewAutoTuneConfig);
 
                     if (unprotecting > 0) stopProtectResuming();
@@ -680,6 +689,17 @@ public class AccessImpinjFragment extends CommonFragment {
     Data2Restore data2Restore = new Data2Restore();
 
     @Override
+    public void onResume() {
+        super.onResume();
+        setUserVisibleHint2(true);
+    }
+
+    @Override
+    public void onPause() {
+        setUserVisibleHint2(false);
+        super.onPause();
+    }
+    @Override
     public void onDestroy() {
         if (MainActivity.csLibrary4A != null) {
             MainActivity.csLibrary4A.abortOperation();
@@ -694,10 +714,11 @@ public class AccessImpinjFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment.setUserVisibleHint2: isVisibleToUser = " + isVisibleToUser);
+        if (isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
             MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment is now VISIBLE");
            setupTagID();
@@ -717,7 +738,9 @@ public class AccessImpinjFragment extends CommonFragment {
                     MainActivity.csLibrary4A.setFastId(false);
                 }
                 if (spinnerTagSelect.getSelectedItemPosition() != impinjTag.others.ordinal()) iValue |= (spinnerTagSelect.getSelectedItemPosition() + 1);
-                if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal())  { MainActivity.tagType = TAG_IMPINJ_M775; MainActivity.mDid = ""; }
+                if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m775.ordinal())  { MainActivity.tagType = TAG_IMPINJ_M775; MainActivity.mDid = "";
+                MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment.setUserVisibleHint2: set MainActivity.tagType as TAG_IMPINJ_M775");
+                }
                 else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m780.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M780; MainActivity.mDid = ""; }
                 else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m830.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M830; MainActivity.mDid = ""; }
                 else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.m770.ordinal()) { MainActivity.tagType = TAG_IMPINJ_M770; MainActivity.mDid = ""; }
@@ -729,11 +752,10 @@ public class AccessImpinjFragment extends CommonFragment {
                 else if (spinnerTagSelect.getSelectedItemPosition() == impinjTag.others.ordinal()) { MainActivity.tagType = TAG_IMPINJ; MainActivity.mDid = ""; }
 
                 MainActivity.mDid = "E28011" + String.format("%02X", iValue);
-                MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment.setUserVisibleHint: DebugABC, MainActivity.mDid = " + MainActivity.mDid + ", MainActivity.tagType = " + MainActivity.tagType.toString());
-                MainActivity.csLibrary4A.appendToLog(String.format("HelloK: iValue = 0x%02X, mDid = %s", iValue, MainActivity.mDid));
+                MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment.setUserVisibleHint: DebugABC, MainActivity.tagType = " + MainActivity.tagType.toString());
                 MainActivity.csLibrary4A.setImpinJExtension(checkBoxTagFocus.isChecked(), checkBoxFastId.isChecked());
             }
-            MainActivity.csLibrary4A.setRx000AccessPassword("000000000");
+            MainActivity.csLibrary4A.setRx000AccessPassword("00000000");
             userVisibleHint = false;
             MainActivity.csLibrary4A.appendToLog("AccessImpinjFragment is now INVISIBLE" + (checkBoxFastId != null ? (" with Value = " + iValue) : ""));
         }
@@ -763,7 +785,7 @@ public class AccessImpinjFragment extends CommonFragment {
                     boolean bEnableBAPMode = false;
                     int number = Integer.valueOf(stringUser.substring(3, 4), 16);
                     if ((number % 2) == 1) bEnableBAPMode = true;
-//                    CheckBox checkBoxBAP = (CheckBox) getActivity().findViewById(R.id.coldChainEnableBAP);
+//                    CheckBox checkBoxBAP = (CheckBox) viewFragment.findViewById(R.id.coldChainEnableBAP);
 //                    checkBoxBAP.setChecked(bEnableBAPMode);
                 }
             }

@@ -1,6 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON_OPUS;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S2;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_MAGNUS_S3;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_AXZON_XERXES;
@@ -20,9 +21,9 @@ import android.widget.Button;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
+import com.csl.cslibrary4a.RfidReader;
 
 public class AxzonSelectorFragment extends CommonFragment {
-    boolean bXerxesEnable = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,88 +45,66 @@ public class AxzonSelectorFragment extends CommonFragment {
         button_s2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gotoAxzonFragment(2);
+                gotoAxzonFragment(TAG_MAGNUS_S2);
             }
         });
         Button button_s3 = (Button) getActivity().findViewById(R.id.select_axzon_s3);
         button_s3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gotoAxzonFragment(3);
+                gotoAxzonFragment(TAG_MAGNUS_S3);
             }
         });
-        Button button_xx = (Button) getActivity().findViewById(R.id.select_axzon_xx);
+        Button button_xx = (Button) getActivity().findViewById(R.id.select_axzon_xerxes);
         button_xx.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gotoAxzonFragment(5);
+                gotoAxzonFragment(TAG_AXZON_XERXES);
+            }
+        });
+        Button button_opus = (Button) getActivity().findViewById(R.id.select_axzon_opus);
+        //if (MainActivity.csLibrary4A.get98XX() != 0) button_opus.setVisibility(View.GONE);
+        button_opus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gotoAxzonFragment(TAG_AXZON_OPUS);
             }
         });
         Button button_all = (Button) getActivity().findViewById(R.id.select_axzon_all);
         button_all.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gotoAxzonFragment(0);
+                gotoAxzonFragment(TAG_AXZON);
             }
         });
-        if (bXerxesEnable == false) {
-            button_xx.setVisibility(View.GONE);
-            button_all.setText("All Magnus");
-        }
     }
 
-    public static AxzonSelectorFragment newInstance(boolean bXerxesEnable) {
+    public static AxzonSelectorFragment newInstance() {
         AxzonSelectorFragment myFragment = new AxzonSelectorFragment();
-        myFragment.bXerxesEnable = bXerxesEnable;
         return myFragment;
     }
     public AxzonSelectorFragment() {
         super("AxzonSelectorFragment");
     }
 
-    void gotoAxzonFragment(int tagType) {
-        switch(tagType) {
-            case 2:
-                MainActivity.tagType = TAG_MAGNUS_S2; MainActivity.mDid = ""; //""E282402";
-                break;
-            case 3:
-                MainActivity.tagType = TAG_MAGNUS_S3; MainActivity.mDid = ""; //""E282403";
-                break;
-            case 5:
-                MainActivity.tagType = TAG_AXZON_XERXES; MainActivity.mDid = ""; //""E282405";
-                break;
-            default:
-                MainActivity.tagType = TAG_AXZON; MainActivity.mDid = ""; //""E2824";
-                break;
-        }
-        MainActivity.csLibrary4A.appendToLog("HelloABC: gotoAxzonFragment with tagType = " + tagType + ", MainActivity.mDid = " + MainActivity.mDid);
+    void gotoAxzonFragment(RfidReader.TagType tagType) {
+        MainActivity.tagType = tagType; MainActivity.mDid = "";
+        MainActivity.csLibrary4A.appendToLog("HelloABC: gotoAxzonFragment with tagType = " + tagType.toString());
 
         MainActivity.csLibrary4A.appendToLog("HelloABC: config is " + (MainActivity.config == null ? "null" : "Valid"));
         MainActivity.config.configPassword = "00000000";
         MainActivity.config.configPower = Integer.toString(300);
         MainActivity.config.config0 = Integer.toString(9);
-        MainActivity.config.config1 = Integer.toString(21);
-        MainActivity.config.config2 = Integer.toString(13);
-        if (tagType == 2) MainActivity.config.config3 = Integer.toString(13);
-        else MainActivity.config.config3 = Integer.toString(160);
+        MainActivity.config.configRssiUpperLimit = Integer.toString(21);
+        MainActivity.config.configRssiLowerLimit = Integer.toString(13);
+        if (tagType == TAG_MAGNUS_S2) MainActivity.config.configHumidityThreshold = Integer.toString(13);
+        else MainActivity.config.configHumidityThreshold = Integer.toString(160);
 
-        if (true) {
-            Fragment fragment;
-            if (bXerxesEnable) fragment = new AxzonFragment();
-            else fragment = new MicronFragment();
-
+            Fragment fragment = new AxzonFragment();
             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.content_frame, fragment);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
-        } else {
-            Fragment fragment = AccessConfigFragment.newInstance(bXerxesEnable);
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.content_frame, fragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
-        }
     }
 }

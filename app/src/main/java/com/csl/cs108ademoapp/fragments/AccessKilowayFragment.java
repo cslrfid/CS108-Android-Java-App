@@ -1,7 +1,7 @@
 package com.csl.cs108ademoapp.fragments;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.Lifecycle;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +12,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cslibrary4a.ReaderDevice;
@@ -34,7 +34,7 @@ public class AccessKilowayFragment extends CommonFragment {
     }
     ReadWriteTypes readWriteTypes;
 
-    private AccessTask accessTask;
+    private AccessTaskCustom accessTask;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -58,10 +58,10 @@ public class AccessKilowayFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 startAccessTask();
@@ -74,7 +74,13 @@ public class AccessKilowayFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
-        setupTagID();
+        setUserVisibleHint2(true);
+    }
+
+    @Override
+    public void onPause() {
+        setUserVisibleHint2(false);
+        super.onPause();
     }
 
     @Override
@@ -84,11 +90,12 @@ public class AccessKilowayFragment extends CommonFragment {
         super.onDestroy();
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED) == false) return;
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessKilowayFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        //if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED) == false) return;
+        if (isVisibleToUser) { //getUserVisibleHint()) {
             setupTagID();
         } else checkBoxRepeat.setChecked(false);
     }
@@ -125,7 +132,7 @@ public class AccessKilowayFragment extends CommonFragment {
             if (accessTask == null) {
                 taskRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessLedTagFragment(): NULL accessReadWriteTask"); ///
-            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
+            } else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessLedTagFragment(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -144,10 +151,10 @@ public class AccessKilowayFragment extends CommonFragment {
                         if (checkBoxRepeat != null && checkBoxRepeat.isChecked()) { bankProcessing = 0; checkProcessing = 0; }
                         else rerunRequest = false;
                     } else {
-                        accessTask = new AccessTask(buttonRead, invalid, true,
+                        accessTask = MainActivity.csLibrary4A.getAccessTaskCustom(buttonRead, invalid, true,
                                 editTextRWTagID.getText().toString(), 1, 32,
                                 "00000000", Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()), RfidReaderChipData.HostCommands.CMD_18K6CREAD,
-                                false, null);
+                                false, null, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                         accessTask.execute();
                         rerunRequest = true;
                         MainActivity.csLibrary4A.appendToLog("AccessLedTagFragment(): accessTask is created"); ///
@@ -166,7 +173,7 @@ public class AccessKilowayFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessLedTagFragment(): accessResult = " + accessResult);

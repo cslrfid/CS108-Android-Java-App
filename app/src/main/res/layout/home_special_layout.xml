@@ -144,16 +144,6 @@
                 android:onClick="axzonClicked"/>
 
             <Button
-                style="@style/DashboardButton"
-                android:layout_height="50dp"
-                android:layout_marginTop="@dimen/home_icon_margin_1"
-                android:background="@drawable/btn_back"
-                android:gravity="center"
-                android:visibility="gone"
-                android:text="Axzon Magnus"
-                android:onClick="rfMicronClicked"/>
-
-            <Button
                 android:id="@+id/SpecialButtonFdmicro"
                 style="@style/DashboardButton"
                 android:layout_height="50dp"

@@ -5,14 +5,15 @@ import static com.csl.cslibrary4a.RfidReader.TagType.TAG_FDMICRO;
 import android.os.Bundle;
 
 import com.csl.cs108ademoapp.MainActivity;
-import com.csl.cslibrary4a.AdapterTab;
-import com.google.android.material.tabs.TabLayout;
+import com.csl.cslibrary4a.CustomTabAdapter;
+import com.csl.cslibrary4a.CustomTabLayout;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.MenuProvider;
-import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,15 +25,15 @@ import com.csl.cs108ademoapp.R;
 
 public class FdmicroFragment extends CommonFragment {
     private ActionBar actionBar;
-    private ViewPager viewPager;
-    AdapterTab adapter;
+    private ViewPager2 viewPager;
+    CustomTabAdapter adapter;
 
     private String[] tabs = {"Scan", "Configuration"};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
+        return inflater.inflate(R.layout.custom_tabbed_layout2, container, false);
     }
 
     @Override
@@ -76,32 +77,16 @@ public class FdmicroFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_inv);
         actionBar.setTitle(R.string.title_activity_fdMicro);
 
-        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
-        for (String tab_name : tabs) {
-            tabLayout.addTab(tabLayout.newTab().setText(tab_name));
-        }
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
-        });
-
-        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new CustomTabAdapter(this, tabs.length);
         adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, TAG_FDMICRO, "")); //""E2827001"));
         adapter.setFragment(1, new AccessFdmicroFragment());
 
-        viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
+        viewPager = (ViewPager2) getActivity().findViewById(R.id.OperationsPager2);
         viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        //viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+
+        CustomTabLayout tabLayout = (CustomTabLayout) getActivity().findViewById(R.id.OperationsTabLayout2);
+        tabLayout.addTab(tabs, viewPager);
     }
 
     @Override

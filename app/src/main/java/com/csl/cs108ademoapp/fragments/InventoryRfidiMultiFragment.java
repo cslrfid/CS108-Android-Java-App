@@ -7,8 +7,8 @@ import static com.csl.cslibrary4a.RfidReader.TagType.TAG_CTESIUS;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_BAP;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_FDMICRO;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M730;
-import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M775;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M770;
+import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M775;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M780;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_IMPINJ_M830;
 import static com.csl.cslibrary4a.RfidReader.TagType.TAG_KILOWAY;
@@ -44,8 +44,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.MenuProvider;
 
-import com.csl.cs108ademoapp.AsyncTaskA;
-import com.csl.cs108ademoapp.CustomPopupWindow;
+import com.csl.cslibrary4a.CustomAsyncTask;
+import com.csl.cslibrary4a.CustomPopupWindow;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.InventoryRfidTask;
 import com.csl.cs108ademoapp.MainActivity;
@@ -67,6 +67,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     private String mDid = null;
     int vibrateTimeBackup = 0;
 
+    private View viewFragment;
     private CheckBox checkBoxDupElim, checkBoxFilterByTid, checkBoxFilterByEpc, checkBoxFilterByProtect;
     private EditText editTextProtectPassword;
     private Spinner spinnerBank1, spinnerBank2;
@@ -82,12 +83,13 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_inventory_rfid_multi, container, false);
+        viewFragment = inflater.inflate(R.layout.fragment_inventory_rfid_multi, container, false);
+        return viewFragment;
     }
 
     void clearTagsList() {
         MainActivity.csLibrary4A.appendToLog("runningInventoryRfidTask = " + MainActivity.sharedObjects.runningInventoryRfidTask + ", readerListAdapter" + (readerListAdapter != null ? " tagCount = " + String.valueOf(readerListAdapter.getCount()) : " = NULL"));
-        if (MainActivity.sharedObjects.runningInventoryRfidTask) return;
+        if (MainActivity.csLibrary4A.isInventoring()) return; //if (MainActivity.sharedObjects.runningInventoryRfidTask) return;
         rfidYieldView.setText("");
         rfidRateView.setText("");
         MainActivity.tagSelected = null;
@@ -97,12 +99,12 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         MainActivity.mLogView.setText("");
     }
     void sortTagsList() {
-        if (MainActivity.sharedObjects.runningInventoryRfidTask) return;
+        if (MainActivity.csLibrary4A.isInventoring()) return; //if (MainActivity.sharedObjects.runningInventoryRfidTask) return;
         Collections.sort(MainActivity.sharedObjects.tagsList);
         readerListAdapter.notifyDataSetChanged();
     }
     void sortTagsListByRssi() {
-        if (MainActivity.sharedObjects.runningInventoryRfidTask) return;
+        if (MainActivity.csLibrary4A.isInventoring()) return; //if (MainActivity.sharedObjects.runningInventoryRfidTask) return;
         Collections.sort(MainActivity.sharedObjects.tagsList, new Comparator<ReaderDevice>() {
             @Override
             public int compare(ReaderDevice deviceTag, ReaderDevice t1) {
@@ -114,7 +116,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         readerListAdapter.notifyDataSetChanged();
     }
     void saveTagsList() {
-        if (MainActivity.sharedObjects.runningInventoryRfidTask) return;
+        if (MainActivity.csLibrary4A.isInventoring()) return; //if (MainActivity.sharedObjects.runningInventoryRfidTask) return;
         SaveList2ExternalTask saveExternalTask = new SaveList2ExternalTask(MainActivity.sharedObjects.tagsList);
         saveExternalTask.execute();
     }
@@ -212,9 +214,9 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             }
         }
         if (bMultiBankInventory) {
-            LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.inventoryMultibankSetting);
+            LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.inventoryMultibankSetting);
             linearLayout.setVisibility(View.VISIBLE);
-            checkBoxDupElim = (CheckBox) getActivity().findViewById(R.id.accessInventoryDupElim);
+            checkBoxDupElim = (CheckBox) view.findViewById(R.id.accessInventoryDupElim);
             checkBoxDupElim.setVisibility(View.VISIBLE);
             checkBoxDupElim.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -226,34 +228,34 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             });
         }
 
-        checkBoxFilterByTid = (CheckBox) getActivity().findViewById(R.id.accessInventoryFilterByTid);
-        MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.onViewCreated: mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid + ", tagType = " + tagType.toString() + ", bMultiBankInventory = " + bMultiBankInventory);
+        checkBoxFilterByTid = (CheckBox) view.findViewById(R.id.accessInventoryFilterByTid);
+        checkBoxFilterByEpc = (CheckBox) view.findViewById(R.id.accessInventoryFilterByEpc);
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.onViewCreated: mDid = " + mDid + ", tagType = " + tagType.toString() + ", bMultiBankInventory = " + bMultiBankInventory);
         if (tagType != null && tagType != TAG_NULL) {
             if (tagType == TAG_FDMICRO) { //mDid.indexOf("E2827001") == 0) {
                 checkBoxFilterByTid.setVisibility(View.VISIBLE);
                 //checkBoxFilterByTid.setText("filter FM13DT160 only");
             }
         } else if (!bMultiBankInventory) {
-            checkBoxFilterByEpc = (CheckBox) getActivity().findViewById(R.id.accessInventoryFilterByEpc);
             MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.onViewCreated: checkBoxFilterByEpc is " + (checkBoxFilterByEpc == null ? "null" : "valid"));
             checkBoxFilterByEpc.setVisibility(View.VISIBLE);
         }
 
-        checkBoxFilterByProtect = (CheckBox) getActivity().findViewById(R.id.accessInventoryFilterByProtect);
-        editTextProtectPassword = (EditText) getActivity().findViewById(R.id.accessInventoryProtectPassword);
+        checkBoxFilterByProtect = (CheckBox) view.findViewById(R.id.accessInventoryFilterByProtect);
+        editTextProtectPassword = (EditText) view.findViewById(R.id.accessInventoryProtectPassword);
         editTextProtectPassword.addTextChangedListener(new GenericTextWatcher(editTextProtectPassword, 8));
         editTextProtectPassword.setText("00000000");
 
         ArrayAdapter<CharSequence> lockAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.memoryBank_options, R.layout.custom_spinner_layout);
         lockAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        spinnerBank1 = (Spinner) getActivity().findViewById(R.id.accessInventoryBank1);
+        spinnerBank1 = (Spinner) view.findViewById(R.id.accessInventoryBank1);
         spinnerBank1.setAdapter(lockAdapter); spinnerBank1.setSelection(2);
-        spinnerBank2 = (Spinner) getActivity().findViewById(R.id.accessInventoryBank2);
+        spinnerBank2 = (Spinner) view.findViewById(R.id.accessInventoryBank2);
         spinnerBank2.setAdapter(lockAdapter); spinnerBank2.setSelection(3);
 
-        rfidListView = (ListView) getActivity().findViewById(R.id.inventoryRfidList1);
-        TextView rfidEmptyView = (TextView) getActivity().findViewById(R.id.inventoryRfidEmpty1);
+        rfidListView = (ListView) view.findViewById(R.id.inventoryRfidList1);
+        TextView rfidEmptyView = (TextView) view.findViewById(R.id.inventoryRfidEmpty1);
         rfidListView.setEmptyView(rfidEmptyView);
         boolean bSelect4detail = true;
         if (bMultiBankInventory) bSelect4detail = false;
@@ -278,7 +280,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     MainActivity.csLibrary4A.appendToLog("strPopup = " + (strPopup == null ? "null" : strPopup));
                     if (strPopup != null && strPopup.trim().length() != 0) {
                         strPopup = MainActivity.csLibrary4A.getUpcSerialDetail(strPopup);
-                        CustomPopupWindow epcSerialPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                        CustomPopupWindow epcSerialPopupWindow = new CustomPopupWindow(MainActivity.context);
                         epcSerialPopupWindow.popupStart(strPopup, false);
                     }
                 }
@@ -298,15 +300,15 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             }
         });
 
-        rfidRunTime = (TextView) getActivity().findViewById(R.id.inventoryRfidRunTime1);
-        rfidVoltageLevel = (TextView) getActivity().findViewById(R.id.inventoryRfidVoltageLevel1);
-        TextView rfidFilterOn = (TextView) getActivity().findViewById(R.id.inventoryRfidFilterOn1);
+        rfidRunTime = (TextView) view.findViewById(R.id.inventoryRfidRunTime1);
+        rfidVoltageLevel = (TextView) view.findViewById(R.id.inventoryRfidVoltageLevel1);
+        TextView rfidFilterOn = (TextView) view.findViewById(R.id.inventoryRfidFilterOn1);
         if (mDid != null || (MainActivity.csLibrary4A.getSelectEnable() == false && MainActivity.csLibrary4A.getInvMatchEnable() == false && MainActivity.csLibrary4A.getRssiFilterEnable() == false))
             rfidFilterOn.setVisibility(View.INVISIBLE);
 
-        rfidYieldView = (TextView) getActivity().findViewById(R.id.inventoryRfidYield1);
-        rfidRateView = (TextView) getActivity().findViewById(R.id.inventoryRfidRate1);
-        button = (Button) getActivity().findViewById(R.id.inventoryRfidButton1);
+        rfidYieldView = (TextView) view.findViewById(R.id.inventoryRfidYield1);
+        rfidRateView = (TextView) view.findViewById(R.id.inventoryRfidRate1);
+        button = (Button) view.findViewById(R.id.inventoryRfidButton1);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -315,7 +317,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         });
 
         vibrateTimeBackup = MainActivity.csLibrary4A.getVibrateTime();
-        final Button buttonT1 = (Button) getActivity().findViewById(R.id.inventoryRfidButtonT1);
+        final Button buttonT1 = (Button) view.findViewById(R.id.inventoryRfidButtonT1);
         buttonT1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -337,26 +339,25 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment().onResume(): userVisibleHint = " + userVisibleHint);
-        if (userVisibleHint) setNotificationListener();
+        setUserVisibleHint2(true);
     }
 
     @Override
     public void onPause() {
-        MainActivity.csLibrary4A.setNotificationListener(null);
+        setUserVisibleHint2(false);
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        mHandler.removeCallbacks(runnableCheckReady);
+        mHandler.removeCallbacks(runnableStartStopHandler);
         if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setNotificationListener(null);
         if (inventoryRfidTask != null) {
             inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.DESTORY;
-            if (MainActivity.csLibrary4A != null) {
+            /*if (MainActivity.csLibrary4A != null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment().onDestory(): VALID inventoryRfidTask");
                 MainActivity.csLibrary4A.abortOperation(); //added in case inventoryRiidTask is removed
-            }
+            }*/
         }
         if (MainActivity.csLibrary4A != null) {
             MainActivity.csLibrary4A.setSameCheck(true);
@@ -369,12 +370,14 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = true;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
         if (checkBoxFilterByProtect == null) return;
-        if(getUserVisibleHint()) {
+        if(isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment().setUserVisibleHint(): userVisibleHint is set as true");
             MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment is now VISIBLE with tagType = " + (tagType == null ? "null" : tagType.toString()) + ", MainActivity.tagType = " + (MainActivity.tagType == null ? "null" : MainActivity.tagType.toString()));
                  if (MainActivity.tagType == TAG_IMPINJ_M775 || MainActivity.tagType == TAG_IMPINJ_M780 || MainActivity.tagType == TAG_IMPINJ_M830 || MainActivity.tagType == TAG_IMPINJ_M770 || MainActivity.tagType == TAG_IMPINJ_M730 ) {
                     checkBoxFilterByProtect.setVisibility(View.VISIBLE);
@@ -385,13 +388,23 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 }
             MainActivity.csLibrary4A.appendToLog("setNotificationListener in multibank inventory");
             setNotificationListener();
+            if (true) { //false && !bMultiBank) {
+                inventoryRfidTask = new InventoryRfidTask(getContext(),
+                        false, MainActivity.csLibrary4A.getInventoryBeep(), false,
+                        MainActivity.sharedObjects.tagsList, readerListAdapter,
+                        null, null,
+                        rfidRunTime, rfidVoltageLevel, rfidYieldView, button, rfidRateView);
+                inventoryRfidTask.bSgtinOnly = checkBoxFilterByEpc.isChecked();
+                inventoryRfidTask.execute();
+            }
         } else {
             userVisibleHint = false;
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment().setUserVisibleHint(): userVisibleHint is set as false");
             MainActivity.csLibrary4A.appendToLog("InventoryRfidiMultiFragment is now INVISIBLE");
             MainActivity.csLibrary4A.appendToLog("setNotificationListener null in multibank inventory");
             MainActivity.csLibrary4A.setNotificationListener(null);
             if (inventoryRfidTask != null) {
-                inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.STOP;
+                inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.DESTORY;
             }
         }
     }
@@ -417,7 +430,6 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         MainActivity.csLibrary4A.setNotificationListener(new NotificationConnector.NotificationListener() {
             @Override
             public void onChange() {
-                MainActivity.csLibrary4A.appendToLog("setNotificationListener TRIGGER key is pressed in multibank inventory.");
                 startStopHandler(true);
             }
         });
@@ -436,41 +448,55 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         }
         if (mDid != null && tagType == TAG_CTESIUS /*mDid.matches("E203510")*/) MainActivity.csLibrary4A.setSelectCriteriaDisable(1);
     }
+    boolean bStartStopping = false, bButtonTriggering = false, bStartStopHandling = false;
     void startStopHandler(boolean buttonTrigger) {
-        MainActivity.csLibrary4A.appendToLog("0 buttonTrigger is " + buttonTrigger);
-        if (buttonTrigger) MainActivity.csLibrary4A.appendToLog("BARTRIGGER: getTriggerButtonStatus = " + MainActivity.csLibrary4A.getTriggerButtonStatus());
-        if (MainActivity.sharedObjects.runningInventoryBarcodeTask) {
-            Toast.makeText(MainActivity.mContext, "Running barcode inventory", Toast.LENGTH_SHORT).show();
-            return;
+        if (buttonTrigger) bButtonTriggering = true;
+        else bStartStopping = true;
+        if (!bStartStopHandling) {
+            bStartStopHandling = true;
+            mHandler.post(runnableStartStopHandler);
         }
-        boolean started = false;
-        if (inventoryRfidTask != null) if (inventoryRfidTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
-        if (buttonTrigger && ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) {
-            MainActivity.csLibrary4A.appendToLog("BARTRIGGER: trigger ignore");
-            return;
-        }
-        if (started == false) {
-            if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
-                return;
-            } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
-                return;
-            } else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
-                //Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
-                mHandler.post(runnableCheckReady);
-                return;
-            }
-            if (bAdd2End) rfidListView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-            else rfidListView.setSelection(0);
-            startInventoryTask();
-        } else if (MainActivity.csLibrary4A.mrfidToWriteSize() == 0) {
-            if (bAdd2End) rfidListView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
-            if (buttonTrigger) inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.BUTTON_RELEASE;
-            else    inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.STOP;
-            MainActivity.csLibrary4A.appendToLogView("CANCELLING: StartStopHandler generates taskCancelReason = " + inventoryRfidTask.taskCancelReason.toString());
-        } else MainActivity.csLibrary4A.appendToLog("BtData. Stop when still writing !!!");
     }
+    Runnable runnableStartStopHandler = new Runnable() {
+        @Override
+        public void run() {
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.runnableStartStopHandler.run: BtDataOut, isInventoring = " + MainActivity.csLibrary4A.isInventoring() + ", bStartStopping = " + bStartStopping + ", bButtonTriggering=" + bButtonTriggering + ", triggerButtonStatus=" + MainActivity.csLibrary4A.getTriggerButtonStatus());
+            if (MainActivity.csLibrary4A.isInventoring()) {
+                if (bStartStopping || (bButtonTriggering && !MainActivity.csLibrary4A.getTriggerButtonStatus())) {
+                    if (bAdd2End)
+                        rfidListView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+                    if (bButtonTriggering)
+                        inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.BUTTON_RELEASE;
+                    else
+                        inventoryRfidTask.taskCancelReason = InventoryRfidTask.TaskCancelRReason.STOP;
+                    MainActivity.csLibrary4A.appendToLogView("InventoryRfidMultiFragment.runnableStartStopHandler.run: BtDataOut, generated taskCancelReason = " + inventoryRfidTask.taskCancelReason.toString());
+                } else {
+                    MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.runnableStartStopHandler.run: BtDataOut, Triggger is pressed when inventoring. please wait");
+                    mHandler.postDelayed(runnableStartStopHandler, 100);
+                    return;
+                }
+            } else {
+                if (!MainActivity.csLibrary4A.isBleConnected()) {
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                } else if (MainActivity.csLibrary4A.isRfidFailure()) {
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                } else if (MainActivity.csLibrary4A.rfidToWriteSize() != 0) {
+                    MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.runnableStartStopHandler.run: BtDataOut, sending data. please wait");
+                    mHandler.postDelayed(runnableStartStopHandler, 100);
+                    return;
+                } else if (bStartStopping || (bButtonTriggering && MainActivity.csLibrary4A.getTriggerButtonStatus())) {
+                    if (bAdd2End) rfidListView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+                    else rfidListView.setSelection(0);
+                    startInventoryTask();
+                    MainActivity.csLibrary4A.appendToLogView("InventoryRfidMultiFragment.runnableStartStopHandler.run: done startInventoryTask");
+                }
+            }
+            bStartStopping = false;
+            bButtonTriggering = false;
+            bStartStopHandling = false;
+            MainActivity.csLibrary4A.appendToLogView("InventoryRfidMultiFragment.runnableStartStopHandler.run: ending");
+        }
+    };
     void startInventoryTask() {
         //RfidReader.ExtraBankData extraBankData = new RfidReader.ExtraBankData();
         String mDid = this.mDid;
@@ -482,7 +508,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask 0 with tagType1 = " + tagType1.toString() + ", mDid = " + mDid);
         MainActivity.csLibrary4A.appendToLog("Rin: tagType1 = " + (tagType1 == null ? "null" : tagType1.toString()) + ", MainActivity.tagType = " + (MainActivity.tagType == null ? "null" : MainActivity.tagType.toString()) + ", bMultiBankInventory = " + bMultiBankInventory);
 
-        MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask: mDid = " + (mDid == null ? "null" : mDid) + ", MainActivity.mDid = " + MainActivity.mDid
+        MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask: mDid = " + (mDid == null ? "null" : mDid)
                 + ", tagType = " + tagType1.toString() + ", MainActivity.tagType = " + MainActivity.tagType
                 + ", bMultiBankInventory = " + bMultiBankInventory);
         /*if (mDid != null && MainActivity.mDid != null) {
@@ -492,34 +518,34 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
         RfidReader.ExtraBankData extraBankData = new RfidReader.ExtraBankData();
         if (mDid != null) extraBankData.setExtraBankData(tagType1, mDid);
         else if (bMultiBank) {
-            CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessInventoryBankTitle1);
+            CheckBox checkBox = (CheckBox) viewFragment.findViewById(R.id.accessInventoryBankTitle1);
             int extra1Bank = 0, extra2Bank = 0;
             int extra1Count, extra2Count;
             int extra1Offset = 0, extra2Offset = 0;
             MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask: checking accessInventoryBankTitle1 as " + (checkBox == null ? "null" : "valid"));
             if (checkBox.isChecked()) {
                 extra1Bank = spinnerBank1.getSelectedItemPosition();
-                EditText editText = (EditText) getActivity().findViewById(R.id.accessInventoryOffset1);
+                EditText editText = (EditText) viewFragment.findViewById(R.id.accessInventoryOffset1);
                 extra1Offset = Integer.valueOf(editText.getText().toString());
-                editText = (EditText) getActivity().findViewById(R.id.accessInventoryLength1);
+                editText = (EditText) viewFragment.findViewById(R.id.accessInventoryLength1);
                 extra1Count = Integer.valueOf(editText.getText().toString());
             } else extra1Count = 0;
-            checkBox = (CheckBox) getActivity().findViewById(R.id.accessInventoryBankTitle2);
+            checkBox = (CheckBox) viewFragment.findViewById(R.id.accessInventoryBankTitle2);
             MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask: checking accessInventoryBankTitle2 as " + (checkBox == null ? "null" : "valid"));
             if (checkBox.isChecked()) {
                 extra2Bank = spinnerBank2.getSelectedItemPosition();
-                EditText editText = (EditText) getActivity().findViewById(R.id.accessInventoryOffset2);
+                EditText editText = (EditText) viewFragment.findViewById(R.id.accessInventoryOffset2);
                 extra2Offset = Integer.valueOf(editText.getText().toString());
-                editText = (EditText) getActivity().findViewById(R.id.accessInventoryLength2);
+                editText = (EditText) viewFragment.findViewById(R.id.accessInventoryLength2);
                 extra2Count = Integer.valueOf(editText.getText().toString());
             } else extra2Count = 0;
             extraBankData.setExtraBankData(extra1Bank, extra1Count, extra1Offset, extra2Bank, extra2Count, extra2Offset);
         }
 
         if (mDid != null) {
-            MainActivity.csLibrary4A.appendToLog("mDid is valid as " + mDid);
-            if (MainActivity.mDid != null && mDid.length() == 0) mDid = MainActivity.mDid;
-            MainActivity.csLibrary4A.appendToLog("new mDid is " + mDid);
+            //MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask: mDid is valid as " + (mDid == null ? "null" : mDid) + ", MainActivity.mDid = " + (MainActivity.mDid == null ? "null" : MainActivity.mDid));
+            //if (MainActivity.mDid != null && mDid.length() == 0) mDid = MainActivity.mDid;
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask: new mDid is " + mDid);
 
             MainActivity.csLibrary4A.appendToLog("mDid = " + mDid);
             if (tagType1 == TAG_CTESIUS /*mDid.matches("E203510")*/) {
@@ -531,7 +557,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
             }
             boolean bNeedSelectedTagByTID = true;
             if (true /*mDid.indexOf("E2806894") == 0*/) {
-                Log.i(TAG, "HelloK: Find E2806894 with MainActivity.mDid = " + MainActivity.mDid + ", mDid = " + mDid);
+                Log.i(TAG, "HelloK: Find E2806894 with mDid = " + mDid);
                 if (tagType1 == TAG_NXP_UCODE8_EPC /*mDid.matches("E2806894A")*/) {
                     Log.i(TAG, "HelloK: Find E2806894A");
                     MainActivity.csLibrary4A.setInvBrandId(false);
@@ -540,7 +566,6 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     MainActivity.csLibrary4A.setInvBrandId(false);
                     if (true) bNeedSelectedTagByTID = false;
                 } else if (tagType1 == TAG_NXP_UCODE8_EPCBRAND /*mDid.matches("E2806894C")*/ || tagType1 == TAG_NXP_UCODE8_EPCBRANDTID /*mDid.matches("E2806894d")*/) {
-                    Log.i(TAG, "HelloK: Find " + MainActivity.mDid);
                     MainActivity.csLibrary4A.setInvBrandId(true);
                     if (true) bNeedSelectedTagByTID = false;
                 }
@@ -561,18 +586,27 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
 
         MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask: checking checkBoxFilterByEpc as " + (checkBoxFilterByEpc == null ? "null" : "valid"));
         MainActivity.csLibrary4A.appendToLog("bSgtinOnly: bMultiBank is " + bMultiBank + ", checkBoxFilterByEpc is " + (checkBoxFilterByEpc == null ? "null" : checkBoxFilterByEpc.isChecked()));
-        if (bMultiBank == false) {
+        if (!bMultiBank) {
             if (checkBoxFilterByEpc.isChecked()) {
                 MainActivity.csLibrary4A.appendToLog("bSgtinOnly: clearTagList");
                 clearTagsList();
             }
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidMultFragment.startInventoryTask: BtDataOut, going to restoreAfterTagSelect");
             MainActivity.csLibrary4A.restoreAfterTagSelect();
-            inventoryRfidTask = new InventoryRfidTask(getContext(), -1, -1, 0, 0, 0, 0,
+            if (false) {
+            MainActivity.csLibrary4A.appendToLog("InventoryRfidMultiFragment.startInventoryTask: " + (extraBankData == null ? "extraBankBank = null" : ("extra1Bank = " + extraBankData.extra1Bank + ", extra2Bank = " + extraBankData.extra2Bank)) + ", tagType1 = " + (tagType1 == null ? "null" : tagType1.toString()));
+            inventoryRfidTask = new InventoryRfidTask(getContext(),
                     false, MainActivity.csLibrary4A.getInventoryBeep(), false,
-                    MainActivity.sharedObjects.tagsList, readerListAdapter, RfidReader.TagType.TAG_NULL, null,
+                    MainActivity.sharedObjects.tagsList, readerListAdapter,
                     null, null,
                     rfidRunTime, rfidVoltageLevel, rfidYieldView, button, rfidRateView);
             inventoryRfidTask.bSgtinOnly = checkBoxFilterByEpc.isChecked();
+            inventoryRfidTask.execute();
+            } else {
+                inventoryRfidTask.extraBankData = new RfidReader.ExtraBankData();
+                MainActivity.csLibrary4A.appendToLog("inventoryRfidMultiFragment.startInventoryTask: 0 created extraBankData");
+                inventoryRfidTask.tagType = null;
+            }
             MainActivity.csLibrary4A.appendToLog("Debug_Compact 1: InventoryRfidMultiFragment.startInventoryTask");
             MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
         } else {
@@ -581,7 +615,7 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                     && */(MainActivity.tagType == TAG_NXP_UCODE8_EPCTID || MainActivity.tagType == TAG_NXP_UCODE8_EPCBRAND);
             if ((extraBankData.extra1Bank != -1 && extraBankData.extra1Count != 0) || (extraBankData.extra2Bank != -1 && extraBankData.extra2Count != 0)) {
                 extraBankData.adjustExtraBank1();
-                MainActivity.csLibrary4A.appendToLog("HelloK: mDid = " + mDid + ", MainActivity.mDid = " + MainActivity.mDid + " with extra1Bank = " + extraBankData.extra1Bank + "," + extraBankData.extra1Offset + "," + extraBankData.extra1Count + ", extra2Bank = " + extraBankData.extra2Bank + "," + extraBankData.extra2Offset + "," + extraBankData.extra2Count);
+                MainActivity.csLibrary4A.appendToLog("HelloK: mDid = " + mDid + " with extra1Bank = " + extraBankData.extra1Bank + "," + extraBankData.extra1Offset + "," + extraBankData.extra1Count + ", extra2Bank = " + extraBankData.extra2Bank + "," + extraBankData.extra2Offset + "," + extraBankData.extra2Count);
                 if (tagType1 /*mDid*/!= null) MainActivity.csLibrary4A.setResReadNoReply(tagType1 == TAG_KILOWAY /*mDid.matches("E281D")*/);
                 if (inventoryUcode8_bc == false) {
                     MainActivity.csLibrary4A.appendToLog("BleStreamOut: Set Multibank");
@@ -599,12 +633,9 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 }
             } else resetSelectData();
             MainActivity.csLibrary4A.appendToLog("startInventoryTask: going to startOperation with extra1Bank = " + extraBankData.extra1Bank + "," + extraBankData.extra1Offset + "," + extraBankData.extra1Count + ", extra2Bank = " + extraBankData.extra2Bank + "," + extraBankData.extra2Offset + "," + extraBankData.extra2Count);
-            inventoryRfidTask = new InventoryRfidTask(getContext(), extraBankData.extra1Bank, extraBankData.extra2Bank, extraBankData.extra1Count, extraBankData.extra2Count, extraBankData.extra1Offset, extraBankData.extra2Offset,
-                    false, MainActivity.csLibrary4A.getInventoryBeep(), false,
-                    MainActivity.sharedObjects.tagsList, readerListAdapter, tagType1, mDid,
-                    null, null,
-                    rfidRunTime, rfidVoltageLevel, rfidYieldView, button, rfidRateView);
-            inventoryRfidTask.bProtectOnly = checkBoxFilterByProtect.isChecked();
+            inventoryRfidTask.extraBankData = extraBankData;
+            MainActivity.csLibrary4A.appendToLog("inventoryRfidMultiFragment.startInventoryTask: 1 created extraBankData");
+            inventoryRfidTask.tagType = tagType1;
             if (inventoryUcode8_bc) {
                 MainActivity.csLibrary4A.appendToLog("Debug_Compact 2: InventoryRfidMultiFragment.startInventoryTask");
                 MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
@@ -613,22 +644,5 @@ public class InventoryRfidiMultiFragment extends CommonFragment {
                 MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY);
             }
         }
-        inventoryRfidTask.execute();
     }
-
-    private final Runnable runnableCheckReady = new Runnable() {
-        @Override
-        public void run() {
-            if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) {
-                button.setEnabled(false);
-                button.setText("Please wait");
-                MainActivity.csLibrary4A.setNotificationListener(null);
-                mHandler.postDelayed(runnableCheckReady, 500);
-            } else {
-                button.setText("Start");
-                button.setEnabled(true);
-                if (userVisibleHint) setNotificationListener();
-            }
-        }
-    };
 }

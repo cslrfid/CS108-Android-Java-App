@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.SettingTask;
+import com.csl.cs108ademoapp.SettingTaskCustom;
 
 public class SettingFilterPostFragment extends CommonFragment {
     private CheckBox checkBoxEnable;
@@ -31,7 +31,7 @@ public class SettingFilterPostFragment extends CommonFragment {
     int invMatchOffset = -1;
     String invMatchData = null;
 
-    private SettingTask settingTask;
+    private SettingTaskCustom settingTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -43,21 +43,21 @@ public class SettingFilterPostFragment extends CommonFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        checkBoxEnable = (CheckBox) getActivity().findViewById(R.id.filterPostCheckEnable);
-        checkBoxType = (CheckBox) getActivity().findViewById(R.id.filterPostCheckType);
-        postFilterOffset = (EditText) getActivity().findViewById(R.id.filterPostOffset);
-        filterPostMaskData = (EditText) getActivity().findViewById(R.id.filterPostMaskData);
+        checkBoxEnable = (CheckBox) view.findViewById(R.id.filterPostCheckEnable);
+        checkBoxType = (CheckBox) view.findViewById(R.id.filterPostCheckType);
+        postFilterOffset = (EditText) view.findViewById(R.id.filterPostOffset);
+        filterPostMaskData = (EditText) view.findViewById(R.id.filterPostMaskData);
 
-        button = (Button) getActivity().findViewById(R.id.filterPostSaveButton);
+        button = (Button) view.findViewById(R.id.filterPostSaveButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean validValue = false;
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     try {
@@ -67,7 +67,7 @@ public class SettingFilterPostFragment extends CommonFragment {
 
                         settingUpdate();
                     } catch (Exception ex) {
-                        Toast.makeText(MainActivity.mContext, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.context, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -96,7 +96,7 @@ public class SettingFilterPostFragment extends CommonFragment {
             long lValue;
             boolean updating = false;
 
-            if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0)   updating = true;
+            if (MainActivity.csLibrary4A.rfidToWriteSize() != 0)   updating = true;
             else {
                 if (updating == false) {
                     checkBoxEnable.setChecked(MainActivity.csLibrary4A.getInvMatchEnable());
@@ -145,7 +145,7 @@ public class SettingFilterPostFragment extends CommonFragment {
             if (MainActivity.csLibrary4A.setPostMatchCriteria(invMatchEnable, invMatchType, invMatchOffset, invMatchData) == false)
                 invalidRequest = true;
         }
-        settingTask = new SettingTask(button, sameSetting, invalidRequest);
+        settingTask = new SettingTaskCustom(button, sameSetting, invalidRequest);
         settingTask.execute();
     }
 }

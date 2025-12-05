@@ -5,7 +5,6 @@ class RfidReaderChipData {
         TAG_RDOEM,
         TAG_INVENTORY_COMPACT, TAG_INVENTORY, TAG_SEARCHING
     }
-
     enum class HostCommands {
         NULL, CMD_WROEM, CMD_RDOEM, CMD_ENGTEST, CMD_MBPRDREG, CMD_MBPWRREG,
         CMD_18K6CINV, CMD_18K6CREAD, CMD_18K6CWRITE, CMD_18K6CLOCK, CMD_18K6CKILL, CMD_SETPWRMGMTCFG, CMD_18K6CAUTHENTICATE, CMD_UNTRACEABLE,
@@ -19,7 +18,6 @@ class RfidReaderChipData {
         CMD_18K6CINV_COMPACT, CMD_18K6CINV_COMPACT_SELECT,
         CMD_18K6CINV_MB, CMD_18K6CINV_MB_SELECT
     }
-
     enum class HostCmdResponseTypes {
         NULL,
         TYPE_COMMAND_BEGIN,
@@ -30,13 +28,14 @@ class RfidReaderChipData {
         TYPE_COMMAND_ACTIVE,
         TYPE_COMMAND_ABORT_RETURN
     }
-
     class Rx000pkgData {
         @JvmField
         var responseType: HostCmdResponseTypes? = null
         @JvmField
         var flags: Int = 0
-        lateinit var dataValues: ByteArray
+        @JvmField
+        var dataValues: ByteArray? = null
+
         @JvmField
         var decodedTime: Long = 0
         @JvmField
@@ -47,17 +46,26 @@ class RfidReaderChipData {
         var decodedChidx: Int = 0
         @JvmField
         var decodedPort: Int = 0
-        lateinit var decodedPc: ByteArray
-        lateinit var decodedEpc: ByteArray
-        lateinit var decodedCrc: ByteArray
-        lateinit var decodedData1: ByteArray
-        lateinit var decodedData2: ByteArray
+        @JvmField
+        var decodedPc: ByteArray? = null
+
+        @JvmField
+        var decodedEpc: ByteArray? = null
+
+        @JvmField
+        var decodedCrc: ByteArray? = null
+
+        @JvmField
+        var decodedData1: ByteArray? = null
+
+        @JvmField
+        var decodedData2: ByteArray? = null
+
         @JvmField
         var decodedResult: String? = null
         @JvmField
         var decodedError: String? = null
     }
-
     enum class CsvColumn {
         RESERVE_BANK,
         EPC_BANK,

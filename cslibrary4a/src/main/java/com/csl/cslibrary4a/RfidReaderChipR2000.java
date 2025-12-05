@@ -18,6 +18,7 @@ public class RfidReaderChipR2000 {
     public int invalidUpdata; //invalidata, invalidUpdata, validata;
     boolean aborting = false;
     Context context; Utility utility; CsReaderConnector csReaderConnector;
+    int powerLevelMax = 320;
     public RfidReaderChipR2000(Context context, Utility utility, CsReaderConnector csReaderConnector) {
         this.context = context;
         this.utility = utility;
@@ -1043,7 +1044,6 @@ public class RfidReaderChipR2000 {
             this.invModeCompact = invModeCompact;
             this.invBrandId = invBrandId;
             this.invAuthenticate = invAuthenticate;
-            appendToLog("BtDataOut: 1, invAuthenticate = " + rx000Setting.invAuthenticate);
             if (DEBUG) appendToLog("Debug_InvCfg: Stored tagDelay = " + this.tagDelay);
 
             byte[] msgBuffer = new byte[]{(byte) 0x70, 1, 1, 9, 0, 0, 0, 0};
@@ -3111,6 +3111,7 @@ public class RfidReaderChipR2000 {
                                             mRx000ToRead.add(dataA);
                                             if (DEBUG)
                                                 appendToLog("Abort Return data is found wth type = " + dataA.responseType.toString());
+                                            if (utility.DEBUG_INVENTORING) appendToLog("RfidReaderChipR2000.uplinkHandler: BtDataOut, abort is received, going to setInventoring as false");
                                             setInventoring(false);
                                         }
                                     }
@@ -3345,9 +3346,7 @@ public class RfidReaderChipR2000 {
                                                     rx000Setting.tagRead = dataIn[startIndex + 6] & 0x03;
                                                     rx000Setting.tagDelay = ((dataIn[startIndex + 7] & 0x03) * 16 + ((dataIn[startIndex + 6] & 0xF0) >> 4));
                                                     rx000Setting.invModeCompact = ((dataIn[startIndex + 7] & 0x04) >> 2);
-                                                    appendToLog("BtDataOut: invAuthenticate = " + rx000Setting.invAuthenticate);
                                                     rx000Setting.invAuthenticate = ((dataIn[startIndex + 7] & 0x10) >> 4);
-                                                    appendToLog("BtDataOut: invAuthenticate = " + rx000Setting.invAuthenticate);
                                                     if (DEBUG)
                                                         appendToLog("found inventory configuration: " + byteArrayToString(dataInPayload) + ", algorithm=" + rx000Setting.invAlgo + ", matchRep=" + rx000Setting.matchRep + ", tagSelect=" + rx000Setting.tagSelect + ", noInventory=" + rx000Setting.noInventory + ", tagRead=" + rx000Setting.tagRead + ", tagDelay=" + rx000Setting.tagDelay);
                                                     break;
@@ -3661,7 +3660,12 @@ public class RfidReaderChipR2000 {
                                                             csReaderConnector.rfidConnector.mRfidToWriteRemoved = true;
                                                             if (DEBUG)
                                                                 appendToLog("mmRfidToWrite remove 8");
-                                                            setInventoring(true);
+                                                            byte[] bytes = new byte[4];
+                                                            System.arraycopy(dataIn, startIndex + 8, bytes, 0, 4);
+                                                            if (dataIn[8] == 0x0F && dataIn[9] == 0 && dataIn[10] == 0 && dataIn[11] == 0) {
+                                                                if (utility.DEBUG_INVENTORING) appendToLog("RfidReaderChipR2000.uplinkHandler: BtDataOut, received command_begin start_inventory data " + byteArrayToString(bytes) + ", going to setInventoring as true");
+                                                                setInventoring(true);
+                                                            }
                                                             Date date = new Date();
                                                             long date_time = date.getTime();
                                                             long expected_firmware_ontime_ms = firmware_ontime_ms;
@@ -3693,6 +3697,7 @@ public class RfidReaderChipR2000 {
                                                     break;
                                                 } else {
                                                     dataA.responseType = RfidReaderChipData.HostCmdResponseTypes.TYPE_COMMAND_END;
+                                                    if (utility.DEBUG_INVENTORING) appendToLog("RfidReaderChipR2000.uplinkHandler: BtDataOut, received command_end, going to setInventoring as false");
                                                     setInventoring(false);
                                                     if (DEBUG)
                                                         appendToLog("command COMMAND_END is found with packageLength=" + packageLengthRead + ", length = " + dataA.dataValues.length + ", dataValues=" + byteArrayToString(dataA.dataValues));
@@ -3730,7 +3735,6 @@ public class RfidReaderChipR2000 {
                                                                 if (dataA.dataValues.length < 12 + 2 + epcLength + 2)
                                                                     dataA.decodedError = "Received TYPE_18K6C_INVENTORY with length = " + String.valueOf(dataA.dataValues.length) + ", data = " + byteArrayToString(dataA.dataValues);
                                                                 else {
-                                                                    setInventoring(true);
                                                                     long time1 = dataA.dataValues[3] & 0x00FF;
                                                                     time1 = time1 << 8;
                                                                     time1 |= dataA.dataValues[2] & 0x00FF;
@@ -3795,6 +3799,8 @@ public class RfidReaderChipR2000 {
                                                         }
                                                         int oldSize2 = mRx000ToRead.size();
                                                         mRx000ToRead.add(dataA);
+                                                        if (utility.DEBUG_INVENTORING) appendToLog("RfidReaderChipR2000.uplinkHandler: BtDataOut, received 18k6c_inventory, going to setInventoring as true");
+                                                        setInventoring(true);
                                                         if (utility.DEBUG_APDATA) {
                                                             appendToLog("ApData: dataValues = " + byteArrayToString(dataA.dataValues) + ", 1 decodedRssi = " + dataA.decodedRssi + ", decodedPhase = " + dataA.decodedPhase + ", decodedChidx = " + dataA.decodedChidx + ", decodedPort = " + dataA.decodedPort);
                                                             appendToLog("ApData: decodedPc/Epc/Crc = " + byteArrayToString(dataA.decodedPc) + ", " + byteArrayToString(dataA.decodedEpc) + ", " + byteArrayToString(dataA.decodedCrc)
@@ -3829,10 +3835,12 @@ public class RfidReaderChipR2000 {
                                                                         dataA.decodedRssi = decodeNarrowBandRSSI(dataValuesFull[index]);
                                                                         index++;
                                                                     }
-                                                                    if (DEBUG)
+                                                                    if (true)
                                                                         appendToLog((dataA.dataValues != null ? "mRfidToRead.size() = " + csReaderConnector.rfidConnector.mRfidToRead.size() + ", dataValues = " + byteArrayToString(dataA.dataValues) + ", " : "") + "2 decodedRssi = " + dataA.decodedRssi + ", decodedPc = " + byteArrayToString(dataA.decodedPc) + ", decodedEpc = " + byteArrayToString(dataA.decodedEpc));
                                                                     if (dataValuesFull.length > index) {
                                                                         mRx000ToRead.add(dataA);
+                                                                        if (utility.DEBUG_INVENTORING) appendToLog("RfidReaderChipR2000.uplinkHandler: BtDataOut, received 18k6c_inventory_compact, going to setInventoring as true");
+                                                                        setInventoring(true);
                                                                         if (utility.DEBUG_APDATA) appendToLog("ApData: Got data to mRx000ToRead " + mRx000ToRead.size() + ", with decodedEpc = " + byteArrayToString(dataA.decodedEpc));
 
                                                                         int iDecodedPortOld = dataA.decodedPort;
@@ -3846,6 +3854,8 @@ public class RfidReaderChipR2000 {
                                                         }
                                                         int oldSize3 = mRx000ToRead.size();
                                                         mRx000ToRead.add(dataA);
+                                                        if (utility.DEBUG_INVENTORING) appendToLog("RfidReaderChipR2000.uplinkHandler: BtDataOut, received 18k6c_inventory_compact, going to setInventoring as true");
+                                                        setInventoring(true);
                                                         if (utility.DEBUG_APDATA) appendToLog("ApData: Got data to mRx000ToRead " + mRx000ToRead.size() + ", with decodedEpc = " + byteArrayToString(dataA.decodedEpc));
                                                         if (DEBUG)
                                                             appendToLog("oldSize = " + oldSize3 + ", after adding 8005 mRx000ToRead.size = " + mRx000ToRead.size());
@@ -4624,5 +4634,5 @@ public class RfidReaderChipR2000 {
 
     boolean inventoring = false;
     public boolean isInventoring() { return  inventoring; }
-    void setInventoring(boolean enable) { inventoring = enable; utility.debugFileEnable(false); if (false) appendToLog("setInventoring R2000 is set as " + inventoring);}
+    void setInventoring(boolean enable) { inventoring = enable; utility.debugFileEnable(false); if (utility.DEBUG_INVENTORING) appendToLog("RfidReaderChipR2000.setInventoring with input as " + inventoring);}
 }

@@ -13,8 +13,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -28,7 +28,7 @@ public class AccessSecurityLockFragment extends CommonFragment {
     private Spinner spinner4KillPwd, spinner4AccessPwd, spinner4EpcMemory, spinner4TidMemory, spinner4UserMemory;
     private Button button;
 
-    private AccessTask accessTask;
+    private AccessTaskCustom accessTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,43 +40,43 @@ public class AccessSecurityLockFragment extends CommonFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        editTextTagID = (EditText) getActivity().findViewById(R.id.accessLockTagID);
-        editTextPassword = (EditText) getActivity().findViewById(R.id.accessLockPasswordValue);
+        editTextTagID = (EditText) view.findViewById(R.id.accessLockTagID);
+        editTextPassword = (EditText) view.findViewById(R.id.accessLockPasswordValue);
         editTextPassword.addTextChangedListener(new GenericTextWatcher(editTextPassword, 8));
         editTextPassword.setText("00000000");
 
-        checkBox = (CheckBox) getActivity().findViewById(R.id.accessLockAllPermLock);
+        checkBox = (CheckBox) view.findViewById(R.id.accessLockAllPermLock);
 
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.access_lock_privilege_array, R.layout.custom_spinner_layout);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        spinner4KillPwd = (Spinner) getActivity().findViewById(R.id.accessLockPrivilege4KillPwd);
+        spinner4KillPwd = (Spinner) view.findViewById(R.id.accessLockPrivilege4KillPwd);
         spinner4KillPwd.setAdapter(arrayAdapter);
 
-        spinner4AccessPwd = (Spinner) getActivity().findViewById(R.id.accessLockPrivilege4AccessPwd);
+        spinner4AccessPwd = (Spinner) view.findViewById(R.id.accessLockPrivilege4AccessPwd);
         spinner4AccessPwd.setAdapter(arrayAdapter);
 
-        spinner4EpcMemory = (Spinner) getActivity().findViewById(R.id.accessLockPrivilege4EpcMemory);
+        spinner4EpcMemory = (Spinner) view.findViewById(R.id.accessLockPrivilege4EpcMemory);
         spinner4EpcMemory.setAdapter(arrayAdapter);
 
-        spinner4TidMemory = (Spinner) getActivity().findViewById(R.id.accessLockPrivilege4TidMemory);
+        spinner4TidMemory = (Spinner) view.findViewById(R.id.accessLockPrivilege4TidMemory);
         spinner4TidMemory.setAdapter(arrayAdapter);
 
-        spinner4UserMemory = (Spinner) getActivity().findViewById(R.id.accessLockPrivilege4UserMemory);
+        spinner4UserMemory = (Spinner) view.findViewById(R.id.accessLockPrivilege4UserMemory);
         spinner4UserMemory.setAdapter(arrayAdapter);
 
-        editTextAntennaPower = (EditText) getActivity().findViewById(R.id.accessLockAntennaPower);
+        editTextAntennaPower = (EditText) view.findViewById(R.id.accessLockAntennaPower);
         editTextAntennaPower.setText(String.valueOf(300));
 
-        button = (Button) getActivity().findViewById(R.id.accessLockButton);
+        button = (Button) view.findViewById(R.id.accessLockButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 startAccessTask();
@@ -95,15 +95,12 @@ public class AccessSecurityLockFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessSecurityLockFragment().onResume(): userVisibleHint = " + userVisibleHint);
-        if (userVisibleHint) {
-            setNotificationListener();
-        }
+        setUserVisibleHint2(true);
     }
 
     @Override
     public void onPause() {
-        MainActivity.csLibrary4A.setNotificationListener(null);
+        setUserVisibleHint2(false);
         super.onPause();
     }
 
@@ -115,10 +112,11 @@ public class AccessSecurityLockFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessSecurityLockFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if (isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
             MainActivity.csLibrary4A.appendToLog("AccessSecurityLockFragment is now VISIBLE");
             setNotificationListener();
@@ -148,7 +146,7 @@ public class AccessSecurityLockFragment extends CommonFragment {
         int accessLockMask = 0;
         int lockAction;
 
-        if (accessTask != null) if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) return;
+        if (accessTask != null) if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) return;
         if (checkBox.isChecked()) {
             accessLockAction = 0x3FF;
             accessLockMask = 0x3FF;
@@ -189,11 +187,12 @@ public class AccessSecurityLockFragment extends CommonFragment {
                 invalidRequest = true;
             }
         }
-        accessTask = new AccessTask(button, null, invalidRequest, true,
+        accessTask = MainActivity.csLibrary4A.getAccessTaskCustom(button, null, invalidRequest, true,
                 strTagID, 1, 32,
                 strPassword, powerLevel, RfidReaderChipData.HostCommands.CMD_18K6CLOCK,
                 0, 0, true, false,
-                null, null, null, null, null);
+                null, null, null, null, null,
+                MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
         accessTask.execute();
     }
 }

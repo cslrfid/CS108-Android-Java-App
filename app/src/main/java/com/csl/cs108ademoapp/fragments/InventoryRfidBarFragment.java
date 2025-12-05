@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.MenuProvider;
 
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.InventoryBarcodeTask;
 import com.csl.cs108ademoapp.InventoryRfidTask;
 import com.csl.cs108ademoapp.MainActivity;
@@ -227,22 +227,22 @@ public class InventoryRfidBarFragment extends CommonFragment {
     void startStopHandler(boolean buttonTrigger) {
         if (buttonTrigger) MainActivity.csLibrary4A.appendToLog("BARTRIGGER: getTriggerButtonStatus = " + MainActivity.csLibrary4A.getTriggerButtonStatus());
         if (MainActivity.sharedObjects.runningInventoryRfidTask) {
-            Toast.makeText(MainActivity.mContext, "Running RFID inventory", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Running RFID inventory", Toast.LENGTH_SHORT).show();
             return;
         }
         boolean started = false;
-        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
+        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == CustomAsyncTask.Status.RUNNING) started = true;
         if (buttonTrigger && ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) {
             MainActivity.csLibrary4A.appendToLog("BARTRIGGER: trigger ignore");
             return;
         }
         if (started == false) {
             if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                 return;
             }
             if (MainActivity.csLibrary4A.isBarcodeFailure()) {
-                Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                 return;
             }
             MainActivity.csLibrary4A.appendToLog("BARTRIGGER: Start Barcode inventory");
@@ -251,7 +251,7 @@ public class InventoryRfidBarFragment extends CommonFragment {
             inventoryBarcodeTask = new InventoryBarcodeTask(null, readerListAdapter, null, barcodeRunTime, barcodeVoltageLevel, barcodeYieldView, button, null, barcodeTotal, false);
             inventoryBarcodeTask.execute();
             mHandler.post(runnable);
-        } else if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) {
+        } else if (inventoryBarcodeTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
             MainActivity.csLibrary4A.appendToLog("BARTRIGGER: Stop Barcode inventory");
             if (buttonTrigger) inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.BUTTON_RELEASE;
             else inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.STOP;
@@ -261,7 +261,7 @@ public class InventoryRfidBarFragment extends CommonFragment {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) {
+            if (inventoryBarcodeTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
                 MainActivity.csLibrary4A.appendToLog("InventoryRfidBarInventory.runnable: with inventoryBarcodeTask running");
                 mHandler.postDelayed(runnable, 100);
             } else if (inventoryRfidTask == null) {
@@ -269,15 +269,15 @@ public class InventoryRfidBarFragment extends CommonFragment {
                     MainActivity.csLibrary4A.appendToLog("InventoryRfidBarInventory.runnable: with inventoryBarcodeTask finished with result");
                     //MainActivity.csLibrary4A.setPowerLevel(150);
                     MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY);
-                    inventoryRfidTask = new InventoryRfidTask(getContext(), -1, -1, 0, 0, 0, 0,
+                    inventoryRfidTask = new InventoryRfidTask(getContext(),
                             false, MainActivity.csLibrary4A.getInventoryBeep(), true,
-                            null, null, RfidReader.TagType.TAG_NULL, null,
+                            null, null,
                             null, null,
                             null, barcodeVoltageLevel, null, button, null);
                     inventoryRfidTask.execute();
                     mHandler.postDelayed(runnable, 100);
                 } else MainActivity.csLibrary4A.appendToLog("InventoryRfidBarInventory.runnable: with inventoryBarcodeTask finished without result");
-            } else if (inventoryRfidTask.getStatus() == AsyncTaskA.Status.RUNNING) {
+            } else if (inventoryRfidTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
                 MainActivity.csLibrary4A.appendToLog("InventoryRfidBarInventory.runnable: with inventoryRfidTask running");
                 mHandler.postDelayed(runnable, 100);
             } else if (inventoryRfidTask.rx000pkgDataResult != null) {

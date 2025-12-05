@@ -52,7 +52,7 @@ import com.csl.cs108ademoapp.fragments.SettingFragment;
 import com.csl.cs108ademoapp.fragments.TestFragment;
 import com.csl.cs108ademoapp.fragments.Ucode8Fragment;
 import com.csl.cs108ademoapp.fragments.UcodeFragment;
-import com.csl.cslibrary4a.Cs108Library4A;
+import com.csl.cslibrary4a.CsLibrary4A;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReader;
 
@@ -73,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
     private ListView mDrawerList;
     private CharSequence mTitle;
 
-    public static Context mContext;
-    public static Cs108Library4A csLibrary4A;
+    public static Context context;
+    public static CsLibrary4A csLibrary4A;
     public static SharedObjects sharedObjects;
     public static SensorConnector mSensorConnector;
     public static ReaderDevice tagSelected;
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     public static String mDid; public static int selectHold; public static int selectFor;
     public static RfidReader.TagType tagType;
     public static class Config {
-        public String configPassword, configPower, config0, config1, config2, config3;
+        public String configPassword, configPower, config0, configRssiUpperLimit, configRssiLowerLimit, configHumidityThreshold;
     };
     public static Config config  = new Config();
     public static String stringPackageName = null;
@@ -110,10 +110,10 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList.setAdapter(new DrawerListAdapter(this, R.layout.drawer_list_item, DrawerListContent.ITEMS));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-        mContext = this;
-        sharedObjects = new SharedObjects(mContext);
-        csLibrary4A = new Cs108Library4A(mContext, mLogView);
-        mSensorConnector = new SensorConnector(mContext);
+        context = this;
+        sharedObjects = new SharedObjects(context);
+        csLibrary4A = new CsLibrary4A(context, mLogView);
+        mSensorConnector = new SensorConnector(context);
 
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
@@ -167,8 +167,8 @@ public class MainActivity extends AppCompatActivity {
     private final Runnable configureRunnable = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: mrfidToWriteSize = " + csLibrary4A.mrfidToWriteSize());
-            if (csLibrary4A.mrfidToWriteSize() != 0) {
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: mrfidToWriteSize = " + csLibrary4A.rfidToWriteSize());
+            if (csLibrary4A.rfidToWriteSize() != 0) {
                 MainActivity.csLibrary4A.mrfidToWritePrint();
                 configureDisplaying = true;
                 mHandler.postDelayed(configureRunnable, 500);
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
                 && position != DrawerPositions.ABOUT
                 && position != DrawerPositions.CONNECT
                 && position != DrawerPositions.DIRECTWEDGE && csLibrary4A.isBleConnected() == false) {
-            Toast.makeText(MainActivity.mContext, "Bluetooth Disconnected.  Please Connect.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Bluetooth Disconnected.  Please Connect.", Toast.LENGTH_SHORT).show();
             return;
         }
         switch (position) {
@@ -261,10 +261,7 @@ public class MainActivity extends AppCompatActivity {
                 fragment = new LongjingFragment();
                 break;
             case AXZON:
-                fragment = AxzonSelectorFragment.newInstance(true);
-                break;
-            case RFMICRON:
-                fragment = AxzonSelectorFragment.newInstance(false);
+                fragment = AxzonSelectorFragment.newInstance();
                 break;
             case FDMICRO:
                 fragment = new FdmicroFragment();
@@ -388,7 +385,6 @@ public class MainActivity extends AppCompatActivity {
     public void kilowayClicked(View view) { selectItem(DrawerPositions.KILOWAY); }
     public void longjingClicked(View view) { selectItem(DrawerPositions.LONGJING); }
     public void axzonClicked(View view) { selectItem(DrawerPositions.AXZON); }
-    public void rfMicronClicked(View view) { selectItem(DrawerPositions.RFMICRON); }
     public void fdmicroClicked(View view) { selectItem(DrawerPositions.FDMICRO); }
     public void ctesiusClicked(View view) { selectItem(DrawerPositions.CTESIUS); }
     public void asygnClicked(View view) { selectItem(DrawerPositions.ASYGNTAG); }

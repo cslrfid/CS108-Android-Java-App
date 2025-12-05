@@ -27,7 +27,7 @@ public class DrawerListContent {
         BAPCARD, COLDCHAIN, AURASENSE,
         KILOWAY,
         LONGJING,
-        AXZON, RFMICRON,
+        AXZON,
         FDMICRO,
         CTESIUS,
         ASYGNTAG,

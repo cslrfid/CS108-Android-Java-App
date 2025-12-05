@@ -127,7 +127,6 @@ public class ControllerConnector {
         boolean bRetValue = false;
         bRetValue = controllerToWrite.add(ControllerConnector.ControllerPayloadEvents.CONTROLLER_RESET);
         appendToLog("add RESET to mSiliconLabIcWrite with length = " + controllerToWrite.size());
-        //mRfidDevice.setInventoring(false);
         return bRetValue;
     }
 

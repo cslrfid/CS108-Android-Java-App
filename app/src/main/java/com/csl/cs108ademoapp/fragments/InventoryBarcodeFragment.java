@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.InventoryBarcodeTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -91,8 +91,8 @@ public class InventoryBarcodeFragment extends CommonFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        barcodeListView = (ListView) getActivity().findViewById(R.id.inventoryBarcodeList);
-        barcodeEmptyView = (TextView) getActivity().findViewById(R.id.inventoryBarcodeEmpty);
+        barcodeListView = (ListView) view.findViewById(R.id.inventoryBarcodeList);
+        barcodeEmptyView = (TextView) view.findViewById(R.id.inventoryBarcodeEmpty);
         barcodeListView.setEmptyView(barcodeEmptyView);
 
         readerListAdapter = new ReaderListAdapter(getActivity(), R.layout.readers_list_item, MainActivity.sharedObjects.barsList, true, false);
@@ -125,11 +125,11 @@ public class InventoryBarcodeFragment extends CommonFragment {
             }
         });
 
-        barcodeRunTime = (TextView) getActivity().findViewById(R.id.inventoryBarcodeRunTime);
-        barcodeVoltageLevel = (TextView) getActivity().findViewById(R.id.inventoryBarcodeVoltageLevel);
+        barcodeRunTime = (TextView) view.findViewById(R.id.inventoryBarcodeRunTime);
+        barcodeVoltageLevel = (TextView) view.findViewById(R.id.inventoryBarcodeVoltageLevel);
 
-        barcodeYieldView = (TextView) getActivity().findViewById(R.id.inventoryBarcodeYield);
-        button = (Button) getActivity().findViewById(R.id.inventoryBarcodeButton);
+        barcodeYieldView = (TextView) view.findViewById(R.id.inventoryBarcodeYield);
+        button = (Button) view.findViewById(R.id.inventoryBarcodeButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,7 +137,7 @@ public class InventoryBarcodeFragment extends CommonFragment {
             }
         });
 
-        barcodeTotal = (TextView) getActivity().findViewById(R.id.inventoryBarcodeTotal);
+        barcodeTotal = (TextView) view.findViewById(R.id.inventoryBarcodeTotal);
 
         MainActivity.csLibrary4A.getBarcodePreSuffix();
     }
@@ -145,19 +145,16 @@ public class InventoryBarcodeFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (true) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment().onResume(): userVisibleHint = " + userVisibleHint);
-        if (userVisibleHint) {
-            MainActivity.csLibrary4A.setAutoBarStartSTop(true); setNotificationListener();
-        }
+        setUserVisibleHint2(true);
     }
 
     @Override
     public void onPause() {
-        if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setNotificationListener(null);
         if (inventoryBarcodeTask != null) {
             if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment.onPause: taskCancelReason as DESTORY");
             inventoryBarcodeTask.taskCancelReason = InventoryBarcodeTask.TaskCancelRReason.DESTORY;
         }
+        setUserVisibleHint2(false);
         super.onPause();
     }
 
@@ -171,9 +168,10 @@ public class InventoryBarcodeFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
         if(getUserVisibleHint()) {
             MainActivity.csLibrary4A.appendToLog("InventoryBarcodeFragment is now VISIBLE");
             userVisibleHint = true;
@@ -204,11 +202,11 @@ public class InventoryBarcodeFragment extends CommonFragment {
     void startStopHandler(boolean buttonTrigger) {
         if (buttonTrigger) MainActivity.csLibrary4A.appendToLog("BARTRIGGER: getTriggerButtonStatus = " + MainActivity.csLibrary4A.getTriggerButtonStatus());
         if (MainActivity.sharedObjects.runningInventoryRfidTask) {
-            Toast.makeText(MainActivity.mContext, "Running RFID inventory", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Running RFID inventory", Toast.LENGTH_SHORT).show();
             return;
         }
         boolean started = false;
-        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
+        if (inventoryBarcodeTask != null) if (inventoryBarcodeTask.getStatus() == CustomAsyncTask.Status.RUNNING) started = true;
         /*
         if (buttonTrigger && ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false))) {
             MainActivity.csLibrary4A.appendToLog("BARTRIGGER: trigger ignore");
@@ -217,11 +215,11 @@ public class InventoryBarcodeFragment extends CommonFragment {
         */
         if (started == false) {
             if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                 return;
             }
             if (MainActivity.csLibrary4A.isBarcodeFailure()) {
-                Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                 return;
             }
             MainActivity.csLibrary4A.appendToLog("BARTRIGGER: Start Barcode inventory");

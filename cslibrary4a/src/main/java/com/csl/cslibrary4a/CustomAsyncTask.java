@@ -1,12 +1,13 @@
-package com.csl.cs108ademoapp;
+package com.csl.cslibrary4a;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class AsyncTaskA {
+public class CustomAsyncTask {
     protected void onPreExecute() { }
 
     protected String doInBackground(Void... a) {
@@ -55,7 +56,7 @@ public class AsyncTaskA {
     }
     public boolean cancel(boolean doit) {
         if (doit) {
-            MainActivity.csLibrary4A.appendToLog("AsyncA.cancel");
+            Log.i("Hello", "AsyncA.cancel");
             handler.removeCallbacks(runnableBackground);
             handler.post(new Runnable() {
                 @Override

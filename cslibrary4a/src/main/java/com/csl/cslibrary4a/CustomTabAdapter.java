@@ -1,21 +1,19 @@
 package com.csl.cslibrary4a;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-public class AdapterTab extends FragmentStatePagerAdapter {
+public class CustomTabAdapter extends FragmentStateAdapter {
     private int iNumOfTabs;
     public Fragment fragment0, fragment1, fragment2, fragment3, fragment4 = null;
 
-    public AdapterTab(FragmentManager fm, int iNumOfTabs) {
-        super(fm);
+    public CustomTabAdapter(Fragment fragment, int iNumOfTabs) {
+        super(fragment);
         this.iNumOfTabs = iNumOfTabs;
     }
 
     @Override
-    public Fragment getItem(int index) {
+    public Fragment createFragment(int index) {
         Fragment fragment = null;
         switch (index) {
             case 0:
@@ -40,13 +38,8 @@ public class AdapterTab extends FragmentStatePagerAdapter {
     }
 
     @Override
-    public int getCount() {
+    public int getItemCount() {
         return iNumOfTabs;
-    }
-
-    @Override
-    public int getItemPosition(Object object) {
-        return PagerAdapter.POSITION_NONE;
     }
 
     public void setFragment(int index, Fragment fragment) {

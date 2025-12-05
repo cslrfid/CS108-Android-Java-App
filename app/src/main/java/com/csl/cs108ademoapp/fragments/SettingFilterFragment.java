@@ -1,7 +1,6 @@
 package com.csl.cs108ademoapp.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,23 +8,23 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.csl.cs108ademoapp.R;
-import com.csl.cslibrary4a.AdapterTab;
-import com.google.android.material.tabs.TabLayout;
+import com.csl.cslibrary4a.CustomTabAdapter;
+import com.csl.cslibrary4a.CustomTabLayout;
 
 public class SettingFilterFragment extends CommonFragment {
     private ActionBar actionBar;
-    private ViewPager viewPager;
-    AdapterTab adapter;
+    private ViewPager2 viewPager;
+    CustomTabAdapter adapter;
 
     private String[] tabs = {"Pre-filter", "Post-filter", "Rssi-filter"};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
+        return inflater.inflate(R.layout.custom_tabbed_layout2, container, false);
     }
 
     @Override
@@ -37,36 +36,16 @@ public class SettingFilterFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_filters);
         actionBar.setTitle(R.string.title_activity_filters);
 
-        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
-
-        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new CustomTabAdapter(this, tabs.length);
         adapter.setFragment(0, new SettingFilterPreFragment());
         adapter.setFragment(1, new SettingFilterPostFragment());
         adapter.setFragment(2, new SettingFilterRssiFragment());
 
-        viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
+        viewPager = (ViewPager2) view.findViewById(R.id.OperationsPager2);
         viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
-        for (String tab_name : tabs) {
-            tabLayout.addTab(tabLayout.newTab().setText(tab_name));
-        }
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                Log.i(TAG, "tab.position is " + tab.getPosition());
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
-        });
+        CustomTabLayout tabLayout = (CustomTabLayout) view.findViewById(R.id.OperationsTabLayout2);
+        tabLayout.addTab(tabs, viewPager);
     }
 
     @Override

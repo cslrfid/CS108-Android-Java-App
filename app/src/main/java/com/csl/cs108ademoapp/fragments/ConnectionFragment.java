@@ -23,7 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.CustomProgressDialog;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -34,7 +34,7 @@ import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 import java.util.ArrayList;
 
 public class ConnectionFragment extends CommonFragment {
-    private DeviceScanTask deviceScanTask;
+    private DeviceScanTaskCustom deviceScanTask;
     private ReaderListAdapter readerListAdapter;
     private ArrayList<ReaderDevice> readersList = MainActivity.sharedObjects.readersList;
 
@@ -172,14 +172,14 @@ public class ConnectionFragment extends CommonFragment {
                 if (deviceConnectTask.isCancelled() == false)   operating = true;
             }
             if (operating == false) {
-                deviceScanTask = new DeviceScanTask();
+                deviceScanTask = new DeviceScanTaskCustom();
                 deviceScanTask.execute();
             }
             mHandler.postDelayed(checkRunnable, 5000);
         }
     };
 
-    private class DeviceScanTask extends AsyncTaskA {
+    private class DeviceScanTaskCustom extends CustomAsyncTask {
         private long timeMillisUpdate = System.currentTimeMillis();
         ArrayList<ReaderDevice> readersListOld = new ArrayList<ReaderDevice>();
         boolean wait4process = false; boolean scanning = false, DEBUG = false;
@@ -218,21 +218,21 @@ public class ConnectionFragment extends CommonFragment {
                     boolean match = false;
                     for (int i = 0; i < readersList.size(); i++) {
                         String stringReaderAddress = readersList.get(i).getAddress();
-                        String stringDeviceAddress = (scanResultA.device == null ? scanResultA.getAddress() : scanResultA.device.getAddress());
+                        String stringDeviceAddress = (scanResultA.device == null ? scanResultA.address : scanResultA.device.getAddress());
                         if (stringReaderAddress.matches(stringDeviceAddress)) {
                             ReaderDevice readerDevice1 = readersList.get(i);
                             int count = readerDevice1.getCount();
                             count++;
                             readerDevice1.setCount(count);
                             readerDevice1.setRssi(scanResultA.rssi);
-                            readerDevice1.setServiceUUID2p1(scanResultA.serviceUUID2p2);
+                            readerDevice1.setServiceUUID(scanResultA.serviceUUID);
                             readersList.set(i, readerDevice1); listUpdated = true;
                             match = true;
                             break;
                         }
                     }
                     if (match == false) {
-                        String name = scanResultA.getName(); //(scanResultA.device == null ? scanResultA.getName() : scanResultA.device.getName());
+                        String name = scanResultA.name; //(scanResultA.device == null ? scanResultA.getName() : scanResultA.device.getName());
                         if (false) {
                             if (scanResultA.device != null && scanResultA.rssi == 0) {
                                 BluetoothDevice bluetoothDevice = scanResultA.device;
@@ -242,8 +242,8 @@ public class ConnectionFragment extends CommonFragment {
                                 }
                             }
                         }
-                        String address = (scanResultA.device == null ? scanResultA.getAddress() : scanResultA.device.getAddress());
-                        ReaderDevice readerDevice = new ReaderDevice(name, address, false, "", 1, scanResultA.rssi, scanResultA.serviceUUID2p2);
+                        String address = (scanResultA.device == null ? scanResultA.address : scanResultA.device.getAddress());
+                        ReaderDevice readerDevice = new ReaderDevice(name, address, false, "", 1, scanResultA.rssi, scanResultA.serviceUUID, scanResultA.hasServicePower);
                         String strInfo = "";
                         if (scanResultA.device != null && scanResultA.device.getBondState() == 12) {
                             strInfo += "BOND_BONDED\n";
@@ -323,7 +323,7 @@ public class ConnectionFragment extends CommonFragment {
 
         @Override
         protected void onPreExecute() {
-            if (DEBUG) MainActivity.csLibrary4A.appendToLog("start of Connection with mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("start of Connection with mrfidToWriteSize = " + MainActivity.csLibrary4A.rfidToWriteSize());
             MainActivity.csLibrary4A.connect(connectingDevice);
             waitTime = 30;
             setting = -1;
@@ -394,7 +394,7 @@ public class ConnectionFragment extends CommonFragment {
             if (DEBUG) MainActivity.csLibrary4A.appendToLog("ConnectionFragment: onPostExecute: getActivity().onBackPressed");
             getActivity().onBackPressed();
             bConnecting = false;
-            if (DEBUG) MainActivity.csLibrary4A.appendToLog("end of Connection with mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+            if (DEBUG) MainActivity.csLibrary4A.appendToLog("end of Connection with mrfidToWriteSize = " + MainActivity.csLibrary4A.rfidToWriteSize());
         }
     }
 }

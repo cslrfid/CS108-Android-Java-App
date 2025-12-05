@@ -7,7 +7,9 @@ class ConnectorData {
 
     @JvmField
     var connectorTypes: ConnectorTypes? = null
-    lateinit var dataValues: ByteArray
+    @JvmField
+    var dataValues: ByteArray? = null
+
     @JvmField
     var invalidSequence: Boolean = false
     @JvmField

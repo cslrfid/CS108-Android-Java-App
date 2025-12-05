@@ -11,8 +11,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -21,6 +21,7 @@ import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessEm4325PassiveFragment extends CommonFragment {
     final boolean DEBUG = true;
+    View viewFragment;
 	EditText editTextRWTagID, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
 
     TextView textViewTemperature;
@@ -32,29 +33,30 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
     boolean operationRead = false;
     ReadWriteTypes readWriteTypes;
 
-    private AccessTask accessTask;
+    private AccessTaskCustom accessTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_access_em4325passive, container, false);
+        viewFragment = inflater.inflate(R.layout.fragment_access_em4325passive, container, false);
+        return viewFragment;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessCCPTagID);
-        editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessCCPAccPasswordValue);
+        editTextRWTagID = (EditText) view.findViewById(R.id.accessCCPTagID);
+        editTextAccessRWAccPassword = (EditText) view.findViewById(R.id.accessCCPAccPasswordValue);
         editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
         editTextAccessRWAccPassword.setText("00000000");
 
-        textViewTemperature = (TextView) getActivity().findViewById(R.id.accessCCPTemperature);
+        textViewTemperature = (TextView) view.findViewById(R.id.accessCCPTemperature);
 
-        editTextaccessRWAntennaPower = (EditText) getActivity().findViewById(R.id.accessCCPAntennaPower);
+        editTextaccessRWAntennaPower = (EditText) view.findViewById(R.id.accessCCPAntennaPower);
         editTextaccessRWAntennaPower.setText(String.valueOf(300));
 
-        buttonRead = (Button) getActivity().findViewById(R.id.accessCCPReadButton);
+        buttonRead = (Button) view.findViewById(R.id.accessCCPReadButton);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,6 +72,18 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        setUserVisibleHint2(true);
+    }
+
+    @Override
+    public void onPause() {
+        setUserVisibleHint2(false);
+        super.onPause();
+    }
+
+    @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
         if (MainActivity.csLibrary4A != null) {
@@ -80,10 +94,11 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if (isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
             MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment is now VISIBLE");
             setupTagID();
@@ -110,14 +125,14 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
 
     boolean isOperationRunning() {
         if (MainActivity.csLibrary4A.isBleConnected() == false) {
-            Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
             return true;
         } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-            Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
             return true;
         } else if (accessTask != null) {
-            if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) {
-                Toast.makeText(MainActivity.mContext, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
+            if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
+                Toast.makeText(MainActivity.context, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
@@ -140,7 +155,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
+            } else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessEm4325PassiveFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -158,13 +173,14 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
                     else if (operationRead) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CREAD;
                     else hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CWRITE;
                     MainActivity.csLibrary4A.appendToLog("hostCommand = " + hostCommand.toString());
-                    accessTask = new AccessTask(buttonRead, null, invalid, true,
+                    accessTask = new AccessTaskCustom(buttonRead, null, invalid, true,
                             editTextRWTagID.getText().toString(), 1, 32,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             hostCommand,
                             0, 0, true, false,
-                            null, null, null, null, null);
+                            null, null, null, null, null,
+                            MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     accessTask.execute();
                     rerunRequest = true;
                     MainActivity.csLibrary4A.appendToLog("accessTask is created");
@@ -215,7 +231,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             MainActivity.csLibrary4A.appendToLog("accessResult 2 bankProcessing = " + bankProcessing + ", accessResult = " + accessTask.accessResult );
@@ -262,7 +278,7 @@ public class AccessEm4325PassiveFragment extends CommonFragment {
             readWriteTypes = ReadWriteTypes.TEMPERATURE;
             if (bankProcessing == 0) {
                 if (operationRead) {
-                    textViewTemperature = (TextView) getActivity().findViewById(R.id.accessCCPTemperature);
+                    textViewTemperature = (TextView) viewFragment.findViewById(R.id.accessCCPTemperature);
                     textViewTemperature.setText("");
                     accOffset = 0x10D; accSize = 1; operationRead = false; writeData = "0000";
                 } else invalidRequest1 = true;

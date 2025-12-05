@@ -8,11 +8,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
+import com.csl.cslibrary4a.CustomAsyncTask;
+import com.csl.cslibrary4a.CustomMediaPlayer;
 import com.csl.cslibrary4a.ReaderDevice;
 
 import java.util.ArrayList;
 
-public class InventoryBarcodeTask extends AsyncTaskA {
+public class InventoryBarcodeTask extends CustomAsyncTask {
     final boolean DEBUG = false, ALLOW_WEDGE = true;
     public enum TaskCancelRReason {
         NULL, INVALD_REQUEST, DESTORY, STOP, BUTTON_RELEASE, TIMEOUT
@@ -291,7 +293,7 @@ public class InventoryBarcodeTask extends AsyncTaskA {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (noToast == false) Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_END, Toast.LENGTH_SHORT).show();
+                    if (noToast == false) Toast.makeText(MainActivity.context, R.string.toast_abort_by_END, Toast.LENGTH_SHORT).show();
                     button.setText(textButton);
                     if (button1 != null) button1.setText(btextButton1);
                 }
@@ -301,11 +303,11 @@ public class InventoryBarcodeTask extends AsyncTaskA {
                 switch (taskCancelReason) {
                     case STOP:
                         if (noToast == false)
-                            Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_STOP, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.context, R.string.toast_abort_by_STOP, Toast.LENGTH_SHORT).show();
                         break;
                     case BUTTON_RELEASE:
                         if (noToast == false)
-                            Toast.makeText(MainActivity.mContext, R.string.toast_abort_by_BUTTON, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.context, R.string.toast_abort_by_BUTTON, Toast.LENGTH_SHORT).show();
                         break;
                 }
             }

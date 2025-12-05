@@ -16,8 +16,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -26,6 +26,7 @@ import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class AccessColdChainFragment extends CommonFragment {
     final boolean DEBUG = true;
+    View viewFragment;
 	EditText editTextRWTagID, editTextAccessRWAccPassword, editTextaccessRWAntennaPower;
     TextView textViewConfigOk, textViewTemperatureOk, textViewEnableOk;
     CheckBox checkBoxConfig, checkBoxTemperature, checkBoxEnable;
@@ -43,78 +44,79 @@ public class AccessColdChainFragment extends CommonFragment {
     boolean operationRead = false;
     ReadWriteTypes readWriteTypes;
 
-    private AccessTask accessTask;
+    private AccessTaskCustom accessTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_access_coldchain, container, false);
+        viewFragment = inflater.inflate(R.layout.fragment_access_coldchain, container, false);
+        return viewFragment;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        editTextRWTagID = (EditText) getActivity().findViewById(R.id.accessCCTagID);
-        editTextAccessRWAccPassword = (EditText) getActivity().findViewById(R.id.accessCCAccPasswordValue);
+        editTextRWTagID = (EditText) view.findViewById(R.id.accessCCTagID);
+        editTextAccessRWAccPassword = (EditText) view.findViewById(R.id.accessCCAccPasswordValue);
         editTextAccessRWAccPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessRWAccPassword, 8));
         editTextAccessRWAccPassword.setText("00000000");
 
-        textViewConfigOk = (TextView) getActivity().findViewById(R.id.accessCCConfigOK);
-        textViewTemperatureOk = (TextView) getActivity().findViewById(R.id.accessCCTemperatureOK);
-        textViewEnableOk = (TextView) getActivity().findViewById(R.id.accessCCEnableOK);
-        checkBoxConfig = (CheckBox) getActivity().findViewById(R.id.accessCCConfigTitle);
-        checkBoxTemperature = (CheckBox) getActivity().findViewById(R.id.accessCCTemperatureTitle);
-        checkBoxEnable = (CheckBox) getActivity().findViewById(R.id.accessCCEnableTitle);
+        textViewConfigOk = (TextView) view.findViewById(R.id.accessCCConfigOK);
+        textViewTemperatureOk = (TextView) view.findViewById(R.id.accessCCTemperatureOK);
+        textViewEnableOk = (TextView) view.findViewById(R.id.accessCCEnableOK);
+        checkBoxConfig = (CheckBox) view.findViewById(R.id.accessCCConfigTitle);
+        checkBoxTemperature = (CheckBox) view.findViewById(R.id.accessCCTemperatureTitle);
+        checkBoxEnable = (CheckBox) view.findViewById(R.id.accessCCEnableTitle);
 
-        textViewTemperature = (TextView) getActivity().findViewById(R.id.accessCCTemperature);
-        textViewUnderAlarm = (TextView) getActivity().findViewById(R.id.accessCCUnderTempAlarm);
-        textViewOverAlarm = (TextView) getActivity().findViewById(R.id.accessCCOverTempAlarm);
-        textViewBatteryAlarm = (TextView) getActivity().findViewById(R.id.accessCCBatteryAlarm);
+        textViewTemperature = (TextView) view.findViewById(R.id.accessCCTemperature);
+        textViewUnderAlarm = (TextView) view.findViewById(R.id.accessCCUnderTempAlarm);
+        textViewOverAlarm = (TextView) view.findViewById(R.id.accessCCOverTempAlarm);
+        textViewBatteryAlarm = (TextView) view.findViewById(R.id.accessCCBatteryAlarm);
 
-        editTextTempThresUnder = (EditText) getActivity().findViewById(R.id.accessCCTempThresUnder);
-        editTextTempThresOver = (EditText) getActivity().findViewById(R.id.accessCCTempThresOver);
-        editTextTempCountUnder = (EditText) getActivity().findViewById(R.id.accessCCTempCountUnder);
-        editTextTempCountOver = (EditText) getActivity().findViewById(R.id.accessCCTempCountOver);
-        editTextMonitorDelay = (EditText) getActivity().findViewById(R.id.accessCCMonitorDelay);
-        editTextSamplingInterval = (EditText) getActivity().findViewById(R.id.accessCCSamplingInverval);
+        editTextTempThresUnder = (EditText) view.findViewById(R.id.accessCCTempThresUnder);
+        editTextTempThresOver = (EditText) view.findViewById(R.id.accessCCTempThresOver);
+        editTextTempCountUnder = (EditText) view.findViewById(R.id.accessCCTempCountUnder);
+        editTextTempCountOver = (EditText) view.findViewById(R.id.accessCCTempCountOver);
+        editTextMonitorDelay = (EditText) view.findViewById(R.id.accessCCMonitorDelay);
+        editTextSamplingInterval = (EditText) view.findViewById(R.id.accessCCSamplingInverval);
 
-        TextView textViewDegreeC = (TextView) getActivity().findViewById(R.id.accessCCDegreeC);
+        TextView textViewDegreeC = (TextView) view.findViewById(R.id.accessCCDegreeC);
         textViewDegreeC.setText(textViewDegreeC.getText().toString() + (char) 0x00B0 + "C)");
 
         ArrayAdapter<CharSequence> arrayAdapterUnit = ArrayAdapter.createFromResource(getActivity(), R.array.coldChain_unit_options, R.layout.custom_spinner_layout);
         arrayAdapterUnit.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerDelayUnit = (Spinner) getActivity().findViewById(R.id.accessCCMonitorUnit);
+        spinnerDelayUnit = (Spinner) view.findViewById(R.id.accessCCMonitorUnit);
         spinnerDelayUnit.setAdapter(arrayAdapterUnit);
 
         ArrayAdapter<CharSequence> arrayAdapterUnit1 = ArrayAdapter.createFromResource(getActivity(), R.array.coldChain_IntervalUnit_options, R.layout.custom_spinner_layout);
         arrayAdapterUnit1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerIntervalUnit = (Spinner) getActivity().findViewById(R.id.accessCCSamplingIntervalUnit);
+        spinnerIntervalUnit = (Spinner) view.findViewById(R.id.accessCCSamplingIntervalUnit);
         spinnerIntervalUnit.setAdapter(arrayAdapterUnit1);
 
         ArrayAdapter<CharSequence> arrayAdapterEnable = ArrayAdapter.createFromResource(getActivity(), R.array.coldChain_enable_options, R.layout.custom_spinner_layout);
         arrayAdapterEnable.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerEnable = (Spinner) getActivity().findViewById(R.id.accessCCEnable);
+        spinnerEnable = (Spinner) view.findViewById(R.id.accessCCEnable);
         spinnerEnable.setAdapter(arrayAdapterEnable);
 
         ArrayAdapter<CharSequence> arrayAdapterTagType = ArrayAdapter.createFromResource(getActivity(), R.array.coldChain_tagtype_options, R.layout.custom_spinner_layout);
         arrayAdapterTagType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerTagType = (Spinner) getActivity().findViewById(R.id.selectCCTagType);
+        spinnerTagType = (Spinner) view.findViewById(R.id.selectCCTagType);
         spinnerTagType.setAdapter(arrayAdapterTagType);
         spinnerTagType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 switch(position) {
                     case 0:
-                        LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCC8304Layout);
+                        LinearLayout linearLayout = (LinearLayout) viewFragment.findViewById(R.id.accessCC8304Layout);
                         linearLayout.setVisibility(View.VISIBLE);
-                        linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCCmaxduraLayout);
+                        linearLayout = (LinearLayout) viewFragment.findViewById(R.id.accessCCmaxduraLayout);
                         linearLayout.setVisibility(View.GONE);
                         break;
                     case 1:
-                        linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCC8304Layout);
+                        linearLayout = (LinearLayout) viewFragment.findViewById(R.id.accessCC8304Layout);
                         linearLayout.setVisibility(View.GONE);
-                        linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCCmaxduraLayout);
+                        linearLayout = (LinearLayout) viewFragment.findViewById(R.id.accessCCmaxduraLayout);
                         linearLayout.setVisibility(View.VISIBLE);
                         break;
                 }
@@ -126,10 +128,10 @@ public class AccessColdChainFragment extends CommonFragment {
             }
         });
 
-        editTextaccessRWAntennaPower = (EditText) getActivity().findViewById(R.id.accessCCAntennaPower);
+        editTextaccessRWAntennaPower = (EditText) view.findViewById(R.id.accessCCAntennaPower);
         editTextaccessRWAntennaPower.setText(String.valueOf(300));
 
-        buttonStartLogging = (Button) getActivity().findViewById(R.id.accessCCStartLogging);
+        buttonStartLogging = (Button) view.findViewById(R.id.accessCCStartLogging);
         buttonStartLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -138,7 +140,7 @@ public class AccessColdChainFragment extends CommonFragment {
                 operationRead = true; startAccessTask();
             }
         });
-        buttonStopLogging = (Button) getActivity().findViewById(R.id.accessCCStopLogging);
+        buttonStopLogging = (Button) view.findViewById(R.id.accessCCStopLogging);
         buttonStopLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -147,7 +149,7 @@ public class AccessColdChainFragment extends CommonFragment {
                 operationRead = true; startAccessTask();
             }
         });
-        buttonCheckAlarm = (Button) getActivity().findViewById(R.id.accessCCcheckAlarm);
+        buttonCheckAlarm = (Button) view.findViewById(R.id.accessCCcheckAlarm);
         buttonCheckAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,7 +158,7 @@ public class AccessColdChainFragment extends CommonFragment {
                 operationRead = true; startAccessTask();
             }
         });
-        buttonGetLogging = (Button) getActivity().findViewById(R.id.accessCCGetLogging);
+        buttonGetLogging = (Button) view.findViewById(R.id.accessCCGetLogging);
         buttonGetLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -166,12 +168,12 @@ public class AccessColdChainFragment extends CommonFragment {
             }
         });
 
-        textViewStartLoggingStatus = (TextView) getActivity().findViewById(R.id.accessCCStartLoggingStatus);
-        textViewStopLoggingStatus = (TextView) getActivity().findViewById(R.id.accessCCStopLoggingStatus);
-        textViewCheckAlaramStatus = (TextView) getActivity().findViewById(R.id.accessCCcheckAlarmStatus);
-        textViewGetLoggingStatus = (TextView) getActivity().findViewById(R.id.accessCCGetLoggingStatus);
+        textViewStartLoggingStatus = (TextView) view.findViewById(R.id.accessCCStartLoggingStatus);
+        textViewStopLoggingStatus = (TextView) view.findViewById(R.id.accessCCStopLoggingStatus);
+        textViewCheckAlaramStatus = (TextView) view.findViewById(R.id.accessCCcheckAlarmStatus);
+        textViewGetLoggingStatus = (TextView) view.findViewById(R.id.accessCCGetLoggingStatus);
 
-        buttonRead = (Button) getActivity().findViewById(R.id.accessCCReadButton);
+        buttonRead = (Button) view.findViewById(R.id.accessCCReadButton);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -181,7 +183,7 @@ public class AccessColdChainFragment extends CommonFragment {
             }
         });
 
-        buttonWrite = (Button) getActivity().findViewById(R.id.accessCCWriteButton);
+        buttonWrite = (Button) view.findViewById(R.id.accessCCWriteButton);
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -196,6 +198,18 @@ public class AccessColdChainFragment extends CommonFragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        setUserVisibleHint2(true);
+    }
+
+    @Override
+    public void onPause() {
+        setUserVisibleHint2(false);
+        super.onPause();
+    }
+
+    @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
         if (MainActivity.csLibrary4A != null) {
@@ -206,10 +220,11 @@ public class AccessColdChainFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if(isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
             MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment is now VISIBLE");
             setupTagID();
@@ -242,7 +257,7 @@ public class AccessColdChainFragment extends CommonFragment {
                     boolean bEnableBAPMode = false;
                     int number = Integer.valueOf(stringUser.substring(3, 4), 16);
                     if ((number % 2) == 1) bEnableBAPMode = true;
-//                    CheckBox checkBoxBAP = (CheckBox) getActivity().findViewById(R.id.coldChainEnableBAP);
+//                    CheckBox checkBoxBAP = (CheckBox) viewFragment.findViewById(R.id.coldChainEnableBAP);
 //                    checkBoxBAP.setChecked(bEnableBAPMode);
                 }
             }
@@ -251,14 +266,14 @@ public class AccessColdChainFragment extends CommonFragment {
 
     boolean isOperationRunning() {
         if (MainActivity.csLibrary4A.isBleConnected() == false) {
-            Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
             return true;
         } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-            Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
             return true;
         } else if (accessTask != null) {
-            if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) {
-                Toast.makeText(MainActivity.mContext, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
+            if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
+                Toast.makeText(MainActivity.context, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
@@ -281,7 +296,7 @@ public class AccessColdChainFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
+            } else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessColdChainFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -298,13 +313,14 @@ public class AccessColdChainFragment extends CommonFragment {
                     if (readWriteTypes == ReadWriteTypes.TEMPERATURE) hostCommand = RfidReaderChipData.HostCommands.CMD_GETSENSORDATA;
                     else if (operationRead) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CREAD;
                     else hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CWRITE;
-                    accessTask = new AccessTask((operationRead ? buttonRead : buttonWrite), null, invalid, true,
+                    accessTask = new AccessTaskCustom((operationRead ? buttonRead : buttonWrite), null, invalid, true,
                             editTextRWTagID.getText().toString(), 1, 32,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
                             hostCommand,
                             0, 0, true, false,
-                            null, null, null, null, null);
+                            null, null, null, null, null,
+                            MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     accessTask.execute();
                     rerunRequest = true;
                     MainActivity.csLibrary4A.appendToLog("accessTask is created");
@@ -355,7 +371,7 @@ public class AccessColdChainFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             MainActivity.csLibrary4A.appendToLog("accessResult 2 bankProcewssing = " + bankProcessing + ", accessResult = " + accessTask.accessResult );
@@ -605,13 +621,13 @@ public class AccessColdChainFragment extends CommonFragment {
             readWriteTypes = ReadWriteTypes.TEMPERATURE;
             if (bankProcessing == 0) {
                 if (operationRead) {
-                    textViewTemperature = (TextView) getActivity().findViewById(R.id.accessCCTemperature);
+                    textViewTemperature = (TextView) viewFragment.findViewById(R.id.accessCCTemperature);
                     textViewTemperature.setText("");
-                    textViewUnderAlarm = (TextView) getActivity().findViewById(R.id.accessCCUnderTempAlarm);
+                    textViewUnderAlarm = (TextView) viewFragment.findViewById(R.id.accessCCUnderTempAlarm);
                     textViewUnderAlarm.setVisibility(View.INVISIBLE);
-                    textViewOverAlarm = (TextView) getActivity().findViewById(R.id.accessCCOverTempAlarm);
+                    textViewOverAlarm = (TextView) viewFragment.findViewById(R.id.accessCCOverTempAlarm);
                     textViewOverAlarm.setVisibility(View.INVISIBLE);
-                    textViewBatteryAlarm = (TextView) getActivity().findViewById(R.id.accessCCBatteryAlarm);
+                    textViewBatteryAlarm = (TextView) viewFragment.findViewById(R.id.accessCCBatteryAlarm);
                     textViewBatteryAlarm.setVisibility(View.INVISIBLE);
                     textViewTemperatureOk.setText("");
                     if (true) {

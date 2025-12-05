@@ -23,7 +23,7 @@ import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 
 import com.csl.cs108ademoapp.CustomAlertDialog;
-import com.csl.cs108ademoapp.CustomPopupWindow;
+import com.csl.cslibrary4a.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 
@@ -77,7 +77,7 @@ public abstract class CommonFragment extends Fragment {
                 byte[] notificationData = MainActivity.csLibrary4A.onNotificationEvent();
                 if (false && notificationData != null) {
                     MainActivity.csLibrary4A.appendToLog("2 matched Error: " + MainActivity.csLibrary4A.byteArrayToString(notificationData));
-                    CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                    CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.context);
                     customPopupWindow.popupStart("Common Notification Error Code A101: " + MainActivity.csLibrary4A.byteArrayToString(notificationData), false);
                 }
                 reportCount = MainActivity.csLibrary4A.getTriggerReportingCount();
@@ -109,10 +109,10 @@ public abstract class CommonFragment extends Fragment {
                 if (bleDisConnecting) bleConnected = false; bleDisConnecting = true;
                 if (bleConnected) {
                     bleConnected = false; if (DEBUG) MainActivity.csLibrary4A.appendToLog("bleConnected is FALSE in " + fragmentName);
-                    if (false) Toast.makeText(MainActivity.mContext, "Bluetooth is disconnected", Toast.LENGTH_SHORT).show();
+                    if (false) Toast.makeText(MainActivity.context, "Bluetooth is disconnected", Toast.LENGTH_SHORT).show();
                     else {
                         CustomAlertDialog appdialog = new CustomAlertDialog();
-                        appdialog.Confirm((Activity) MainActivity.mContext, "Bluetooth is DISCONNECTED",
+                        appdialog.Confirm((Activity) MainActivity.context, "Bluetooth is DISCONNECTED",
                                 "Do you want to reconnect the Bluetooth ?",
                                 "No thanks", "Reconnect",
                                 new Runnable() {
@@ -142,7 +142,7 @@ public abstract class CommonFragment extends Fragment {
                     rfidFailure = true;
                     if (false) {
                         CustomAlertDialog appdialog = new CustomAlertDialog();
-                        appdialog.Confirm((Activity) MainActivity.mContext, "Rfid Transmission failure",
+                        appdialog.Confirm((Activity) MainActivity.context, "Rfid Transmission failure",
                                 "Do you want to disconnect the Bluetooth ?",
                                 "No thanks", "Disconnect",
                                 new Runnable() {
@@ -172,7 +172,7 @@ public abstract class CommonFragment extends Fragment {
             else if (++MainActivity.sharedObjects.batteryWarningShown == 1) {
                 if (batteryWarningPopupWindow != null)
                     batteryWarningPopupWindow.popupWindow.dismiss();
-                batteryWarningPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                batteryWarningPopupWindow = new CustomPopupWindow(MainActivity.context);
                 batteryWarningPopupWindow.popupStart(strBatteryLow + "% Battery Life Left, Please Recharge CSL Reader or Replace with Freshly Charged CSL Reader battery", false);
             } else if (false && MainActivity.sharedObjects.batteryWarningShown > 10) MainActivity.sharedObjects.batteryWarningShown = 0;
 
@@ -327,7 +327,7 @@ public abstract class CommonFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog(fragmentName);
+        if (DEBUG && MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.appendToLog(fragmentName);
         super.onDestroyView();
     }
 

@@ -1,0 +1,1073 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/base_layout_style"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <include
+                    android:id="@+id/accessXXTagID"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/password_title" />
+
+                <include
+                    android:id="@+id/accessXXAccPasswordValue"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    layout="@layout/custom_edittext_password" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/settingAntennaPower_title" />
+
+                <EditText
+                    android:id="@+id/accessXXAntennaPower"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font"
+                    android:inputType="numberDecimal" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    style="@style/style_normal_font"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:text="Logger Status" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView999"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle999"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView999"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView999a"
+                    android:layout_width="wrap_content"
+                    android:text="mV"/>
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView10"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle10"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonSpinner10"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView12"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle12"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView12"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView13"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle13"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView13"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+             <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView16"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle16"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonSpinner16"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="20dp">
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle16a"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle16b"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle16c"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle16d"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView13b"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle13b"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView13b"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView13d"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle13d"
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView13d"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView13c"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle13c"
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView13c"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView20"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle20"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView20"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView21"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle21"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView21"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView14"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle14"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonSpinner14"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView15"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle15"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonSpinner15"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="30dp">
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle15aa"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle15ab"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="30dp">
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle15a"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle15b"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle15c"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    style="@style/style_normal_font"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:text="Logger Configuration" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView1"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle1"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonSpinner1"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView11"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle11"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonSpinner11"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle11m"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle11n"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle11o"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle11p"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView2"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle2"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView2"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView222"
+                    android:layout_width="wrap_content" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView3"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle3"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView3"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView333"
+                    android:layout_width="wrap_content" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView4x"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle4x"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView4x"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView4"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle4"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView4"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView5"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle5"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView5"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView8"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle8"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView8"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView13a"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle13a"
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView13a"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView80"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle80"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonSpinner80"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView9c"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle9c"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView9c"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView1b"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle1b"
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView1b"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="mV"/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView1a"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle1a"
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView1a"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="mV"/>
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView11a"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle11a"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonSpinner11a"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="30dp">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView11b"
+                    android:layout_width="wrap_content" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonSpinner11b"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView11c"
+                    android:layout_width="wrap_content" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView11c"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView11d"
+                    android:layout_width="wrap_content" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView11d"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView9"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle9"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <Spinner
+                    android:id="@+id/accessAxzonEditView9"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView9a"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle9a"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView9a"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView9b"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle9b"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView9b"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView9d"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle9d"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView9d"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/default_left_padding">
+
+                <TextView
+                    android:id="@+id/accessAxzonTextView9e"
+                    android:layout_width="wrap_content" />
+
+                <CheckBox
+                    android:id="@+id/accessAxzonCheckBoxTitle9e"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/accessAxzonEditView9e"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    style="@style/style_normal_font"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:text="Logger Start" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|bottom"
+        android:orientation="vertical" >
+
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/custom_readwrite" />
+    </LinearLayout>
+</LinearLayout>

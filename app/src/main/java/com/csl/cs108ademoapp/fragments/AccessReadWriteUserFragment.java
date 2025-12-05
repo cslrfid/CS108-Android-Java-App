@@ -22,7 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.cs108ademoapp.AccessTask1;
-import com.csl.cs108ademoapp.CustomPopupWindow;
+import com.csl.cslibrary4a.CustomPopupWindow;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.SelectTag;
 import com.csl.cs108ademoapp.MainActivity;
@@ -30,7 +30,7 @@ import com.csl.cs108ademoapp.R;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
-import static com.csl.cs108ademoapp.MainActivity.mContext;
+import static com.csl.cs108ademoapp.MainActivity.context;
 import static com.csl.cs108ademoapp.MainActivity.tagSelected;
 
 public class AccessReadWriteUserFragment extends CommonFragment {
@@ -69,7 +69,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_access);
         actionBar.setTitle(R.string.title_activity_readWriteUser);
 
-        selectTag = new SelectTag((Activity)getActivity(), 0);
+        selectTag = new SelectTag((Activity)getActivity(), view,0);
         spinnerSelectBank = (Spinner) getActivity().findViewById(R.id.selectMemoryBank);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -155,10 +155,10 @@ public class AccessReadWriteUserFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 operationRead = true; startAccessTask();
@@ -170,10 +170,10 @@ public class AccessReadWriteUserFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 operationRead = false; startAccessTask();
@@ -257,7 +257,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
         editTextAccessRWEpc.setText(strTemp);
 
         if (needPopup) {
-            CustomPopupWindow customPopupWindow = new CustomPopupWindow(mContext);
+            CustomPopupWindow customPopupWindow = new CustomPopupWindow(context);
             customPopupWindow.popupStart("Changing EPC Length will automatically modify to " + (iWordCount * 16) + " bits.", false);
         }
     }
@@ -265,7 +265,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
     long msStartTime;
     void startAccessTask() {
         if (selectTag.editTextTagID.getText().toString().length() == 0) {
-            Toast.makeText(MainActivity.mContext, "Please select tag first !!!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Please select tag first !!!", Toast.LENGTH_SHORT).show();
             return;
         }
         CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessRWUserTitle);
@@ -309,7 +309,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
                             selectTag.editTextTagID.getText().toString(), spinnerSelectBank.getSelectedItemPosition() + 1, selectOffset,
                             editTextAccessRWAccPassword.getText().toString(),
                             Integer.valueOf(editTextaccessRWAntennaPower.getText().toString()),
-                            (operationRead ? RfidReaderChipData.HostCommands.CMD_18K6CREAD: RfidReaderChipData.HostCommands.CMD_18K6CWRITE), updateRunnable);
+                            (operationRead ? RfidReaderChipData.HostCommands.CMD_18K6CREAD: RfidReaderChipData.HostCommands.CMD_18K6CWRITE), updateRunnable, context, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     accessTask.execute();
                     rerunRequest = true;
                 }
@@ -320,7 +320,7 @@ public class AccessReadWriteUserFragment extends CommonFragment {
             }
             else {
                 if (bankProcessing == 0 && bcheckBoxAll) {
-                    Toast.makeText(MainActivity.mContext, "no choice selected yet", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "no choice selected yet", Toast.LENGTH_SHORT).show();
                 }
                 updating = false;
             }

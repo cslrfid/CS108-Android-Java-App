@@ -92,7 +92,7 @@ public class DeviceFinder{
                         }
                         scanResultA.name = sb.toString();
                         appendToLog("DeviceFinder.runnable: scanResultA.name is " + scanResultA.name);
-                        scanResultA.serviceUUID2p2 = 4;
+                        scanResultA.serviceUUID = 4;
 
                         if (csReaderConnector.mScanResultList != null) {
                             csReaderConnector.mScanResultList.add(scanResultA);

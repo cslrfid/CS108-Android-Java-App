@@ -14,24 +14,25 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.MenuProvider;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cslibrary4a.AdapterTab;
-import com.google.android.material.tabs.TabLayout;
+import com.csl.cslibrary4a.CustomTabAdapter;
+import com.csl.cslibrary4a.CustomTabLayout;
 
 public class ColdChainFragment extends CommonFragment {
     private ActionBar actionBar;
-    private ViewPager viewPager;
-    AdapterTab adapter;
+    private ViewPager2 viewPager;
+    CustomTabAdapter adapter;
 
     private String[] tabs = {"Select Tag", "Logging", "One-shot"};
+    private String[] tabs2 = {"Select Tag", "Logging"};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
+        return inflater.inflate(R.layout.custom_tabbed_layout2, container, false);
     }
 
     @Override
@@ -77,37 +78,17 @@ public class ColdChainFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_inv);
         actionBar.setTitle(R.string.title_activity_coldChain);
 
-        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
-
-        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new CustomTabAdapter(this, tabs.length);
         adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(true, TAG_EM_COLDCHAIN, "" /*"E280B0"*/));
         adapter.setFragment(1, new AccessColdChainFragment());
         adapter.setFragment(2, new AccessEm4325PassiveFragment());
 
-        viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
+        viewPager = (ViewPager2) view.findViewById(R.id.OperationsPager2);
         viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        //viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
-        for (int i = 0; i < tabs.length; i++) {
-            if (MainActivity.csLibrary4A.get98XX() == 2 && i == tabs.length -1) break;;
-            String tab_name = tabs[i];
-            tabLayout.addTab(tabLayout.newTab().setText(tab_name));
-        }
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
-        });
+        CustomTabLayout tabLayout = (CustomTabLayout) view.findViewById(R.id.OperationsTabLayout2);
+        tabLayout.addTab(MainActivity.csLibrary4A.get98XX() == 2 ? tabs2 : tabs, viewPager);
     }
 
     @Override

@@ -10,8 +10,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -23,7 +23,7 @@ public class AccessSecurityKillFragment extends CommonFragment {
     private EditText editTextTagID, editTextPassword, editTextAntennaPower;
     private Button button;
 
-    private AccessTask accessTask;
+    private AccessTaskCustom accessTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -35,23 +35,23 @@ public class AccessSecurityKillFragment extends CommonFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        editTextTagID = (EditText) getActivity().findViewById(R.id.accessKillTagID);
-        editTextPassword = (EditText) getActivity().findViewById(R.id.accessKillPasswordValue);
+        editTextTagID = (EditText) view.findViewById(R.id.accessKillTagID);
+        editTextPassword = (EditText) view.findViewById(R.id.accessKillPasswordValue);
         editTextPassword.addTextChangedListener(new GenericTextWatcher(editTextPassword, 8));
         editTextPassword.setText("00000000");
 
-        editTextAntennaPower = (EditText) getActivity().findViewById(R.id.accessKillAntennaPower);
+        editTextAntennaPower = (EditText) view.findViewById(R.id.accessKillAntennaPower);
         editTextAntennaPower.setText(String.valueOf(300));
 
-        button = (Button) getActivity().findViewById(R.id.accessKillButton);
+        button = (Button) view.findViewById(R.id.accessKillButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 startAccessTask();
@@ -70,15 +70,12 @@ public class AccessSecurityKillFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessSecurityKillFragment().onResume(): userVisibleHint = " + userVisibleHint);
-        if (userVisibleHint) {
-            setNotificationListener();
-        }
+        setUserVisibleHint2(true);
     }
 
     @Override
     public void onPause() {
-        MainActivity.csLibrary4A.setNotificationListener(null);
+        setUserVisibleHint2(false);
         super.onPause();
     }
 
@@ -90,10 +87,11 @@ public class AccessSecurityKillFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessSecurityKillFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if(isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
             MainActivity.csLibrary4A.appendToLog("AccessSecurityKillFragment is now VISIBLE");
             setNotificationListener();
@@ -119,16 +117,17 @@ public class AccessSecurityKillFragment extends CommonFragment {
     }
 
     void startAccessTask() {
-        if (accessTask != null) if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) return;
+        if (accessTask != null) if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) return;
         boolean invalidRequest = false;
         String strTagID = editTextTagID.getText().toString();
         String strPassword = editTextPassword.getText().toString();
         int powerLevel = Integer.valueOf(editTextAntennaPower.getText().toString());
-        accessTask = new AccessTask(button, null, invalidRequest, true,
+        accessTask = MainActivity.csLibrary4A.getAccessTaskCustom(button, null, invalidRequest, true,
                 strTagID, 1, 32,
                 strPassword, powerLevel, RfidReaderChipData.HostCommands.CMD_18K6CKILL,
                 0, 0, true, false,
-                null, null, null, null, null);
+                null, null, null, null, null,
+                MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
         accessTask.execute();
     }
 }

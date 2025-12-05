@@ -19,8 +19,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.GenericTextWatcher;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -43,6 +43,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class AccessUcodeFragment extends CommonFragment {
     final boolean DEBUG = true; int iTagType = -1;
     SelectTag selectTag;
+    View viewFragment;
     LinearLayout layout;
     TextView textViewAesKey0ActivateOk, textViewAesKey1ActivateOk, textViewAesKey0Ok, textViewAesKey1Ok;
     Spinner spinnerHideTid;
@@ -67,12 +68,13 @@ public class AccessUcodeFragment extends CommonFragment {
     ReadWriteTypes readWriteTypes;
     boolean bImpinJTag = false;
 
-    private AccessTask accessTask;
+    private AccessTaskCustom accessTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_access_ucode, container, false);
+        viewFragment = inflater.inflate(R.layout.fragment_access_ucode, container, false);
+        return viewFragment;
     }
 
     @Override
@@ -80,46 +82,47 @@ public class AccessUcodeFragment extends CommonFragment {
         super.onViewCreated(view, savedInstanceState);
         if (MainActivity.tagType != null) if (MainActivity.tagType == RfidReader.TagType.TAG_AXZON) iTagType = 5;
 
-        selectTag = new SelectTag((Activity)getActivity(), 1);
-        if (MainActivity.tagType != null && MainActivity.tagType.toString().contains("TAG_IMPINJ")) bImpinJTag = true;
+        selectTag = new SelectTag((Activity)getActivity(), view, 1);
+        //if (MainActivity.tagType != null && MainActivity.tagType.toString().contains("TAG_IMPINJ")) bImpinJTag = true;
+        //MainActivity.csLibrary4A.appendToLog("AccessUcodeFragment.onViewCreated: MainActivity.tagType = " + (MainActivity.tagType == null ? "null" : MainActivity.tagType.toString()) + ", bImpinjTag = " + bImpinJTag);
 
-        spinnerHideTid = (Spinner) getActivity().findViewById(R.id.accessUCHideTid);
+        spinnerHideTid = (Spinner) view.findViewById(R.id.accessUCHideTid);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.hideTid_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerHideTid.setAdapter(targetAdapter);
 
-        checkBoxHideEpc = (CheckBox) getActivity().findViewById(R.id.accessUCHideEpc);
-        checkBoxHideTid = (CheckBox) getActivity().findViewById(R.id.accessUCHideTid1);
-        checkBoxHideUser = (CheckBox) getActivity().findViewById(R.id.accessUCHideUser);
-        checkBoxHideRange = (CheckBox) getActivity().findViewById(R.id.accessUCHideRange);
-        textViewAesKey0ActivateOk = (TextView) getActivity().findViewById(R.id.accessUCAesKey0ActivateOK);
-        textViewAesKey1ActivateOk = (TextView) getActivity().findViewById(R.id.accessUCAesKey1ActivateOK);
-        checkBoxAesKey0Activate = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey0Activate);
-        checkBoxAesKey1Activate = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey1Activate);
+        checkBoxHideEpc = (CheckBox) view.findViewById(R.id.accessUCHideEpc);
+        checkBoxHideTid = (CheckBox) view.findViewById(R.id.accessUCHideTid1);
+        checkBoxHideUser = (CheckBox) view.findViewById(R.id.accessUCHideUser);
+        checkBoxHideRange = (CheckBox) view.findViewById(R.id.accessUCHideRange);
+        textViewAesKey0ActivateOk = (TextView) view.findViewById(R.id.accessUCAesKey0ActivateOK);
+        textViewAesKey1ActivateOk = (TextView) view.findViewById(R.id.accessUCAesKey1ActivateOK);
+        checkBoxAesKey0Activate = (CheckBox) view.findViewById(R.id.accessUCAesKey0Activate);
+        checkBoxAesKey1Activate = (CheckBox) view.findViewById(R.id.accessUCAesKey1Activate);
 
-        TableRow tableRow = (TableRow) getActivity().findViewById(R.id.accessUCAesKeysRow);
+        TableRow tableRow = (TableRow) view.findViewById(R.id.accessUCAesKeysRow);
         if (iTagType == 5) tableRow.setVisibility(View.GONE);
-        textViewAesKey0Ok = (TextView) getActivity().findViewById(R.id.accessUCAesKey0OK);
-        textViewAesKey1Ok = (TextView) getActivity().findViewById(R.id.accessUCAesKey1OK);
-        checkBoxAesKey0 = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey0Title);
-        checkBoxAesKey1 = (CheckBox) getActivity().findViewById(R.id.accessUCAesKey1Title);
+        textViewAesKey0Ok = (TextView) view.findViewById(R.id.accessUCAesKey0OK);
+        textViewAesKey1Ok = (TextView) view.findViewById(R.id.accessUCAesKey1OK);
+        checkBoxAesKey0 = (CheckBox) view.findViewById(R.id.accessUCAesKey0Title);
+        checkBoxAesKey1 = (CheckBox) view.findViewById(R.id.accessUCAesKey1Title);
 
-        editTextAuthKeyId = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId);
+        editTextAuthKeyId = (EditText) view.findViewById(R.id.accessUCAuthKeyId);
         editTextAuthKeyId.setText(String.valueOf(0));
-        editTextAuthMsg = (EditText) getActivity().findViewById(R.id.accessUCAuthMsg);
-        editTextAuthMsg.addTextChangedListener(new GenericTextWatcher(editTextAuthMsg, bImpinJTag ? 12 : 20));
-        editTextAuthProfile = (EditText) getActivity().findViewById(R.id.accessUCAuthProfile);
+        editTextAuthMsg = (EditText) view.findViewById(R.id.accessUCAuthMsg);
+        //editTextAuthMsg.addTextChangedListener(new GenericTextWatcher(editTextAuthMsg, bImpinJTag ? 12 : 20));
+        editTextAuthProfile = (EditText) view.findViewById(R.id.accessUCAuthProfile);
         editTextAuthProfile.setText(String.valueOf(0));
-        editTextAuthOffset = (EditText) getActivity().findViewById(R.id.accessUCAuthOffset);
+        editTextAuthOffset = (EditText) view.findViewById(R.id.accessUCAuthOffset);
         editTextAuthOffset.setText(String.valueOf(0));
-        editTextAuthBlockId = (EditText) getActivity().findViewById(R.id.accessUCAuthBlockId);
+        editTextAuthBlockId = (EditText) view.findViewById(R.id.accessUCAuthBlockId);
         editTextAuthBlockId.setText(String.valueOf(1));
 
-        TextView textViewAuthProtModeLabel = (TextView) getActivity().findViewById(R.id.accessUCAuthProtModeLabel);
-        editTextAuthProtMode = (EditText) getActivity().findViewById(R.id.accessUCAuthProtMode);
-        TableRow tableRowAuthProtMode = (TableRow) getActivity().findViewById(R.id.accessUCAuthtModeRow);
-        checkBoxAuthEncryptMode = (CheckBox) getActivity().findViewById(R.id.accessUCAuthEncryptMode);
-        checkBoxAuthValidMode = (CheckBox) getActivity().findViewById(R.id.accessUCAuthValidMode);
+        TextView textViewAuthProtModeLabel = (TextView) view.findViewById(R.id.accessUCAuthProtModeLabel);
+        editTextAuthProtMode = (EditText) view.findViewById(R.id.accessUCAuthProtMode);
+        TableRow tableRowAuthProtMode = (TableRow) view.findViewById(R.id.accessUCAuthtModeRow);
+        checkBoxAuthEncryptMode = (CheckBox) view.findViewById(R.id.accessUCAuthEncryptMode);
+        checkBoxAuthValidMode = (CheckBox) view.findViewById(R.id.accessUCAuthValidMode);
         if (iTagType == 5) {
             textViewAuthProtModeLabel.setVisibility(View.GONE);
             editTextAuthProtMode.setVisibility(View.GONE);
@@ -128,72 +131,72 @@ public class AccessUcodeFragment extends CommonFragment {
             editTextAuthProtMode.setText(String.valueOf(1));
         }
 
-        editTextAuthResponse = (EditText) getActivity().findViewById(R.id.accessUCAuthResponse);
-        textViewAuthResponseDecoded = (TextView) getActivity().findViewById(R.id.accessUCAuthResponseDecoded);
-        textViewAuthResponseDecodedCustom = (TextView) getActivity().findViewById(R.id.accessUCAuthResponseDecodedCustom);
-        editTextAuthResponseEncodedMac = (TextView) getActivity().findViewById(R.id.accessUCAuthResponseEecodedMac);
-        textViewImpinjResponse = (TextView) getActivity().findViewById(R.id.accessUCImpinjResponse);
-        editTextEpcSize = (EditText) getActivity().findViewById(R.id.accessUCEpcSize);
-        editTextAesKey0 = (EditText) getActivity().findViewById(R.id.accessUCAesKey0);
+        editTextAuthResponse = (EditText) view.findViewById(R.id.accessUCAuthResponse);
+        textViewAuthResponseDecoded = (TextView) view.findViewById(R.id.accessUCAuthResponseDecoded);
+        textViewAuthResponseDecodedCustom = (TextView) view.findViewById(R.id.accessUCAuthResponseDecodedCustom);
+        editTextAuthResponseEncodedMac = (TextView) view.findViewById(R.id.accessUCAuthResponseEecodedMac);
+        textViewImpinjResponse = (TextView) view.findViewById(R.id.accessUCImpinjResponse);
+        editTextEpcSize = (EditText) view.findViewById(R.id.accessUCEpcSize);
+        editTextAesKey0 = (EditText) view.findViewById(R.id.accessUCAesKey0);
         editTextAesKey0.addTextChangedListener(new GenericTextWatcher(editTextAesKey0, 32));
-        editTextAesKey1 = (EditText) getActivity().findViewById(R.id.accessUCAesKey1);
+        editTextAesKey1 = (EditText) view.findViewById(R.id.accessUCAesKey1);
         editTextAesKey1.addTextChangedListener(new GenericTextWatcher(editTextAesKey1, 32));
 
-        buttonRead = (Button) getActivity().findViewById(R.id.accessUCReadButton);
+        buttonRead = (Button) view.findViewById(R.id.accessUCReadButton);
         if (iTagType == 5) buttonRead.setVisibility(View.GONE);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 operationRead = true; startAccessTask();
             }
         });
 
-        buttonWrite = (Button) getActivity().findViewById(R.id.accessUCWriteButton);
+        buttonWrite = (Button) view.findViewById(R.id.accessUCWriteButton);
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 operationRead = false; startAccessTask();
             }
         });
 
-        buttonReadBuffer = (Button) getActivity().findViewById(R.id.accessUCReadBufferButton);
+        buttonReadBuffer = (Button) view.findViewById(R.id.accessUCReadBufferButton);
         buttonReadBuffer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 readBufferChecked = true; startAccessTask();
             }
         });
 
-        buttonTam1 = (Button) getActivity().findViewById(R.id.accessUCTam1AuthButton);
+        buttonTam1 = (Button) view.findViewById(R.id.accessUCTam1AuthButton);
         buttonTam1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 MainActivity.csLibrary4A.appendToLog("buttonTam1 is pressed");
@@ -202,15 +205,15 @@ public class AccessUcodeFragment extends CommonFragment {
             }
         });
 
-        buttonTam2 = (Button) getActivity().findViewById(R.id.accessUCTam2AuthButton);
+        buttonTam2 = (Button) view.findViewById(R.id.accessUCTam2AuthButton);
         buttonTam2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 MainActivity.csLibrary4A.appendToLog("buttonTam2 is pressed");
@@ -228,39 +231,39 @@ public class AccessUcodeFragment extends CommonFragment {
             }
         });
 
-        buttonUntrace = (Button) getActivity().findViewById(R.id.accessUCUntraceButton);
+        buttonUntrace = (Button) view.findViewById(R.id.accessUCUntraceButton);
         buttonUntrace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 untraceChecked = true; startAccessTask();
             }
         });
 
-        tableRow = (TableRow) getActivity().findViewById(R.id.accessUCShowEpcRow);
+        tableRow = (TableRow) view.findViewById(R.id.accessUCShowEpcRow);
         if (iTagType == 5) tableRow.setVisibility(View.GONE);
-        buttonShowEpc = (Button) getActivity().findViewById(R.id.accessUCShowEpcButton);
+        buttonShowEpc = (Button) view.findViewById(R.id.accessUCShowEpcButton);
         buttonShowEpc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 showEpcChecked = true; startAccessTask();
             }
         });
 
-        TextView textViewWarning = (TextView) getActivity().findViewById(R.id.accessUCWarning);
+        TextView textViewWarning = (TextView) view.findViewById(R.id.accessUCWarning);
         if (iTagType == 5) textViewWarning.setText("Notice: Xerxes assumes Key0 for Tam1 and Tam 2");
         else textViewWarning.setText("Notice: Ucode assumes Key1 for Tam2");
 
@@ -268,26 +271,26 @@ public class AccessUcodeFragment extends CommonFragment {
         MainActivity.csLibrary4A.getUntraceableEpcLength();
         MainActivity.csLibrary4A.setSameCheck(false);
 
-        MainActivity.csLibrary4A.appendToLog("mDid in AccessUcodeFragment = " + MainActivity.mDid);
-        TextView textView = (TextView) getActivity().findViewById(R.id.accessUCAuthKeyIdLabel);
-        EditText editText = (EditText) getActivity().findViewById(R.id.accessUCAuthKeyId);
-        TableRow tableRow1 = (TableRow) getActivity().findViewById(R.id.accessUCAuthProfileRow);
-
-        layout = (LinearLayout) getActivity().findViewById(R.id.accessUCUcodeDNALayout);
-        if (bImpinJTag) {
+/*
+        TextView textView = (TextView) view.findViewById(R.id.accessUCAuthKeyIdLabel);
+        EditText editText = (EditText) view.findViewById(R.id.accessUCAuthKeyId);
+        TableRow tableRow1 = (TableRow) view.findViewById(R.id.accessUCAuthProfileRow);
+*/
+        layout = (LinearLayout) view.findViewById(R.id.accessUCUcodeDNALayout);
+        /*if (bImpinJTag) {
             textView.setVisibility(View.GONE);
             editText.setVisibility(View.GONE);
             editTextAuthMsg.setText("049CA53E55EA");
             tableRow1.setVisibility(View.GONE);
-            LinearLayout layout1 = (LinearLayout) getActivity().findViewById(R.id.accessUCKeyLayout);
-            LinearLayout layout2 = (LinearLayout) getActivity().findViewById(R.id.accessUCButtons);
+            LinearLayout layout1 = (LinearLayout) view.findViewById(R.id.accessUCKeyLayout);
+            LinearLayout layout2 = (LinearLayout) view.findViewById(R.id.accessUCButtons);
             layout1.setVisibility(View.GONE);
             layout2.setVisibility(View.GONE);
         } else if (MainActivity.csLibrary4A.get98XX() == 0 && MainActivity.csLibrary4A.checkHostProcessorVersion(MainActivity.csLibrary4A.getMacVer(), 2, 6, 8)) {
             layout.setVisibility(View.VISIBLE);
-        }
+        }*/
 
-        Button buttonImpinjCheck = (Button) getActivity().findViewById(R.id.accessUCImpinjCheck);
+        Button buttonImpinjCheck = (Button) view.findViewById(R.id.accessUCImpinjCheck);
         buttonImpinjCheck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -298,9 +301,9 @@ public class AccessUcodeFragment extends CommonFragment {
             }
         });
 
-        editTextAccessUCserverImpinj = (EditText) getActivity().findViewById(R.id.accessUCserverImpinj);
-        editTextAccessUCemail = (EditText) getActivity().findViewById(R.id.accessUCemail);
-        editTextAccessUCpassword = (EditText) getActivity().findViewById(R.id.accessUCpassword);
+        editTextAccessUCserverImpinj = (EditText) view.findViewById(R.id.accessUCserverImpinj);
+        editTextAccessUCemail = (EditText) view.findViewById(R.id.accessUCemail);
+        editTextAccessUCpassword = (EditText) view.findViewById(R.id.accessUCpassword);
         if (true) {
             editTextAccessUCserverImpinj.setText(MainActivity.csLibrary4A.getServerImpinjLocation());
             editTextAccessUCemail.setText(MainActivity.csLibrary4A.getServerImpinjName());
@@ -407,21 +410,40 @@ public class AccessUcodeFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
-        setupTagID();
+        if (MainActivity.tagType != null && MainActivity.tagType.toString().contains("TAG_IMPINJ")) bImpinJTag = true;
+        editTextAuthMsg.addTextChangedListener(new GenericTextWatcher(editTextAuthMsg, bImpinJTag ? 12 : 20));
+        TextView textView = (TextView) viewFragment.findViewById(R.id.accessUCAuthKeyIdLabel);
+        EditText editText = (EditText) viewFragment.findViewById(R.id.accessUCAuthKeyId);
+        TableRow tableRow1 = (TableRow) viewFragment.findViewById(R.id.accessUCAuthProfileRow);
+        if (bImpinJTag) {
+            textView.setVisibility(View.GONE);
+            editText.setVisibility(View.GONE);
+            editTextAuthMsg.setText("049CA53E55EA");
+            tableRow1.setVisibility(View.GONE);
+            LinearLayout layout1 = (LinearLayout) viewFragment.findViewById(R.id.accessUCKeyLayout);
+            LinearLayout layout2 = (LinearLayout) viewFragment.findViewById(R.id.accessUCButtons);
+            layout1.setVisibility(View.GONE);
+            layout2.setVisibility(View.GONE);
+        } else if (MainActivity.csLibrary4A.get98XX() == 0 && MainActivity.csLibrary4A.checkHostProcessorVersion(MainActivity.csLibrary4A.getMacVer(), 2, 6, 8)) {
+            layout.setVisibility(View.VISIBLE);
+        }
+        setUserVisibleHint2(true);
     }
 
     @Override
     public void onDestroy() {
         if (accessTask != null) accessTask.cancel(true);
         if (MainActivity.csLibrary4A != null) MainActivity.csLibrary4A.setSameCheck(true);
+        setUserVisibleHint2(false);
         super.onDestroy();
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessUcodeFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if (isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
             MainActivity.csLibrary4A.appendToLog("AccessUcodeFragment is now VISIBLE");
             setupTagID();
@@ -431,7 +453,7 @@ public class AccessUcodeFragment extends CommonFragment {
             MainActivity.csLibrary4A.appendToLog("AccessUcodeFragment is now inVISIBLE with layout = " + (layout == null ? "null" : layout.getVisibility()));
             if (getActivity() != null && layout != null && layout.getVisibility() == View.VISIBLE) {
                 keyId = Integer.parseInt(editTextAuthKeyId.getText().toString()); strChallenge = editTextAuthMsg.getText().toString();
-                RadioButton radioButton = (RadioButton) getActivity().findViewById(R.id.accessUCInventoryTam1);
+                RadioButton radioButton = (RadioButton) viewFragment.findViewById(R.id.accessUCInventoryTam1);
                 if (radioButton.isChecked()) {
                     MainActivity.csLibrary4A.appendToLog("AccessUcodeFragment.setUserVisibleHint: accessUCInventoryTam1 is checked");
                     if (false) MainActivity.csLibrary4A.setTam1Configuration(0, "FD5D8048F48DD09AAD22");
@@ -441,7 +463,7 @@ public class AccessUcodeFragment extends CommonFragment {
                     }
                     MainActivity.tagType = RfidReader.TagType.TAG_NXP_UCODEDNA_AUTHMODE;
                 } else {
-                    radioButton = (RadioButton) getActivity().findViewById(R.id.accessUCInventoryTam2);
+                    radioButton = (RadioButton) viewFragment.findViewById(R.id.accessUCInventoryTam2);
                     if (radioButton.isChecked()) {
                         MainActivity.csLibrary4A.appendToLog("AccessUcodeFragment.setUserVisibleHint: accessUCInventoryTam22 is checked");
                         if (false) MainActivity.csLibrary4A.setTam2Configuration(1, "FD5D8048F48DD09AAD22", 0, 0, 1, 1);
@@ -493,11 +515,11 @@ public class AccessUcodeFragment extends CommonFragment {
                     boolean bEnableBAPMode = false;
                     int number = Integer.valueOf(stringUser.substring(3, 4), 16);
                     if ((number % 2) == 1) bEnableBAPMode = true;
-//                    CheckBox checkBoxBAP = (CheckBox) getActivity().findViewById(R.id.coldChainEnableBAP);
+//                    CheckBox checkBoxBAP = (CheckBox) viewFragment.findViewById(R.id.coldChainEnableBAP);
 //                    checkBoxBAP.setChecked(bEnableBAPMode);
                 }
 
-                editTextAccessUCTid = (EditText) getActivity().findViewById(R.id.accessUCTid);
+                editTextAccessUCTid = (EditText) viewFragment.findViewById(R.id.accessUCTid);
                 editTextAccessUCTid.setText(tagSelected.getTid());
             }
         }
@@ -636,7 +658,7 @@ public class AccessUcodeFragment extends CommonFragment {
                         else strMatchResult += " Not Matched";
                     }
                 }
-                Toast.makeText(MainActivity.mContext, strMatchResult, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.context, strMatchResult, Toast.LENGTH_SHORT).show();
                 retValue = true;
             }
 
@@ -694,7 +716,7 @@ public class AccessUcodeFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
+            } else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -723,11 +745,12 @@ public class AccessUcodeFragment extends CommonFragment {
                     else if (operationRead) hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CREAD;
                     else hostCommand = RfidReaderChipData.HostCommands.CMD_18K6CWRITE;
 
-                    accessTask = new AccessTask(button, null, invalid, true,
+                    accessTask = MainActivity.csLibrary4A.getAccessTaskCustom(button, null, invalid, true,
                             selectTag.editTextTagID.getText().toString(), 1, 32,
                             selectTag.editTextAccessPassword.getText().toString(), Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()), hostCommand,
                             0, 0, true, false,
-                            null, null, null, null, null);
+                            null, null, null, null, null,
+                            MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     accessTask.execute();
                     rerunRequest = true;
                     MainActivity.csLibrary4A.appendToLog("accessTask is created");
@@ -776,7 +799,7 @@ public class AccessUcodeFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             if (readBufferChecked) readBufferChecked = false;
@@ -790,7 +813,7 @@ public class AccessUcodeFragment extends CommonFragment {
                     }
                     editTextAuthResponse.setText(strValue);
                     if (bImpinJTag) {
-                        LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessUCImpinjLayout);
+                        LinearLayout layout = (LinearLayout) viewFragment.findViewById(R.id.accessUCImpinjLayout);
                         if (authenTam1) layout.setVisibility(View.VISIBLE);
                         else layout.setVisibility(View.GONE);
                     } else processAESdata(accessResult);

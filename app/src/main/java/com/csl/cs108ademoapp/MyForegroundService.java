@@ -2,7 +2,7 @@ package com.csl.cs108ademoapp;
 
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.BLUETOOTH_SCAN;
-import static com.csl.cs108ademoapp.MainActivity.mContext;
+import static com.csl.cs108ademoapp.MainActivity.context;
 import static com.csl.cs108ademoapp.MyForegroundService.ForegroundServiceState.CLOUDCONNECT;
 import static com.csl.cs108ademoapp.MyForegroundService.ForegroundServiceState.CONNECT;
 import static com.csl.cs108ademoapp.MyForegroundService.ForegroundServiceState.CONNECTED;
@@ -31,6 +31,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
 import com.csl.cs108ademoapp.fragments.AboutFragment;
+import com.csl.cs108ademoapp.fragments.DirectWedgeFragment;
 import com.csl.cslibrary4a.BluetoothGatt;
 import com.csl.cslibrary4a.ReaderDevice;
 import com.csl.cslibrary4a.RfidReaderChipData;
@@ -45,7 +46,7 @@ public class MyForegroundService extends Service {
     boolean DEBUG = false;
     String TAG = "Hello";
     Handler mHandler = new Handler();
-    public static final String CHANNEL_ID = "ForegroundServiceChannelA";
+    public static final String CHANNEL_ID = "ForegroundServiceChannelSimple";
     public static final int SERVICE_ID = 1;
     NotificationManager notificationManager;
     NotificationCompat.Builder notificationCompatBuilder;
@@ -94,10 +95,12 @@ public class MyForegroundService extends Service {
         //notificationIntent.setFlags((Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         notificationCompatBuilder = new NotificationCompat.Builder(this, CHANNEL_ID);
-        if (getPackageName().contains("cs710ademoapp")) {
-            notificationCompatBuilder.setContentTitle("Cs710Reader Foreground Service").setSmallIcon(R.drawable.csl_logo_230510);
+        if (getPackageName().contains("cs710awedgeapp")) {
+            notificationCompatBuilder.setContentTitle("DataWedge Foreground Service").setSmallIcon(R.drawable.csl_java_logo_230510);
+        } else if (getPackageName().contains("cs710ademoapp")) {
+            notificationCompatBuilder.setContentTitle("Cs710Reader Foreground Service").setSmallIcon(R.drawable.csl_java_logo_230510);
         } else {
-            notificationCompatBuilder.setContentTitle("CsReader Foreground Service").setSmallIcon(R.drawable.csl_logo);
+            notificationCompatBuilder.setContentTitle("CsReader Foreground Service").setSmallIcon(R.drawable.csl_logo_170420);
             //.setPriority(NotificationCompat.PRIORITY_DEFAULT)
             //.setContentIntent(pendingIntent)
             //.setAutoCancel(true)
@@ -114,14 +117,13 @@ public class MyForegroundService extends Service {
                 new Runnable() {
                     @Override
                     public void run() {
-                        while (true) {
+                        while (threading) {
                             int iRandom = getRandomNumber();
                             String strMessage = iRandom + ", ";
                             if (MainActivity.csLibrary4A == null) {
                                 strMessage += "Cannot connect. Please restart App";
                                 foregroundServiceState = NULL;
-                            } else
-                        {
+                            } else {
                             ForegroundServiceState foregroundServiceStateOld = foregroundServiceState;
                             if (foregroundServiceState == NULL) {
                                 strMessage += "ServiceState = " + foregroundServiceState.toString();
@@ -130,13 +132,13 @@ public class MyForegroundService extends Service {
                                 strMessage += "Wait to enable Foreground Service";
                                 if (isForegroundEnable()) {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { //that is android 12 or above
-                                        if (ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-                                                || ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                                        if (ActivityCompat.checkSelfPermission(context, BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
+                                                || ActivityCompat.checkSelfPermission(context, BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
                                             Log.i(TAG, "runnableStart: CANNOT start scanLeDevice as BLUETOOTH_CONNECT && BLUETOOTH_SCAN is NOT yet permitted");
                                         } else if (MainActivity.csLibrary4A.isBleConnected()) {
                                             foregroundServiceState = CONNECTED;
                                             Log.i(TAG, "going to CONNECTED");
-                                        } else if (MainActivity.activityActive == false) {
+                                        } else if (!MainActivity.activityActive) {
                                             Log.i(TAG, "runnableStartService: BLUETOOTH_CONNECT and BLUETOOTH_SCAN and (ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION) is permitted");
                                         } else {
                                             Log.i(TAG, "Start ScanLeDevice");
@@ -157,7 +159,8 @@ public class MyForegroundService extends Service {
                                         if (csScanData == null) break;
                                         strMessage += ("\n" + csScanData.device.getAddress());
                                         if (csScanData.device.getAddress().matches(MainActivity.csLibrary4A.getForegroundReader())) { //"84:C6:92:9D:DD:52")) {
-                                            readerDevice = new ReaderDevice(csScanData.device.getName(), csScanData.device.getAddress(), false, "", 1, csScanData.rssi, csScanData.serviceUUID2p2);
+                                            readerDevice = new ReaderDevice(csScanData.device.getName(), csScanData.device.getAddress(), false, "", 1,
+                                                    csScanData.rssi, csScanData.serviceUUID, csScanData.hasServicePower);
                                             String strInfo = "";
                                             if (csScanData.device.getBondState() == 12) {
                                                 strInfo += "BOND_BONDED\n";
@@ -181,6 +184,15 @@ public class MyForegroundService extends Service {
                             } else if (foregroundServiceState == CONNECT) {
                                 strMessage += "Connecting Reader";
                                 if (MainActivity.csLibrary4A.isBleConnected()) {
+                                    for (int i = 0; i < MainActivity.sharedObjects.readersList.size(); i++) {
+                                        ReaderDevice readerDevice1 = MainActivity.sharedObjects.readersList.get(i);
+                                        if (readerDevice1.getAddress().matches(readerDevice.getAddress())) {
+                                            readerDevice = readerDevice1;
+                                            MainActivity.sharedObjects.readersList.remove(i);
+                                            MainActivity.csLibrary4A.appendToLog("CheckingPoint remove matched items");
+                                            break;
+                                        }
+                                    }
                                     readerDevice.setConnected(true);
                                     readerDevice.setSelected(true);
                                     MainActivity.sharedObjects.readersList.add(readerDevice);
@@ -355,16 +367,17 @@ public class MyForegroundService extends Service {
                             updateNotification(strMessage);
                             try {
                                 int iTime = 2000;
-                                if (foregroundServiceState == INVENTORY) iTime = 100;
+                                if (foregroundServiceState == CONNECTED && MainActivity.csLibrary4A.getTriggerButtonStatus()) iTime = 100;
                                 Thread.sleep(iTime);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         }
+                        Log.i(TAG, "thread exits with threading = " + threading);
                     }
                 }
         );
-        thread.start();
+        threading = true; thread.start();
 
         // Builds the notification and issues it.
         //do heavy work on a background thread
@@ -380,7 +393,7 @@ public class MyForegroundService extends Service {
             MainActivity.csLibrary4A.disconnect(false);
             Log.i(TAG, "MyForegroundService: onDestroy 0");
         }
-        thread.stop();
+        threading = false; //thread.stop();
         stopSelf();
         super.onDestroy();
     }
@@ -399,11 +412,11 @@ public class MyForegroundService extends Service {
         super.onTaskRemoved(rootIntent);
         //do something you want
         //stop service
-        thread.stop();
+        threading = false; //thread.stop();
         this.stopSelf();
     }
 
-    Thread thread = null;
+    Thread thread = null; boolean threading = false;
     Notification updateNotification(String string) {
         if (DEBUG) Log.i(TAG, "MyForegroundService.updateNotification: " + string);
         notificationCompatBuilder.setContentText(string);
@@ -431,7 +444,7 @@ public class MyForegroundService extends Service {
                 }
                 if (strBatteryLow != null) {
                     if (false) Log.i(TAG, "CustomIME Debug 112");
-                    Toast.makeText(mContext,
+                    Toast.makeText(context,
                             "Battery Low: " + strBatteryLow + "% Battery Life Left",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -447,7 +460,10 @@ public class MyForegroundService extends Service {
     boolean isForegroundEnable() {
         if (MainActivity.csLibrary4A == null) return false;
         if (DEBUG) Log.i(TAG, "MyForegroundService.isForegroundEnable: isHomeFragment = " + MainActivity.isHomeFragment + ", getForegroundReader = " + MainActivity.csLibrary4A.getForegroundReader());
-        return (MainActivity.isHomeFragment && MainActivity.csLibrary4A.getForegroundReader().length() != 0);
+        boolean bValue = (MainActivity.csLibrary4A.getForegroundReader() != null && !MainActivity.csLibrary4A.getForegroundReader().isEmpty());
+        if (getPackageName().contains("cs710awedgeapp")) bValue &= (MainActivity.activityActive == false  && !DirectWedgeFragment.bUserRequestedDisconnect);
+        else bValue &= MainActivity.isHomeFragment;
+        return bValue;
     }
 
     enum ForegroundServiceState {

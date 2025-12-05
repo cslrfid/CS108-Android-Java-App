@@ -4,17 +4,15 @@ import static com.csl.cslibrary4a.RfidReader.TagType.TAG_EM_AURASENSE;
 
 import android.os.Bundle;
 
-import com.google.android.material.tabs.TabLayout;
+import com.csl.cslibrary4a.CustomTabAdapter;
+import com.csl.cslibrary4a.CustomTabLayout;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.MenuProvider;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,20 +25,20 @@ import com.csl.cs108ademoapp.R;
 
 public class AuraSenseFragment extends CommonFragment {
     private ActionBar actionBar;
-    private ViewPager viewPager;
-    AuraSenseAdapter mAdapter;
+    private ViewPager2 viewPager;
+    CustomTabAdapter adapter;
 
     private String[] tabs = {"Configuration", "Scan" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
+        return inflater.inflate(R.layout.custom_tabbed_layout2, container, false);
     }
 
     @Override
     public boolean onMenuItemSelectedA(MenuItem item) {
-        InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) mAdapter.fragment1;
+        InventoryRfidiMultiFragment fragment1 = (InventoryRfidiMultiFragment) adapter.fragment1;
          if (item.getItemId() == R.id.menuAction_clear) {
              fragment1.clearTagsList();
              return true;
@@ -79,58 +77,43 @@ public class AuraSenseFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_inv);
         actionBar.setTitle(R.string.title_activity_auraSense);
 
-        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
+        adapter = new CustomTabAdapter(this, 2);
+        adapter.setFragment(0, new AccessAuraSenseFragment());
+        adapter.setFragment(1, InventoryRfidiMultiFragment.newInstance(true, TAG_EM_AURASENSE, "" /*"E280B12"*/));
 
-        mAdapter = new AuraSenseAdapter(getActivity().getSupportFragmentManager());
-        viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
-        viewPager.setAdapter(mAdapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        viewPager = (ViewPager2) getActivity().findViewById(R.id.OperationsPager2);
+        viewPager.setAdapter(adapter);
+        //viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
-        for (String tab_name : tabs) {
-            tabLayout.addTab(tabLayout.newTab().setText(tab_name));
-        }
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
-        });
+        CustomTabLayout tabLayout = (CustomTabLayout) getActivity().findViewById(R.id.OperationsTabLayout2);
+        tabLayout.addTab(tabs, viewPager);
     }
 
     @Override
     public void onPause() {
-		mAdapter.fragment0.onPause();
-        mAdapter.fragment1.onPause();
+		adapter.fragment0.onPause();
+        adapter.fragment1.onPause();
         super.onPause();
     }
 
     @Override
     public void onStop() {
-        mAdapter.fragment0.onStop();
-        mAdapter.fragment1.onStop();
+        adapter.fragment0.onStop();
+        adapter.fragment1.onStop();
         super.onStop();
     }
 
     @Override
     public void onDestroyView() {
-        mAdapter.fragment0.onDestroyView();
-        mAdapter.fragment1.onDestroyView();
+        adapter.fragment0.onDestroyView();
+        adapter.fragment1.onDestroyView();
         super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
-        mAdapter.fragment0.onDestroy();
-        mAdapter.fragment1.onDestroy();
+        adapter.fragment0.onDestroy();
+        adapter.fragment1.onDestroy();
         if (MainActivity.csLibrary4A != null) {
             MainActivity.csLibrary4A.setSelectCriteriaDisable(-1);
             MainActivity.csLibrary4A.setSameCheck(true);
@@ -141,47 +124,12 @@ public class AuraSenseFragment extends CommonFragment {
 
     @Override
     public void onDetach() {
-        mAdapter.fragment0.onDetach();
-        mAdapter.fragment1.onDetach();
+        adapter.fragment0.onDetach();
+        adapter.fragment1.onDetach();
         super.onDetach();
     }
 
     public AuraSenseFragment() {
         super("AuraSenseFragment");
-    }
-
-    class AuraSenseAdapter extends FragmentStatePagerAdapter {
-        private final int NO_OF_TABS = 2;
-        public Fragment fragment0, fragment1, fragment2;
-
-        @Override
-        public Fragment getItem(int index) {
-            Fragment fragment = null;
-            switch (index) {
-                case 0:
-                    fragment = new AccessAuraSenseFragment();
-                    fragment0 = fragment;
-                    break;
-                default:
-                    fragment = InventoryRfidiMultiFragment.newInstance(true, TAG_EM_AURASENSE, "" /*"E280B12"*/);
-                    fragment1 = fragment;
-                    break;
-            }
-            return fragment;
-        }
-
-        @Override
-        public int getCount() {
-            return NO_OF_TABS;
-        }
-
-        @Override
-        public int getItemPosition(Object object) {
-            return PagerAdapter.POSITION_NONE;
-        }
-
-        public AuraSenseAdapter(FragmentManager fm) {
-            super(fm);
-        }
     }
 }

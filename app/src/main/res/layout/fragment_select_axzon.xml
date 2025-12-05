@@ -21,11 +21,18 @@
         android:text="Magnus S3" />
 
     <Button
-        android:id="@+id/select_axzon_xx"
+        android:id="@+id/select_axzon_xerxes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="30sp"
         android:text="Xerxes" />
+
+    <Button
+        android:id="@+id/select_axzon_opus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:text="Opus" />
 
     <Button
         android:id="@+id/select_axzon_all"

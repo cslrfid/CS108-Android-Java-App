@@ -17,7 +17,7 @@ import androidx.annotation.NonNull;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.SettingTask;
+import com.csl.cs108ademoapp.SettingTaskCustom;
 
 public class SettingFilterPreFragment extends CommonFragment {
     private EditText editTextFilterPreSelectIndex;
@@ -41,7 +41,7 @@ public class SettingFilterPreFragment extends CommonFragment {
     int invSelectMaskOffset = -1;
     String invSelectMaskData = null;
 
-    private SettingTask settingTask;
+    private SettingTaskCustom settingTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,16 +53,17 @@ public class SettingFilterPreFragment extends CommonFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        editTextFilterPreSelectIndex = (EditText) getActivity().findViewById(R.id.filterPreSelectxIndex);
-        checkBoxEnable = (CheckBox) getActivity().findViewById(R.id.filterPreCheck);
+        editTextFilterPreSelectIndex = (EditText) view.findViewById(R.id.filterPreSelectxIndex);
+        MainActivity.csLibrary4A.appendToLog("AccessSecurityLockFragment.onViewCreated: editTextFilterPreSelectIndex is " + (editTextFilterPreSelectIndex == null ? "null" : "valid"));
+        checkBoxEnable = (CheckBox) view.findViewById(R.id.filterPreCheck);
 
-        targetSpinner = (Spinner) getActivity().findViewById(R.id.preFilterTarget);
+        targetSpinner = (Spinner) view.findViewById(R.id.preFilterTarget);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.filterPre_target_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         targetSpinner.setAdapter(targetAdapter);
         if (false) targetSpinner.setEnabled(false);
 
-        actionSpinner = (Spinner) getActivity().findViewById(R.id.preFilterAction);
+        actionSpinner = (Spinner) view.findViewById(R.id.preFilterAction);
         ArrayAdapter<CharSequence> actionAdapter;
         if (true) { //MainActivity.csLibrary4A.getQuerySelect() >= 2) {
             actionAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.filterPre_SLaction_options, R.layout.custom_spinner_layout);
@@ -73,13 +74,13 @@ public class SettingFilterPreFragment extends CommonFragment {
         actionSpinner.setAdapter(actionAdapter);
         if (false) actionSpinner.setEnabled(false);
 
-        memoryBankSpinner = (Spinner) getActivity().findViewById(R.id.preFilterMemoryBank);
+        memoryBankSpinner = (Spinner) view.findViewById(R.id.preFilterMemoryBank);
         ArrayAdapter<CharSequence> memoryBankAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
         memoryBankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         memoryBankSpinner.setAdapter(memoryBankAdapter);
         memoryBankSpinner.setEnabled(true);
 
-        spinnerMaskDataType = (Spinner) getActivity().findViewById(R.id.filterPreMaskDataType);
+        spinnerMaskDataType = (Spinner) view.findViewById(R.id.filterPreMaskDataType);
         ArrayAdapter<CharSequence> maskDataTypeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.dataType_options, R.layout.custom_spinner_layout);
         maskDataTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMaskDataType.setAdapter(maskDataTypeAdapter);
@@ -100,20 +101,20 @@ public class SettingFilterPreFragment extends CommonFragment {
             }
         });
 
-        preFilterOffset = (EditText) getActivity().findViewById(R.id.filterPreOffset);
-        filterPreMaskDataHex = (EditText) getActivity().findViewById(R.id.filterPreMaskDataHex);
-        filterPreMaskDataBit = (EditText) getActivity().findViewById(R.id.filterPreMaskDataBit);
+        preFilterOffset = (EditText) view.findViewById(R.id.filterPreOffset);
+        filterPreMaskDataHex = (EditText) view.findViewById(R.id.filterPreMaskDataHex);
+        filterPreMaskDataBit = (EditText) view.findViewById(R.id.filterPreMaskDataBit);
 
-        button = (Button) getActivity().findViewById(R.id.filterPreSaveButton);
+        button = (Button) view.findViewById(R.id.filterPreSaveButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean validValue = false;
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     try {
@@ -126,7 +127,7 @@ public class SettingFilterPreFragment extends CommonFragment {
 
                         settingUpdate();
                     } catch (Exception ex) {
-                        Toast.makeText(MainActivity.mContext, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.context, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -155,7 +156,7 @@ public class SettingFilterPreFragment extends CommonFragment {
             long lValue;
             boolean updating = false;
 
-            if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0)   updating = true;
+            if (MainActivity.csLibrary4A.rfidToWriteSize() != 0)   updating = true;
             else {
                 if (updating == false && editTextFilterPreSelectIndex.getText().length() == 0) {
                     lValue = MainActivity.csLibrary4A.getInvSelectIndex();
@@ -267,7 +268,7 @@ public class SettingFilterPreFragment extends CommonFragment {
             }
         }
 
-        settingTask = new SettingTask(button, sameSetting, invalidRequest);
+        settingTask = new SettingTaskCustom(button, sameSetting, invalidRequest);
         settingTask.execute();
         MainActivity.csLibrary4A.saveSetting2File();
     }

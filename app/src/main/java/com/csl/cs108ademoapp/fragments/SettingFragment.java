@@ -8,30 +8,23 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.csl.cs108ademoapp.MainActivity;
-import com.csl.cslibrary4a.AdapterTab;
 import com.csl.cs108ademoapp.R;
-import com.google.android.material.tabs.TabLayout;
+import com.csl.cslibrary4a.CustomTabAdapter;
+import com.csl.cslibrary4a.CustomTabLayout;
 
 public class SettingFragment extends CommonFragment {
     private ActionBar actionBar;
-    private ViewPager viewPager;
-    FragmentStatePagerAdapter pagerAdapter;
-    AdapterTab adapter;
-    Fragment fragment0, fragment1;
-
+    private ViewPager2 viewPager;
+    CustomTabAdapter adapter;
     private String[] tabs = { "Operation", "Administration" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
+        return inflater.inflate(R.layout.custom_tabbed_layout2, container, false);
     }
 
     @Override
@@ -42,61 +35,15 @@ public class SettingFragment extends CommonFragment {
         actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         actionBar.setTitle(R.string.title_activity_settings);
 
-        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        pagerAdapter = new FragmentStatePagerAdapter(getActivity().getSupportFragmentManager()) {
-            @Override
-            public int getCount() {
-                return tabs.length;
-            }
-            @Override
-            public int getItemPosition(Object object) {
-                return PagerAdapter.POSITION_NONE;
-            }
-            @Override
-            public Fragment getItem(int position) {
-                Fragment fragment = null;
-                switch (position) {
-                    case 0:
-                        fragment = new SettingOperateFragment();   //AccessSecurityLockFragment();    //InventoryRfidiMultiFragment();
-                        fragment0 = fragment;
-                        break;
-                    case 1:
-                        fragment1 = new SettingAdminFragment();
-                        break;
-                    default:
-                        fragment = null;
-                        break;
-                }
-                return fragment;
-            }
-        };
-        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new CustomTabAdapter(this, tabs.length);
         adapter.setFragment(0, new SettingOperateFragment());
         adapter.setFragment(1, new SettingAdminFragment());
 
-        viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
+        viewPager = (ViewPager2) view.findViewById(R.id.OperationsPager2);
         viewPager.setAdapter(adapter); //pagerAdapter); //mAdapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
-        for (String tab_name : tabs) {
-            tabLayout.addTab(tabLayout.newTab().setText(tab_name));
-        }
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
-        });
+        CustomTabLayout tabLayout = (CustomTabLayout) view.findViewById(R.id.OperationsTabLayout2);
+        tabLayout.addTab(tabs, viewPager);
     }
 
     @Override

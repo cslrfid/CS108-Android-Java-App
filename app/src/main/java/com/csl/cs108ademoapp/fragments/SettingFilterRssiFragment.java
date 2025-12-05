@@ -17,7 +17,7 @@ import androidx.annotation.NonNull;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.SettingTask;
+import com.csl.cs108ademoapp.SettingTaskCustom;
 
 public class SettingFilterRssiFragment extends CommonFragment {
     private CheckBox checkBoxEnable;
@@ -33,7 +33,7 @@ public class SettingFilterRssiFragment extends CommonFragment {
     double invSelectFilterThreshold1 = -1, invSelectFilterThreshold2 = -1;
     long invSelectFilterCount = -1;
 
-    private SettingTask settingTask;
+    private SettingTaskCustom settingTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,39 +45,39 @@ public class SettingFilterRssiFragment extends CommonFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        checkBoxEnable = (CheckBox) getActivity().findViewById(R.id.filterRssiCheck);
+        checkBoxEnable = (CheckBox) view.findViewById(R.id.filterRssiCheck);
 
-        spinnerFilterType = (Spinner) getActivity().findViewById(R.id.filterRssiFilterType);
+        spinnerFilterType = (Spinner) view.findViewById(R.id.filterRssiFilterType);
         ArrayAdapter<CharSequence> filterTypeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.filterType_options, R.layout.custom_spinner_layout);
         filterTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerFilterType.setAdapter(filterTypeAdapter);
         spinnerFilterType.setEnabled(false);
 
-        spinnerFilterOption = (Spinner) getActivity().findViewById(R.id.filterRssiFilterOption);
+        spinnerFilterOption = (Spinner) view.findViewById(R.id.filterRssiFilterOption);
         ArrayAdapter<CharSequence> filterOptionAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.filter_options1, R.layout.custom_spinner_layout);
         filterOptionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerFilterOption.setAdapter(filterOptionAdapter);
 
         String strUnit = MainActivity.csLibrary4A.getRssiDisplaySetting() > 0 ? "(dBm)" : "(dBuV)";
-        TextView textViewThreshold1 = (TextView) getActivity().findViewById(R.id.filterRssiThreshold1Label);
+        TextView textViewThreshold1 = (TextView) view.findViewById(R.id.filterRssiThreshold1Label);
         textViewThreshold1.setText(textViewThreshold1.getText().toString() + strUnit);
-        TextView textViewThreshold2 = (TextView) getActivity().findViewById(R.id.filterRssiThreshold2Label);
+        TextView textViewThreshold2 = (TextView) view.findViewById(R.id.filterRssiThreshold2Label);
         textViewThreshold2.setText(textViewThreshold2.getText().toString() + strUnit);
 
-        editTextFilterThreshold1 = (EditText) getActivity().findViewById(R.id.filterRssiThreshold1);
-        editTextFilterThreshold2 = (EditText) getActivity().findViewById(R.id.filterRssiThreshold2);
-        editTextFilterCount = (EditText) getActivity().findViewById(R.id.filterRssiCount);
+        editTextFilterThreshold1 = (EditText) view.findViewById(R.id.filterRssiThreshold1);
+        editTextFilterThreshold2 = (EditText) view.findViewById(R.id.filterRssiThreshold2);
+        editTextFilterCount = (EditText) view.findViewById(R.id.filterRssiCount);
 
-        button = (Button) getActivity().findViewById(R.id.filterRssiSaveButton);
+        button = (Button) view.findViewById(R.id.filterRssiSaveButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean validValue = false;
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     boolean bValid = false;
@@ -92,7 +92,7 @@ public class SettingFilterRssiFragment extends CommonFragment {
                         invSelectFilterCount = Integer.parseInt(editTextFilterCount.getText().toString());
                         bValid = true;
                     } catch (Exception ex) {
-                        Toast.makeText(MainActivity.mContext, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.context, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
                     }
                     if (bValid) settingUpdate();
                 }
@@ -122,7 +122,7 @@ public class SettingFilterRssiFragment extends CommonFragment {
             long lValue;
             String updating = null;
 
-            if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0)   updating = "waiting empty buffer";
+            if (MainActivity.csLibrary4A.rfidToWriteSize() != 0)   updating = "waiting empty buffer";
             else {
                 if (updating == null) {
                     boolean bValue = MainActivity.csLibrary4A.getRssiFilterEnable();
@@ -193,10 +193,10 @@ public class SettingFilterRssiFragment extends CommonFragment {
 
         if (invalidRequest != null) {
             String strValue = "Invalid " + invalidRequest + ". Operation is cancelled.";
-            Toast.makeText(MainActivity.mContext, strValue, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, strValue, Toast.LENGTH_SHORT).show();
 
         } else {
-            settingTask = new SettingTask(button, sameSetting, false);
+            settingTask = new SettingTaskCustom(button, sameSetting, false);
             settingTask.execute();
             MainActivity.csLibrary4A.saveSetting2File();
         }

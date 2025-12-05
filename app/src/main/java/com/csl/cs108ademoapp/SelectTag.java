@@ -15,25 +15,25 @@ public class SelectTag {
     public Spinner spinnerSelectBank;
     public TableRow tableRowSelectMemoryBank, tableRowSelectPassword;
 
-    public SelectTag(Activity activity, int index) {
-        if (index == 2) tableRowSelectMemoryBank = (TableRow) activity.findViewById(R.id.selectMemoryBankRow2);
-        else if (index == 1) tableRowSelectMemoryBank = (TableRow) activity.findViewById(R.id.selectMemoryBankRow1);
-        else tableRowSelectMemoryBank = (TableRow) activity.findViewById(R.id.selectMemoryBankRow);
-        if (index == 2) tableRowSelectPassword = (TableRow) activity.findViewById(R.id.selectPasswordRow2);
-        else if (index == 1) tableRowSelectPassword = (TableRow) activity.findViewById(R.id.selectPasswordRow1);
-        else tableRowSelectPassword = (TableRow) activity.findViewById(R.id.selectPasswordRow);
+    public SelectTag(Activity activity, View viewFragment, int index) {
+        if (index == 2) tableRowSelectMemoryBank = (TableRow) viewFragment.findViewById(R.id.selectMemoryBankRow2);
+        else if (index == 1) tableRowSelectMemoryBank = (TableRow) viewFragment.findViewById(R.id.selectMemoryBankRow1);
+        else tableRowSelectMemoryBank = (TableRow) viewFragment.findViewById(R.id.selectMemoryBankRow);
+        if (index == 2) tableRowSelectPassword = (TableRow) viewFragment.findViewById(R.id.selectPasswordRow2);
+        else if (index == 1) tableRowSelectPassword = (TableRow) viewFragment.findViewById(R.id.selectPasswordRow1);
+        else tableRowSelectPassword = (TableRow) viewFragment.findViewById(R.id.selectPasswordRow);
 
-        if (index == 2) editTextTagID = (EditText) activity.findViewById(R.id.selectTagID2);
-        else if (index == 1) editTextTagID = (EditText) activity.findViewById(R.id.selectTagID1);
-        else editTextTagID = (EditText) activity.findViewById(R.id.selectTagID);
-        if (index == 2) editTextSelectOffset = (EditText) activity.findViewById(R.id.selectMemoryOffset2);
-        else if (index == 1) editTextSelectOffset = (EditText) activity.findViewById(R.id.selectMemoryOffset1);
-        else editTextSelectOffset = (EditText) activity.findViewById(R.id.selectMemoryOffset);
+        if (index == 2) editTextTagID = (EditText) viewFragment.findViewById(R.id.selectTagID2);
+        else if (index == 1) editTextTagID = (EditText) viewFragment.findViewById(R.id.selectTagID1);
+        else editTextTagID = (EditText) viewFragment.findViewById(R.id.selectTagID);
+        if (index == 2) editTextSelectOffset = (EditText) viewFragment.findViewById(R.id.selectMemoryOffset2);
+        else if (index == 1) editTextSelectOffset = (EditText) viewFragment.findViewById(R.id.selectMemoryOffset1);
+        else editTextSelectOffset = (EditText) viewFragment.findViewById(R.id.selectMemoryOffset);
         //editTextRWSelectOffset.setVisibility(View.VISIBLE);
 
-        if (index == 2) spinnerSelectBank = (Spinner) activity.findViewById(R.id.selectMemoryBank2);
-        else if (index == 1) spinnerSelectBank = (Spinner) activity.findViewById(R.id.selectMemoryBank1);
-        else spinnerSelectBank = (Spinner) activity.findViewById(R.id.selectMemoryBank);
+        if (index == 2) spinnerSelectBank = (Spinner) viewFragment.findViewById(R.id.selectMemoryBank2);
+        else if (index == 1) spinnerSelectBank = (Spinner) viewFragment.findViewById(R.id.selectMemoryBank1);
+        else spinnerSelectBank = (Spinner) viewFragment.findViewById(R.id.selectMemoryBank);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(activity, R.array.read_memoryBank_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSelectBank.setAdapter(targetAdapter);
@@ -49,15 +49,15 @@ public class SelectTag {
             }
         });
 
-        if (index == 2) editTextAccessPassword = (EditText) activity.findViewById(R.id.selectPasswordValue2);
-        else if (index == 1) editTextAccessPassword = (EditText) activity.findViewById(R.id.selectPasswordValue1);
-        else editTextAccessPassword = (EditText) activity.findViewById(R.id.selectPasswordValue);
+        if (index == 2) editTextAccessPassword = (EditText) viewFragment.findViewById(R.id.selectPasswordValue2);
+        else if (index == 1) editTextAccessPassword = (EditText) viewFragment.findViewById(R.id.selectPasswordValue1);
+        else editTextAccessPassword = (EditText) viewFragment.findViewById(R.id.selectPasswordValue);
         editTextAccessPassword.addTextChangedListener(new GenericTextWatcher(editTextAccessPassword, 8));
         editTextAccessPassword.setText("00000000");
 
-        if (index == 2) editTextAccessAntennaPower = (EditText) activity.findViewById(R.id.selectAntennaPower2);
-        else if (index == 1) editTextAccessAntennaPower = (EditText) activity.findViewById(R.id.selectAntennaPower1);
-        else editTextAccessAntennaPower = (EditText) activity.findViewById(R.id.selectAntennaPower);
+        if (index == 2) editTextAccessAntennaPower = (EditText) viewFragment.findViewById(R.id.selectAntennaPower2);
+        else if (index == 1) editTextAccessAntennaPower = (EditText) viewFragment.findViewById(R.id.selectAntennaPower1);
+        else editTextAccessAntennaPower = (EditText) viewFragment.findViewById(R.id.selectAntennaPower);
         editTextAccessAntennaPower.setText(String.valueOf(300));
     }
 

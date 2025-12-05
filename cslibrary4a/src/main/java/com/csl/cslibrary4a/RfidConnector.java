@@ -124,14 +124,6 @@ public class RfidConnector {
                             csReaderRfidData.downlinkResponded = true;
                             mRfidToWrite.set(0, csReaderRfidData);
                             if (utility.DEBUG_PKDATA) appendToLog("PkData: mRfidToWrite.downlinkResponsed is set and waiting uplink data");
-                    /*if (false) {
-                        for (int i = 0; i < rfidReaderChip.mRfidReaderChip.mRx000ToRead.size(); i++) {
-                            if (rfidReaderChip.mRfidReaderChip.mRx000ToRead.get(i).responseType == Cs710Library4A.HostCmdResponseTypes.TYPE_COMMAND_END)
-                                if (DEBUG) appendToLog("mRx0000ToRead with COMMAND_END is removed");
-                        }
-                        if (DEBUG) appendToLog("mRx000ToRead.clear !!!");
-                    }
-                    rfidReaderChip.mRfidReaderChip.mRx000ToRead.clear(); if (DEBUG) appendToLog("mRx000ToRead.clear !!!");*/
                             utility.writeDebug2File("Up31 " + mRfidToWrite.get(0).rfidPayloadEvent.toString() + ", " + byteArrayToString(data1));
                             return true;
                         }
@@ -196,11 +188,10 @@ public class RfidConnector {
         return null;
     }
 
-    public boolean found;
     public int invalidUpdata;
     public boolean isRfidToRead(ConnectorData connectorData) {
         boolean DEBUG = false;
-        found = false;
+        boolean found = false;
         if (connectorData.dataValues[0] == (byte) 0x81) {
             appendToLog("BtData: RfidConnector.isRfidToRead dataValue = " + byteArrayToString(connectorData.dataValues));
             RfidConnector.CsReaderRfidData cs108RfidReadData = new RfidConnector.CsReaderRfidData();
@@ -208,7 +199,7 @@ public class RfidConnector {
             System.arraycopy(connectorData.dataValues, 2, dataValues, 0, dataValues.length);
             switch (connectorData.dataValues[1]) {
                 case 0:
-                    appendToLog("BtData: RfidConnector.isRfidToRead rfidConnectorCallback is " + (rfidConnectorCallback == null ? "null" : "valid"));
+                    if (false) appendToLog("RfidConnector.isRfidToRead: rfidConnectorCallback is " + (rfidConnectorCallback == null ? "null" : "valid"));
                     if (rfidConnectorCallback != null) {
                         if (rfidConnectorCallback.callbackMethod(dataValues)) break;
                     }

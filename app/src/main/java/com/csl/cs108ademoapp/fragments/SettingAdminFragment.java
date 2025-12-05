@@ -20,13 +20,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.CustomPopupWindow;
+import com.csl.cslibrary4a.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cs108ademoapp.SettingTask;
+import com.csl.cs108ademoapp.SettingTaskCustom;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
 public class SettingAdminFragment extends CommonFragment {
+    View viewFragment;
     private CheckBox checkBoxTriggerReporting, checkBoxInventoryBeep, checkBoxInventoryVibrate, checkBoxSaveFileEnable, checkBoxSaveCloudEnable, checkBoxSaveNewCloudEnable, checkBoxSaveAllCloudEnable, checkBoxDebugEnable, checkBoxForegroundService;
     private CheckBox checkBoxCsvColumnResBank, checkBoxCsvColumnEpcBank, checkBoxCsvColumnTidBank, checkBoxCsvColumnUserBank, checkBoxCsvColumnPhase, checkBoxCsvColumnChannel, checkBoxCsvColumnTime, checkBoxCsvColumnTimeZone, checkBoxCsvColumnLocation, checkBoxCsvColumnDirection, checkBoxCsvColumnOthers;
     private EditText editTextDeviceName, editTextCycleDelay, editTextTriggerReportingCount, editTextBeepCount, editTextVibrateTime, editTextVibrateWindow, editTextServer, editTextServerTimeout, editTextServerMqtt, editTextTopicMqtt, editTextForegroundDupElim, editTextServerImpinj, editTextServerImpinjName, editTextServerImpinjPasword;
@@ -54,41 +55,42 @@ public class SettingAdminFragment extends CommonFragment {
     int buttonCloudSave = -1, iForegroundDupElimNew = -1;
     int iServerTimeout = -1; int iServerTimeoutMin = 3; int iServerTimeoutMax = 9;
 
-    private SettingTask settingTask;
+    private SettingTaskCustom settingTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_settings_admin, container, false);
+        viewFragment = inflater.inflate(R.layout.fragment_settings_admin, container, false);
+        return viewFragment;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        textViewReaderModel = (TextView) getActivity().findViewById(R.id.settingAdminReaderModel);
-        editTextDeviceName = (EditText) getActivity().findViewById(R.id.settingAdminDeviceName);
+        textViewReaderModel = (TextView) view.findViewById(R.id.settingAdminReaderModel);
+        editTextDeviceName = (EditText) view.findViewById(R.id.settingAdminDeviceName);
         editTextDeviceName.setBackgroundResource(R.drawable.my_edittext_background);
         editTextDeviceName.setHint("Name Pattern");
         InputFilter[] FilterArray = new InputFilter[1];
         FilterArray[0] = new InputFilter.LengthFilter(20);
         editTextDeviceName.setFilters(FilterArray);
 
-        spinnerQueryBattery = (Spinner) getActivity().findViewById(R.id.settingAdminBattery);
+        spinnerQueryBattery = (Spinner) view.findViewById(R.id.settingAdminBattery);
         {
             ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.admin_battery_options, R.layout.custom_spinner_layout);
             targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerQueryBattery.setAdapter(targetAdapter);
         }
 
-        spinnerQueryRssi = (Spinner) getActivity().findViewById(R.id.settingAdminRssi);
+        spinnerQueryRssi = (Spinner) view.findViewById(R.id.settingAdminRssi);
         {
             ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.admin_rssi_options, R.layout.custom_spinner_layout);
             targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerQueryRssi.setAdapter(targetAdapter);
         }
 
-        spinnerQueryVibrateMode = (Spinner) getActivity().findViewById(R.id.settingAdminVibrateMode);
+        spinnerQueryVibrateMode = (Spinner) view.findViewById(R.id.settingAdminVibrateMode);
         {
             ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.admin_vibratemode_options, R.layout.custom_spinner_layout);
             targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -96,12 +98,12 @@ public class SettingAdminFragment extends CommonFragment {
         }
 
         if (MainActivity.csLibrary4A.get98XX() == 2) {
-            LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.settingAdminCycleDelayRow);
+            LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.settingAdminCycleDelayRow);
             linearLayout.setVisibility(View.GONE);
             spinnerQueryVibrateMode.setEnabled(false);
         }
 
-        spinnerSavingFormat = (Spinner) getActivity().findViewById(R.id.settingAdminSavingFormat);
+        spinnerSavingFormat = (Spinner) view.findViewById(R.id.settingAdminSavingFormat);
         {
             ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.admin_savingformat_options, R.layout.custom_spinner_layout);
             targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -109,7 +111,8 @@ public class SettingAdminFragment extends CommonFragment {
             spinnerSavingFormat.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.settingAdminCSVColumnSelectLayout);
+                    LinearLayout linearLayout = (LinearLayout) viewFragment.findViewById(R.id.settingAdminCSVColumnSelectLayout);
+                    MainActivity.csLibrary4A.appendToLog("SettingAdminFragment.onViewCreated.onItemSelectedListener: linearLayout is " + (linearLayout == null ? "null" : "valid"));
                     switch (i) {
                         case 1:
                             linearLayout.setVisibility(View.VISIBLE);
@@ -127,75 +130,75 @@ public class SettingAdminFragment extends CommonFragment {
             });
         }
 
-        checkBoxCsvColumnResBank = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnResBank);
-        checkBoxCsvColumnEpcBank = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnEpcBank);
-        checkBoxCsvColumnTidBank = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnTidBank);
-        checkBoxCsvColumnUserBank = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnUserBank);
-        checkBoxCsvColumnPhase = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnPhase);
-        checkBoxCsvColumnChannel = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnChannel);
-        checkBoxCsvColumnTime = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnTime);
-        checkBoxCsvColumnTimeZone = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnTimeZone);
-        checkBoxCsvColumnLocation = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnLocation);
-        checkBoxCsvColumnDirection = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnDirection);
-        checkBoxCsvColumnOthers = (CheckBox) getActivity().findViewById(R.id.settingAdminCSVColumnOthers);
+        checkBoxCsvColumnResBank = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnResBank);
+        checkBoxCsvColumnEpcBank = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnEpcBank);
+        checkBoxCsvColumnTidBank = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnTidBank);
+        checkBoxCsvColumnUserBank = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnUserBank);
+        checkBoxCsvColumnPhase = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnPhase);
+        checkBoxCsvColumnChannel = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnChannel);
+        checkBoxCsvColumnTime = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnTime);
+        checkBoxCsvColumnTimeZone = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnTimeZone);
+        checkBoxCsvColumnLocation = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnLocation);
+        checkBoxCsvColumnDirection = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnDirection);
+        checkBoxCsvColumnOthers = (CheckBox) view.findViewById(R.id.settingAdminCSVColumnOthers);
 
-        TextView textViewAdminCycleDelayLabel = (TextView) getActivity().findViewById(R.id.settingAdminCycleDelayLabel);
+        TextView textViewAdminCycleDelayLabel = (TextView) view.findViewById(R.id.settingAdminCycleDelayLabel);
         String stringAdminCycleDelayLabel = textViewAdminCycleDelayLabel.getText().toString();
         stringAdminCycleDelayLabel += "(" + String.valueOf(cycleDelayMin) + "-" + String.valueOf(cycleDelayMax) + "ms)";
         textViewAdminCycleDelayLabel.setText(stringAdminCycleDelayLabel);
-        editTextCycleDelay = (EditText) getActivity().findViewById(R.id.settingAdminCycleDelay);
+        editTextCycleDelay = (EditText) view.findViewById(R.id.settingAdminCycleDelay);
 
-        TextView textViewAdminTriggerReportingCountLabel = (TextView) getActivity().findViewById(R.id.settingAdminTriggerReportingCountLabel);
+        TextView textViewAdminTriggerReportingCountLabel = (TextView) view.findViewById(R.id.settingAdminTriggerReportingCountLabel);
         String stringAdminTriggeringReportingCountLabel = textViewAdminTriggerReportingCountLabel.getText().toString();
         stringAdminTriggeringReportingCountLabel += "(" + String.valueOf(sTriggerCountMin) + "-" + String.valueOf(sTriggerCountMax) + ") sec";
         textViewAdminTriggerReportingCountLabel.setText(stringAdminTriggeringReportingCountLabel);
-        editTextTriggerReportingCount = (EditText) getActivity().findViewById(R.id.settingAdminTriggerReportingCount);
+        editTextTriggerReportingCount = (EditText) view.findViewById(R.id.settingAdminTriggerReportingCount);
 
-        TextView textViewAdminBeepCountLabel = (TextView) getActivity().findViewById(R.id.settingAdminBeepCountLabel);
+        TextView textViewAdminBeepCountLabel = (TextView) view.findViewById(R.id.settingAdminBeepCountLabel);
         String stringAdminBeepCountLabel = textViewAdminBeepCountLabel.getText().toString();
         stringAdminBeepCountLabel += "(" + String.valueOf(iBeepCountMin) + "-" + String.valueOf(iBeepCountMax) + ")";
         textViewAdminBeepCountLabel.setText(stringAdminBeepCountLabel);
-        editTextBeepCount = (EditText) getActivity().findViewById(R.id.settingAdminBeepCount);
+        editTextBeepCount = (EditText) view.findViewById(R.id.settingAdminBeepCount);
 
-        TextView textViewAdminVibrateTimeLabel = (TextView) getActivity().findViewById(R.id.settingAdminVibrateTimeLabel);
+        TextView textViewAdminVibrateTimeLabel = (TextView) view.findViewById(R.id.settingAdminVibrateTimeLabel);
         String stringAdminVibrateTimeLabel = textViewAdminVibrateTimeLabel.getText().toString();
         stringAdminVibrateTimeLabel += "(" + String.valueOf(iVibrateTimeMin) + "-" + String.valueOf(iVibrateTimeMax) + "ms)";
         textViewAdminVibrateTimeLabel.setText(stringAdminVibrateTimeLabel);
-        editTextVibrateTime = (EditText) getActivity().findViewById(R.id.settingAdminVibrateTime);
+        editTextVibrateTime = (EditText) view.findViewById(R.id.settingAdminVibrateTime);
 
-        TextView textViewAdminVibrateWindowLabel = (TextView) getActivity().findViewById(R.id.settingAdminVibrateWindowLabel);
+        TextView textViewAdminVibrateWindowLabel = (TextView) view.findViewById(R.id.settingAdminVibrateWindowLabel);
         String stringAdminVibrateWindowLabel = textViewAdminVibrateWindowLabel.getText().toString();
         stringAdminVibrateWindowLabel += "(" + String.valueOf(iVibrateWindowMin) + "-" + String.valueOf(iVibrateWindowMax) + "sec)";
         textViewAdminVibrateWindowLabel.setText(stringAdminVibrateWindowLabel);
-        editTextVibrateWindow = (EditText) getActivity().findViewById(R.id.settingAdminVibrateWindow);
+        editTextVibrateWindow = (EditText) view.findViewById(R.id.settingAdminVibrateWindow);
 
-        checkBoxTriggerReporting = (CheckBox) getActivity().findViewById(R.id.settingAdminTriggerReporting);
-        checkBoxInventoryBeep = (CheckBox) getActivity().findViewById(R.id.settingAdminInventoryBeep);
-        checkBoxInventoryVibrate = (CheckBox) getActivity().findViewById(R.id.settingAdminInventoryVibrate);
-        checkBoxSaveFileEnable = (CheckBox) getActivity().findViewById(R.id.settingAdminToFileEnable);
-        checkBoxSaveCloudEnable = (CheckBox) getActivity().findViewById(R.id.settingAdminToCloudEnable);
-        checkBoxSaveNewCloudEnable = (CheckBox) getActivity().findViewById(R.id.settingAdminNewToCloudEnable);
-        checkBoxSaveAllCloudEnable = (CheckBox) getActivity().findViewById(R.id.settingAdminAllToCloudEnable);
-        editTextServer = (EditText) getActivity().findViewById(R.id.settingAdminServer);
+        checkBoxTriggerReporting = (CheckBox) view.findViewById(R.id.settingAdminTriggerReporting);
+        checkBoxInventoryBeep = (CheckBox) view.findViewById(R.id.settingAdminInventoryBeep);
+        checkBoxInventoryVibrate = (CheckBox) view.findViewById(R.id.settingAdminInventoryVibrate);
+        checkBoxSaveFileEnable = (CheckBox) view.findViewById(R.id.settingAdminToFileEnable);
+        checkBoxSaveCloudEnable = (CheckBox) view.findViewById(R.id.settingAdminToCloudEnable);
+        checkBoxSaveNewCloudEnable = (CheckBox) view.findViewById(R.id.settingAdminNewToCloudEnable);
+        checkBoxSaveAllCloudEnable = (CheckBox) view.findViewById(R.id.settingAdminAllToCloudEnable);
+        editTextServer = (EditText) view.findViewById(R.id.settingAdminServer);
         editTextServer.setHint("Cloud Address Pattern");
-        editTextServerMqtt = (EditText) getActivity().findViewById(R.id.settingAdminMqttServer);
+        editTextServerMqtt = (EditText) view.findViewById(R.id.settingAdminMqttServer);
         editTextServerMqtt.setHint("IP Address Pattern");
-        editTextTopicMqtt = (EditText) getActivity().findViewById(R.id.settingAdminTopicMqtt);
-        editTextForegroundDupElim = (EditText) getActivity().findViewById(R.id.settingAdminDupElimDelay);
-        radioButtonCloudSaveNone = (RadioButton) getActivity().findViewById(R.id.settingAdminCloudSaveNone);
-        radioButtonCloudSaveHttp = (RadioButton) getActivity().findViewById(R.id.settingAdminCloudSaveHttp);
-        radioButtonCloudSaveMqtt = (RadioButton) getActivity().findViewById(R.id.settingAdminCloudSaveMqtt);
-        editTextServerImpinj = (EditText) getActivity().findViewById(R.id.settingAdminServerImpinj);
-        editTextServerImpinjName = (EditText) getActivity().findViewById(R.id.settingAdminServerImpinjName);
-        editTextServerImpinjPasword = (EditText) getActivity().findViewById(R.id.settingAdminServerImpinjPassword);
+        editTextTopicMqtt = (EditText) view.findViewById(R.id.settingAdminTopicMqtt);
+        editTextForegroundDupElim = (EditText) view.findViewById(R.id.settingAdminDupElimDelay);
+        radioButtonCloudSaveNone = (RadioButton) view.findViewById(R.id.settingAdminCloudSaveNone);
+        radioButtonCloudSaveHttp = (RadioButton) view.findViewById(R.id.settingAdminCloudSaveHttp);
+        radioButtonCloudSaveMqtt = (RadioButton) view.findViewById(R.id.settingAdminCloudSaveMqtt);
+        editTextServerImpinj = (EditText) view.findViewById(R.id.settingAdminServerImpinj);
+        editTextServerImpinjName = (EditText) view.findViewById(R.id.settingAdminServerImpinjName);
+        editTextServerImpinjPasword = (EditText) view.findViewById(R.id.settingAdminServerImpinjPassword);
 
-        TextView textViewAdminServerConnectTimeoutLabel = (TextView) getActivity().findViewById(R.id.settingAdminServerConnectTimeoutLabel);
+        TextView textViewAdminServerConnectTimeoutLabel = (TextView) view.findViewById(R.id.settingAdminServerConnectTimeoutLabel);
         String stringAdminServerConnectTimeoutLabel  = textViewAdminServerConnectTimeoutLabel.getText().toString();
         stringAdminServerConnectTimeoutLabel += "(" + String.valueOf(iServerTimeoutMin) + "-" + String.valueOf(iServerTimeoutMax) + "sec)";
         textViewAdminServerConnectTimeoutLabel.setText(stringAdminServerConnectTimeoutLabel);
-        editTextServerTimeout = (EditText) getActivity().findViewById(R.id.settingAdminServerConnectTimeout);
+        editTextServerTimeout = (EditText) view.findViewById(R.id.settingAdminServerConnectTimeout);
 
-        buttonCSLServer = (Button) getActivity().findViewById(R.id.settingAdminCSLServer);
+        buttonCSLServer = (Button) view.findViewById(R.id.settingAdminCSLServer);
         buttonCSLServer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -209,117 +212,117 @@ public class SettingAdminFragment extends CommonFragment {
             }
         });
 
-        Button buttonReset = (Button) getActivity().findViewById(R.id.settingAdminBarcodeResetButton);
+        Button buttonReset = (Button) view.findViewById(R.id.settingAdminBarcodeResetButton);
         buttonReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isBarcodeFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     MainActivity.csLibrary4A.setBarcodeOn(true);
                     MainActivity.csLibrary4A.barcodeSendCommandConinuous();
                     MainActivity.csLibrary4A.setBarcodeOn(false);
                     MainActivity.csLibrary4A.saveSetting2File();
-                    Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_saved, Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        Button buttonReset2 = (Button) getActivity().findViewById(R.id.settingAdminBarcodeResetButtonT);
+        Button buttonReset2 = (Button) view.findViewById(R.id.settingAdminBarcodeResetButtonT);
         buttonReset2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isBarcodeFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     MainActivity.csLibrary4A.setBarcodeOn(true);
                     MainActivity.csLibrary4A.barcodeSendCommandTrigger();
                     MainActivity.csLibrary4A.saveSetting2File();
-                    Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_saved, Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        Button buttonReset3 = (Button) getActivity().findViewById(R.id.settingAdminBarcodeResetButtonF);
+        Button buttonReset3 = (Button) view.findViewById(R.id.settingAdminBarcodeResetButtonF);
         buttonReset3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isBarcodeFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     MainActivity.csLibrary4A.setBarcodeOn(true);
                     MainActivity.csLibrary4A.barcodeSendCommandSetPreSuffix();
-                    Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_saved, Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        Button buttonReset4 = (Button) getActivity().findViewById(R.id.settingAdminBarcodeResetButtonR);
+        Button buttonReset4 = (Button) view.findViewById(R.id.settingAdminBarcodeResetButtonR);
         buttonReset4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (MainActivity.csLibrary4A.isBarcodeFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Barcode is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Barcode is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     MainActivity.csLibrary4A.setBarcodeOn(true);
                     MainActivity.csLibrary4A.barcodeSendCommandResetPreSuffix();
-                    Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_saved, Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        Button buttonReset1 = (Button) getActivity().findViewById(R.id.settingAdminReaderResetButton);
+        Button buttonReset1 = (Button) view.findViewById(R.id.settingAdminReaderResetButton);
         buttonReset1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (false && MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     MainActivity.csLibrary4A.setReaderDefault();
                     MainActivity.csLibrary4A.saveSetting2File();
-                    Toast.makeText(MainActivity.mContext, R.string.toast_saved, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_saved, Toast.LENGTH_SHORT).show();
 
                     mHandler.post(updateRunnable);
-                    CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                    CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.context);
                     String stringInfo = "Please power cycle reader and also this application";
                     customPopupWindow.popupStart(stringInfo, false);
                 }
             }
         });
 
-        button = (Button) getActivity().findViewById(R.id.settingSaveButtonAdmin);
+        button = (Button) view.findViewById(R.id.settingSaveButtonAdmin);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean validValue = false;
                 if (MainActivity.csLibrary4A.isBleConnected() == false) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
                     return;
                 } else if (false && MainActivity.csLibrary4A.isRfidFailure()) {
-                    Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
                     return;
                 } else if (updateRunning) {
-                    Toast.makeText(MainActivity.mContext, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.context, R.string.toast_not_ready, Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     try {
@@ -370,21 +373,33 @@ public class SettingAdminFragment extends CommonFragment {
                         foregroundServiceEnable = checkBoxForegroundService.isChecked();
                         settingUpdate();
                     } catch (Exception ex) {
-                        Toast.makeText(MainActivity.mContext, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.context, R.string.toast_invalid_range, Toast.LENGTH_SHORT).show();
                     }
                 }
             }
         });
 
-        checkBoxDebugEnable = (CheckBox) getActivity().findViewById(R.id.settingAdminDebugEnable);
-        checkBoxForegroundService = (CheckBox) getActivity().findViewById(R.id.settingAdminForegroundEnable);
+        checkBoxDebugEnable = (CheckBox) view.findViewById(R.id.settingAdminDebugEnable);
+        checkBoxForegroundService = (CheckBox) view.findViewById(R.id.settingAdminForegroundEnable);
 
         if (!MainActivity.foregroundServiceEnable) {
-            LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.settingAdminForegroundLayout);
+            LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.settingAdminForegroundLayout);
             linearLayout.setVisibility(View.GONE);
         }
         if (sameCheck == false) MainActivity.csLibrary4A.setSameCheck(false);
         mHandler.post(updateRunnable);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setUserVisibleHint2(true);
+    }
+
+    @Override
+    public void onPause() {
+        setUserVisibleHint2(false);
+        super.onPause();
     }
 
     @Override
@@ -395,10 +410,11 @@ public class SettingAdminFragment extends CommonFragment {
         super.onDestroy();
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(isVisibleToUser) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("SettingAdminFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if (isVisibleToUser) {
             checkBoxTriggerReporting.setChecked(MainActivity.csLibrary4A.getTriggerReporting());
             checkBoxInventoryBeep.setChecked(MainActivity.csLibrary4A.getInventoryBeep());
             checkBoxInventoryVibrate.setChecked(MainActivity.csLibrary4A.getInventoryVibrate());
@@ -446,7 +462,7 @@ public class SettingAdminFragment extends CommonFragment {
             if (editTextTriggerReportingCount != null)   {
                 int triggerReportingCount = MainActivity.csLibrary4A.getTriggerReportingCount();
                 if (triggerReportingCount != MainActivity.csLibrary4A.iNO_SUCH_SETTING) {
-                    TableRow tableRow = (TableRow) getActivity().findViewById(R.id.settingAdminTriggerReportingRow);
+                    TableRow tableRow = (TableRow) viewFragment.findViewById(R.id.settingAdminTriggerReportingRow);
                     tableRow.setVisibility(View.VISIBLE);
                 }
                 editTextTriggerReportingCount.setText(String.valueOf(triggerReportingCount));
@@ -717,7 +733,7 @@ public class SettingAdminFragment extends CommonFragment {
                     invalidRequest = true;
             }
         }
-        settingTask = new SettingTask(button, sameSetting, invalidRequest);
+        settingTask = new SettingTaskCustom(button, sameSetting, invalidRequest);
         settingTask.execute();
         MainActivity.csLibrary4A.saveSetting2File();
     }

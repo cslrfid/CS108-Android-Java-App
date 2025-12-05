@@ -13,17 +13,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.MenuProvider;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
-import com.csl.cslibrary4a.AdapterTab;
-import com.google.android.material.tabs.TabLayout;
+import com.csl.cslibrary4a.CustomTabAdapter;
+import com.csl.cslibrary4a.CustomTabLayout;
 
 public class InventoryFragment extends CommonFragment {
     private ActionBar actionBar;
-    private ViewPager viewPager;
-    AdapterTab adapter;
+    private ViewPager2 viewPager;
+    CustomTabAdapter adapter;
 
     private String[] tabs = {"RFID", "Barcode"};
 
@@ -31,14 +31,14 @@ public class InventoryFragment extends CommonFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         savedInstanceState = null;
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.custom_tabbed_layout, container, false);
+        return inflater.inflate(R.layout.custom_tabbed_layout2, container, false);
     }
 
     @Override
     public boolean onMenuItemSelectedA(@NonNull MenuItem item) {
-        MainActivity.csLibrary4A.appendToLog("InventoryFragment.onMenuItemSelectedA with viewPager as " + viewPager.getCurrentItem());
-        InventoryRfidiMultiFragment fragment0 = (InventoryRfidiMultiFragment) adapter.getItem(0);
-        InventoryBarcodeFragment fragment1 = (InventoryBarcodeFragment) adapter.getItem(1);
+        MainActivity.csLibrary4A.appendToLog("InventoryFragment.onMenuItemSelectedA with viewPager as " + viewPager.getCurrentItem() + ", item as " + item.getItemId());
+        InventoryRfidiMultiFragment fragment0 = (InventoryRfidiMultiFragment) adapter.createFragment(0);
+        InventoryBarcodeFragment fragment1 = (InventoryBarcodeFragment) adapter.createFragment(1);
         switch (viewPager.getCurrentItem()) {
             case 0:
                 return fragment0.onMenuItemSelectedA(item);
@@ -71,35 +71,17 @@ public class InventoryFragment extends CommonFragment {
         actionBar.setIcon(R.drawable.dl_inv);
         actionBar.setTitle(R.string.title_activity_inventory);
 
-        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.OperationsTabLayout);
-
-        adapter = new AdapterTab(getActivity().getSupportFragmentManager(), tabs.length);
+        adapter = new CustomTabAdapter(this, tabs.length);
         adapter.setFragment(0, InventoryRfidiMultiFragment.newInstance(false, null, null));
         adapter.setFragment(1, new InventoryBarcodeFragment());
 
-        viewPager = (ViewPager) getActivity().findViewById(R.id.OperationsPager);
+        viewPager = (ViewPager2) getActivity().findViewById(R.id.OperationsPager2);
         Log.i("Hello", "InventoryFragment.onActivity");
         viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        //viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
-        for (String tab_name : tabs) {
-            tabLayout.addTab(tabLayout.newTab().setText(tab_name));
-        }
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
-        });
+        CustomTabLayout tabLayout = (CustomTabLayout) getActivity().findViewById(R.id.OperationsTabLayout2);
+        tabLayout.addTab(tabs, viewPager);
     }
 
     @Override

@@ -12,11 +12,12 @@ public class BluetoothConnector {
 //    public boolean userDebugEnableDefault = false;
 //    public boolean userDebugEnable = userDebugEnableDefault;
 
-    Context context; Utility utility; boolean userDebugEnable;
-    public BluetoothConnector(Context context, Utility utility, boolean userDebugEnable) {
+    Context context; Utility utility; boolean userDebugEnable; boolean bis108;
+    public BluetoothConnector(Context context, Utility utility, boolean userDebugEnable, boolean bis108) {
         this.context = context;
         this.utility = utility; DEBUG_PKDATA = utility.DEBUG_PKDATA;
         this.userDebugEnable = userDebugEnable;
+        this.bis108 = bis108;
     }
     private String byteArrayToString(byte[] packet) { return utility.byteArrayToString(packet); }
     private boolean compareArray(byte[] array1, byte[] array2, int length) { return utility.compareByteArray(array1, array2, length); }
@@ -174,8 +175,13 @@ public class BluetoothConnector {
                             int length = mBluetoothIcVersion.length;
                             if (connectorData.dataValues.length - 2 < length) length = connectorData.dataValues.length - 2;
                             System.arraycopy(connectorData.dataValues, 2, mBluetoothIcVersion, 0, length);
-                            if (mBluetoothIcVersion[0] == 3) icsModel = 463;
-                            else if (mBluetoothIcVersion[0] == 1) icsModel = 108;
+                            if (bis108) {
+                                if (mBluetoothIcVersion[0] == 3) icsModel = 463;
+                                else if (mBluetoothIcVersion[0] == 1) icsModel = 108;
+                            } else {
+                                if (mBluetoothIcVersion[0] == 3) icsModel = 203;
+                                else if (mBluetoothIcVersion[0] == 1) icsModel = 710;
+                            }
                             mBluetoothIcVersionUpdated = true;
                             if (DEBUG) appendToLog("mBluetoothIcVersionUpdated is true");
                             bprocessed = true;

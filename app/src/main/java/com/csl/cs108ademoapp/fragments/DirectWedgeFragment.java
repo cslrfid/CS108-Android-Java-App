@@ -9,8 +9,13 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.Context.LOCATION_SERVICE;
 
-import static com.csl.cs108ademoapp.MainActivity.mContext;
+import static androidx.core.app.ServiceCompat.STOP_FOREGROUND_REMOVE;
+import static androidx.core.app.ServiceCompat.stopForeground;
+import static androidx.core.content.ContextCompat.getSystemService;
+import static com.csl.cs108ademoapp.MainActivity.context;
 
+import android.app.ActivityManager;
+import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
@@ -20,6 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,9 +43,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import com.csl.cs108ademoapp.CustomPopupWindow;
-import com.csl.cs108ademoapp.DrawerListContent;
+import com.csl.cslibrary4a.CustomPopupWindow;
+import com.csl.cs108ademoapp.MyForegroundService;
 import com.csl.cs108ademoapp.adapters.ReaderListAdapter;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
@@ -153,7 +160,7 @@ public class DirectWedgeFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected() || true) new SettingWedgeFragment().show(getChildFragmentManager(), "TAG");
-                else if (MainActivity.csLibrary4A.mrfidToWriteSize() != 0) Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.toast_not_ready), Toast.LENGTH_SHORT).show();
+                else if (MainActivity.csLibrary4A.rfidToWriteSize() != 0) Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.toast_not_ready), Toast.LENGTH_SHORT).show();
                 else Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.toast_ble_not_connected), Toast.LENGTH_SHORT).show();
             }
         });
@@ -187,7 +194,7 @@ public class DirectWedgeFragment extends CommonFragment {
             @Override
             public void onClick(View v) {
                 if (MainActivity.csLibrary4A.isBleConnected()) {
-                    if (MainActivity.csLibrary4A.mrfidToWriteSize() == 0) {
+                    if (MainActivity.csLibrary4A.rfidToWriteSize() == 0) {
                         MainActivity.wedged = true;
                         Intent i = new Intent(Intent.ACTION_MAIN);
                         i.addCategory(Intent.CATEGORY_HOME);
@@ -201,7 +208,7 @@ public class DirectWedgeFragment extends CommonFragment {
         buttonInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CustomPopupWindow customPopupWindow = new CustomPopupWindow(mContext);
+                CustomPopupWindow customPopupWindow = new CustomPopupWindow(context);
                 String stringInfo =
                 "1.	For the first time launching the application, please grant device permission for location, connectivity and enabling <CSL Data Wedge>. \n\n" +
                 "2.	Readers will be discovered by the app and please check the box on the right hand side to select the reader to be connected. \n\n" +
@@ -233,6 +240,7 @@ public class DirectWedgeFragment extends CommonFragment {
             MainActivity.csLibrary4A.setSameCheck(true);
             MainActivity.csLibrary4A.restoreAfterTagSelect();
         }
+        handler.removeCallbacks(runnableStart);
         super.onDestroy();
     }
 
@@ -258,7 +266,7 @@ public class DirectWedgeFragment extends CommonFragment {
         MainActivity.csLibrary4A.connect(readerDevice); bWedgeConnecting = true; bWedgeConnected = false; bUserRequestedDisconnect = false;
         buttonConnect.setText("Connecting");
         MainActivity.csLibrary4A.setWedgeDeviceName(readerDevice.getName()); MainActivity.csLibrary4A.setWedgeDeviceAddress(readerDevice.getAddress());
-        MainActivity.csLibrary4A.setWedgeDeviceUUID2p1(readerDevice.getServiceUUID2p1());
+        MainActivity.csLibrary4A.setWedgeDeviceUUID2p1(readerDevice.getServiceUUID());
     }
 
     Runnable runnableStartService = new Runnable() {
@@ -266,82 +274,40 @@ public class DirectWedgeFragment extends CommonFragment {
 
         @Override
         public void run() {
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE) = " + ActivityCompat.checkSelfPermission(mContext, WRITE_EXTERNAL_STORAGE));
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, READ_EXTERNAL_STORAGE)  = " + ActivityCompat.checkSelfPermission(mContext, READ_EXTERNAL_STORAGE));
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (mContext.checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions WRITE_EXTERNAL_STORAGE"); //
-                    requestPermissions(new String[] { WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE }, 1);
-                    //Toast.makeText(mContext, com.csl.cslibrary4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
-                } else MainActivity.csLibrary4A.appendToLog("runnableStartService: WRITE_EXTERNAL_STORAGE is permitted"); ///
-            } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle WRITE_EXTERNAL_STORAGE");
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE) = " + ActivityCompat.checkSelfPermission(context, WRITE_EXTERNAL_STORAGE));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, READ_EXTERNAL_STORAGE)  = " + ActivityCompat.checkSelfPermission(context, READ_EXTERNAL_STORAGE));
 
-            LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
+            LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
             MainActivity.csLibrary4A.appendToLog("runnableStartService: locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER));
             MainActivity.csLibrary4A.appendToLog("runnableStartService: locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) = " + locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) = " + ActivityCompat.checkSelfPermission(mContext, ACCESS_FINE_LOCATION));
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_COARSE_LOCATION)  = " + ActivityCompat.checkSelfPermission(mContext, ACCESS_COARSE_LOCATION));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if ((ActivityCompat.checkSelfPermission(mContext, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                        || ActivityCompat.checkSelfPermission(mContext, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-                    CustomAlertDialog appdialog = new CustomAlertDialog();
-                    appdialog.Confirm(getActivity(), "Use your location",
-                            "This app collects location data in the background.  In terms of the features using this location data in the background, this App collects location data when it is reading RFID tag in all inventory pages.  The purpose of this is to correlate the RFID tag with the actual GNSS(GPS) location of the tag.  In other words, this is to track the physical location of the logistics item tagged with the RFID tag.",
-                            "No thanks", "Turn on",
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    MainActivity.csLibrary4A.appendToLog("runnableStartService: allow permission in ACCESS_FINE_LOCATION handler");
-                                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions ACCESS_FINE_LOCATION");
-                                    requestPermissions(new String[] { ACCESS_FINE_LOCATION }, 123); //ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION
-                                    //if (false) Toast.makeText(mContext, com.csl.cslibrary4a.R.string.toast_permission_not_granted, Toast.LENGTH_SHORT).show();
-                                    /*{
-                                        LocationManager locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
-                                        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == false) {
-                                            MainActivity.csLibrary4A.appendToLog("popupAlert: StreamOut: start activity ACTION_LOCATION_SOURCE_SETTINGS");
-                                            Intent intent1 = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                            mContext.startActivity(intent1);
-                                        }
-                                    }*/
-                                    //bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
-                                    //bAlerting = false;
-                                }
-                            },
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    MainActivity.csLibrary4A.appendToLog("runnableStartService: reject permission in ACCESS_FINE_LOCATION handler");
-                                    //bAlerting = false;
-                                    //bleEnableRequestShown0 = true; mHandler.postDelayed(mRquestAllowRunnable, 60000);
-                                }
-                            });
-                    MainActivity.csLibrary4A.appendToLog("runnableStartService: started ACCESS_FINE_LOCATION handler");
-                } else MainActivity.csLibrary4A.appendToLog("runnableStartService: handled ACCESS_FINE_LOCATION");
-            } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle ACCESS_FINE_LOCATION");
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) = " + ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, ACCESS_COARSE_LOCATION)  = " + ActivityCompat.checkSelfPermission(context, ACCESS_COARSE_LOCATION));
 
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_CONNECT) = " + ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_CONNECT));
-            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_SCAN)  = " + ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_SCAN));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                    MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
-                    requestPermissions(new String[] { BLUETOOTH_SCAN, BLUETOOTH_CONNECT }, 123);
-                } else MainActivity.csLibrary4A.appendToLog("runnableStartService: handled BLUETOOTH_CONNECT and BLUETOOTH_SCAN");
-            } else MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_CONNECT) = " + ActivityCompat.checkSelfPermission(context, BLUETOOTH_CONNECT));
+            MainActivity.csLibrary4A.appendToLog("runnableStartService: ActivityCompat.checkSelfPermission(activity, BLUETOOTH_SCAN)  = " + ActivityCompat.checkSelfPermission(context, BLUETOOTH_SCAN));
         }
     };
 
+    boolean bForegroundServiceRunning = false;
     int runningMode = -1, connectWait = 0, scanWait = 0;
     Runnable runnableStart = new Runnable() {
         @Override
         public void run() {
             boolean bValue = true;
+            if (bForegroundServiceRunning == false && MainActivity.stringPackageName.contains("cs710awedgeapp")) {
+                if (ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(context, ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    startService();
+                    bForegroundServiceRunning = true;
+                }
+            }
             if (MainActivity.csLibrary4A.isBleConnected()) {
-                if (MainActivity.csLibrary4A.mrfidToWriteSize() == 0) {
+                if (MainActivity.csLibrary4A.rfidToWriteSize() == 0) {
                     bWedgeConnecting = false;
                     if (bWedgeConnected == false) {
                         bWedgeConnected = true;
                         MainActivity.csLibrary4A.setPowerLevel(MainActivity.csLibrary4A.getWedgePower());
-                        MainActivity.csLibrary4A.appendToLog("runnableStart: isBleConnected is true with mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+                        MainActivity.csLibrary4A.appendToLog("runnableStart: isBleConnected is true with mrfidToWriteSize = " + MainActivity.csLibrary4A.rfidToWriteSize());
                         for (int i = 0; i < readersList.size(); i++) {
                             ReaderDevice readerDevice = readersList.get(i);
                             if (readerDevice.getSelected() && readerDevice.isConnected() == false) {
@@ -374,6 +340,7 @@ public class DirectWedgeFragment extends CommonFragment {
                         BluetoothGatt.CsScanData csScanData = MainActivity.csLibrary4A.getNewDeviceScanned();
                         if (csScanData != null) {
                             BluetoothGatt.CsScanData scanResultA = csScanData;
+                            if (scanResultA.device == null) continue;
                             if (getActivity() == null) continue;
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 if (ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
@@ -400,7 +367,8 @@ public class DirectWedgeFragment extends CommonFragment {
                                     }
                                 }
                                 if (match == false) {
-                                    ReaderDevice readerDevice = new ReaderDevice(scanResultA.device.getName(), scanResultA.device.getAddress(), false, "", 1, scanResultA.rssi, scanResultA.serviceUUID2p2);
+                                    ReaderDevice readerDevice = new ReaderDevice(scanResultA.device.getName(), scanResultA.device.getAddress(), false, "",
+                                            1, scanResultA.rssi, scanResultA.serviceUUID, scanResultA.hasServicePower);
                                     String strInfo = "";
                                     if (scanResultA.device.getBondState() == 12) {
                                         strInfo += "BOND_BONDED\n";
@@ -432,26 +400,24 @@ public class DirectWedgeFragment extends CommonFragment {
                 MainActivity.csLibrary4A.appendToLog("runnableStart: isBleScanning is FALSE");
                 boolean bScanPermitted = true;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { //that is android 12 or above
-                    if (ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-                            || ActivityCompat.checkSelfPermission(mContext, BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(context, BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
+                            || ActivityCompat.checkSelfPermission(context, BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
                         bScanPermitted = false;
-                        //MainActivity.csLibrary4A.appendToLog("runnableStartService: requestPermissions BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
-                        //requestPermissions(new String[] { BLUETOOTH_SCAN, BLUETOOTH_CONNECT }, 123);
                         MainActivity.csLibrary4A.appendToLog("runnableStart: CANNOT start scanLeDevice as BLUETOOTH_CONNECT && BLUETOOTH_SCAN is NOT yet permitted");
                     } else {
                         MainActivity.csLibrary4A.appendToLog("runnableStartService: BLUETOOTH_CONNECT and BLUETOOTH_SCAN and (ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION) is permitted");
                     }
                 } else {
                     MainActivity.csLibrary4A.appendToLog("runnableStartService: no need to handle BLUETOOTH_SCAN and BLUETOOTH_CONNECT");
-                    if (ActivityCompat.checkSelfPermission(mContext, BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(context, BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
                         bScanPermitted = false;
                         MainActivity.csLibrary4A.appendToLog("runnableStart: CANNOT start scanLeDevice as BLUETOOTH is NOT yet permitted");
                     } else {
                         MainActivity.csLibrary4A.appendToLog("runnableStartService: BLUETOOTH_CONNECT and BLUETOOTH_SCAN and (ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION) is permitted");
                     }
                 }
-                if ((ActivityCompat.checkSelfPermission(mContext, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                        || ActivityCompat.checkSelfPermission(mContext, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                if ((ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(context, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
                     bScanPermitted = false;
                     MainActivity.csLibrary4A.appendToLog("runnableStart: CANNOT start scanLeDevice as ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION is NOT yet permitted");
                 }
@@ -499,7 +465,7 @@ public class DirectWedgeFragment extends CommonFragment {
             boolean bFound = false;
             List<InputMethodInfo> list = null;
             stringImeExpected = getActivity().getPackageName() + ".CustomIME";
-            if (MainActivity.drawerPositionsDefault != DrawerListContent.DrawerPositions.MAIN) stringLabelExpected = getResources().getString(R.string.app_ime_simplewedge1);
+            if (getActivity().getPackageName().contains("cs710awedgeapp")) stringLabelExpected = getResources().getString(R.string.app_ime_simplewedge1);
             else if (getActivity().getPackageName().contains("cs710ademoapp")) stringLabelExpected = getResources().getString(R.string.app_ime_cs710);
             else stringLabelExpected = getResources().getString(R.string.app_ime_cs108);
             InputMethodManager inputMethodManager = inputMethodManager = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
@@ -541,7 +507,7 @@ public class DirectWedgeFragment extends CommonFragment {
                     if (list.get(i).getServiceName().contains(stringImeExpected) && list.get(i).loadLabel(getActivity().getPackageManager()).toString().contains(stringLabelExpected)) {
                         bFound = true;
                         MainActivity.csLibrary4A.appendToLog("Found expected IME with id = " + list.get(i).getId());
-                        String idCurrent = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+                        String idCurrent = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
                         MainActivity.csLibrary4A.appendToLog("Found current IME with id = " + idCurrent);
                         if (list.get(i).getId().matches(idCurrent)) {
                             MainActivity.csLibrary4A.appendToLog("expected IME matches current IME");
@@ -568,5 +534,26 @@ public class DirectWedgeFragment extends CommonFragment {
                 }
             }
         }
+    }
+
+    Intent serviceIntent;
+    Service serviceStarted;
+    public void startService() {
+        Log.i("Hello", "startService start");
+        ActivityManager activityManager = (ActivityManager) getSystemService(context, ActivityManager.class);
+        assert activityManager != null;
+        for (ActivityManager.RunningServiceInfo service: activityManager.getRunningServices(Integer.MAX_VALUE)) {
+            MainActivity.csLibrary4A.appendToLog("MyForegroundService.class.getName = " + MyForegroundService.class.getName() + ", service.service.getClassName = " + service.service.getClassName());
+            if (MyForegroundService.class.getName().equals(service.service.getClassName())) {
+                return;
+            }
+        }
+        serviceIntent = new Intent(context, MyForegroundService.class);
+        serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");;
+        ContextCompat.startForegroundService(context, serviceIntent);
+    }
+    public void stopService1() {
+        //Intent serviceIntent = new Intent(getActivity(), CustomForegroundService.class);
+        stopForeground(serviceStarted, STOP_FOREGROUND_REMOVE);
     }
 }

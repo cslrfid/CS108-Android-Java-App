@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputConnection;
 
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cslibrary4a.RfidReaderChipData;
 
 import java.io.IOException;
@@ -113,7 +114,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
             else if (MainActivity.sharedObjects == null || MainActivity.csLibrary4A == null) {
                 if (false) { new Thread(yourRunnable).start(); }
             }
-            else if (MainActivity.mContext == null) return;
+            else if (MainActivity.context == null) return;
             else {
                 if (inventoring == false) {
                     MainActivity.sharedObjects.serviceArrayList.clear();
@@ -127,9 +128,9 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
                         startStopHandler();
                         inventoring = false;
                     } else if (inventoring == false) {
-                        appendToLog("CustomIME Debug 3 with runningInventoryRfidTask = " + MainActivity.sharedObjects.runningInventoryRfidTask + ", and mrfidToWriteSize = " + MainActivity.csLibrary4A.mrfidToWriteSize());
+                        appendToLog("CustomIME Debug 3 with runningInventoryRfidTask = " + MainActivity.sharedObjects.runningInventoryRfidTask + ", and mrfidToWriteSize = " + MainActivity.csLibrary4A.rfidToWriteSize());
                         appendToLog("CustomIME Debug 3 with runningInventoryBarcodeTask = " + MainActivity.sharedObjects.runningInventoryBarcodeTask);
-                        if (MainActivity.sharedObjects.runningInventoryRfidTask == false && MainActivity.sharedObjects.runningInventoryBarcodeTask == false && MainActivity.csLibrary4A.mrfidToWriteSize() == 0) {
+                        if (MainActivity.sharedObjects.runningInventoryRfidTask == false && MainActivity.sharedObjects.runningInventoryBarcodeTask == false && MainActivity.csLibrary4A.rfidToWriteSize() == 0) {
                             startStopHandler();
                             inventoring = true;
                         }
@@ -189,6 +190,8 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
             }
             int iDelayms = 500;
             if (inventoring) iDelayms = 100;
+            appendToLog("MainActivity activityActive is " + (MainActivity.activityActive ? "active" : "inactive"));
+            appendToLog("MainActivity.csLibrary4A is " + (MainActivity.csLibrary4A == null ? "null" : "valid"));
             appendToLog("CustomIME BtData set next time as " + iDelayms);
             mHandler.postDelayed(serviceRunnable, iDelayms);
         }
@@ -200,10 +203,10 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
     void startStopHandler() {
         boolean started = false;
         if (inventoryRfidTask != null) {
-            if (inventoryRfidTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
+            if (inventoryRfidTask.getStatus() == CustomAsyncTask.Status.RUNNING) started = true;
         }
         if (inventoryBarcodeTask != null) {
-            if (inventoryBarcodeTask.getStatus() == AsyncTaskA.Status.RUNNING) started = true;
+            if (inventoryBarcodeTask.getStatus() == CustomAsyncTask.Status.RUNNING) started = true;
         }
         appendToLog("CustomIME Debug 10");
         if ((started && MainActivity.csLibrary4A.getTriggerButtonStatus()) || (started == false && MainActivity.csLibrary4A.getTriggerButtonStatus() == false)) return;
@@ -214,7 +217,7 @@ public class CustomIME extends InputMethodService { //implements KeyboardView.On
                 inventoryBarcodeTask.execute();
             } else {
                 MainActivity.csLibrary4A.setPowerLevel(MainActivity.csLibrary4A.getWedgePower());
-                MainActivity.csLibrary4A.appendToLog("Debug_Compact: CustomIME.startStopHandler");
+                appendToLog("Debug_Compact: CustomIME.startStopHandler");
                 MainActivity.csLibrary4A.startOperation(RfidReaderChipData.OperationTypes.TAG_INVENTORY_COMPACT);
                 inventoryRfidTask = new InventoryRfidTask();
                 inventoryRfidTask.execute();

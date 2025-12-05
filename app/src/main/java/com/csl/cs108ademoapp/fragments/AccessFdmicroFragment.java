@@ -16,9 +16,9 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
-import com.csl.cs108ademoapp.CustomPopupWindow;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
+import com.csl.cslibrary4a.CustomPopupWindow;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SaveList2ExternalTask;
@@ -28,12 +28,13 @@ import com.csl.cslibrary4a.RfidReaderChipData;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static com.csl.cs108ademoapp.MainActivity.mContext;
+import static com.csl.cs108ademoapp.MainActivity.context;
 
 import androidx.annotation.NonNull;
 
 public class AccessFdmicroFragment extends CommonFragment {
     SelectTag selectTag;
+    View viewFragment;
     Spinner spinnerSelectCommand, spinnerSelectAuth, spinnerSelectGetSource;
     TableRow tableRowOffsetLength, tableRowValue, tableRowAuth, tableRowGetTemperature, tableRowGetTemperature1, tableRowLogging, tableRowReg, tableRowEnable;
     EditText editTextMemoryValue, editTextDelayStart, editTextCntLimit, editTextStep;
@@ -42,7 +43,7 @@ public class AccessFdmicroFragment extends CommonFragment {
     SimpleDateFormat formatter;
 
     boolean operationRunning = false, operationRead = false, operationReadTemperature = false, operationReadBattery = false, operationSetLogging = false, operationCheckLogging = false, operationStopLogging = false, operationGetLogging = false;
-    AccessTask accessTask;
+    AccessTaskCustom accessTask;
 
     void clearOperationSelect() {
         operationReadTemperature = false; operationReadBattery = false; operationSetLogging = false; operationCheckLogging = false; operationStopLogging = false; operationGetLogging = false;
@@ -50,25 +51,26 @@ public class AccessFdmicroFragment extends CommonFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_access_fdmicro, container, false);
+        viewFragment = inflater.inflate(R.layout.fragment_access_fdmicro, container, false);
+        return viewFragment;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        selectTag = new SelectTag((Activity)getActivity(), 0);
+        selectTag = new SelectTag((Activity)getActivity(), view, 0);
 
-        tableRowOffsetLength = (TableRow) getActivity().findViewById(R.id.accessFDOffsetLengthRow);
-        tableRowValue = (TableRow) getActivity().findViewById(R.id.accessFDValueRow);
-        tableRowAuth = (TableRow) getActivity().findViewById(R.id.accessFDAuthRow);
-        tableRowGetTemperature = (TableRow) getActivity().findViewById(R.id.accessFDGetTemperatureRow);
-        tableRowGetTemperature1 = (TableRow) getActivity().findViewById(R.id.accessFDGetTemperatureRow1);
-        tableRowLogging = (TableRow) getActivity().findViewById(R.id.accessFDLoggingRow);
-        tableRowReg = (TableRow) getActivity().findViewById(R.id.accessFDRegRow);
-        tableRowEnable = (TableRow) getActivity().findViewById(R.id.accessFDEnableRow);
+        tableRowOffsetLength = (TableRow) view.findViewById(R.id.accessFDOffsetLengthRow);
+        tableRowValue = (TableRow) view.findViewById(R.id.accessFDValueRow);
+        tableRowAuth = (TableRow) view.findViewById(R.id.accessFDAuthRow);
+        tableRowGetTemperature = (TableRow) view.findViewById(R.id.accessFDGetTemperatureRow);
+        tableRowGetTemperature1 = (TableRow) view.findViewById(R.id.accessFDGetTemperatureRow1);
+        tableRowLogging = (TableRow) view.findViewById(R.id.accessFDLoggingRow);
+        tableRowReg = (TableRow) view.findViewById(R.id.accessFDRegRow);
+        tableRowEnable = (TableRow) view.findViewById(R.id.accessFDEnableRow);
 
-        spinnerSelectCommand = (Spinner) getActivity().findViewById(R.id.selectCommand);
+        spinnerSelectCommand = (Spinner) view.findViewById(R.id.selectCommand);
         ArrayAdapter<CharSequence> targetAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.fd_command_options, R.layout.custom_spinner_layout);
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSelectCommand.setAdapter(targetAdapter);
@@ -84,19 +86,19 @@ public class AccessFdmicroFragment extends CommonFragment {
             }
         });
 
-        editTextMemoryValue = (EditText) getActivity().findViewById(R.id.accessFDMemoryValue);
+        editTextMemoryValue = (EditText) view.findViewById(R.id.accessFDMemoryValue);
 
-        spinnerSelectAuth = (Spinner) getActivity().findViewById(R.id.accessFDselectAuth);
+        spinnerSelectAuth = (Spinner) view.findViewById(R.id.accessFDselectAuth);
         ArrayAdapter<CharSequence> targetAdapterAuth = ArrayAdapter.createFromResource(getActivity(), R.array.fd_auth_options, R.layout.custom_spinner_layout);
         targetAdapterAuth.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSelectAuth.setAdapter(targetAdapterAuth);
 
-        spinnerSelectGetSource = (Spinner) getActivity().findViewById(R.id.accessFDSelectGetSource);
+        spinnerSelectGetSource = (Spinner) view.findViewById(R.id.accessFDSelectGetSource);
         ArrayAdapter<CharSequence> targetAdapterGetSource = ArrayAdapter.createFromResource(getActivity(), R.array.fd_getSource_options, R.layout.custom_spinner_layout);
         targetAdapterAuth.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSelectGetSource.setAdapter(targetAdapterGetSource);
 
-        Button buttonCheckTemperature = (Button) getActivity().findViewById(R.id.accessFDcheckTemperature);
+        Button buttonCheckTemperature = (Button) view.findViewById(R.id.accessFDcheckTemperature);
         buttonCheckTemperature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -106,9 +108,9 @@ public class AccessFdmicroFragment extends CommonFragment {
                 readWriteOperation();
             }
         });
-        textViewTemperatureValue = (TextView) getActivity().findViewById(R.id.accessFDtemperatureValue);
+        textViewTemperatureValue = (TextView) view.findViewById(R.id.accessFDtemperatureValue);
 
-        Button buttonCheckBattery = (Button) getActivity().findViewById(R.id.accessFDcheckBattery);
+        Button buttonCheckBattery = (Button) view.findViewById(R.id.accessFDcheckBattery);
         buttonCheckBattery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,14 +120,14 @@ public class AccessFdmicroFragment extends CommonFragment {
                 readWriteOperation();
             }
         });
-        textViewBatteryValue = (TextView) getActivity().findViewById(R.id.accessFDbatteryValue);
+        textViewBatteryValue = (TextView) view.findViewById(R.id.accessFDbatteryValue);
 
-        editTextDelayStart = (EditText) getActivity().findViewById(R.id.accessFDvdetDelayStartCfg);
-        editTextCntLimit = (EditText) getActivity().findViewById(R.id.accessFDrtcCntLimit);
-        editTextStep = (EditText) getActivity().findViewById(R.id.accessFDstepCfg);
+        editTextDelayStart = (EditText) view.findViewById(R.id.accessFDvdetDelayStartCfg);
+        editTextCntLimit = (EditText) view.findViewById(R.id.accessFDrtcCntLimit);
+        editTextStep = (EditText) view.findViewById(R.id.accessFDstepCfg);
         formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-        Button buttonSetLogging = (Button) getActivity().findViewById(R.id.accessFDSetLogging);
+        Button buttonSetLogging = (Button) view.findViewById(R.id.accessFDSetLogging);
         buttonSetLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -135,7 +137,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                 readWriteOperation();
             }
         });
-        Button buttonCheckLogging = (Button) getActivity().findViewById(R.id.accessFDCheckLogging);
+        Button buttonCheckLogging = (Button) view.findViewById(R.id.accessFDCheckLogging);
         buttonCheckLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,7 +147,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                 readWriteOperation();
             }
         });
-        Button buttonStopLogging = (Button) getActivity().findViewById(R.id.accessFDStopLogging);
+        Button buttonStopLogging = (Button) view.findViewById(R.id.accessFDStopLogging);
         buttonStopLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -155,7 +157,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                 readWriteOperation();
             }
         });
-        Button buttonGetLogging = (Button) getActivity().findViewById(R.id.accessFDGetLogging);
+        Button buttonGetLogging = (Button) view.findViewById(R.id.accessFDGetLogging);
         buttonGetLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -165,10 +167,10 @@ public class AccessFdmicroFragment extends CommonFragment {
                 readWriteOperation();
             }
         });
-        textViewLoggingValue = (TextView) getActivity().findViewById(R.id.accessFDloggingValue);
-        textViewLoggingValue1 = (TextView) getActivity().findViewById(R.id.accessFDloggingValue1);
+        textViewLoggingValue = (TextView) view.findViewById(R.id.accessFDloggingValue);
+        textViewLoggingValue1 = (TextView) view.findViewById(R.id.accessFDloggingValue1);
 
-        Button buttonSaveLogging = (Button) getActivity().findViewById(R.id.accessFDSaveLogging);
+        Button buttonSaveLogging = (Button) view.findViewById(R.id.accessFDSaveLogging);
         buttonSaveLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -189,12 +191,12 @@ public class AccessFdmicroFragment extends CommonFragment {
                     }
                 }
                 String resultDisplay = saveExternalTask.save2File(strMessage, false);
-                CustomPopupWindow customPopupWindow = new CustomPopupWindow(mContext);
+                CustomPopupWindow customPopupWindow = new CustomPopupWindow(context);
                 customPopupWindow.popupStart(resultDisplay, false);
             }
         });
 
-        buttonRead = (Button) getActivity().findViewById(R.id.accessRWReadButton);
+        buttonRead = (Button) view.findViewById(R.id.accessRWReadButton);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -204,7 +206,7 @@ public class AccessFdmicroFragment extends CommonFragment {
             }
         });
 
-        buttonWrite = (Button) getActivity().findViewById(R.id.accessRWWriteButton);
+        buttonWrite = (Button) view.findViewById(R.id.accessRWWriteButton);
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -220,11 +222,13 @@ public class AccessFdmicroFragment extends CommonFragment {
     @Override
     public void onResume() {
         super.onResume();
+        setUserVisibleHint2(true);
         MainActivity.csLibrary4A.appendToLog("AccessFdmicro onResume !!!");
     }
 
     @Override
     public void onPause() {
+        setUserVisibleHint2(false);
         super.onPause();
     }
 
@@ -238,10 +242,11 @@ public class AccessFdmicroFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessFdmicroFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if (isVisibleToUser) { //getUserVisibleHint()) {
             userVisibleHint = true;
             selectTag.updateBankSelected();
             MainActivity.csLibrary4A.appendToLog("AccessFdmicroFragment is now VISIBLE");
@@ -345,7 +350,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                 tableRowGetTemperature1.setVisibility(View.GONE);
                 tableRowLogging.setVisibility(View.GONE);
                 tableRowReg.setVisibility(View.GONE);
-                CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessFDEnable);
+                CheckBox checkBox = (CheckBox) viewFragment.findViewById(R.id.accessFDEnable);
                 if (position == 6) checkBox.setText("refresh temperature measurement");
                 else checkBox.setText("Enable");
                 if (position == 7) tableRowEnable.setVisibility(View.GONE);
@@ -364,8 +369,8 @@ public class AccessFdmicroFragment extends CommonFragment {
 
     boolean isOperationRunning() {
         if (accessTask != null) {
-            if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) {
-                Toast.makeText(MainActivity.mContext, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
+            if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
+                Toast.makeText(MainActivity.context, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
@@ -391,12 +396,12 @@ public class AccessFdmicroFragment extends CommonFragment {
             }
             switch (position) {
                 case 0:
-                    EditText editTextMemoryOffset = (EditText) getActivity().findViewById(R.id.accessFDmemoryOffset);
+                    EditText editTextMemoryOffset = (EditText) viewFragment.findViewById(R.id.accessFDmemoryOffset);
                     int iMemoryOffset = getEditTextHexValue(editTextMemoryOffset, 4);
                     iMemoryOffset &= 0xFFFC;
                     editTextMemoryOffset.setText(String.format("%X", iMemoryOffset));
 
-                    EditText editTextMemoryLength = (EditText) getActivity().findViewById(R.id.accessFDmemoryLength);
+                    EditText editTextMemoryLength = (EditText) viewFragment.findViewById(R.id.accessFDmemoryLength);
                     int iMemoryLength = 0;
                     try {
                         iMemoryLength = Integer.parseInt(editTextMemoryLength.getText().toString());
@@ -447,7 +452,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                     }
                     MainActivity.csLibrary4A.set_fdCmdCfg(iConfig);    //0 (user area password), 3 (unlock password), 4 (stop logging password)
 
-                    EditText editTextAuthPassword = (EditText) getActivity().findViewById(R.id.selectFDAuthPassword);
+                    EditText editTextAuthPassword = (EditText) viewFragment.findViewById(R.id.selectFDAuthPassword);
                     int iValue = getEditTextHexValue(editTextAuthPassword, 8);
                     MainActivity.csLibrary4A.set_fdPwd(iValue);
 
@@ -455,7 +460,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                     break;
                 case 2:
                     iConfig = 0;
-                    CheckBox checkBoxGetTemperatureStartGet = (CheckBox) getActivity().findViewById(R.id.accessFDGetTemperatureStartGet);
+                    CheckBox checkBoxGetTemperatureStartGet = (CheckBox) viewFragment.findViewById(R.id.accessFDGetTemperatureStartGet);
                     if (true) {
                         if (operationRead) checkBoxGetTemperatureStartGet.setChecked(true);
                         else checkBoxGetTemperatureStartGet.setChecked(false);
@@ -472,15 +477,15 @@ public class AccessFdmicroFragment extends CommonFragment {
                             iConfig |= 0x30;
                             break;
                     }
-                    CheckBox checkBoxGetTemperatureResultType = (CheckBox) getActivity().findViewById(R.id.accessFDGetTemperatureResultType);
+                    CheckBox checkBoxGetTemperatureResultType = (CheckBox) viewFragment.findViewById(R.id.accessFDGetTemperatureResultType);
                     if (checkBoxGetTemperatureResultType.isChecked()) iConfig |= 4;
-                    CheckBox checkBoxGetTemperatureCheckField = (CheckBox) getActivity().findViewById(R.id.accessFDGetTemperatureCheckField);
+                    CheckBox checkBoxGetTemperatureCheckField = (CheckBox) viewFragment.findViewById(R.id.accessFDGetTemperatureCheckField);
                     if (checkBoxGetTemperatureCheckField.isChecked()) iConfig |= 2;
-                    CheckBox checkBoxGetTemperatureStorageEnable = (CheckBox) getActivity().findViewById(R.id.accessFDGetTemperatureStorageEnable);
+                    CheckBox checkBoxGetTemperatureStorageEnable = (CheckBox) viewFragment.findViewById(R.id.accessFDGetTemperatureStorageEnable);
                     if (checkBoxGetTemperatureStorageEnable.isChecked()) iConfig |= 1;
                     MainActivity.csLibrary4A.set_fdCmdCfg(iConfig);
 
-                    EditText editTextStoreOffset = (EditText) getActivity().findViewById(R.id.accessFDStoreOffset);
+                    EditText editTextStoreOffset = (EditText) viewFragment.findViewById(R.id.accessFDStoreOffset);
                     int iStoreOffset = getEditTextHexValue(editTextStoreOffset, 2);
                     MainActivity.csLibrary4A.set_fdBlockAddr4GetTemperature(iStoreOffset);
 
@@ -492,7 +497,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                     if (operationRead)
                         hostCommand = RfidReaderChipData.HostCommands.CMD_FDM_START_LOGGING;
                     else {
-                        EditText editText = (EditText) getActivity().findViewById(R.id.selectFDLoggingPassword);
+                        EditText editText = (EditText) viewFragment.findViewById(R.id.selectFDLoggingPassword);
                         int iPassword = getEditTextHexValue(editText, 8);
                         MainActivity.csLibrary4A.set_fdPwd(iPassword);
 
@@ -500,12 +505,12 @@ public class AccessFdmicroFragment extends CommonFragment {
                     }
                     break;
                 case 4:
-                    EditText editText = (EditText) getActivity().findViewById(R.id.accessFDRegOffset);
+                    EditText editText = (EditText) viewFragment.findViewById(R.id.accessFDRegOffset);
                     iValue = getEditTextHexValue(editText, 2);
                     iValue += 0xC000;
                     editText.setText(String.format("%04X", iValue));
 
-                    EditText editText1 = (EditText) getActivity().findViewById(R.id.accessFDRegValue);
+                    EditText editText1 = (EditText) viewFragment.findViewById(R.id.accessFDRegValue);
                     if (operationRead) {
                         editText1.setText("");
                         MainActivity.csLibrary4A.set_fdRegAddr(iValue);
@@ -520,7 +525,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                 case 6:
                 case 7:
                 case 8:
-                    CheckBox checkBox1 = (CheckBox) getActivity().findViewById(R.id.accessFDEnable);
+                    CheckBox checkBox1 = (CheckBox) viewFragment.findViewById(R.id.accessFDEnable);
                     iValue = 0;
                     if (checkBox1.isChecked()) {
                         if (position == 8) iValue = 2;
@@ -547,13 +552,14 @@ public class AccessFdmicroFragment extends CommonFragment {
         int selectBank = selectTag.spinnerSelectBank.getSelectedItemPosition() + 1;
         int selectOffset = Integer.valueOf(selectTag.editTextSelectOffset.getText().toString());
         boolean invalid = false;
-        accessTask = new AccessTask((operationRead ? buttonRead : buttonWrite), null, invalid, true,
+        accessTask = new AccessTaskCustom((operationRead ? buttonRead : buttonWrite), null, invalid, true,
                 selectMask, selectBank, selectOffset,
                 selectTag.editTextAccessPassword.getText().toString(),
                 Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()),
                 hostCommand,
                 0, 0, true, false,
-                null, null, null, null, null);
+                null, null, null, null, null,
+                MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
         accessTask.setRunnable(updateRunnable);
         accessTask.execute();
     }
@@ -565,7 +571,7 @@ public class AccessFdmicroFragment extends CommonFragment {
         public void run() {
             if (accessTask == null) return;
             if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "accessTask.status = " + accessTask.getStatus().toString());
-            if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) {
+            if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
                 mHandler.postDelayed(updateRunnable, 100);
                 return;
             }
@@ -726,7 +732,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AAA: " + "operationSetLogging: iOtherFlowCount = " + iOtherFlowCount + ", accessResult = " + accessTask.accessResult + ", resultError= " + accessTask.resultError);
                 switch (iOtherFlowCount) {
                     case 0: //0x4cb3,29d6
-                        CheckBox checkBox = (CheckBox) getActivity().findViewById(R.id.accessFDenableLEDAutoFlash);
+                        CheckBox checkBox = (CheckBox) viewFragment.findViewById(R.id.accessFDenableLEDAutoFlash);
                         long lValue = 0x4db229d6;
                         if (checkBox.isChecked()) {
                             lValue |= 0x2000; lValue &= ~0x20;
@@ -940,13 +946,13 @@ public class AccessFdmicroFragment extends CommonFragment {
                         strMessage += "\nPassword is ";
                         if ((iValue & 0x40) != 0) strMessage += "zero";
                         else strMessage += "non-zero";
-                        CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                        CustomPopupWindow customPopupWindow = new CustomPopupWindow(MainActivity.context);
                         customPopupWindow.popupStart(strMessage, false);
                         break;
                     case 2:
                         if (DEBUG) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessTask.accessResult);
                         strMessage = accessTask.accessResult;
-                        CheckBox checkBoxGetTemperatureResultType = (CheckBox) getActivity().findViewById(R.id.accessFDGetTemperatureResultType);
+                        CheckBox checkBoxGetTemperatureResultType = (CheckBox) viewFragment.findViewById(R.id.accessFDGetTemperatureResultType);
                         if (operationRead) {
                             iValue = Integer.parseInt(strMessage, 16);
                             if ((iValue & 0x8000) != 0) strMessage += ": store addr overflow";
@@ -962,7 +968,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                             else if (strMessage.matches("FFF0"))
                                 strMessage += ": not yet enable field check";
                         }
-                        customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                        customPopupWindow = new CustomPopupWindow(MainActivity.context);
                         customPopupWindow.popupStart(strMessage, false);
                         break;
                     case 3:
@@ -976,7 +982,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                             if ((iValue & 1) != 0) strMessage += ": RTC stop password is all zero";
                         }
                         if (strMessage != null) {
-                            customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                            customPopupWindow = new CustomPopupWindow(MainActivity.context);
                             customPopupWindow.popupStart(strMessage, false);
                         }
                         break;
@@ -986,7 +992,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                             if (false && accessTask.accessResult.matches("FFFF"))
                                 strMessage = accessTask.accessResult + ": invalid empty address";
                             else {
-                                EditText editText = (EditText) getActivity().findViewById(R.id.accessFDRegValue);
+                                EditText editText = (EditText) viewFragment.findViewById(R.id.accessFDRegValue);
                                 editText.setText(accessTask.accessResult);
                             }
                         } else {
@@ -1007,7 +1013,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                             }
                         }
                         if (strMessage != null) {
-                            customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                            customPopupWindow = new CustomPopupWindow(MainActivity.context);
                             customPopupWindow.popupStart(strMessage, false);
                         }
                         break;
@@ -1016,7 +1022,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                     case 8:
                         strMessage = accessTask.accessResult.trim();
                         if (strMessage != null && strMessage.length() != 0 && strMessage.matches("0000") == false) {
-                            customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                            customPopupWindow = new CustomPopupWindow(MainActivity.context);
                             customPopupWindow.popupStart(strMessage, false);
                         }
                         if (position == 8 && iOtherFlowCount == 0) {
@@ -1033,7 +1039,7 @@ public class AccessFdmicroFragment extends CommonFragment {
                         if ((iValue & 0x800) != 0) strMessage += ": vdet_process_flag";
                         if ((iValue & 0x200) != 0) strMessage += ": light_chk_flag";
                         if ((iValue & 0x100) != 0) strMessage += ": vbat_pwr_flag";
-                        customPopupWindow = new CustomPopupWindow(MainActivity.mContext);
+                        customPopupWindow = new CustomPopupWindow(MainActivity.context);
                         customPopupWindow.popupStart(strMessage, false);
                         break;
                     default:

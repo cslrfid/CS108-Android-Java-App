@@ -12,7 +12,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
     RfidReader.TagType tagTypeExpected;
     private int count;
     private double rssi;
-    private int serviceUUID2p1;
+    private int serviceUUID; private boolean hasServicePower;
     private int phase, channel, port;
     public final int INVALID_STATUS = -1;
     private int status = INVALID_STATUS;
@@ -68,14 +68,15 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.sensorData = sensorData;
     }
 
-    public ReaderDevice(String name, String address, boolean selected, String details, int count, double rssi, int serviceUUID2p1) {
+    public ReaderDevice(String name, String address, boolean selected, String details, int count, double rssi, int serviceUUID, boolean hasServicePower) {
         this.name = name;
         this.address = address;
         this.selected = selected;
         this.details = details;
         this.count = count;
         this.rssi = rssi;
-        this.serviceUUID2p1 = serviceUUID2p1;
+        this.serviceUUID = serviceUUID;
+        this.hasServicePower = hasServicePower;
     }
 
     public ReaderDevice(String name, String address, boolean selected, String details, int count, double rssi) {
@@ -229,9 +230,11 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.rssi = rssi;
     }
 
-    public int getServiceUUID2p1() { return serviceUUID2p1; }
-    public void setServiceUUID2p1(int serviceUUID2p1) { this.serviceUUID2p1 = serviceUUID2p1; }
+    public int getServiceUUID() { return serviceUUID; }
+    public void setServiceUUID(int serviceUUID) { this.serviceUUID = serviceUUID; }
 
+    public boolean getHasServicePower() { return hasServicePower; }
+    public void setHasServicePower(boolean hasServicePower) { this.hasServicePower = hasServicePower; }
     public int getPhase() { return phase; }
     public void setPhase(int phase) { this.phase = phase; }
 
@@ -312,7 +315,7 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
         this.extra2Bank = extra2Bank;
         this.extra2Offset = extra2Offset;
     }
-    void setExtra(String strExtra1, int extra1Bank, int extra1Offset, String strExtra2, int extra2Bank, int extra2Offset) {
+    public void setExtra(String strExtra1, int extra1Bank, int extra1Offset, String strExtra2, int extra2Bank, int extra2Offset) {
         this.strExtra1 = strExtra1;
         this.extra1Bank = extra1Bank;
         this.extra1Offset = extra1Offset;
@@ -355,5 +358,22 @@ public class ReaderDevice implements Comparable<ReaderDevice>  {
 
     public int compareTo(ReaderDevice other) {
         return address.compareTo(other.address);
+    }
+
+    public String getDeviceType() {
+        String string = null;
+        if (getServiceUUID() == 0) {
+            if (getHasServicePower()) string = "CS108 Handheld Reader";
+            else string = "CS463 Fixed Reader"; // either CS463 or CS203X
+        }
+        else if (getServiceUUID() == 1) string = "CS108 Handheld USB Reader";
+        else if (getServiceUUID() == 2) {
+            if (getHasServicePower()) string = "CS710S Handheld Reader";
+            else string = "CS203XL Fixed Reader";
+        } else if (getServiceUUID() == 3) string = "CS710S Handheld USB Reader";
+        else if (getServiceUUID() == 4) string = "CS463 Fixed HTTP Reader";
+        else if (getServiceUUID() == 5) string = "CS203XL Fixed HTTP Reader";
+        else if (getServiceUUID() == 6) string = "Connected paired devices";
+        return string;
     }
 }

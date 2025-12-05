@@ -12,7 +12,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode 46
-        versionName "2.20.0"
+        versionName "2.21.9"
         ndk {
             debugSymbolLevel = 'FULL'
         }
@@ -27,8 +27,8 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation fileTree(include: ['*.aar', '*.jar'], dir: 'libs')
+    implementation 'com.google.android.material:material:1.13.0'
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.github.hannesa2:paho.mqtt.android:4.4'

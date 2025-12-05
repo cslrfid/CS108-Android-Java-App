@@ -9,470 +9,13 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:orientation="vertical" >
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:visibility="visible">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Regulatory region" />
-
-            <Spinner
-                android:id="@+id/settingOperateRegulatoryRegion"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                style="@style/style_default_spinner" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:visibility="visible"/>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Frequency order" />
-
-            <Spinner
-                android:id="@+id/settingOperateFrequencyOrder"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                style="@style/style_default_spinner" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:visibility="visible"/>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Fixed channel" />
-
-            <Spinner
-                android:id="@+id/settingOperateChannel"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:visibility="visible"/>
-
-        <TableRow
-            android:id="@+id/settingOperatePortWarningRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/style_normal_font"
-                android:textAlignment="center"
-                android:text="Current Port is the last enabled power level"/>
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/settingOperatePortChannelRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/settingOperatePortChannelLabel"
-                android:layout_width="0dp"
-                android:layout_weight="2"
-                style="@style/style_normal_font" />
-
-            <TextView
-                android:id="@+id/settingOperatePortChannel"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-
-            <Button
-                android:id="@+id/settingOperatePortChannelSelect"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Select" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/settingOperatePortEnableRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Enable" />
-
-            <CheckBox
-                android:id="@+id/settingOperatePortEnable"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/settingOperatePowerLabel"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Power" />
-
-            <EditText
-                android:id="@+id/settingOperatePower"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/settingOperatePortDwellRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/settingOperatePortDwellLabel"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Dwell time" />
-
-            <EditText
-                android:id="@+id/settingOperatePortDwell"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/settingOperateCompactDelayRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/settingAdminTagDelayLabel"
-                android:layout_width="0dp"
-                android:layout_weight="4"
-                style="@style/style_normal_font"
-                android:text="'Compact' Inventory delay time" />
-
-            <EditText
-                android:id="@+id/settingOperateTagDelay"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/settingOperateIntraPkDelayRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="4"
-                style="@style/style_normal_font"
-                android:text="IntraPacket delay in ms" />
-
-            <EditText
-                android:id="@+id/settingOperateIntraPkDelay"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/settingOperateDupDelayRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="4"
-                style="@style/style_normal_font"
-                android:text="Duplication elimination in seconds" />
-
-            <EditText
-                android:id="@+id/settingOperateDupDelay"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/settingOperatePopulationLabel"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Tag population" />
-
-            <EditText
-                android:id="@+id/settingOperatePopulation"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Q(0-15)" />
-
-            <EditText
-                android:id="@+id/settingOperateQValue"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-
-            <Button
-                android:id="@+id/settingOperateOverrideButton"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Override" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Session" />
-
-            <Spinner
-                android:id="@+id/settingOperateSession"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                style="@style/style_default_spinner" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Target" />
-
-            <Spinner
-                android:id="@+id/settingOperateTarget"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                style="@style/style_default_spinner" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <CheckBox
-                android:id="@+id/settingOperateTagFocus"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="tag focus (for impinj tags only)" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <CheckBox
-                android:id="@+id/settingOperateFastId"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="fast id (for impinj tags only)"
-                />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="@string/settingInvAlgo_titile" />
-
-            <Spinner
-                android:id="@+id/settingOperateAlgorithmToUse"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                style="@style/style_default_spinner" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/settingOperateRetryLabel"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Query retry" />
-
-            <EditText
-                android:id="@+id/settingOperateRetry"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:background="@drawable/my_edittext_background"
-                android:inputType="numberDecimal"
-                style="@style/style_normal_font" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                style="@style/style_normal_font"
-                android:text="Reader mode /\nLink profile" />
-
-            <Spinner
-                android:id="@+id/settingOperateProfile"
-                android:layout_width="0dp"
-                android:layout_weight="2"
-                android:background="@drawable/my_edittext_background"
-                style="@style/style_default_spinner" />
-        </TableRow>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
 
         <LinearLayout
-            android:id="@+id/settingOperateGainControl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:orientation="vertical" >
 
             <TableRow
                 android:layout_width="match_parent"
@@ -480,16 +23,35 @@
                 android:layout_gravity="center_vertical">
 
                 <TextView
+                    style="@style/style_normal_font"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:text="@string/common_configurations" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:visibility="visible">
+
+                <TextView
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     style="@style/style_normal_font"
-                    android:text="Environmental RSSI" />
+                    android:text="@string/regulatory_region" />
 
-                <TextView
-                    android:id="@+id/settingOperateEnvironmentalRSSI"
+                <Spinner
+                    android:id="@+id/settingOperateRegulatoryRegion"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    style="@style/style_normal_font" />
+                    android:background="@drawable/my_edittext_background"
+                    style="@style/style_default_spinner" />
             </TableRow>
 
             <TableRow
@@ -501,12 +63,192 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     style="@style/style_normal_font"
-                    android:text="High compression" />
+                    android:text="@string/frequency_order" />
+
+                <Spinner
+                    android:id="@+id/settingOperateFrequencyOrder"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    style="@style/style_default_spinner" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/settingOperateChannelRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/fixed_channel" />
+
+                <Spinner
+                    android:id="@+id/settingOperateChannel"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    style="@style/style_normal_font"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:text="@string/antenna_specific_configurations" />
+            </TableRow>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <TableRow
+                android:id="@+id/settingOperatePortChannelRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/settingOperatePortChannelLabel"
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    style="@style/style_normal_font" />
+
+                <EditText
+                    android:id="@+id/settingOperatePortChannel"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:background="@drawable/my_edittext_background"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font" />
 
                 <CheckBox
-                    android:id="@+id/settingOperateHighCompression"
+                    android:id="@+id/settingOperatePortEnable"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:text="Enable"
+                    style="@style/style_normal_font" />
+
+                <Button
+                    android:id="@+id/settingOperatePortChannelSelect"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    android:text="Select" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/settingOperatePowerLabel"
                     android:layout_width="0dp"
                     android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Power" />
+
+                <EditText
+                    android:id="@+id/settingOperatePower"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/settingOperatePortDwellRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/settingOperatePortDwellLabel"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Dwell time" />
+
+                <EditText
+                    android:id="@+id/settingOperatePortDwell"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <LinearLayout
+                android:id="@+id/settingOperateOtherConfigurationLayout0"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        style="@style/style_normal_font"
+                        android:textAlignment="center"
+                        android:textSize="20sp"
+                        android:text="@string/other_common_configurations" />
+                </TableRow>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray" />
+            </LinearLayout>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/settingInvAlgo_titile" />
+
+                <Spinner
+                    android:id="@+id/settingOperateAlgorithmToUse"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    style="@style/style_default_spinner" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/settingOperatePopulationLabel"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="@string/tag_population" />
+
+                <EditText
+                    android:id="@+id/settingOperatePopulation"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:inputType="numberDecimal"
                     style="@style/style_normal_font" />
             </TableRow>
 
@@ -519,10 +261,81 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     style="@style/style_normal_font"
-                    android:text="RFlan gain" />
+                    android:text="Start Q(0-15)" />
+
+                <EditText
+                    android:id="@+id/settingOperateQValue"
+                    android:enabled="false"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font" />
+
+                <Button
+                    android:id="@+id/settingOperateOverrideButton"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Override" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Reader mode /\nLink profile" />
 
                 <Spinner
-                    android:id="@+id/settingOperateRflnaGain"
+                    android:id="@+id/settingOperateProfile"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:background="@drawable/my_edittext_background"
+                    style="@style/style_default_spinner" />
+            </TableRow>
+
+            <LinearLayout
+                android:id="@+id/settingOperateOtherConfigurationLayout1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        style="@style/style_normal_font"
+                        android:textAlignment="center"
+                        android:textSize="20sp"
+                        android:text="@string/other_common_configurations" />
+                </TableRow>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray" />
+            </LinearLayout>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Session" />
+
+                <Spinner
+                    android:id="@+id/settingOperateSession"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:background="@drawable/my_edittext_background"
@@ -538,10 +351,10 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     style="@style/style_normal_font"
-                    android:text="IFlna gain" />
+                    android:text="Target" />
 
                 <Spinner
-                    android:id="@+id/settingOperateIflnaGain"
+                    android:id="@+id/settingOperateTarget"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:background="@drawable/my_edittext_background"
@@ -553,21 +366,270 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical">
 
-                <TextView
+                <CheckBox
+                    android:id="@+id/settingOperateTagFocus"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     style="@style/style_normal_font"
-                    android:text="Agc gain" />
+                    android:text="tag focus (for impinj tags only)" />
+            </TableRow>
 
-                <Spinner
-                    android:id="@+id/settingOperateAgcGAin"
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/settingOperateFastId"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="fast id (for impinj tags only)" />
+            </TableRow>
+
+            <LinearLayout
+                android:id="@+id/settingOperateOtherConfigurationLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        style="@style/style_normal_font"
+                        android:textAlignment="center"
+                        android:textSize="20sp"
+                        android:text="@string/other_common_configurations" />
+                </TableRow>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray" />
+            </LinearLayout>
+
+            <TableRow
+                android:id="@+id/settingOperatePortEnableRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/settingOperatePowerBoost"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="Power Boost"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/settingOperateDupDelayRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="4"
+                    style="@style/style_normal_font"
+                    android:text="Duplication elimination in seconds" />
+
+                <EditText
+                    android:id="@+id/settingOperateDupDelay"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:background="@drawable/my_edittext_background"
-                    style="@style/style_default_spinner" />
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font" />
             </TableRow>
+
+            <TableRow
+                android:id="@+id/settingOperateIntraPkDelayRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="4"
+                    style="@style/style_normal_font"
+                    android:text="IntraPacket delay in ms" />
+
+                <EditText
+                    android:id="@+id/settingOperateIntraPkDelay"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/settingOperateRetryLabel"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/style_normal_font"
+                    android:text="Query retry" />
+
+                <EditText
+                    android:id="@+id/settingOperateRetry"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/settingOperateCompactDelayRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/settingAdminTagDelayLabel"
+                    android:layout_width="0dp"
+                    android:layout_weight="4"
+                    style="@style/style_normal_font"
+                    android:text="'Compact' Inventory delay time" />
+
+                <EditText
+                    android:id="@+id/settingOperateTagDelay"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_edittext_background"
+                    android:inputType="numberDecimal"
+                    style="@style/style_normal_font" />
+            </TableRow>
+
+            <LinearLayout
+                android:id="@+id/settingOperateTestConfigurationLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="4"
+                        style="@style/style_normal_font"
+                        android:textAlignment="center"
+                        android:textSize="20sp"
+                        android:text="Test Configurations" />
+                </TableRow>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    android:visibility="visible"/>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Environmental RSSI" />
+
+                    <TextView
+                        android:id="@+id/settingOperateEnvironmentalRSSI"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="High compression" />
+
+                    <CheckBox
+                        android:id="@+id/settingOperateHighCompression"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="RFlan gain" />
+
+                    <Spinner
+                        android:id="@+id/settingOperateRflnaGain"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/my_edittext_background"
+                        style="@style/style_default_spinner" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="IFlna gain" />
+
+                    <Spinner
+                        android:id="@+id/settingOperateIflnaGain"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/my_edittext_background"
+                        style="@style/style_default_spinner" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        style="@style/style_normal_font"
+                        android:text="Agc gain" />
+
+                    <Spinner
+                        android:id="@+id/settingOperateAgcGAin"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/my_edittext_background"
+                        style="@style/style_default_spinner" />
+                </TableRow>
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
     </ScrollView>
 
     <LinearLayout

@@ -28,8 +28,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.csl.cs108ademoapp.AccessTask;
-import com.csl.cs108ademoapp.AsyncTaskA;
+import com.csl.cslibrary4a.AccessTaskCustom;
+import com.csl.cslibrary4a.CustomAsyncTask;
 import com.csl.cs108ademoapp.MainActivity;
 import com.csl.cs108ademoapp.R;
 import com.csl.cs108ademoapp.SelectTag;
@@ -39,6 +39,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
     final boolean DEBUG = true;
     Spinner spinnerTagSelect;
     SelectTag selectTag;
+    View viewFragment;
     RadioButton radioButtonAuraSensAtBoot, radioButtonAuraSensAtSelect;
     TextView textViewAuraSensorDataOK, textViewAuraSystemConfigurationOK, textViewAuraSensorCalibrationOK, textViewAuraSensorControlOK, textViewAuraSensorDataStoredOK;
     CheckBox checkBoxAuraSensorDataRCommandW, checkBoxAuraSystemConfiguration, checkBoxAuraCalibration, checkBoxAuraControl, checkBoxAuraDataStored;
@@ -69,31 +70,32 @@ public class AccessAuraSenseFragment extends CommonFragment {
     boolean operationRead = false;
     boolean bRequestCheck;
 
-    private AccessTask accessTask;
+    private AccessTaskCustom accessTask;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.fragment_access_aurasense, container, false);
+        viewFragment = inflater.inflate(R.layout.fragment_access_aurasense, container, false);
+        return viewFragment;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        spinnerTagSelect = (Spinner) getActivity().findViewById(R.id.accessEmicroTagSelect);
+        spinnerTagSelect = (Spinner) view.findViewById(R.id.accessEmicroTagSelect);
         ArrayAdapter<CharSequence> targetAdapter1 = ArrayAdapter.createFromResource(getActivity(), R.array.emicro_options, R.layout.custom_spinner_layout);
         targetAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTagSelect.setAdapter(targetAdapter1); spinnerTagSelect.setSelection(0);
         spinnerTagSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                LinearLayout layout0 = (LinearLayout) getActivity().findViewById(R.id.accessEmicroSelectLayout);
-                LinearLayout layout1 = (LinearLayout) getActivity().findViewById(R.id.accessEmMicroAuroSenseLayout);
-                LinearLayout layout2 = (LinearLayout) getActivity().findViewById(R.id.accessEmMicroColdChainLayout);
-                TableRow tableRow = (TableRow) getActivity().findViewById(R.id.accessEmicroCCTemperature);
+                LinearLayout layout0 = (LinearLayout) viewFragment.findViewById(R.id.accessEmicroSelectLayout);
+                LinearLayout layout1 = (LinearLayout) viewFragment.findViewById(R.id.accessEmMicroAuroSenseLayout);
+                LinearLayout layout2 = (LinearLayout) viewFragment.findViewById(R.id.accessEmMicroColdChainLayout);
+                TableRow tableRow = (TableRow) viewFragment.findViewById(R.id.accessEmicroCCTemperature);
                 if (MainActivity.csLibrary4A.get98XX() == 2) tableRow.setVisibility(View.GONE);
-                LinearLayout layout4 = (LinearLayout) getActivity().findViewById(R.id.accessCustomReadWrite);
+                LinearLayout layout4 = (LinearLayout) viewFragment.findViewById(R.id.accessCustomReadWrite);
                 if (position == eMicroTag.emAuraSense.ordinal()) {
                     MainActivity.tagType = TAG_EM_AURASENSE; MainActivity.mDid = "" /*"E280B12"*/;
                     layout0.setVisibility(View.VISIBLE);
@@ -128,85 +130,85 @@ public class AccessAuraSenseFragment extends CommonFragment {
 
         });
 
-        selectTag = new SelectTag((Activity)getActivity(), 0);
+        selectTag = new SelectTag((Activity)getActivity(), view, 0);
         selectTag.tableRowSelectMemoryBank.setVisibility(View.GONE);
 
-        radioButtonAuraSensAtBoot = (RadioButton) getActivity().findViewById(R.id.accessAuraSensAtBoot);
-        radioButtonAuraSensAtSelect = (RadioButton) getActivity().findViewById(R.id.accessAuraSensAtSelect);
+        radioButtonAuraSensAtBoot = (RadioButton) view.findViewById(R.id.accessAuraSensAtBoot);
+        radioButtonAuraSensAtSelect = (RadioButton) view.findViewById(R.id.accessAuraSensAtSelect);
 
-        textViewAuraSystemConfigurationOK = (TextView) getActivity().findViewById(R.id.accessAuraSystemConfigurationOK);
-        textViewAuraSensorCalibrationOK = (TextView) getActivity().findViewById(R.id.accessAuraSensorCalibrationOK);
-        textViewAuraSensorControlOK = (TextView) getActivity().findViewById(R.id.accessAuraSensorControlOK);
-        textViewAuraSensorDataStoredOK = (TextView) getActivity().findViewById(R.id.accessAuraSensorDataStoredOK);
+        textViewAuraSystemConfigurationOK = (TextView) view.findViewById(R.id.accessAuraSystemConfigurationOK);
+        textViewAuraSensorCalibrationOK = (TextView) view.findViewById(R.id.accessAuraSensorCalibrationOK);
+        textViewAuraSensorControlOK = (TextView) view.findViewById(R.id.accessAuraSensorControlOK);
+        textViewAuraSensorDataStoredOK = (TextView) view.findViewById(R.id.accessAuraSensorDataStoredOK);
 
-        checkBoxAuraSystemConfiguration = (CheckBox) getActivity().findViewById(R.id.accessAuraSystemConfigurationCheck);
-        checkBoxAuraCalibration = (CheckBox) getActivity().findViewById(R.id.accessAuraSensorCalibrationCheck);
-        checkBoxAuraControl = (CheckBox) getActivity().findViewById(R.id.accessAuraSensorControlCheck);
-        checkBoxAuraDataStored = (CheckBox) getActivity().findViewById(R.id.accessAuraSensorDataStoredCheck);
+        checkBoxAuraSystemConfiguration = (CheckBox) view.findViewById(R.id.accessAuraSystemConfigurationCheck);
+        checkBoxAuraCalibration = (CheckBox) view.findViewById(R.id.accessAuraSensorCalibrationCheck);
+        checkBoxAuraControl = (CheckBox) view.findViewById(R.id.accessAuraSensorControlCheck);
+        checkBoxAuraDataStored = (CheckBox) view.findViewById(R.id.accessAuraSensorDataStoredCheck);
 
-        editTextAuraSensorData = (EditText) getActivity().findViewById(R.id.accessAuraSensorData); editTextAuraSensorData.setEnabled(false);
-        editTextAuraSystemConfiguration = (EditText) getActivity().findViewById(R.id.accessAuraSystemConfiguration); editTextAuraSystemConfiguration.setEnabled(false);
-        editTextAuraSensorCalibration = (EditText) getActivity().findViewById(R.id.accessAuraSensorCalibration); editTextAuraSensorCalibration.setInputType(InputType.TYPE_CLASS_NUMBER);
-        editTextAuraSensorDataStored = (EditText) getActivity().findViewById(R.id.accessAuraSensorDataStored); editTextAuraSensorDataStored.setEnabled(false);
-        checkBoxAuraSensAtBootCheck = (CheckBox) getActivity().findViewById(R.id.accessAuraSensAtBootCheck);
-        checkBoxAuraSensAtSelectCheck = (CheckBox) getActivity().findViewById(R.id.accessAuraSensAtSelectCheck);
-        checkBoxAuraSensWriteCheck = (CheckBox) getActivity().findViewById(R.id.accessAuraSensAtWriteCheck);
+        editTextAuraSensorData = (EditText) view.findViewById(R.id.accessAuraSensorData); editTextAuraSensorData.setEnabled(false);
+        editTextAuraSystemConfiguration = (EditText) view.findViewById(R.id.accessAuraSystemConfiguration); editTextAuraSystemConfiguration.setEnabled(false);
+        editTextAuraSensorCalibration = (EditText) view.findViewById(R.id.accessAuraSensorCalibration); editTextAuraSensorCalibration.setInputType(InputType.TYPE_CLASS_NUMBER);
+        editTextAuraSensorDataStored = (EditText) view.findViewById(R.id.accessAuraSensorDataStored); editTextAuraSensorDataStored.setEnabled(false);
+        checkBoxAuraSensAtBootCheck = (CheckBox) view.findViewById(R.id.accessAuraSensAtBootCheck);
+        checkBoxAuraSensAtSelectCheck = (CheckBox) view.findViewById(R.id.accessAuraSensAtSelectCheck);
+        checkBoxAuraSensWriteCheck = (CheckBox) view.findViewById(R.id.accessAuraSensAtWriteCheck);
 
-        textViewConfigOk = (TextView) getActivity().findViewById(R.id.accessCCConfigOK);
-        textViewTemperatureOk = (TextView) getActivity().findViewById(R.id.accessCCTemperatureOK);
-        textViewEnableOk = (TextView) getActivity().findViewById(R.id.accessCCEnableOK);
+        textViewConfigOk = (TextView) view.findViewById(R.id.accessCCConfigOK);
+        textViewTemperatureOk = (TextView) view.findViewById(R.id.accessCCTemperatureOK);
+        textViewEnableOk = (TextView) view.findViewById(R.id.accessCCEnableOK);
 
-        checkBoxConfig = (CheckBox) getActivity().findViewById(R.id.accessCCConfigTitle);
-        checkBoxTemperature = (CheckBox) getActivity().findViewById(R.id.accessCCTemperatureTitle);
-        checkBoxEnable = (CheckBox) getActivity().findViewById(R.id.accessCCEnableTitle);
+        checkBoxConfig = (CheckBox) view.findViewById(R.id.accessCCConfigTitle);
+        checkBoxTemperature = (CheckBox) view.findViewById(R.id.accessCCTemperatureTitle);
+        checkBoxEnable = (CheckBox) view.findViewById(R.id.accessCCEnableTitle);
 
-        textViewTemperature = (TextView) getActivity().findViewById(R.id.accessCCTemperature);
-        textViewUnderAlarm = (TextView) getActivity().findViewById(R.id.accessCCUnderTempAlarm);
-        textViewOverAlarm = (TextView) getActivity().findViewById(R.id.accessCCOverTempAlarm);
-        textViewBatteryAlarm = (TextView) getActivity().findViewById(R.id.accessCCBatteryAlarm);
+        textViewTemperature = (TextView) view.findViewById(R.id.accessCCTemperature);
+        textViewUnderAlarm = (TextView) view.findViewById(R.id.accessCCUnderTempAlarm);
+        textViewOverAlarm = (TextView) view.findViewById(R.id.accessCCOverTempAlarm);
+        textViewBatteryAlarm = (TextView) view.findViewById(R.id.accessCCBatteryAlarm);
 
-        editTextTempThresUnder = (EditText) getActivity().findViewById(R.id.accessCCTempThresUnder);
-        editTextTempThresOver = (EditText) getActivity().findViewById(R.id.accessCCTempThresOver);
-        editTextTempCountUnder = (EditText) getActivity().findViewById(R.id.accessCCTempCountUnder);
-        editTextTempCountOver = (EditText) getActivity().findViewById(R.id.accessCCTempCountOver);
-        editTextMonitorDelay = (EditText) getActivity().findViewById(R.id.accessCCMonitorDelay);
-        editTextSamplingInterval = (EditText) getActivity().findViewById(R.id.accessCCSamplingInverval);
+        editTextTempThresUnder = (EditText) view.findViewById(R.id.accessCCTempThresUnder);
+        editTextTempThresOver = (EditText) view.findViewById(R.id.accessCCTempThresOver);
+        editTextTempCountUnder = (EditText) view.findViewById(R.id.accessCCTempCountUnder);
+        editTextTempCountOver = (EditText) view.findViewById(R.id.accessCCTempCountOver);
+        editTextMonitorDelay = (EditText) view.findViewById(R.id.accessCCMonitorDelay);
+        editTextSamplingInterval = (EditText) view.findViewById(R.id.accessCCSamplingInverval);
 
         ArrayAdapter<CharSequence> arrayAdapterUnit = ArrayAdapter.createFromResource(getActivity(), R.array.coldChain_unit_options, R.layout.custom_spinner_layout);
         arrayAdapterUnit.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerDelayUnit = (Spinner) getActivity().findViewById(R.id.accessCCMonitorUnit);
+        spinnerDelayUnit = (Spinner) view.findViewById(R.id.accessCCMonitorUnit);
         spinnerDelayUnit.setAdapter(arrayAdapterUnit);
 
         ArrayAdapter<CharSequence> arrayAdapterUnit1 = ArrayAdapter.createFromResource(getActivity(), R.array.coldChain_IntervalUnit_options, R.layout.custom_spinner_layout);
         arrayAdapterUnit1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerIntervalUnit = (Spinner) getActivity().findViewById(R.id.accessCCSamplingIntervalUnit);
+        spinnerIntervalUnit = (Spinner) view.findViewById(R.id.accessCCSamplingIntervalUnit);
         spinnerIntervalUnit.setAdapter(arrayAdapterUnit1);
 
         ArrayAdapter<CharSequence> arrayAdapterEnable = ArrayAdapter.createFromResource(getActivity(), R.array.coldChain_enable_options, R.layout.custom_spinner_layout);
         arrayAdapterEnable.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerEnable = (Spinner) getActivity().findViewById(R.id.accessCCEnable);
+        spinnerEnable = (Spinner) view.findViewById(R.id.accessCCEnable);
         spinnerEnable.setAdapter(arrayAdapterEnable);
 
-        textViewCustomTagFound = (TextView) getActivity().findViewById(R.id.accessCustomTagFound);
+        textViewCustomTagFound = (TextView) view.findViewById(R.id.accessCustomTagFound);
 /*
         ArrayAdapter<CharSequence> arrayAdapterTagType = ArrayAdapter.createFromResource(getActivity(), R.array.coldChain_tagtype_options, R.layout.custom_spinner_layout);
         arrayAdapterTagType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCustomTagType = (Spinner) getActivity().findViewById(R.id.selectCustomTagType);
+        spinnerCustomTagType = (Spinner) view.findViewById(R.id.selectCustomTagType);
         spinnerCustomTagType.setAdapter(arrayAdapterTagType);
         spinnerCustomTagType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 switch(position) {
                     case 0:
-                        LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCC8304Layout);
+                        LinearLayout linearLayout = (LinearLayout) viewFragment.findViewById(R.id.accessCC8304Layout);
                         linearLayout.setVisibility(View.VISIBLE);
-                        linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCCmaxduraLayout);
+                        linearLayout = (LinearLayout) viewFragment.findViewById(R.id.accessCCmaxduraLayout);
                         linearLayout.setVisibility(View.GONE);
                         break;
                     case 1:
-                        linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCC8304Layout);
+                        linearLayout = (LinearLayout) viewFragment.findViewById(R.id.accessCC8304Layout);
                         linearLayout.setVisibility(View.GONE);
-                        linearLayout = (LinearLayout) getActivity().findViewById(R.id.accessCCmaxduraLayout);
+                        linearLayout = (LinearLayout) viewFragment.findViewById(R.id.accessCCmaxduraLayout);
                         linearLayout.setVisibility(View.VISIBLE);
                         break;
                 }
@@ -218,7 +220,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
             }
         });
 */
-        buttonCs8304StartLogging = (Button) getActivity().findViewById(R.id.accessCs8304StartLogging);
+        buttonCs8304StartLogging = (Button) view.findViewById(R.id.accessCs8304StartLogging);
         buttonCs8304StartLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -227,7 +229,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                 operationRead = true; startAccessTask();
             }
         });
-        buttonCs8304StopLogging = (Button) getActivity().findViewById(R.id.accessCs8304StopLogging);
+        buttonCs8304StopLogging = (Button) view.findViewById(R.id.accessCs8304StopLogging);
         buttonCs8304StopLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -236,7 +238,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                 operationRead = true; startAccessTask();
             }
         });
-        buttonCs8304CheckAlarm = (Button) getActivity().findViewById(R.id.accessCs8304CheckAlarm);
+        buttonCs8304CheckAlarm = (Button) view.findViewById(R.id.accessCs8304CheckAlarm);
         buttonCs8304CheckAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -245,7 +247,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                 operationRead = true; startAccessTask();
             }
         });
-        buttonCs8304GetLogging = (Button) getActivity().findViewById(R.id.accessCs8304GetLogging);
+        buttonCs8304GetLogging = (Button) view.findViewById(R.id.accessCs8304GetLogging);
         buttonCs8304GetLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -255,36 +257,48 @@ public class AccessAuraSenseFragment extends CommonFragment {
             }
         });
 
-        textViewCs8304StartLoggingStatus = (TextView) getActivity().findViewById(R.id.accessCs8304StartLoggingStatus);
-        textViewCs8304StopLoggingStatus = (TextView) getActivity().findViewById(R.id.accessCs8304StopLoggingStatus);
-        textViewCs8304CheckAlaramStatus = (TextView) getActivity().findViewById(R.id.accessCs8304CheckAlarmStatus);
-        textViewCs8304GetLoggingStatus = (TextView) getActivity().findViewById(R.id.accessCs8304GetLoggingStatus);
+        textViewCs8304StartLoggingStatus = (TextView) view.findViewById(R.id.accessCs8304StartLoggingStatus);
+        textViewCs8304StopLoggingStatus = (TextView) view.findViewById(R.id.accessCs8304StopLoggingStatus);
+        textViewCs8304CheckAlaramStatus = (TextView) view.findViewById(R.id.accessCs8304CheckAlarmStatus);
+        textViewCs8304GetLoggingStatus = (TextView) view.findViewById(R.id.accessCs8304GetLoggingStatus);
 
-        buttonRead = (Button) getActivity().findViewById(R.id.accessRWReadButton);
+        buttonRead = (Button) view.findViewById(R.id.accessRWReadButton);
         buttonRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (isOperationRunning()) return;
-                textViewAuraSensorDataOK = (TextView) getActivity().findViewById(R.id.accessAuraSensorDataOK);
-                checkBoxAuraSensorDataRCommandW = (CheckBox) getActivity().findViewById(R.id.accessAuraSensorDataCheck);
+                textViewAuraSensorDataOK = (TextView) viewFragment.findViewById(R.id.accessAuraSensorDataOK);
+                checkBoxAuraSensorDataRCommandW = (CheckBox) viewFragment.findViewById(R.id.accessAuraSensorDataCheck);
                 readWriteTypes = ReadWriteTypes.NULL;
                 operationRead = true; startAccessTask();
             }
         });
 
-        buttonWrite = (Button) getActivity().findViewById(R.id.accessRWWriteButton);
+        buttonWrite = (Button) view.findViewById(R.id.accessRWWriteButton);
         buttonWrite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (isOperationRunning()) return;
-                textViewAuraSensorDataOK = (TextView) getActivity().findViewById(R.id.accessAuraWriteSensorDataOK);
-                checkBoxAuraSensorDataRCommandW = (CheckBox) getActivity().findViewById(R.id.accessAuraWriteSensorDataCheck);
+                textViewAuraSensorDataOK = (TextView) viewFragment.findViewById(R.id.accessAuraWriteSensorDataOK);
+                checkBoxAuraSensorDataRCommandW = (CheckBox) viewFragment.findViewById(R.id.accessAuraWriteSensorDataCheck);
                 readWriteTypes = ReadWriteTypes.NULL;
                 operationRead = false; startAccessTask();
             }
         });
 
         MainActivity.csLibrary4A.setSameCheck(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setUserVisibleHint2(true);
+    }
+
+    @Override
+    public void onPause() {
+        setUserVisibleHint2(false);
+        super.onPause();
     }
 
     @Override
@@ -295,10 +309,11 @@ public class AccessAuraSenseFragment extends CommonFragment {
     }
 
     boolean userVisibleHint = false;
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if(getUserVisibleHint()) {
+    //@Override
+    public void setUserVisibleHint2(boolean isVisibleToUser) {
+        //super.setUserVisibleHint(isVisibleToUser);
+        MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment.setUserVisibleHint: isVisibleToUser = " + isVisibleToUser);
+        if(isVisibleToUser) { //getUserVisibleHint()) {
             if (selectTag != null) selectTag.updateBankSelected();
             userVisibleHint = true;
             if (textViewCustomTagFound != null) {
@@ -308,7 +323,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
                         textViewCustomTagFound.setText("CS" + tagSelected.getUser().substring(0, 4) + "-" + tagSelected.getUser().substring(4, 5));
                     } else textViewCustomTagFound.setText("");
                 }
-                LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.accessEmicroCS8304Layout);
+                LinearLayout layout = (LinearLayout) viewFragment.findViewById(R.id.accessEmicroCS8304Layout);
                 if (textViewCustomTagFound.getText().toString().contains("8304")) {
                     layout.setVisibility(View.VISIBLE);
                 } else layout.setVisibility(View.GONE);
@@ -335,14 +350,14 @@ public class AccessAuraSenseFragment extends CommonFragment {
 
     boolean isOperationRunning() {
         if (MainActivity.csLibrary4A.isBleConnected() == false) {
-            Toast.makeText(MainActivity.mContext, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, R.string.toast_ble_not_connected, Toast.LENGTH_SHORT).show();
             return true;
         } else if (MainActivity.csLibrary4A.isRfidFailure()) {
-            Toast.makeText(MainActivity.mContext, "Rfid is disabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.context, "Rfid is disabled", Toast.LENGTH_SHORT).show();
             return true;
         } else if (accessTask != null) {
-            if (accessTask.getStatus() == AsyncTaskA.Status.RUNNING) {
-                Toast.makeText(MainActivity.mContext, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
+            if (accessTask.getStatus() == CustomAsyncTask.Status.RUNNING) {
+                Toast.makeText(MainActivity.context, "Running acccess task. Please wait", Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
@@ -366,7 +381,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
             if (accessTask == null) {
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment().updateRunnable(): NULL accessReadWriteTask");
                 taskRequest = true;
-            } else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) {
+            } else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) {
                 rerunRequest = true;
                 if (DEBUG) MainActivity.csLibrary4A.appendToLog("AccessAuraSenseFragment().updateRunnable(): accessReadWriteTask.getStatus() =  " + accessTask.getStatus().toString());
             } else {
@@ -395,13 +410,14 @@ public class AccessAuraSenseFragment extends CommonFragment {
                         buttonAccess = buttonWrite;
                     }
                     MainActivity.csLibrary4A.appendToLog("hostCommand 1 = " + hostCommand.toString());
-                    accessTask = new AccessTask(buttonAccess, null, invalid, true,
+                    accessTask = new AccessTaskCustom(buttonAccess, null, invalid, true,
                             selectMask, selectBank, selectOffset,
                             selectTag.editTextAccessPassword.getText().toString(),
                             Integer.valueOf(selectTag.editTextAccessAntennaPower.getText().toString()),
                             hostCommand,
                             0, 0, true, false,
-                            null, null, null, null, null);
+                            null, null, null, null, null,
+                            MainActivity.context, MainActivity.csLibrary4A, MainActivity.sharedObjects.playerN, MainActivity.sharedObjects.playerO);
                     accessTask.execute();
                     rerunRequest = true;
                     MainActivity.csLibrary4A.appendToLog("accessTask is created with selectBank = " + selectBank);
@@ -418,7 +434,7 @@ public class AccessAuraSenseFragment extends CommonFragment {
     boolean processResult() {
         String accessResult = null;
         if (accessTask == null) return false;
-        else if (accessTask.getStatus() != AsyncTaskA.Status.FINISHED) return false;
+        else if (accessTask.getStatus() != CustomAsyncTask.Status.FINISHED) return false;
         else {
             accessResult = accessTask.accessResult;
             if (DEBUG || true) MainActivity.csLibrary4A.appendToLog("accessResult = " + accessResult);
@@ -577,9 +593,9 @@ public class AccessAuraSenseFragment extends CommonFragment {
                     editTextAuraSensorData.setText("");
                 } else {
                     int iValue = 0;
-                    RadioButton radioButtonAuraSens2Null = (RadioButton) getActivity().findViewById(R.id.accessAuraSens2Null);
-                    RadioButton radioButtonAuraSens2Store = (RadioButton) getActivity().findViewById(R.id.accessAuraSens2Store);
-                    RadioButton radioButtonAuraSens2Calibration = (RadioButton) getActivity().findViewById(R.id.accessAuraSens2Calibration);
+                    RadioButton radioButtonAuraSens2Null = (RadioButton) viewFragment.findViewById(R.id.accessAuraSens2Null);
+                    RadioButton radioButtonAuraSens2Store = (RadioButton) viewFragment.findViewById(R.id.accessAuraSens2Store);
+                    RadioButton radioButtonAuraSens2Calibration = (RadioButton) viewFragment.findViewById(R.id.accessAuraSens2Calibration);
 
                     if (radioButtonAuraSens2Null.isChecked()) iValue = 0x8001;
                     else if (radioButtonAuraSens2Store.isChecked()) iValue = 0x1000;
@@ -699,13 +715,13 @@ public class AccessAuraSenseFragment extends CommonFragment {
                 readWriteTypes = ReadWriteTypes.COLDCHAIN_TEMPERATURE;
                 if (bankProcessing == 0) {
                     if (operationRead) {
-                        textViewTemperature = (TextView) getActivity().findViewById(R.id.accessCCTemperature);
+                        textViewTemperature = (TextView) viewFragment.findViewById(R.id.accessCCTemperature);
                         textViewTemperature.setText("");
-                        textViewUnderAlarm = (TextView) getActivity().findViewById(R.id.accessCCUnderTempAlarm);
+                        textViewUnderAlarm = (TextView) viewFragment.findViewById(R.id.accessCCUnderTempAlarm);
                         textViewUnderAlarm.setVisibility(View.INVISIBLE);
-                        textViewOverAlarm = (TextView) getActivity().findViewById(R.id.accessCCOverTempAlarm);
+                        textViewOverAlarm = (TextView) viewFragment.findViewById(R.id.accessCCOverTempAlarm);
                         textViewOverAlarm.setVisibility(View.INVISIBLE);
-                        textViewBatteryAlarm = (TextView) getActivity().findViewById(R.id.accessCCBatteryAlarm);
+                        textViewBatteryAlarm = (TextView) viewFragment.findViewById(R.id.accessCCBatteryAlarm);
                         textViewBatteryAlarm.setVisibility(View.INVISIBLE);
                         textViewTemperatureOk.setText("");
                         if (true) {

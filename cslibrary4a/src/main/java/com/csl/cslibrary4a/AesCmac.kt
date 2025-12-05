@@ -15,11 +15,11 @@ class AesCmac @JvmOverloads constructor(length: Int = BLOCK_SIZE) {
     private var macLength = 0
     private var aesCipher: Cipher? = null
 
-    private lateinit var buffer: ByteArray
+    private var buffer: ByteArray = TODO()
     private var bufferCount = 0
 
-    private lateinit var k1: ByteArray
-    private lateinit var k2: ByteArray
+    private var k1: ByteArray
+    private var k2: ByteArray
 
     init {
         if (length > BLOCK_SIZE) {

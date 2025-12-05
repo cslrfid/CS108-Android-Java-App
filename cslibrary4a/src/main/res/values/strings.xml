@@ -76,7 +76,29 @@
         <item>205: Japan, FM0 50kHz 20us</item>
         <item>382: All, Miller 8 160kHz 20us</item>
         <item>4382: All, Miller 8 160kHz 20us Gen2X</item>
+        <item>1120: 103, 148, 146, 185</item>
+        <item>1220: 225, 223, 241, 285</item>
+        <item>1320: 302, 345, 343, 382</item>
+        <item>1420: 203, 223, 241, 285</item>
+        <item>5123: 4123, 123</item>
+        <item>5141: 4141, 141</item>
+        <item>5146: 4146, 146</item>
+        <item>5185: 4185, 185</item>
+        <item>5124: 4124, 124</item>
+        <item>5148: 4148, 148</item>
+        <item>5222: 4222, 222</item>
+        <item>5241: 4241, 241</item>
+        <item>5244: 4244, 244</item>
+        <item>5285: 4285, 285</item>
+        <item>5324: 4324, 324</item>
+        <item>5342: 4342, 342</item>
+        <item>5343: 4343, 343</item>
+        <item>5382: 4382, 382</item>
+        <item>5323: 4323, 323</item>
+        <item>5345: 4345, 345</item>
     </string-array>
 
     <string name="toast_permission_not_granted">"Permissions are not granted. Please allow them in system setting."</string>
+    <string name="toast_abort_by_SUCCESS">SUCCESS</string>
+    <string name="toast_abort_by_FAILURE">FAILURE</string>
 </resources>
